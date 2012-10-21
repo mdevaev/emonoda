@@ -180,6 +180,7 @@ def torrents(src_dir_path) :
 	for torrent_file_name in filter(lambda name : name.endswith(".torrent"), os.listdir(src_dir_path)) :
 		with open(os.path.join(src_dir_path, torrent_file_name)) as torrent_file :
 			bencode_dict = bencode.bdecode(torrent_file.read())
+			bencode_dict.setdefault("comment", "")
 			torrent_hash = hashlib.sha1(bencode.bencode(bencode_dict["info"])).hexdigest().upper()
 			torrents_dict[torrent_file_name] = {
 				"bencode" : bencode_dict,
