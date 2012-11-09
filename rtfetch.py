@@ -22,6 +22,7 @@
 
 import sys
 import os
+import abc
 import urllib
 import urllib2
 import xmlrpclib
@@ -38,7 +39,7 @@ import re
 
 
 ##### Public constants #####
-USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.89 Safari/537.1"
+BROWSER_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.89 Safari/537.1"
 
 RUTRACKER_DOMAIN = "rutracker.org"
 RUTRACKER_LOGIN_URL = "http://login.%s/forum/login.php" % (RUTRACKER_DOMAIN)
@@ -48,7 +49,32 @@ RUTRACKER_AJAX_URL = "http://%s/forum/ajax.php" % (RUTRACKER_DOMAIN)
 
 
 ##### Public classes #####
-class RuTracker(object) :
+class Fetcher(object) :
+	__metaclass__ = abc.ABCMeta
+
+	@abc.abstractmethod
+	def name(self) :
+		pass
+
+	@abc.abstractmethod
+	def match(self, bencode_dict) :
+		pass
+
+	@abc.abstractmethod
+	def login(self) :
+		pass
+
+	@abc.abstractmethod
+	def torrentChanged(self, bencode_dict) :
+		pass
+
+	@abc.abstractmethod
+	def fetchTorrent(self, bencode_dict) :
+		pass
+
+
+###
+class RuTrackerFetcher(Fetcher) :
 	def __init__(self, user_name, passwd, interactive_flag = False) :
 		object.__init__(self)
 
@@ -103,32 +129,10 @@ class RuTracker(object) :
 				if self.__cap_static_regexp.search(web_file.read()) is None :
 					raise RuntimeError("Invalid captcha")
 
-	def fetchHash(self, bencode_dict) :
-		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
-		assert not comment_match is None, "No comment"
-
-		data = self.readUrlRetry(bencode_dict["comment"])
-		hash_t_match = self.__hash_t_regexp.search(data)
-		hash_form_token_match = self.__hash_form_token_regexp.search(data)
-		assert not hash_t_match is None, "Unknown t_hash"
-		assert not hash_form_token_match is None, "Unknown form_token"
-
-		post_dict = {
-			"action" : "get_info_hash",
-			"topic_id" : comment_match.group(1),
-			"t_hash" : hash_t_match.group(1),
-			"form_token" : hash_form_token_match.group(1)
-		}
-		request = urllib2.Request(RUTRACKER_AJAX_URL, urllib.urlencode(post_dict), headers={
-				"User-Agent" : USER_AGENT
-			})
-		response_dict = json.loads(self.readUrlRetry(request))
-		if response_dict.has_key("ih_hex") :
-			return response_dict["ih_hex"].upper()
-		elif response_dict.has_key("error_msg") :
-			raise RuntimeError(unicode(response_dict["error_msg"]).encode("utf-8"))
-		else :
-			raise RuntimeError("Invalid response: %s" % (str(response_dict)))
+	def torrentChanged(self, bencode_dict) :
+		old_hash = torrentHash(bencode_dict)
+		new_hash = self.fetchHash(bencode_dict)
+		return ( old_hash != new_hash )
 
 	def fetchTorrent(self, bencode_dict) :
 		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
@@ -157,7 +161,7 @@ class RuTracker(object) :
 		request = urllib2.Request(RUTRACKER_DL_URL+("?t=%s" % (topic_id)), "", headers={
 				"Referer" : RUTRACKER_VIEWTOPIC_URL+("?t=%s" % (topic_id)),
 				"Origin" : "http://%s" % (RUTRACKER_DOMAIN),
-				"User-Agent" : USER_AGENT
+				"User-Agent" : BROWSER_USER_AGENT
 			})
 
 		data = self.readUrlRetry(request)
@@ -166,6 +170,33 @@ class RuTracker(object) :
 
 
 	### Private ###
+
+	def fetchHash(self, bencode_dict) :
+		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
+		assert not comment_match is None, "No comment"
+
+		data = self.readUrlRetry(bencode_dict["comment"])
+		hash_t_match = self.__hash_t_regexp.search(data)
+		hash_form_token_match = self.__hash_form_token_regexp.search(data)
+		assert not hash_t_match is None, "Unknown t_hash"
+		assert not hash_form_token_match is None, "Unknown form_token"
+
+		post_dict = {
+			"action" : "get_info_hash",
+			"topic_id" : comment_match.group(1),
+			"t_hash" : hash_t_match.group(1),
+			"form_token" : hash_form_token_match.group(1)
+		}
+		request = urllib2.Request(RUTRACKER_AJAX_URL, urllib.urlencode(post_dict), headers={
+				"User-Agent" : USER_AGENT
+			})
+		response_dict = json.loads(self.readUrlRetry(request))
+		if response_dict.has_key("ih_hex") :
+			return response_dict["ih_hex"].upper()
+		elif response_dict.has_key("error_msg") :
+			raise RuntimeError(unicode(response_dict["error_msg"]).encode("utf-8"))
+		else :
+			raise RuntimeError("Invalid response: %s" % (str(response_dict)))
 
 	def readUrlRetry(self, *args_list, **kwargs_dict) :
 		count = 0
@@ -199,12 +230,11 @@ def torrents(src_dir_path) :
 		with open(os.path.join(src_dir_path, torrent_file_name)) as torrent_file :
 			bencode_dict = bencode.bdecode(torrent_file.read())
 			bencode_dict.setdefault("comment", "")
-			torrent_hash = hashlib.sha1(bencode.bencode(bencode_dict["info"])).hexdigest().upper()
-			torrents_dict[torrent_file_name] = {
-				"bencode" : bencode_dict,
-				"hash" : torrent_hash
-			}
+			torrents_dict[torrent_file_name] = bencode_dict
 	return torrents_dict
+
+def torrentHash(bencode_dict) :
+	return hashlib.sha1(bencode.bencode(bencode_dict["info"])).hexdigest().upper()
 
 def update(fetcher, interface, src_dir_path, backup_dir_path) :
 	print
@@ -214,8 +244,7 @@ def update(fetcher, interface, src_dir_path, backup_dir_path) :
 	updated_count = 0
 	error_count = 0
 
-	for (torrent_file_name, torrent_dict) in sorted(torrents(src_dir_path).items(), key=operator.itemgetter(0)) :
-		bencode_dict = torrent_dict["bencode"]
+	for (torrent_file_name, bencode_dict) in sorted(torrents(src_dir_path).items(), key=operator.itemgetter(0)) :
 		comment = bencode_dict["comment"]
 
 		if not fetcher.match(bencode_dict) :
@@ -224,7 +253,7 @@ def update(fetcher, interface, src_dir_path, backup_dir_path) :
 			continue
 
 		try :
-			if torrent_dict["hash"] == fetcher.fetchHash(bencode_dict) :
+			if not fetcher.torrentChanged(bencode_dict) :
 				print "[ ] %s %s" % (fetcher.name(), torrent_file_name)
 				passed_count += 1
 				continue
@@ -235,7 +264,7 @@ def update(fetcher, interface, src_dir_path, backup_dir_path) :
 			if not backup_dir_path is None :
 				shutil.copyfile(torrent_file_path, os.path.join(backup_dir_path, "%s.%d.bak" % (torrent_file_name, time.time())))
 			if not interface is None :
-				interface.removeTorrent(torrent_dict["hash"])
+				interface.removeTorrent(torrentHash(bencode_dict))
 
 			with open(torrent_file_path, "w") as torrent_file :
 				torrent_file.write(torrent_data)
@@ -272,11 +301,11 @@ def main() :
 	if options.passwd is None :
 		options.passwd = getpass.getpass(":: RuTracker password for user \"%s\": " % (options.user_name))
 
-	rutracker = RuTracker(options.user_name, options.passwd, options.interactive_flag)
-	rutracker.login()
+	rutracker_fetcher = RuTrackerFetcher(options.user_name, options.passwd, options.interactive_flag)
+	rutracker_fetcher.login()
 	rtorrent = ( RTorrent(options.xmlrpc_url) if not options.no_rtorrent_flag else None )
 
-	update(rutracker, rtorrent, options.src_dir_path, options.backup_dir_path)
+	update(rutracker_fetcher, rtorrent, options.src_dir_path, options.backup_dir_path)
 
 
 if __name__ == "__main__" :
