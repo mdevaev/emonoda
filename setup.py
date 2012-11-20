@@ -20,7 +20,7 @@ setup(
 	],
 	scripts=[
 		"rtfetch.py",
-	]
+	],
 	classifiers=[
 		"Topic :: Software Development :: Libraries :: Python Modules",
 		"Development Status :: 3 - Alpha",
