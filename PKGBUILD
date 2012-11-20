@@ -34,6 +34,6 @@ build() {
 	cd $_gitname-build
 
 	python2 setup.py install --root="$pkgdir" --prefix=/usr
-	mv /usr/bin/rtfetch.py /usr/bin/rtfetch
+	mv $pkgdir/usr/bin/rtfetch.py $pkgdir/usr/bin/rtfetch
 }
 
