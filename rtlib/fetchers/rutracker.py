@@ -1,0 +1,185 @@
+# -*- coding: UTF-8 -*-
+#
+#    rtfetch -- Update rtorrent files from popular trackers
+#    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#####
+
+
+from rtlib import const
+from rtlib import fetcher
+from rtlib import torrents
+
+import urllib
+import urllib2
+import cookielib
+import bencode
+import json
+import time
+import re
+
+
+##### Public constants #####
+RUTRACKER_DOMAIN = "rutracker.org"
+RUTRACKER_LOGIN_URL = "http://login.%s/forum/login.php" % (RUTRACKER_DOMAIN)
+RUTRACKER_VIEWTOPIC_URL = "http://%s/forum/viewtopic.php" % (RUTRACKER_DOMAIN)
+RUTRACKER_DL_URL = "http://dl.%s/forum/dl.php" % (RUTRACKER_DOMAIN)
+RUTRACKER_AJAX_URL = "http://%s/forum/ajax.php" % (RUTRACKER_DOMAIN)
+
+
+##### Public classes #####
+class Fetcher(fetcher.AbstractFetcher) :
+	def __init__(self, user_name, passwd, interactive_flag = False) :
+		fetcher.AbstractFetcher.__init__(self, user_name, passwd, interactive_flag)
+
+		self.__user_name = user_name
+		self.__passwd = passwd
+		self.__interactive_flag = interactive_flag
+
+		self.__comment_regexp = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
+
+		self.__cap_static_regexp = re.compile(r"\"(http://static\.rutracker\.org/captcha/[^\"]+)\"")
+		self.__cap_sid_regexp = re.compile(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"")
+		self.__cap_code_regexp = re.compile(r"name=\"(cap_code_[a-zA-Z0-9]+)\"")
+
+		self.__hash_t_regexp = re.compile(r"t_hash\s*:\s*'([a-zA-Z0-9]+)'")
+		self.__hash_form_token_regexp = re.compile(r"name=\"form_token\" value=\"([a-zA-Z0-9]+)\"")
+
+		self.__cookie_jar = None
+		self.__opener = None
+
+
+	### Public ###
+
+	@classmethod
+	def name(self) :
+		return "rutracker"
+
+	def match(self, bencode_dict) :
+		return ( not self.__comment_regexp.match(bencode_dict["comment"]) is None )
+
+	def login(self) :
+		self.__cookie_jar = cookielib.CookieJar()
+		self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.__cookie_jar))
+
+		post_dict = {
+			"login_username" : self.__user_name,
+			"login_password" : self.__passwd,
+			"login" : "%C2%F5%EE%E4",
+		}
+		web_file = self.__opener.open(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
+		data = web_file.read()
+
+		cap_static_match = self.__cap_static_regexp.search(data)
+		if not cap_static_match is None :
+			if not self.__interactive_flag :
+				raise RuntimeError("Required captcha")
+			else :
+				cap_sid_match = self.__cap_sid_regexp.search(data)
+				cap_code_match = self.__cap_code_regexp.search(data)
+				assert not cap_sid_match is None
+				assert not cap_code_match is None
+
+				print ":: Enter the capthca [ %s ]: " % (cap_static_match.group(1)),
+				post_dict[cap_code_match.group(1)] = raw_input()
+				post_dict["cap_sid"] = cap_sid_match.group(1)
+				web_file = self.__opener.open(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
+				if not self.__cap_static_regexp.search(web_file.read()) is None :
+					raise RuntimeError("Invalid captcha")
+
+	def loggedIn(self) :
+		return ( not self.__opener is None )
+
+	def torrentChanged(self, bencode_dict) :
+		old_hash = torrents.torrentHash(bencode_dict)
+		new_hash = self.fetchHash(bencode_dict)
+		return ( old_hash != new_hash )
+
+	def fetchTorrent(self, bencode_dict) :
+		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
+		assert not comment_match is None, "No comment"
+		topic_id = comment_match.group(1)
+		cookie = cookielib.Cookie(
+			version=0,
+			name="bb_dl",
+			value=topic_id,
+			port=None,
+			port_specified=False,
+			domain="",
+			domain_specified=False,
+			domain_initial_dot=False,
+			path="/forum/",
+			path_specified=True,
+			secure=False,
+			expires=None,
+			discard=True,
+			comment=None,
+			comment_url=None,
+			rest={ "HttpOnly" : None },
+			rfc2109=False,
+		)
+		self.__cookie_jar.set_cookie(cookie)
+		request = urllib2.Request(RUTRACKER_DL_URL+("?t=%s" % (topic_id)), "", headers={
+				"Referer" : RUTRACKER_VIEWTOPIC_URL+("?t=%s" % (topic_id)),
+				"Origin" : "http://%s" % (RUTRACKER_DOMAIN),
+				"User-Agent" : const.BROWSER_USER_AGENT,
+			})
+
+		data = self.readUrlRetry(request)
+		bencode.bdecode(data)
+		return data
+
+
+	### Private ###
+
+	def fetchHash(self, bencode_dict) :
+		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
+		assert not comment_match is None, "No comment"
+
+		data = self.readUrlRetry(bencode_dict["comment"])
+		hash_t_match = self.__hash_t_regexp.search(data)
+		hash_form_token_match = self.__hash_form_token_regexp.search(data)
+		assert not hash_t_match is None, "Unknown t_hash"
+		assert not hash_form_token_match is None, "Unknown form_token"
+
+		post_dict = {
+			"action" : "get_info_hash",
+			"topic_id" : comment_match.group(1),
+			"t_hash" : hash_t_match.group(1),
+			"form_token" : hash_form_token_match.group(1),
+		}
+		request = urllib2.Request(RUTRACKER_AJAX_URL, urllib.urlencode(post_dict), headers={
+				"User-Agent" : const.BROWSER_USER_AGENT
+			})
+		response_dict = json.loads(self.readUrlRetry(request))
+		if response_dict.has_key("ih_hex") :
+			return response_dict["ih_hex"].upper()
+		elif response_dict.has_key("error_msg") :
+			raise RuntimeError(unicode(response_dict["error_msg"]).encode("utf-8"))
+		else :
+			raise RuntimeError("Invalid response: %s" % (str(response_dict)))
+
+	def readUrlRetry(self, *args_list, **kwargs_dict) :
+		count = 0
+		while True :
+			try :
+				return self.__opener.open(*args_list, **kwargs_dict).read()
+			except urllib2.HTTPError, err :
+				if count >= 10 or not err.code in (503, 404) :
+					raise
+				count += 1
+				time.sleep(1)
+

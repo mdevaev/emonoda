@@ -3,7 +3,7 @@
 pkgname=rtfetch
 pkgver=20121025
 pkgrel=1
-pkgdesc="Update rtorrent files from rutracker.org"
+pkgdesc="rtfetch -- Update rtorrent files from popular trackers"
 arch=('any')
 url="http://github.com/mdevaev/rtfetch.git"
 license="GPL"
@@ -33,6 +33,7 @@ build() {
 	cp -r $_gitname $_gitname-build
 	cd $_gitname-build
 
-	make DESTDIR=$pkgdir install
+	python2 setup.py install --root="$pkgdir" --prefix=/usr
+	mv /usr/bin/rtfetch.py /usr/bin/rtfetch
 }
 

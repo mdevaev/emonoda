@@ -1,7 +1,7 @@
 all :
 	true
 
-install :
-	mkdir -p $(DESTDIR)/usr/bin
-	install -m 755 rtfetch.py $(DESTDIR)/usr/bin/rtfetch
+clean :
+	find . -type f -name '*.pyc' -exec rm '{}' \;
+	rm -rf pkg-root.arch
 
