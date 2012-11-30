@@ -42,8 +42,8 @@ DELIMITER = "-" * 10
 
 ##### Public methods #####
 def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) :
+	old_text = static_list[0]
 	if short_flag :
-		old_text = static_list[0]
 		static_list[0] = text
 		text = " "*len(old_text) + "\r" + text + "\r"
 	else :
