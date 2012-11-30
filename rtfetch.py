@@ -27,6 +27,7 @@ from rtlib import fetchers
 
 import sys
 import os
+import traceback
 import xmlrpclib
 import operator
 import argparse
@@ -35,10 +36,26 @@ import shutil
 import time
 
 
-##### Public methods #####
-def update(fetchers_list, interface, src_dir_path, backup_dir_path) :
-	print
+##### Public constants #####
+DELIMITER = "-" * 10
 
+
+##### Public methods #####
+def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) :
+	if short_flag :
+		old_text = static_list[0]
+		static_list[0] = text
+		text = " "*len(old_text) + "\r" + text + "\r"
+	else :
+		if len(static_list[0]) != 0 :
+			text = " "*len(old_text) + "\r" + text + "\n"
+		else :
+			text += "\n"
+		static_list[0] = ""
+	output.write(text)
+	output.flush()
+
+def update(fetchers_list, interface, src_dir_path, backup_dir_path) :
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
@@ -58,7 +75,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path) :
 					fetcher.login()
 
 				if not fetcher.torrentChanged(bencode_dict) :
-					print "[ ] %s %s" % (fetcher.name(), torrent_file_name)
+					oneLine("[ ] %s %s" % (fetcher.name(), torrent_file_name))
 					passed_count += 1
 					continue
 
@@ -75,20 +92,22 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path) :
 				if not interface is None :
 					interface.loadTorrent(torrent_file_path)
 
-				print "[+] %s %s --- %s" % (fetcher.name(), torrent_file_name, comment)
+				oneLine("[+] %s %s --- %s" % (fetcher.name(), torrent_file_name, comment), False)
 				updated_count += 1
 			except Exception, err :
-				print "[-] %s %s --- %s :: %s(%s)" % (fetcher.name(), torrent_file_name, comment, type(err).__name__, str(err))
+				print "[-] %s %s --- %s" % (fetcher.name(), torrent_file_name, comment)
+				for row in traceback.format_exc().strip().split("\n") :
+					print "\t" + row
 				error_count += 1
 
 			break
 
 		if unknown_flag :
-			print "[!] UNKNOWN %s --- %s" % (torrent_file_name, comment)
+			oneLine("[!] UNKNOWN %s --- %s" % (torrent_file_name, comment), False)
 			unknown_count += 1
 
-	print
-	print "-"*10
+	oneLine("", False)
+	print DELIMITER
 	print "Unknown: %d" % (unknown_count)
 	print "Passed: %d" % (passed_count)
 	print "Updated: %d" % (updated_count)
