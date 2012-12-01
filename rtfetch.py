@@ -55,13 +55,16 @@ def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) :
 	output.write(text)
 	output.flush()
 
-def update(fetchers_list, interface, src_dir_path, backup_dir_path, skip_unknown_flag) :
+def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag) :
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
 	error_count = 0
 
 	for (torrent_file_name, bencode_dict) in sorted(torrents.torrents(src_dir_path).items(), key=operator.itemgetter(0)) :
+		if not names_filter is None and not names_filter in torrent_file_name :
+			continue
+
 		comment = bencode_dict["comment"]
 
 		unknown_flag = ( not skip_unknown_flag )
@@ -121,6 +124,7 @@ def main() :
 	cli_parser.add_argument("-c", "--config",        dest="config_file_path",   action="store",      required=True, metavar="<file>")
 	cli_parser.add_argument("-s", "--source-dir",    dest="src_dir_path",       action="store",      default=".",   metavar="<dir>")
 	cli_parser.add_argument("-b", "--backup-dir",    dest="backup_dir_path",    action="store",      default=None,  metavar="<dir>")
+	cli_parser.add_argument("-f", "--filter",        dest="names_filter",       action="store",      default=None,  metavar="<substring>")
 	cli_parser.add_argument("-o", "--only-fetchers", dest="only_fetchers_list", nargs="+",           default=fetchers.FETCHERS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument("-t", "--timeout",       dest="socket_timeout",     action="store",      default=5, type=int, metavar="<seconds>")
 	cli_parser.add_argument("-i", "--interative",    dest="interactive_flag",   action="store_true", default=False)
@@ -155,6 +159,7 @@ def main() :
 	update(fetchers_list, interface,
 		cli_options.src_dir_path,
 		cli_options.backup_dir_path,
+		cli_options.names_filter,
 		cli_options.skip_unknown_flag,
 	)
 
