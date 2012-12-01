@@ -25,6 +25,7 @@ from rtlib import torrents
 
 import urllib
 import urllib2
+import socket
 import cookielib
 import bencode
 import json
@@ -74,31 +75,11 @@ class Fetcher(fetcher.AbstractFetcher) :
 	def login(self) :
 		self.__cookie_jar = cookielib.CookieJar()
 		self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.__cookie_jar))
-
-		post_dict = {
-			"login_username" : self.__user_name,
-			"login_password" : self.__passwd,
-			"login" : "%C2%F5%EE%E4",
-		}
-		web_file = self.__opener.open(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
-		data = web_file.read()
-
-		cap_static_match = self.__cap_static_regexp.search(data)
-		if not cap_static_match is None :
-			if not self.__interactive_flag :
-				raise RuntimeError("Required captcha")
-			else :
-				cap_sid_match = self.__cap_sid_regexp.search(data)
-				cap_code_match = self.__cap_code_regexp.search(data)
-				assert not cap_sid_match is None
-				assert not cap_code_match is None
-
-				print ":: Enter the capthca [ %s ]: " % (cap_static_match.group(1)),
-				post_dict[cap_code_match.group(1)] = raw_input()
-				post_dict["cap_sid"] = cap_sid_match.group(1)
-				web_file = self.__opener.open(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
-				if not self.__cap_static_regexp.search(web_file.read()) is None :
-					raise RuntimeError("Invalid captcha")
+		try :
+			self.tryLogin()
+		except Exception :
+			self.__cookie_jar = None
+			self.__opener = None
 
 	def loggedIn(self) :
 		return ( not self.__opener is None )
@@ -145,6 +126,31 @@ class Fetcher(fetcher.AbstractFetcher) :
 
 	### Private ###
 
+	def tryLogin(self) :
+		post_dict = {
+			"login_username" : self.__user_name,
+			"login_password" : self.__passwd,
+			"login" : "\xc2\xf5\xee\xe4",
+		}
+		data = self.readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
+
+		cap_static_match = self.__cap_static_regexp.search(data)
+		if not cap_static_match is None :
+			if not self.__interactive_flag :
+				raise RuntimeError("Required captcha")
+			else :
+				cap_sid_match = self.__cap_sid_regexp.search(data)
+				cap_code_match = self.__cap_code_regexp.search(data)
+				assert not cap_sid_match is None
+				assert not cap_code_match is None
+
+				print ":: Enter the capthca [ %s ]:" % (cap_static_match.group(1)),
+				post_dict[cap_code_match.group(1)] = raw_input()
+				post_dict["cap_sid"] = cap_sid_match.group(1)
+				web_file = self.readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
+				if not self.__cap_static_regexp.search(web_file.read()) is None :
+					raise RuntimeError("Invalid captcha")
+
 	def fetchHash(self, bencode_dict) :
 		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
 		assert not comment_match is None, "No comment"
@@ -173,13 +179,16 @@ class Fetcher(fetcher.AbstractFetcher) :
 			raise RuntimeError("Invalid response: %s" % (str(response_dict)))
 
 	def readUrlRetry(self, *args_list, **kwargs_dict) :
-		count = 0
+		retries = kwargs_dict.pop("retries", 10)
 		while True :
 			try :
 				return self.__opener.open(*args_list, **kwargs_dict).read()
-			except urllib2.HTTPError, err :
-				if count >= 10 or not err.code in (503, 404) :
+			except (socket.timeout, urllib2.HTTPError), err :
+				if retries == 0 :
 					raise
-				count += 1
+				if isinstance(err, urllib2.HTTPError) :
+					if not err.code in (503, 404) :
+						raise
+				retries -= 1
 				time.sleep(1)
 
