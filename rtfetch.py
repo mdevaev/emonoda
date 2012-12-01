@@ -24,9 +24,9 @@ from rtlib import torrents
 from rtlib import rtorrent
 from rtlib import fetchers
 
-
 import sys
 import os
+import socket
 import traceback
 import xmlrpclib
 import operator
@@ -124,7 +124,10 @@ def main() :
 	cli_parser.add_argument("-b", "--backup-dir", dest="backup_dir_path", action="store", default=None)
 	cli_parser.add_argument("--no-rtorrent", dest="no_rtorrent_flag", action="store_true", default=False)
 	cli_parser.add_argument("--xmlrpc-url", dest="xmlrpc_url", action="store", default="http://localhost/RPC2")
+	cli_parser.add_argument("-t", "--timeout", dest="socket_timeout", action="store", default=5, type=int)
 	cli_options = cli_parser.parse_args(sys.argv[1:])
+
+	socket.setdefaulttimeout(cli_options.socket_timeout)
 
 	fetchers_list = []
 	config_parser = ConfigParser.ConfigParser()
