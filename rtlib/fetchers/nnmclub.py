@@ -70,7 +70,7 @@ class Fetcher(fetcher.AbstractFetcher) :
 			"username" : self.__user_name,
 			"password" : self.__passwd,
 			"redirect" : "",
-			"login" : "%C2%F5%EE%E4"
+			"login" : "\xc2\xf5\xee\xe4"
 		}
 		data = opener.open(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict)).read()
 		if not "[ %s ]" % (self.__user_name) in data :
