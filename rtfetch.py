@@ -103,7 +103,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path) :
 			break
 
 		if unknown_flag :
-			oneLine("[!] UNKNOWN %s --- %s" % (torrent_file_name, comment), False)
+			oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, comment), False)
 			unknown_count += 1
 
 	oneLine("", False)
