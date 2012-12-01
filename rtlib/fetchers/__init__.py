@@ -24,8 +24,10 @@ import nnmclub
 
 
 ##### Public constants #####
-FETCHERS_LIST = (
-	rutracker.Fetcher,
-	nnmclub.Fetcher,
-)
+FETCHERS_MAP = dict([
+		(fetcher.name(), fetcher) for fetcher in (
+				rutracker.Fetcher,
+				nnmclub.Fetcher,
+			)
+	])
 

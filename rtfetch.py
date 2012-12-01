@@ -55,7 +55,7 @@ def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) :
 	output.write(text)
 	output.flush()
 
-def update(fetchers_list, interface, src_dir_path, backup_dir_path) :
+def update(fetchers_list, interface, src_dir_path, backup_dir_path, skip_unknown_flag) :
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
@@ -64,7 +64,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path) :
 	for (torrent_file_name, bencode_dict) in sorted(torrents.torrents(src_dir_path).items(), key=operator.itemgetter(0)) :
 		comment = bencode_dict["comment"]
 
-		unknown_flag = True
+		unknown_flag = ( not skip_unknown_flag )
 		for fetcher in fetchers_list :
 			if not fetcher.match(bencode_dict) :
 				continue
@@ -122,6 +122,8 @@ def main() :
 	cli_parser.add_argument("-i", "--interative", dest="interactive_flag", action="store_true", default=False)
 	cli_parser.add_argument("-s", "--source-dir", dest="src_dir_path", action="store", default=".")
 	cli_parser.add_argument("-b", "--backup-dir", dest="backup_dir_path", action="store", default=None)
+	cli_parser.add_argument("-o", "--only-fetchers", dest="only_fetchers_list", nargs="+", default=fetchers.FETCHERS_MAP.keys())
+	cli_parser.add_argument("-u", "--skip-unknown", dest="skip_unknown_flag", action="store_true", default=False)
 	cli_parser.add_argument("--no-rtorrent", dest="no_rtorrent_flag", action="store_true", default=False)
 	cli_parser.add_argument("--xmlrpc-url", dest="xmlrpc_url", action="store", default="http://localhost/RPC2")
 	cli_parser.add_argument("-t", "--timeout", dest="socket_timeout", action="store", default=5, type=int)
@@ -129,11 +131,12 @@ def main() :
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
 
+	enabled_fetchers_set = set(fetchers.FETCHERS_MAP.keys()).intersection(cli_options.only_fetchers_list)
 	fetchers_list = []
 	config_parser = ConfigParser.ConfigParser()
 	config_parser.read(cli_options.config_file_path)
-	for fetcher_class in fetchers.FETCHERS_LIST :
-		fetcher_name = fetcher_class.name()
+	for fetcher_name in enabled_fetchers_set :
+		fetcher_class = fetchers.FETCHERS_MAP[fetcher_name]
 		if config_parser.has_section(fetcher_name) :
 			fetchers_list.append(fetcher_class(
 					config_parser.get(fetcher_name, "login"),
@@ -141,12 +144,19 @@ def main() :
 					cli_options.interactive_flag,
 				))
 
+	if len(enabled_fetchers_set) != len(fetchers.FETCHERS_MAP) :
+		cli_options.skip_unknown_flag = True
+
 	if len(fetchers_list) == 0 :
 		print >> sys.stderr, "No available fetchers in config"
 		sys.exit(1)
 
 	interface = ( rtorrent.RTorrent(cli_options.xmlrpc_url) if not cli_options.no_rtorrent_flag else None )
-	update(fetchers_list, interface, cli_options.src_dir_path, cli_options.backup_dir_path)
+	update(fetchers_list, interface,
+		cli_options.src_dir_path,
+		cli_options.backup_dir_path,
+		cli_options.skip_unknown_flag,
+	)
 
 
 ###
