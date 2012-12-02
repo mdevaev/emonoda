@@ -34,7 +34,7 @@ NNMCLUB_DOMAIN = "nnm-club.ru"
 NNMCLUB_LOGIN_URL = "http://%s/forum/login.php" % (NNMCLUB_DOMAIN)
 #NNMCLUB_VIEWTOPIC_URL = "http://%s/forum/viewtopic.php" % (NNMCLUB_DOMAIN)
 NNMCLUB_DL_URL = "http://%s/forum/download.php" % (NNMCLUB_DOMAIN)
-NNMCLUB_SCRAPE_URL = "http://%s:2710/scrape" % (NNMCLUB_DOMAIN)
+NNMCLUB_SCRAPE_URL = "http://bt.%s:2710/scrape" % (NNMCLUB_DOMAIN)
 
 
 ##### Public classes #####
