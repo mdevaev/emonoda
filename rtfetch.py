@@ -56,7 +56,7 @@ def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) :
 	output.write(text)
 	output.flush()
 
-def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag) :
+def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag) :
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
@@ -79,7 +79,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 					fetcher.login()
 
 				if not fetcher.torrentChanged(bencode_dict) :
-					oneLine("[ ] %s %s" % (fetcher.name(), torrent_file_name))
+					oneLine("[ ] %s %s" % (fetcher.name(), torrent_file_name), not show_passed_flag)
 					passed_count += 1
 					continue
 
@@ -133,6 +133,7 @@ def main() :
 	cli_parser.add_argument("-t", "--timeout",       dest="socket_timeout",     action="store",      default=5, type=int, metavar="<seconds>")
 	cli_parser.add_argument("-i", "--interative",    dest="interactive_flag",   action="store_true", default=False)
 	cli_parser.add_argument("-u", "--skip-unknown",  dest="skip_unknown_flag",  action="store_true", default=False)
+	cli_parser.add_argument("-p", "--show-passed",   dest="show_passed_flag",   action="store_true", default=False)
 	cli_parser.add_argument(      "--no-rtorrent",   dest="no_rtorrent_flag",   action="store_true", default=False)
 	cli_parser.add_argument(      "--xmlrpc-url",    dest="xmlrpc_url",         action="store",      default="http://localhost/RPC2", metavar="<url>")
 	cli_options = cli_parser.parse_args(sys.argv[1:])
@@ -165,6 +166,7 @@ def main() :
 		cli_options.backup_dir_path,
 		cli_options.names_filter,
 		cli_options.skip_unknown_flag,
+		cli_options.show_passed_flag,
 	)
 
 
