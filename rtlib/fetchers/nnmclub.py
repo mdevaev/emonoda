@@ -19,7 +19,7 @@
 #####
 
 
-from rtlib import fetcher
+from rtlib import fetcherlib
 from rtlib import torrents
 
 import urllib
@@ -38,9 +38,9 @@ NNMCLUB_SCRAPE_URL = "http://%s:2710/scrape" % (NNMCLUB_DOMAIN)
 
 
 ##### Public classes #####
-class Fetcher(fetcher.AbstractFetcher) :
+class Fetcher(fetcherlib.AbstractFetcher) :
 	def __init__(self, user_name, passwd, interactive_flag = False) :
-		fetcher.AbstractFetcher.__init__(self, user_name, passwd, interactive_flag)
+		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, interactive_flag)
 
 		self.__user_name = user_name
 		self.__passwd = passwd
@@ -73,8 +73,7 @@ class Fetcher(fetcher.AbstractFetcher) :
 			"login" : "\xc2\xf5\xee\xe4"
 		}
 		data = opener.open(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict)).read()
-		if not "[ %s ]" % (self.__user_name) in data :
-			raise RuntimeError("Invalid login")
+		self.assertLogin("[ %s ]" % (self.__user_name) in data, "Invalid login")
 
 		self.__cookie_jar = cookie_jar
 		self.__opener = opener
@@ -86,8 +85,7 @@ class Fetcher(fetcher.AbstractFetcher) :
 		torrent_hash = torrents.torrentHash(bencode_dict)
 		scrape_hash = torrents.scrapeHash(torrent_hash)
 		data = self.__opener.open(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (scrape_hash))).read()
-		if not data.startswith("d5:") :
-			raise RuntimeError("Invalid scrape answer")
+		self.assertFetcher(data.startswith("d5:"), "Invalid scrape answer")
 		return ( data.strip() == "d5:filesdee" )
 
 	def fetchTorrent(self, bencode_dict) :

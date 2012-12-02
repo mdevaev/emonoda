@@ -22,6 +22,7 @@
 
 from rtlib import torrents
 from rtlib import rtorrent
+from rtlib import fetcherlib
 from rtlib import fetchers
 
 import sys
@@ -97,6 +98,9 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 
 				oneLine("[+] %s %s --- %s" % (fetcher.name(), torrent_file_name, comment), False)
 				updated_count += 1
+			except fetcherlib.CommonFetcherError, err :
+				print "[-] %s %s --- %s :: %s(%s)" % (fetcher.name(), torrent_file_name, comment, type(err).__name__, str(err))
+				error_count += 1
 			except Exception, err :
 				print "[-] %s %s --- %s" % (fetcher.name(), torrent_file_name, comment)
 				for row in traceback.format_exc().strip().split("\n") :

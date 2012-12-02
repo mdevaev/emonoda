@@ -20,7 +20,7 @@
 
 
 from rtlib import const
-from rtlib import fetcher
+from rtlib import fetcherlib
 from rtlib import torrents
 
 import urllib
@@ -42,9 +42,9 @@ RUTRACKER_AJAX_URL = "http://%s/forum/ajax.php" % (RUTRACKER_DOMAIN)
 
 
 ##### Public classes #####
-class Fetcher(fetcher.AbstractFetcher) :
+class Fetcher(fetcherlib.AbstractFetcher) :
 	def __init__(self, user_name, passwd, interactive_flag = False) :
-		fetcher.AbstractFetcher.__init__(self, user_name, passwd, interactive_flag)
+		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, interactive_flag)
 
 		self.__user_name = user_name
 		self.__passwd = passwd
@@ -77,9 +77,10 @@ class Fetcher(fetcher.AbstractFetcher) :
 		self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.__cookie_jar))
 		try :
 			self.tryLogin()
-		except Exception :
+		except :
 			self.__cookie_jar = None
 			self.__opener = None
+			raise
 
 	def loggedIn(self) :
 		return ( not self.__opener is None )
@@ -91,8 +92,9 @@ class Fetcher(fetcher.AbstractFetcher) :
 
 	def fetchTorrent(self, bencode_dict) :
 		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
-		assert not comment_match is None, "No comment"
+		assert not comment_match is None, "No comment match"
 		topic_id = comment_match.group(1)
+
 		cookie = cookielib.Cookie(
 			version=0,
 			name="bb_dl",
@@ -136,30 +138,28 @@ class Fetcher(fetcher.AbstractFetcher) :
 
 		cap_static_match = self.__cap_static_regexp.search(data)
 		if not cap_static_match is None :
-			if not self.__interactive_flag :
-				raise RuntimeError("Required captcha")
-			else :
-				cap_sid_match = self.__cap_sid_regexp.search(data)
-				cap_code_match = self.__cap_code_regexp.search(data)
-				assert not cap_sid_match is None
-				assert not cap_code_match is None
+			self.assertLogin(self.__interactive_flag, "Required captcha")
 
-				print ":: Enter the capthca [ %s ]:" % (cap_static_match.group(1)),
-				post_dict[cap_code_match.group(1)] = raw_input()
-				post_dict["cap_sid"] = cap_sid_match.group(1)
-				web_file = self.readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
-				if not self.__cap_static_regexp.search(web_file.read()) is None :
-					raise RuntimeError("Invalid captcha")
+			cap_sid_match = self.__cap_sid_regexp.search(data)
+			cap_code_match = self.__cap_code_regexp.search(data)
+			self.assertLogin(not cap_sid_match is None, "Unknown cap_sid")
+			self.assertLogin(not cap_code_match is None, "Unknown cap_code")
+
+			print ":: Enter the capthca [ %s ]:" % (cap_static_match.group(1)),
+			post_dict[cap_code_match.group(1)] = raw_input()
+			post_dict["cap_sid"] = cap_sid_match.group(1)
+			web_file = self.readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
+			self.assertLogin(self.__cap_static_regexp.search(web_file.read()) is None, "Invalid captcha")
 
 	def fetchHash(self, bencode_dict) :
 		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
-		assert not comment_match is None, "No comment"
+		assert not comment_match is None, "No comment match"
 
 		data = self.readUrlRetry(bencode_dict["comment"])
 		hash_t_match = self.__hash_t_regexp.search(data)
 		hash_form_token_match = self.__hash_form_token_regexp.search(data)
-		assert not hash_t_match is None, "Unknown t_hash"
-		assert not hash_form_token_match is None, "Unknown form_token"
+		self.assertFetcher(not hash_t_match is None, "Unknown t_hash")
+		self.assertFetcher(not hash_form_token_match is None, "Unknown form_token")
 
 		post_dict = {
 			"action" : "get_info_hash",
@@ -174,9 +174,9 @@ class Fetcher(fetcher.AbstractFetcher) :
 		if response_dict.has_key("ih_hex") :
 			return response_dict["ih_hex"].upper()
 		elif response_dict.has_key("error_msg") :
-			raise RuntimeError(unicode(response_dict["error_msg"]).encode("utf-8"))
+			raise fetcherlib.FetcherError(unicode(response_dict["error_msg"]).encode("utf-8"))
 		else :
-			raise RuntimeError("Invalid response: %s" % (str(response_dict)))
+			raise fetcherlib.FetcherError("Invalid response: %s" % (str(response_dict)))
 
 	def readUrlRetry(self, *args_list, **kwargs_dict) :
 		retries = kwargs_dict.pop("retries", 10)

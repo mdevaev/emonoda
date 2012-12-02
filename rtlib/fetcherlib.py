@@ -19,10 +19,24 @@
 #####
 
 
+##### Exceptions #####
+class CommonFetcherError(Exception) :
+	pass
+
+class LoginError(CommonFetcherError) :
+	pass
+
+class FetcherError(CommonFetcherError) :
+	pass
+
+
 ##### Public classes #####
 class AbstractFetcher(object) :
 	def __init__(self, user_name, passwd, interactive_flag = False) :
 		object.__init__(self)
+
+
+	### Public ###
 
 	@classmethod
 	def name(self) :
@@ -42,4 +56,19 @@ class AbstractFetcher(object) :
 
 	def fetchTorrent(self, bencode_dict) :
 		raise NotImplementedError
+
+	###
+
+	def assertLogin(self, *args_list) :
+		self.customAssert(LoginError, *args_list)
+
+	def assertFetcher(self, *args_list) :
+		self.customAssert(FetcherError, *args_list)
+
+
+	### Private ###
+
+	def customAssert(self, exception, arg, message = "") :
+		if not arg :
+			raise exception(message)
 
