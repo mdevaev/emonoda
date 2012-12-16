@@ -19,6 +19,10 @@
 #####
 
 
+import socket
+import urllib2
+
+
 ##### Exceptions #####
 class CommonFetcherError(Exception) :
 	pass
