@@ -72,3 +72,29 @@ class AbstractFetcher(object) :
 		if not arg :
 			raise exception(message)
 
+
+##### Public methods #####
+def readUrlRetry(*args_list, **kwargs_dict) :
+	opener = kwargs_dict.pop("opener", None)
+	if opener is None :
+		opener = urllib2.build_opener()
+	retries = kwargs_dict.pop("retries", 10)
+	sleep_time = kwargs_dict.pop("sleep_time", 1)
+	retry_codes_list = kwargs_dict.pop("retry_codes_list", (503, 502, 500))
+	retry_timeout_flag = kwargs_dict.pop("retry_timeout_flag", True)
+
+	while True :
+		try :
+			return opener.open(*args_list, **kwargs_dict).read()
+		except (socket.timeout, urllib2.HTTPError), err :
+			if retries == 0 :
+				raise
+			if isinstance(err, socket.timeout) :
+				if not retry_timeout_flag :
+					raise
+			elif isinstance(err, urllib2.HTTPError) :
+				if not err.code in retry_codes_list :
+					raise
+			retries -= 1
+			time.sleep(sleep_time)
+

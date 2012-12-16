@@ -173,22 +173,13 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		response_dict = json.loads(self.readUrlRetry(request))
 		if response_dict.has_key("ih_hex") :
 			return response_dict["ih_hex"].upper()
-		elif response_dict.has_key("error_msg") :
+		elif response_dict.has_key("error_msg") : # Like self.assertFetcher()
 			raise fetcherlib.FetcherError(unicode(response_dict["error_msg"]).encode("utf-8"))
 		else :
 			raise fetcherlib.FetcherError("Invalid response: %s" % (str(response_dict)))
 
 	def readUrlRetry(self, *args_list, **kwargs_dict) :
-		retries = kwargs_dict.pop("retries", 10)
-		while True :
-			try :
-				return self.__opener.open(*args_list, **kwargs_dict).read()
-			except (socket.timeout, urllib2.HTTPError), err :
-				if retries == 0 :
-					raise
-				if isinstance(err, urllib2.HTTPError) :
-					if not err.code in (503, 404) :
-						raise
-				retries -= 1
-				time.sleep(1)
+		kwargs_dict.setdefault("opener", self.__opener)
+		kwargs_dict.setdefault("retry_codes_list", (503, 404))
+		return fetcherlib.readUrlRetry(*args_list, **kwargs_dict)
 
