@@ -80,7 +80,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 					fetcher.login()
 
 				if not fetcher.torrentChanged(bencode_dict) :
-					oneLine(status_lime % (" "), not show_passed_flag)
+					oneLine(status_line % (" "), not show_passed_flag)
 					passed_count += 1
 					continue
 
