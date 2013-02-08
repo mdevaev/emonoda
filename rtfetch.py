@@ -74,12 +74,13 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 				continue
 			unknown_flag = False
 
+			status_line = "[%s] %s %s --- %s" % ("%s", fetcher.name(), torrent_file_name, comment)
 			try :
 				if not fetcher.loggedIn() :
 					fetcher.login()
 
 				if not fetcher.torrentChanged(bencode_dict) :
-					oneLine("[ ] %s %s" % (fetcher.name(), torrent_file_name), not show_passed_flag)
+					oneLine(status_lime % (" "), not show_passed_flag)
 					passed_count += 1
 					continue
 
@@ -96,13 +97,13 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 				if not interface is None :
 					interface.loadTorrent(torrent_file_path)
 
-				oneLine("[+] %s %s --- %s" % (fetcher.name(), torrent_file_name, comment), False)
+				oneLine(status_line % ("+"), False)
 				updated_count += 1
 			except fetcherlib.CommonFetcherError, err :
-				print "[-] %s %s --- %s :: %s(%s)" % (fetcher.name(), torrent_file_name, comment, type(err).__name__, str(err))
+				print (status_line + " :: %s(%s)") % ("-", type(err).__name__, str(err))
 				error_count += 1
 			except Exception, err :
-				print "[-] %s %s --- %s" % (fetcher.name(), torrent_file_name, comment)
+				print status_line % ("-")
 				for row in traceback.format_exc().strip().split("\n") :
 					print "\t" + row
 				error_count += 1
