@@ -56,18 +56,16 @@ def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) :
 	output.write(text)
 	output.flush()
 
-def updateTorrent(torrent, fetcher, backup_dir_path = None, interface = None) :
+
+###
+def downloadTorrent(torrent, fetcher) :
 	torrent_data = fetcher.fetchTorrent(torrent)
 	new_file_path = torrent.path() + ".new"
 	with open(new_file_path, "w") as new_file :
 		new_file.write(torrent_data)
+	return new_file_path
 
-	if not backup_dir_path is None :
-		backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
-		shutil.copyfile(torrent.path(), backup_file_path)
-
-	if not interface is None :
-		interface.removeTorrent(torrent)
+def replaceTorrent(torrent, new_file_path) :
 	try :
 		os.remove(torrent.path())
 	except OSError, err :
@@ -75,9 +73,21 @@ def updateTorrent(torrent, fetcher, backup_dir_path = None, interface = None) :
 			raise
 	os.rename(new_file_path, torrent.path())
 	torrent.reload()
+
+def updateTorrent(torrent, fetcher, backup_dir_path, interface) :
+	new_file_path = downloadTorrent(torrent, fetcher)
+	if not backup_dir_path is None :
+		backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
+		shutil.copyfile(torrent.path(), backup_file_path)
+
+	if not interface is None :
+		interface.removeTorrent(torrent)
+	replaceTorrent(torrent, new_file_path)
 	if not interface is None :
 		interface.loadTorrent(torrent)
 
+
+###
 def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag) :
 	unknown_count = 0
 	passed_count = 0
