@@ -74,7 +74,7 @@ def replaceTorrent(torrent, new_file_path) :
 	os.rename(new_file_path, torrent.path())
 	torrent.reload()
 
-def updateTorrent(torrent, fetcher, backup_dir_path, interface, save_custom1_flag) :
+def updateTorrent(torrent, fetcher, backup_dir_path, interface, save_custom1_flag, save_custom2_flag) :
 	new_file_path = downloadTorrent(torrent, fetcher)
 	if not backup_dir_path is None :
 		backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
@@ -84,6 +84,8 @@ def updateTorrent(torrent, fetcher, backup_dir_path, interface, save_custom1_fla
 		interface.removeTorrent(torrent)
 		if save_custom1_flag :
 			custom1 = interface.custom1(torrent)
+		if save_custom2_flag :
+			custom2 = interface.custom2(torrent)
 
 	replaceTorrent(torrent, new_file_path)
 
@@ -91,10 +93,12 @@ def updateTorrent(torrent, fetcher, backup_dir_path, interface, save_custom1_fla
 		interface.loadTorrent(torrent)
 		if save_custom1_flag :
 			interface.setCustom1(torrent, custom1)
+		if save_custom2_flag :
+			interface.setCustom2(torrent, custom2)
 
 
 ###
-def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, save_custom1_flag) :
+def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, save_custom1_flag, save_custom2_flag) :
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
@@ -120,7 +124,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 					passed_count += 1
 					continue
 
-				updateTorrent(torrent, fetcher, backup_dir_path, interface, save_custom1_flag)
+				updateTorrent(torrent, fetcher, backup_dir_path, interface, save_custom1_flag, save_custom2_flag)
 				oneLine(status_line % ("+"), False)
 				updated_count += 1
 
@@ -163,7 +167,8 @@ def main() :
 	cli_parser.add_argument("-p", "--show-passed",   dest="show_passed_flag",   action="store_true", default=False)
 	cli_parser.add_argument(      "--no-rtorrent",   dest="no_rtorrent_flag",   action="store_true", default=False)
 	cli_parser.add_argument(      "--xmlrpc-url",    dest="xmlrpc_url",         action="store",      default="http://localhost/RPC2", metavar="<url>")
-	cli_parser.add_argument(      "--save-custom1",   dest="save_custom1_flag",   action="store_true", default=False)
+	cli_parser.add_argument(      "--save-custom1",  dest="save_custom1_flag",  action="store_true", default=False)
+	cli_parser.add_argument(      "--save-custom2",  dest="save_custom2_flag",  action="store_true", default=False)
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
@@ -196,6 +201,7 @@ def main() :
 		cli_options.skip_unknown_flag,
 		cli_options.show_passed_flag,
 		cli_options.save_custom1_flag,
+		cli_options.save_custom2_flag,
 	)
 
 

@@ -43,3 +43,9 @@ class RTorrent(object) :
 	def custom1(self, torrent) :
 		return self.__server.d.get_custom1(torrent.hash())
 
+	def setCustom2(self, torrent, custom2) :
+		self.__server.d.set_custom2(torrent.hash(), custom2)
+
+	def custom2(self, torrent) :
+		return self.__server.d.get_custom2(torrent.hash())
+
