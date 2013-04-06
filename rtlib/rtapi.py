@@ -35,3 +35,11 @@ class RTorrent(object) :
 	def loadTorrent(self, torrent) :
 		self.__server.load_start(torrent.path())
 
+	###
+
+	def setLabel(self, torrent, label) :
+		self.__server.d.set_custom1(torrent.hash(), label)
+
+	def label(self, torrent) :
+		return self.__server.d.get_custom1(torrent.hash())
+
