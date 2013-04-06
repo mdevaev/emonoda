@@ -30,7 +30,6 @@ import os
 import socket
 import errno
 import traceback
-import xmlrpclib
 import operator
 import argparse
 import ConfigParser

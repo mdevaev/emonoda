@@ -25,10 +25,8 @@ from rtlib import tfile
 
 import urllib
 import urllib2
-import socket
 import cookielib
 import json
-import time
 import re
 
 

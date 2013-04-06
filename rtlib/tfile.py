@@ -20,7 +20,6 @@
 
 
 import os
-import copy
 import bencode
 import hashlib
 
