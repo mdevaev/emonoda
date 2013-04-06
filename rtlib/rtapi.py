@@ -37,9 +37,9 @@ class RTorrent(object) :
 
 	###
 
-	def setLabel(self, torrent, label) :
-		self.__server.d.set_custom1(torrent.hash(), label)
+	def setCustom1(self, torrent, custom1) :
+		self.__server.d.set_custom1(torrent.hash(), custom1)
 
-	def label(self, torrent) :
+	def custom1(self, torrent) :
 		return self.__server.d.get_custom1(torrent.hash())
 
