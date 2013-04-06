@@ -27,10 +27,11 @@ import hashlib
 
 ##### Public methods #####
 def torrents(src_dir_path) :
-	torrents_dict = {}
-	for torrent_file_name in filter(lambda name : name.endswith(".torrent"), os.listdir(src_dir_path)) :
-		torrents_dict[torrent_file_name] = Torrent(os.path.join(src_dir_path, torrent_file_name))
-	return torrents_dict
+	return dict([
+			(name, Torrent(os.path.join(src_dir_path, name)))
+			for name in os.listdir(src_dir_path)
+			if name.endswith(".torrent")
+		])
 
 def torrentStruct(torrent_data) :
 	return bencode.bdecode(torrent_data)
@@ -45,18 +46,21 @@ class Torrent(object) :
 		self.__hash = None
 		self.__scrape_hash = None
 
-		self.load()
+		self.reload()
 
 
 	### Public ###
 
-	def load(self) :
+	def reload(self) :
 		with open(self.__torrent_file_path) as torrent_file :
 			self.__bencode_dict = torrentStruct(torrent_file.read())
 			self.__hash = hashlib.sha1(bencode.bencode(self.__bencode_dict["info"])).hexdigest().lower()
 			self.__scrape_hash = None
 
 	###
+
+	def path(self) :
+		return self.__torrent_file_path
 
 	def comment(self) :
 		return self.__bencode_dict.get("comment", "")

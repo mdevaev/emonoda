@@ -28,6 +28,7 @@ from rtlib import fetchers
 import sys
 import os
 import socket
+import errno
 import traceback
 import xmlrpclib
 import operator
@@ -56,6 +57,28 @@ def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) :
 	output.write(text)
 	output.flush()
 
+def updateTorrent(torrent, fetcher, backup_dir_path = None, interface = None) :
+	torrent_data = fetcher.fetchTorrent(torrent)
+	new_file_path = torrent.path() + ".new"
+	with open(new_file_path, "w") as new_file :
+		new_file.write(torrent_data)
+
+	if not backup_dir_path is None :
+		backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
+		shutil.copyfile(torrent.path(), backup_file_path)
+
+	if not interface is None :
+		interface.removeTorrent(torrent)
+	try :
+		os.remove(torrent.path())
+	except OSError, err :
+		if err.errno != errno.ENOENT :
+			raise
+	os.rename(new_file_path, torrent.path())
+	torrent.reload()
+	if not interface is None :
+		interface.loadTorrent(torrent)
+
 def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag) :
 	unknown_count = 0
 	passed_count = 0
@@ -82,24 +105,14 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 					passed_count += 1
 					continue
 
-				torrent_data = fetcher.fetchTorrent(torrent)
-
-				torrent_file_path = os.path.join(src_dir_path, torrent_file_name)
-				if not backup_dir_path is None :
-					shutil.copyfile(torrent_file_path, os.path.join(backup_dir_path, "%s.%d.bak" % (torrent_file_name, time.time())))
-				if not interface is None :
-					interface.removeTorrent(torrent.hash())
-
-				with open(torrent_file_path, "w") as torrent_file :
-					torrent_file.write(torrent_data)
-				if not interface is None :
-					interface.loadTorrent(torrent_file_path)
-
+				updateTorrent(torrent, fetcher, backup_dir_path, interface)
 				oneLine(status_line % ("+"), False)
 				updated_count += 1
+
 			except fetcherlib.CommonFetcherError, err :
 				print (status_line + " :: %s(%s)") % ("-", type(err).__name__, str(err))
 				error_count += 1
+
 			except Exception, err :
 				print status_line % ("-")
 				for row in traceback.format_exc().strip().split("\n") :

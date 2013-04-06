@@ -29,9 +29,9 @@ class RTorrent(object) :
 	def __init__(self, url) :
 		self.__server = xmlrpclib.ServerProxy(url)
 
-	def removeTorrent(self, torrent_hash) :
-		self.__server.d.erase(torrent_hash)
+	def removeTorrent(self, torrent) :
+		self.__server.d.erase(torrent.hash())
 
-	def loadTorrent(self, torrent_file_path) :
-		self.__server.load_start(torrent_file_path)
+	def loadTorrent(self, torrent) :
+		self.__server.load_start(torrent.path())
 
