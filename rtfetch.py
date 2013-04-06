@@ -20,8 +20,8 @@
 #####
 
 
-from rtlib import torrents
-from rtlib import rtorrent
+from rtlib import tfile
+from rtlib import rtapi
 from rtlib import fetcherlib
 from rtlib import fetchers
 
@@ -62,35 +62,33 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 	updated_count = 0
 	error_count = 0
 
-	for (torrent_file_name, bencode_dict) in sorted(torrents.torrents(src_dir_path).items(), key=operator.itemgetter(0)) :
+	for (torrent_file_name, torrent) in sorted(tfile.torrents(src_dir_path).items(), key=operator.itemgetter(0)) :
 		if not names_filter is None and not names_filter in torrent_file_name :
 			continue
 
-		comment = bencode_dict["comment"]
-
 		unknown_flag = ( not skip_unknown_flag )
 		for fetcher in fetchers_list :
-			if not fetcher.match(bencode_dict) :
+			if not fetcher.match(torrent) :
 				continue
 			unknown_flag = False
 
-			status_line = "[%s] %s %s --- %s" % ("%s", fetcher.name(), torrent_file_name, comment)
+			status_line = "[%s] %s %s --- %s" % ("%s", fetcher.name(), torrent_file_name, torrent.comment())
 			try :
 				if not fetcher.loggedIn() :
 					fetcher.login()
 
-				if not fetcher.torrentChanged(bencode_dict) :
+				if not fetcher.torrentChanged(torrent) :
 					oneLine(status_line % (" "), not show_passed_flag)
 					passed_count += 1
 					continue
 
-				torrent_data = fetcher.fetchTorrent(bencode_dict)
+				torrent_data = fetcher.fetchTorrent(torrent)
 
 				torrent_file_path = os.path.join(src_dir_path, torrent_file_name)
 				if not backup_dir_path is None :
 					shutil.copyfile(torrent_file_path, os.path.join(backup_dir_path, "%s.%d.bak" % (torrent_file_name, time.time())))
 				if not interface is None :
-					interface.removeTorrent(torrents.torrentHash(bencode_dict))
+					interface.removeTorrent(torrent.hash())
 
 				with open(torrent_file_path, "w") as torrent_file :
 					torrent_file.write(torrent_data)
@@ -111,7 +109,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 			break
 
 		if unknown_flag :
-			oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, comment), False)
+			oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, torrent.comment()), False)
 			unknown_count += 1
 
 	oneLine("", False)
@@ -161,7 +159,7 @@ def main() :
 		print >> sys.stderr, "No available fetchers in config"
 		sys.exit(1)
 
-	interface = ( rtorrent.RTorrent(cli_options.xmlrpc_url) if not cli_options.no_rtorrent_flag else None )
+	interface = ( rtapi.RTorrent(cli_options.xmlrpc_url) if not cli_options.no_rtorrent_flag else None )
 	update(fetchers_list, interface,
 		cli_options.src_dir_path,
 		cli_options.backup_dir_path,

@@ -20,6 +20,7 @@
 
 
 import os
+import copy
 import bencode
 import hashlib
 
@@ -28,18 +29,45 @@ import hashlib
 def torrents(src_dir_path) :
 	torrents_dict = {}
 	for torrent_file_name in filter(lambda name : name.endswith(".torrent"), os.listdir(src_dir_path)) :
-		with open(os.path.join(src_dir_path, torrent_file_name)) as torrent_file :
-			bencode_dict = bencode.bdecode(torrent_file.read())
-			bencode_dict.setdefault("comment", "")
-			torrents_dict[torrent_file_name] = bencode_dict
+		torrents_dict[torrent_file_name] = Torrent(os.path.join(src_dir_path, torrent_file_name))
 	return torrents_dict
 
-def torrentHash(bencode_dict) :
-	return hashlib.sha1(bencode.bencode(bencode_dict["info"])).hexdigest().upper()
+def torrentStruct(torrent_data) :
+	return bencode.bdecode(torrent_data)
 
-def scrapeHash(torrent_hash) :
-	scrape_hash = ""
-	for index in xrange(0, len(torrent_hash), 2) :
-		scrape_hash += "%{0}".format(torrent_hash[index:index + 2])
-	return scrape_hash
+
+##### Public classes #####
+class Torrent(object) :
+	def __init__(self, torrent_file_path) :
+		self.__torrent_file_path = torrent_file_path
+
+		self.__bencode_dict = None
+		self.__hash = None
+		self.__scrape_hash = None
+
+		self.load()
+
+
+	### Public ###
+
+	def load(self) :
+		with open(self.__torrent_file_path) as torrent_file :
+			self.__bencode_dict = torrentStruct(torrent_file.read())
+			self.__hash = hashlib.sha1(bencode.bencode(self.__bencode_dict["info"])).hexdigest().lower()
+			self.__scrape_hash = None
+
+	###
+
+	def comment(self) :
+		return self.__bencode_dict.get("comment", "")
+
+	def hash(self) :
+		return self.__hash
+
+	def scrapeHash(self) :
+		if self.__scrape_hash is None :
+			self.__scrape_hash = ""
+			for index in xrange(0, len(self.__hash), 2) :
+				self.__scrape_hash += "%{0}".format(self.__hash[index:index + 2])
+		return self.__scrape_hash
 

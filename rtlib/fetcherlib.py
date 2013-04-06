@@ -47,7 +47,7 @@ class AbstractFetcher(object) :
 	def name(self) :
 		raise NotImplementedError
 
-	def match(self, bencode_dict) :
+	def match(self, torrent) :
 		raise NotImplementedError
 
 	def login(self) :
@@ -56,10 +56,10 @@ class AbstractFetcher(object) :
 	def loggedIn(self) :
 		raise NotImplementedError
 
-	def torrentChanged(self, bencode_dict) :
+	def torrentChanged(self, torrent) :
 		raise NotImplementedError
 
-	def fetchTorrent(self, bencode_dict) :
+	def fetchTorrent(self, torrent) :
 		raise NotImplementedError
 
 	###

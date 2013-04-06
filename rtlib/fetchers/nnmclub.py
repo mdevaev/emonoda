@@ -20,12 +20,11 @@
 
 
 from rtlib import fetcherlib
-from rtlib import torrents
+from rtlib import tfile
 
 import urllib
 import urllib2
 import cookielib
-import bencode
 import re
 
 
@@ -59,8 +58,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	def name(self) :
 		return "nnm-club"
 
-	def match(self, bencode_dict) :
-		return ( not self.__comment_regexp.match(bencode_dict["comment"]) is None )
+	def match(self, torrent) :
+		return ( not self.__comment_regexp.match(torrent.comment()) is None )
 
 	def login(self) :
 		cookie_jar = cookielib.CookieJar()
@@ -81,20 +80,18 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	def loggedIn(self) :
 		return ( not self.__opener is None )
 
-	def torrentChanged(self, bencode_dict) :
-		torrent_hash = torrents.torrentHash(bencode_dict)
-		scrape_hash = torrents.scrapeHash(torrent_hash)
-		data = self.readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (scrape_hash)))
+	def torrentChanged(self, torrent) :
+		data = self.readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())))
 		self.assertFetcher(data.startswith("d5:"), "Invalid scrape answer")
 		return ( data.strip() == "d5:filesdee" )
 
-	def fetchTorrent(self, bencode_dict) :
-		data = self.readUrlRetry(bencode_dict["comment"])
+	def fetchTorrent(self, torrent) :
+		data = self.readUrlRetry(torrent.comment())
 		torrent_id_match = self.__torrent_id_regexp.search(data)
 		assert not torrent_id_match is None, "Unknown torrent_id"
 		torrent_id = torrent_id_match.group(1)
 		data = self.readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
-		bencode.bdecode(data)
+		tfile.torrentStruct(data)
 		return data
 
 

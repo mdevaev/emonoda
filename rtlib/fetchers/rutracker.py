@@ -21,13 +21,12 @@
 
 from rtlib import const
 from rtlib import fetcherlib
-from rtlib import torrents
+from rtlib import tfile
 
 import urllib
 import urllib2
 import socket
 import cookielib
-import bencode
 import json
 import time
 import re
@@ -69,8 +68,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	def name(self) :
 		return "rutracker"
 
-	def match(self, bencode_dict) :
-		return ( not self.__comment_regexp.match(bencode_dict["comment"]) is None )
+	def match(self, torrent) :
+		return ( not self.__comment_regexp.match(torrent.comment()) is None )
 
 	def login(self) :
 		self.__cookie_jar = cookielib.CookieJar()
@@ -85,13 +84,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	def loggedIn(self) :
 		return ( not self.__opener is None )
 
-	def torrentChanged(self, bencode_dict) :
-		old_hash = torrents.torrentHash(bencode_dict)
-		new_hash = self.fetchHash(bencode_dict)
-		return ( old_hash != new_hash )
+	def torrentChanged(self, torrent) :
+		return ( torrent.hash() != self.fetchHash(torrent) )
 
-	def fetchTorrent(self, bencode_dict) :
-		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
+	def fetchTorrent(self, torrent) :
+		comment_match = self.__comment_regexp.match(torrent.comment())
 		assert not comment_match is None, "No comment match"
 		topic_id = comment_match.group(1)
 
@@ -122,7 +119,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			})
 
 		data = self.readUrlRetry(request)
-		bencode.bdecode(data)
+		tfile.torrentStruct(data)
 		return data
 
 
@@ -151,11 +148,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			web_file = self.readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
 			self.assertLogin(self.__cap_static_regexp.search(web_file.read()) is None, "Invalid captcha")
 
-	def fetchHash(self, bencode_dict) :
-		comment_match = self.__comment_regexp.match(bencode_dict["comment"])
+	def fetchHash(self, torrent) :
+		comment_match = self.__comment_regexp.match(torrent.comment())
 		assert not comment_match is None, "No comment match"
 
-		data = self.readUrlRetry(bencode_dict["comment"])
+		data = self.readUrlRetry(torrent.comment())
 		hash_t_match = self.__hash_t_regexp.search(data)
 		hash_form_token_match = self.__hash_form_token_regexp.search(data)
 		self.assertFetcher(not hash_t_match is None, "Unknown t_hash")
@@ -172,7 +169,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			})
 		response_dict = json.loads(self.readUrlRetry(request))
 		if response_dict.has_key("ih_hex") :
-			return response_dict["ih_hex"].upper()
+			return response_dict["ih_hex"].lower()
 		elif response_dict.has_key("error_msg") : # Like self.assertFetcher()
 			raise fetcherlib.FetcherError(unicode(response_dict["error_msg"]).encode("utf-8"))
 		else :
