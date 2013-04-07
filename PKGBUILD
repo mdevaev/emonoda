@@ -35,5 +35,6 @@ build() {
 
 	python2 setup.py install --root="$pkgdir" --prefix=/usr
 	mv $pkgdir/usr/bin/rtfetch.py $pkgdir/usr/bin/rtfetch
+	mv $pkgdir/usr/bin/rtlost.py $pkgdir/usr/bin/rtlost
 }
 
