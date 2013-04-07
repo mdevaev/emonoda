@@ -77,3 +77,15 @@ class Torrent(object) :
 				self.__scrape_hash += "%{0}".format(self.__hash[index:index + 2])
 		return self.__scrape_hash
 
+	def files(self, prefix = "") :
+		# XXX: See https://wiki.theory.org/BitTorrentSpecification for details
+		base = os.path.join(prefix, self.__bencode_dict["info"]["name"])
+		if not self.__bencode_dict["info"].has_key("files") : # Single File Mode
+			return [base]
+		else : # Multiple File Mode
+			files_list = [base]
+			for file_dict in self.__bencode_dict["info"]["files"] :
+				for (index, _) in enumerate(file_dict["path"]) :
+					files_list.append(os.path.join(prefix, base, os.path.sep.join(file_dict["path"][0:index + 1])))
+			return files_list
+
