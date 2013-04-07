@@ -61,6 +61,9 @@ class Torrent(object) :
 	def path(self) :
 		return self.__torrent_file_path
 
+	def bencode(self) :
+		return self.__bencode_dict
+
 	def comment(self) :
 		return self.__bencode_dict.get("comment", "")
 
