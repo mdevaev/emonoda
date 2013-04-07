@@ -21,7 +21,6 @@
 
 
 from rtlib import tfile
-from rtlib import rtapi
 
 import sys
 import os
@@ -29,7 +28,7 @@ import argparse
 
 
 ##### Public methods #####
-def torrentProvides(torrent, prefix = "") :
+def torrentFiles(torrent, prefix = "") :
 	# XXX: See https://wiki.theory.org/BitTorrentSpecification for details
 	bencode_dict = torrent.bencode()
 	base = os.path.join(prefix, bencode_dict["info"]["name"])
@@ -42,6 +41,13 @@ def torrentProvides(torrent, prefix = "") :
 				files_list.append(os.path.join(prefix, base, os.path.sep.join(file_dict["path"][0:index + 1])))
 		return files_list
 
+def torrentsProvides(torrents_dir_path, data_dir_path) :
+	data_files_list = []
+	for torrent in tfile.torrents(torrents_dir_path).values() :
+		for file_path in torrentFiles(torrent, data_dir_path) :
+			data_files_list.append(file_path)
+	return data_files_list
+
 def onError(exception) :
 	raise exception
 
@@ -52,16 +58,10 @@ def dataProvides(data_dir_path) :
 			data_files_list.append(os.path.join(root, item))
 	return data_files_list
 
-def searchLost(interface, torrents_dir_path, data_dir_path) :
+def searchLost(torrents_dir_path, data_dir_path) :
 	data_dir_path = os.path.abspath(data_dir_path)
-
-	torrents_tree_set = set()
-	for torrent in tfile.torrents(torrents_dir_path).values() :
-		for file_path in torrentProvides(torrent, data_dir_path) :
-			torrents_tree_set.add(file_path)
-
+	torrents_tree_set = set(torrentsProvides(torrents_dir_path, data_dir_path))
 	data_tree_set = set(dataProvides(data_dir_path))
-
 	for file_path in sorted(data_tree_set.difference(torrents_tree_set)) :
 		print file_path
 
