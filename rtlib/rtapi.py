@@ -37,15 +37,13 @@ class RTorrent(object) :
 
 	###
 
-	def setCustom1(self, torrent, custom1) :
-		self.__server.d.set_custom1(torrent.hash(), custom1)
+	def setCustom(self, index, torrent, data) :
+		assert 1 <= index <= 5, "Invalid custom index"
+		method = getattr(self.__server.d, "set_custom%d" % (index))
+		method(torrent.hash(), data)
 
-	def custom1(self, torrent) :
-		return self.__server.d.get_custom1(torrent.hash())
-
-	def setCustom2(self, torrent, custom2) :
-		self.__server.d.set_custom2(torrent.hash(), custom2)
-
-	def custom2(self, torrent) :
-		return self.__server.d.get_custom2(torrent.hash())
+	def custom(self, index, torrent) :
+		assert 1 <= index <= 5, "Invalid custom index"
+		method = getattr(self.__server.d, "get_custom%d" % (index))
+		return method(torrent.hash())
 

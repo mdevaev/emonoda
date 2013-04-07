@@ -74,7 +74,7 @@ def replaceTorrent(torrent, new_file_path) :
 	os.rename(new_file_path, torrent.path())
 	torrent.reload()
 
-def updateTorrent(torrent, fetcher, backup_dir_path, interface, save_custom1_flag, save_custom2_flag) :
+def updateTorrent(torrent, fetcher, backup_dir_path, interface, save_customs_list) :
 	new_file_path = downloadTorrent(torrent, fetcher)
 	if not backup_dir_path is None :
 		backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
@@ -82,23 +82,18 @@ def updateTorrent(torrent, fetcher, backup_dir_path, interface, save_custom1_fla
 
 	if not interface is None :
 		interface.removeTorrent(torrent)
-		if save_custom1_flag :
-			custom1 = interface.custom1(torrent)
-		if save_custom2_flag :
-			custom2 = interface.custom2(torrent)
+		customs_dict = dict([ (index, interface.custom(index, torrent)) for index in save_customs_list ])
 
 	replaceTorrent(torrent, new_file_path)
 
 	if not interface is None :
 		interface.loadTorrent(torrent)
-		if save_custom1_flag :
-			interface.setCustom1(torrent, custom1)
-		if save_custom2_flag :
-			interface.setCustom2(torrent, custom2)
+		for (index, data) in customs_dict.iteritems() :
+			interface.setCustom(index, torrent, data)
 
 
 ###
-def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, save_custom1_flag, save_custom2_flag) :
+def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, save_customs_list) :
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
@@ -124,7 +119,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 					passed_count += 1
 					continue
 
-				updateTorrent(torrent, fetcher, backup_dir_path, interface, save_custom1_flag, save_custom2_flag)
+				updateTorrent(torrent, fetcher, backup_dir_path, interface, save_customs_list)
 				oneLine(status_line % ("+"), False)
 				updated_count += 1
 
@@ -167,8 +162,7 @@ def main() :
 	cli_parser.add_argument("-p", "--show-passed",   dest="show_passed_flag",   action="store_true", default=False)
 	cli_parser.add_argument(      "--no-rtorrent",   dest="no_rtorrent_flag",   action="store_true", default=False)
 	cli_parser.add_argument(      "--xmlrpc-url",    dest="xmlrpc_url",         action="store",      default="http://localhost/RPC2", metavar="<url>")
-	cli_parser.add_argument(      "--save-custom1",  dest="save_custom1_flag",  action="store_true", default=False)
-	cli_parser.add_argument(      "--save-custom2",  dest="save_custom2_flag",  action="store_true", default=False)
+	cli_parser.add_argument(      "--save-customs",  dest="save_customs",       action="store",      default=None, type=int, metavar="<indexes>")
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
@@ -193,6 +187,14 @@ def main() :
 		print >> sys.stderr, "No available fetchers in config"
 		sys.exit(1)
 
+	save_customs_list = []
+	if not cli_options.save_customs is None :
+		save_customs_list = sorted(map(int, set(str(cli_options.save_customs))))
+		for custom in save_customs_list :
+			if custom < 1 or custom > 5 :
+				print >> sys.stderr, "Invalid custom index: %d" % (custom)
+				sys.exit(1)
+
 	interface = ( rtapi.RTorrent(cli_options.xmlrpc_url) if not cli_options.no_rtorrent_flag else None )
 	update(fetchers_list, interface,
 		cli_options.src_dir_path,
@@ -200,8 +202,7 @@ def main() :
 		cli_options.names_filter,
 		cli_options.skip_unknown_flag,
 		cli_options.show_passed_flag,
-		cli_options.save_custom1_flag,
-		cli_options.save_custom2_flag,
+		save_customs_list,
 	)
 
 
