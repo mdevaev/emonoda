@@ -21,6 +21,8 @@
 
 import xmlrpclib
 
+import tfile
+
 
 ##### Public classes #####
 class RTorrent(object) :
@@ -29,10 +31,14 @@ class RTorrent(object) :
 	def __init__(self, url) :
 		self.__server = xmlrpclib.ServerProxy(url)
 
+
+	### Public ###
+
 	def removeTorrent(self, torrent) :
-		self.__server.d.erase(torrent.hash())
+		self.__server.d.erase(self.maybeHash(torrent, False))
 
 	def loadTorrent(self, torrent) :
+		self.maybeHash(torrent)
 		self.__server.load_start(torrent.path())
 
 	###
@@ -40,10 +46,32 @@ class RTorrent(object) :
 	def setCustom(self, index, torrent, data) :
 		assert 1 <= index <= 5, "Invalid custom index"
 		method = getattr(self.__server.d, "set_custom%d" % (index))
-		method(torrent.hash(), data)
+		method(self.maybeHash(torrent, False), data)
 
 	def custom(self, index, torrent) :
 		assert 1 <= index <= 5, "Invalid custom index"
 		method = getattr(self.__server.d, "get_custom%d" % (index))
-		return method(torrent.hash())
+		return method(self.maybeHash(torrent, False))
+
+	def fullPath(self, torrent) :
+		return self.__server.d.get_base_path(self.maybeHash(torrent, False))
+
+	###
+
+	def hashs(self) :
+		return self.__server.download_list()
+
+
+	### Private ###
+
+	def maybeHash(self, item, required_torrent_flag = True) :
+		if required_torrent_flag :
+			assert isinstance(item, tfile.Torrent), "Required instance of the %s" % (str(tfile.Torrent))
+			return item.hash()
+		else :
+			if isinstance(item, tfile.Torrent) :
+				return item.hash()
+			else :
+				assert isinstance(item, (str, unicode)), "Required string hash"
+				return item
 
