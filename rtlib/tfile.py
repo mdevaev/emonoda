@@ -32,9 +32,22 @@ def torrents(src_dir_path, extension = ".torrent") :
 			if name.endswith(extension)
 		])
 
-def torrentStruct(t_data) :
-	return bencode.bdecode(t_data)
+def indexed(src_dir_path, prefix = "") :
+	files_dict = {}
+	for torrent in torrents(src_dir_path).values() :
+		for path in torrent.files() :
+			full_path = os.path.join(prefix, path)
+			files_dict.setdefault(full_path, set())
+			files_dict[full_path].add(torrent)
+	return files_dict
 
+
+###
+def torrentStruct(torrent_data) :
+	return bencode.bdecode(torrent_data)
+
+
+###
 def torrentHash(bencode_dict) :
 	return hashlib.sha1(bencode.bencode(bencode_dict["info"])).hexdigest().lower()
 
@@ -48,6 +61,8 @@ def scrapeHash(torrent_hash) :
 ##### Public classes #####
 class Torrent(object) :
 	def __init__(self, torrent_file_path) :
+		# XXX: File format: https://wiki.theory.org/BitTorrentSpecification
+
 		self.__torrent_file_path = torrent_file_path
 
 		self.__bencode_dict = None
@@ -73,6 +88,9 @@ class Torrent(object) :
 	def bencode(self) :
 		return self.__bencode_dict
 
+	def name(self) :
+		return self.__bencode_dict["info"]["name"]
+
 	def comment(self) :
 		return self.__bencode_dict.get("comment", "")
 
@@ -92,7 +110,6 @@ class Torrent(object) :
 		return not self.__bencode_dict["info"].has_key("files")
 
 	def files(self, prefix = "") :
-		# XXX: See https://wiki.theory.org/BitTorrentSpecification for details
 		base = os.path.join(prefix, self.__bencode_dict["info"]["name"])
 		if self.isSingleFile() : # Single File Mode
 			return [base]
