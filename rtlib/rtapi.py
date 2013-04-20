@@ -19,9 +19,21 @@
 #####
 
 
+import os
 import xmlrpclib
 
 import tfile
+import tools.coding
+
+
+##### Public methods #####
+def indexed(interface, system_path_flag = False) :
+	files_dict = {}
+	for torrent_hash in interface.hashs() :
+		for path in interface.files(torrent_hash, system_path_flag) :
+			files_dict.setdefault(path, set())
+			files_dict[path].add(torrent_hash)
+	return files_dict
 
 
 ##### Public classes #####
@@ -41,6 +53,9 @@ class RTorrent(object) :
 		self.maybeHash(torrent)
 		self.__server.load_start(torrent.path())
 
+	def path(self, torrent) :
+		return self.__server.d.get_loaded_file(self.maybeHash(torrent, False))
+
 	###
 
 	def setCustom(self, index, torrent, data) :
@@ -56,10 +71,40 @@ class RTorrent(object) :
 	def fullPath(self, torrent) :
 		return self.__server.d.get_base_path(self.maybeHash(torrent, False))
 
+	def name(self, torrent) :
+		return self.__server.d.get_name(self.maybeHash(torrent, False))
+
 	###
 
 	def hashs(self) :
 		return self.__server.download_list()
+
+	###
+
+	def isSingleFile(self, torrent) :
+		return not self.__server.d.is_multi_file(self.maybeHash(torrent, False))
+
+	def files(self, torrent, system_path_flag = False) :
+		torrent_hash = self.maybeHash(torrent, False)
+
+		method = ( self.__server.d.get_base_path if system_path_flag else self.__server.d.get_base_filename )
+		prefix = tools.coding.utf8(method(torrent_hash))
+		if self.isSingleFile(torrent) :
+			return [prefix]
+
+		count = self.__server.d.get_size_files(torrent_hash)
+		multicall = xmlrpclib.MultiCall(self.__server)
+		for index in xrange(count) :
+			multicall.f.get_path(torrent_hash, index)
+
+		fetched_list = list(multicall())
+		files_set = set([prefix])
+		for count in xrange(len(fetched_list)) :
+			path = tools.coding.utf8(fetched_list[count])
+			path_list = path.split(os.path.sep)
+			for index in xrange(len(path_list)) :
+				files_set.add(os.path.join(prefix, os.path.sep.join(path_list[0:index+1])))
+		return list(files_set)
 
 
 	### Private ###
