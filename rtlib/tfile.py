@@ -101,7 +101,7 @@ class Torrent(object) :
 
 	def scrapeHash(self) :
 		if self.__scrape_hash is None :
-			self.__scrape_hash = scrapeHash(self.__hash)
+			self.__scrape_hash = scrapeHash(self.hash())
 		return self.__scrape_hash
 
 	###
