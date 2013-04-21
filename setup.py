@@ -17,6 +17,7 @@ setup(
 	packages=[
 		"rtlib",
 		"rtlib/fetchers",
+		"rtlib/tools",
 	],
 	scripts=[
 		"rtfetch.py",
