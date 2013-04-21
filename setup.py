@@ -20,6 +20,7 @@ setup(
 	],
 	scripts=[
 		"rtfetch.py",
+		"rtquery.py",
 	],
 	classifiers=[
 		"Topic :: Software Development :: Libraries :: Python Modules",

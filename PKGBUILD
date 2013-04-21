@@ -1,7 +1,7 @@
 # Contributor: Devaev Maxim <mdevaev@gmail.com>
 
 pkgname=rtfetch
-pkgver=20130209
+pkgver=20130421
 pkgrel=2
 pkgdesc="rtfetch -- Update rtorrent files from popular trackers"
 arch=('any')
@@ -35,6 +35,6 @@ build() {
 
 	python2 setup.py install --root="$pkgdir" --prefix=/usr
 	mv $pkgdir/usr/bin/rtfetch.py $pkgdir/usr/bin/rtfetch
-	mv $pkgdir/usr/bin/rtlost.py $pkgdir/usr/bin/rtlost
+	mv $pkgdir/usr/bin/rtquery.py $pkgdir/usr/bin/rtquery
 }
 
