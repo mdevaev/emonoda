@@ -19,15 +19,7 @@
 #####
 
 
-from rtlib import plugin
-
-import rutracker
-import nnmclub
-
-
-##### Public constants #####
-FETCHERS_MAP = plugin.mapObjects(
-	rutracker.Fetcher,
-	nnmclub.Fetcher,
-)
+##### Public methods #####
+def mapObjects(*cls_list) :
+	return dict([ (cls.plugin(), cls) for cls in cls_list ])
 

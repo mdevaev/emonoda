@@ -63,7 +63,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	### Public ###
 
 	@classmethod
-	def name(self) :
+	def plugin(self) :
 		return "rutracker"
 
 	def match(self, torrent) :

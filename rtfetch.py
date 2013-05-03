@@ -21,9 +21,9 @@
 
 
 from rtlib import tfile
-from rtlib import rtapi
 from rtlib import fetcherlib
 from rtlib import fetchers
+from rtlib import clients
 
 import sys
 import os
@@ -82,14 +82,14 @@ def updateTorrent(torrent, fetcher, backup_dir_path, interface, save_customs_lis
 
 	if not interface is None :
 		interface.removeTorrent(torrent)
-		customs_dict = dict([ (index, interface.custom(index, torrent)) for index in save_customs_list ])
+		customs_dict = dict([ (key, interface.custom(key, torrent)) for key in save_customs_list ])
 
 	replaceTorrent(torrent, new_file_path)
 
 	if not interface is None :
 		interface.loadTorrent(torrent)
-		for (index, data) in customs_dict.iteritems() :
-			interface.setCustom(index, torrent, data)
+		for (key, data) in customs_dict.iteritems() :
+			interface.setCustom(key, torrent, data)
 
 
 ###
@@ -109,7 +109,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 				continue
 			unknown_flag = False
 
-			status_line = "[%s] %s %s --- %s" % ("%s", fetcher.name(), torrent_file_name, torrent.comment())
+			status_line = "[%s] %s %s --- %s" % ("%s", fetcher.plugin(), torrent_file_name, torrent.comment())
 			try :
 				if not fetcher.loggedIn() :
 					fetcher.login()
@@ -160,9 +160,9 @@ def main() :
 	cli_parser.add_argument("-i", "--interative",    dest="interactive_flag",   action="store_true", default=False)
 	cli_parser.add_argument("-u", "--skip-unknown",  dest="skip_unknown_flag",  action="store_true", default=False)
 	cli_parser.add_argument("-p", "--show-passed",   dest="show_passed_flag",   action="store_true", default=False)
-	cli_parser.add_argument(      "--no-rtorrent",   dest="no_rtorrent_flag",   action="store_true", default=False)
-	cli_parser.add_argument(      "--xmlrpc-url",    dest="xmlrpc_url",         action="store",      default="http://localhost/RPC2", metavar="<url>")
-	cli_parser.add_argument(      "--save-customs",  dest="save_customs",       action="store",      default=None, type=int, metavar="<indexes>")
+	cli_parser.add_argument(      "--client",        dest="client_name",        action="store",      default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
+	cli_parser.add_argument(      "--client-url",    dest="client_url",         action="store",      default=None, metavar="<url>")
+	cli_parser.add_argument(      "--save-customs",  dest="save_customs_list",  nargs="+",           default=None, metavar="<keys>")
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
@@ -187,22 +187,27 @@ def main() :
 		print >> sys.stderr, "No available fetchers in config"
 		sys.exit(1)
 
-	save_customs_list = []
-	if not cli_options.save_customs is None :
-		save_customs_list = sorted(map(int, set(str(cli_options.save_customs))))
-		for custom in save_customs_list :
-			if custom < 1 or custom > 5 :
-				print >> sys.stderr, "Invalid custom index: %d" % (custom)
+	interface = None
+	if not cli_options.client_name is None :
+		client_class = clients.CLIENTS_MAP[cli_options.client_name]
+		interface = client_class(cli_options.client_url)
+
+	if not interface is None and not cli_options.save_customs_list is None :
+		cli_options.save_customs_list = list(set(cli_options.save_customs_list))
+		valid_keys_list = interface.customKeys()
+		for key in cli_options.save_customs_list :
+			if not key in valid_keys_list :
+				print >> sys.stderr, "Invalid custom key: %s" % (key)
 				sys.exit(1)
 
-	interface = ( rtapi.RTorrent(cli_options.xmlrpc_url) if not cli_options.no_rtorrent_flag else None )
+
 	update(fetchers_list, interface,
 		cli_options.src_dir_path,
 		cli_options.backup_dir_path,
 		cli_options.names_filter,
 		cli_options.skip_unknown_flag,
 		cli_options.show_passed_flag,
-		save_customs_list,
+		cli_options.save_customs_list,
 	)
 
 

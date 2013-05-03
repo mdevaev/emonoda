@@ -21,7 +21,8 @@
 
 
 from rtlib import tfile
-from rtlib import rtapi
+from rtlib import clients
+from rtlib import clientlib
 
 import sys
 import os
@@ -52,7 +53,7 @@ def formatTorrent(interface, torrent) :
 def querySearchLost(interface, src_dir_path, data_dir_path) :
 	data_dir_path = os.path.abspath(data_dir_path)
 	if interface != None :
-		torrents_tree_set = set(rtapi.indexed(interface, True))
+		torrents_tree_set = set(clientlib.indexed(interface, True))
 	else :
 		torrents_tree_set = set(tfile.indexed(src_dir_path, data_dir_path).keys())
 	data_tree_set = set(treeList(data_dir_path))
@@ -66,7 +67,7 @@ def queryWhatProvides(interface, src_dir_path, data_dir_path, file_path) :
 		file_path = os.path.join(data_dir_path, file_path)
 
 	if interface != None :
-		files_dict = rtapi.indexed(interface, system_path_flag)
+		files_dict = clientlib.indexed(interface, system_path_flag)
 	else :
 		files_dict = tfile.indexed(src_dir_path, data_dir_path)
 
@@ -76,7 +77,7 @@ def queryWhatProvides(interface, src_dir_path, data_dir_path, file_path) :
 
 def queryConflicts(interface, src_dir_path) :
 	if interface != None :
-		files_dict = rtapi.indexed(interface, True)
+		files_dict = clientlib.indexed(interface, True)
 	else :
 		files_dict = tfile.indexed(src_dir_path)
 	for (full_path, torrents_set) in files_dict.iteritems() :
@@ -110,17 +111,20 @@ def main() :
 	conflicts_opt     = queries_group.add_argument("--conflicts",     dest="conflicts_flag",     action="store_true", default=False)
 
 	src_dir_opt = interface_group.add_argument("-s", "--source-dir", dest="src_dir_path",  action="store", metavar="<dir>")
-	interface_group.add_argument(                    "--rtorrent",   dest="rtorrent_flag", action="store_true", default=False)
+	interface_group.add_argument(                    "--client",     dest="client_name",   action="store", default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
 
 	data_dir_opt = cli_parser.add_argument("-d", "--data-dir",   dest="data_dir_path",  action="store", metavar="<dir>")
 	file_opt     = cli_parser.add_argument("-f", "--file",       dest="file_path",      action="store", metavar="<file>")
 	cli_parser.add_argument(               "-t", "--timeout",    dest="socket_timeout", action="store", default=5, type=int, metavar="<seconds>")
-	cli_parser.add_argument(                     "--xmlrpc-url", dest="xmlrpc_url",     action="store", default="http://localhost/RPC2", metavar="<url>")
+	cli_parser.add_argument(                     "--client-url", dest="client_url",     action="store", default=None, metavar="<url>")
 
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
-	interface = ( rtapi.RTorrent(cli_options.xmlrpc_url) if cli_options.rtorrent_flag else None )
+	interface = None
+	if not cli_options.client_name is None :
+		client_class = clients.CLIENTS_MAP[cli_options.client_name]
+		interface = client_class(cli_options.client_url)
 
 	if cli_options.lost_files_flag :
 		requiredOptions(lost_files_opt, cli_options, (data_dir_opt,))

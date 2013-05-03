@@ -55,7 +55,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	### Public ###
 
 	@classmethod
-	def name(self) :
+	def plugin(self) :
 		return "nnm-club"
 
 	def match(self, torrent) :

@@ -21,13 +21,11 @@
 
 from rtlib import plugin
 
-import rutracker
-import nnmclub
+import rtorrent
 
 
 ##### Public constants #####
-FETCHERS_MAP = plugin.mapObjects(
-	rutracker.Fetcher,
-	nnmclub.Fetcher,
+CLIENTS_MAP = plugin.mapObjects(
+	rtorrent.Client,
 )
 

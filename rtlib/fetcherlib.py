@@ -44,7 +44,7 @@ class AbstractFetcher(object) :
 	### Public ###
 
 	@classmethod
-	def name(self) :
+	def plugin(self) :
 		raise NotImplementedError
 
 	def match(self, torrent) :

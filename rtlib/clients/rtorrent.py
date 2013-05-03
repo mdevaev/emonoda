@@ -19,73 +19,78 @@
 #####
 
 
+from rtlib import clientlib
+
+from rtlib import tools
+import rtlib.tools.coding
+
 import os
 import xmlrpclib
 
-import tfile
-import tools.coding
 
-
-##### Public methods #####
-def indexed(interface, system_path_flag = False) :
-	files_dict = {}
-	for torrent_hash in interface.hashs() :
-		for path in interface.files(torrent_hash, system_path_flag) :
-			files_dict.setdefault(path, set())
-			files_dict[path].add(torrent_hash)
-	return files_dict
+##### Public constants #####
+DEFAULT_URL = "http://localhost/RPC2"
 
 
 ##### Public classes #####
-class RTorrent(object) :
+class Client(clientlib.AbstractClient) :
 	# XXX: API description: http://code.google.com/p/gi-torrent/wiki/rTorrent_XMLRPC_reference
 
-	def __init__(self, url) :
+	def __init__(self, url = DEFAULT_URL) :
+		if url is None :
+			url = DEFAULT_URL
+		clientlib.AbstractClient.__init__(self, url = DEFAULT_URL)
+
 		self.__server = xmlrpclib.ServerProxy(url)
 
 
 	### Public ###
 
+	@classmethod
+	def plugin(self) :
+		return "rtorrent"
+
 	def removeTorrent(self, torrent) :
-		self.__server.d.erase(self.maybeHash(torrent, False))
+		self.__server.d.erase(clientlib.maybeHash(torrent, False))
 
 	def loadTorrent(self, torrent) :
-		self.maybeHash(torrent)
+		clientlib.maybeHash(torrent)
 		self.__server.load_start(torrent.path())
-
-	def path(self, torrent) :
-		return self.__server.d.get_loaded_file(self.maybeHash(torrent, False))
-
-	###
-
-	def setCustom(self, index, torrent, data) :
-		assert 1 <= index <= 5, "Invalid custom index"
-		method = getattr(self.__server.d, "set_custom%d" % (index))
-		method(self.maybeHash(torrent, False), data)
-
-	def custom(self, index, torrent) :
-		assert 1 <= index <= 5, "Invalid custom index"
-		method = getattr(self.__server.d, "get_custom%d" % (index))
-		return method(self.maybeHash(torrent, False))
-
-	def fullPath(self, torrent) :
-		return self.__server.d.get_base_path(self.maybeHash(torrent, False))
-
-	def name(self, torrent) :
-		return self.__server.d.get_name(self.maybeHash(torrent, False))
-
-	###
 
 	def hashs(self) :
 		return self.__server.download_list()
 
+	def path(self, torrent) :
+		return self.__server.d.get_loaded_file(clientlib.maybeHash(torrent, False))
+
 	###
 
+	def customKeys(self) :
+		return ("1", "2", "3", "4", "5")
+
+	def setCustom(self, key, torrent, data) :
+		assert 1 <= key <= 5, "Invalid custom key"
+		method = getattr(self.__server.d, "set_custom%d" % (key))
+		method(clientlib.maybeHash(torrent, False), data)
+
+	def custom(self, key, torrent) :
+		assert 1 <= key <= 5, "Invalid custom key"
+		method = getattr(self.__server.d, "get_custom%d" % (key))
+		return method(clientlib.maybeHash(torrent, False))
+
+	###
+
+	def fullPath(self, torrent) :
+		return self.__server.d.get_base_path(clientlib.maybeHash(torrent, False))
+
+	def name(self, torrent) :
+		return self.__server.d.get_name(clientlib.maybeHash(torrent, False))
+
 	def isSingleFile(self, torrent) :
-		return not self.__server.d.is_multi_file(self.maybeHash(torrent, False))
+		return not self.__server.d.is_multi_file(clientlib.maybeHash(torrent, False))
 
 	def files(self, torrent, system_path_flag = False) :
-		torrent_hash = self.maybeHash(torrent, False)
+		torrent_hash = clientlib.maybeHash(torrent, False)
 
 		method = ( self.__server.d.get_base_path if system_path_flag else self.__server.d.get_base_filename )
 		prefix = tools.coding.utf8(method(torrent_hash))
@@ -105,18 +110,4 @@ class RTorrent(object) :
 			for index in xrange(len(path_list)) :
 				files_set.add(os.path.join(prefix, os.path.sep.join(path_list[0:index+1])))
 		return list(files_set)
-
-
-	### Private ###
-
-	def maybeHash(self, item, required_torrent_flag = True) :
-		if required_torrent_flag :
-			assert isinstance(item, tfile.Torrent), "Required instance of the %s" % (str(tfile.Torrent))
-			return item.hash()
-		else :
-			if isinstance(item, tfile.Torrent) :
-				return item.hash()
-			else :
-				assert isinstance(item, (str, unicode)), "Required string hash"
-				return item
 
