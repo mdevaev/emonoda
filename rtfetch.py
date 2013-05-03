@@ -25,6 +25,9 @@ from rtlib import fetcherlib
 from rtlib import fetchers
 from rtlib import clients
 
+from rtlib import tools
+import rtlib.tools.cli # pylint: disable=W0611
+
 import sys
 import os
 import socket
@@ -42,22 +45,6 @@ DELIMITER = "-" * 10
 
 
 ##### Public methods #####
-def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) :
-	old_text = static_list[0]
-	if short_flag :
-		static_list[0] = text
-		text = " "*len(old_text) + "\r" + text + "\r"
-	else :
-		if len(static_list[0]) != 0 :
-			text = " "*len(old_text) + "\r" + text + "\n"
-		else :
-			text += "\n"
-		static_list[0] = ""
-	output.write(text)
-	output.flush()
-
-
-###
 def downloadTorrent(torrent, fetcher) :
 	torrent_data = fetcher.fetchTorrent(torrent)
 	new_file_path = torrent.path() + ".new"
@@ -115,12 +102,12 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 					fetcher.login()
 
 				if not fetcher.torrentChanged(torrent) :
-					oneLine(status_line % (" "), not show_passed_flag)
+					tools.cli.oneLine(status_line % (" "), not show_passed_flag)
 					passed_count += 1
 					continue
 
 				updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list)
-				oneLine(status_line % ("+"), False)
+				tools.cli.oneLine(status_line % ("+"), False)
 				updated_count += 1
 
 			except fetcherlib.CommonFetcherError, err :
@@ -136,10 +123,10 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 			break
 
 		if unknown_flag :
-			oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, torrent.comment()), False)
+			tools.cli.oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, torrent.comment()), False)
 			unknown_count += 1
 
-	oneLine("", False)
+	tools.cli.oneLine("", False)
 	print DELIMITER
 	print "Unknown: %d" % (unknown_count)
 	print "Passed: %d" % (passed_count)
