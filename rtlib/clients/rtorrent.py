@@ -72,13 +72,11 @@ class Client(clientlib.AbstractClient) :
 		return ("1", "2", "3", "4", "5")
 
 	def setCustom(self, key, torrent, data) :
-		assert 1 <= key <= 5, "Invalid custom key"
-		method = getattr(self.__server.d, "set_custom%d" % (key))
+		method = getattr(self.__server.d, "set_custom" + key)
 		method(clientlib.maybeHash(torrent, False), data)
 
 	def custom(self, key, torrent) :
-		assert 1 <= key <= 5, "Invalid custom key"
-		method = getattr(self.__server.d, "get_custom%d" % (key))
+		method = getattr(self.__server.d, "get_custom" + key)
 		return method(clientlib.maybeHash(torrent, False))
 
 	###
