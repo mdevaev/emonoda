@@ -74,26 +74,26 @@ def replaceTorrent(torrent, new_file_path) :
 	os.rename(new_file_path, torrent.path())
 	torrent.reload()
 
-def updateTorrent(torrent, fetcher, backup_dir_path, interface, save_customs_list) :
+def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list) :
 	new_file_path = downloadTorrent(torrent, fetcher)
 	if not backup_dir_path is None :
 		backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
 		shutil.copyfile(torrent.path(), backup_file_path)
 
-	if not interface is None :
-		interface.removeTorrent(torrent)
-		customs_dict = dict([ (key, interface.custom(key, torrent)) for key in save_customs_list ])
+	if not client is None :
+		client.removeTorrent(torrent)
+		customs_dict = dict([ (key, client.custom(key, torrent)) for key in save_customs_list ])
 
 	replaceTorrent(torrent, new_file_path)
 
-	if not interface is None :
-		interface.loadTorrent(torrent)
+	if not client is None :
+		client.loadTorrent(torrent)
 		for (key, data) in customs_dict.iteritems() :
-			interface.setCustom(key, torrent, data)
+			client.setCustom(key, torrent, data)
 
 
 ###
-def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, save_customs_list) :
+def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, save_customs_list) :
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
@@ -119,7 +119,7 @@ def update(fetchers_list, interface, src_dir_path, backup_dir_path, names_filter
 					passed_count += 1
 					continue
 
-				updateTorrent(torrent, fetcher, backup_dir_path, interface, save_customs_list)
+				updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list)
 				oneLine(status_line % ("+"), False)
 				updated_count += 1
 
@@ -187,21 +187,21 @@ def main() :
 		print >> sys.stderr, "No available fetchers in config"
 		sys.exit(1)
 
-	interface = None
+	client = None
 	if not cli_options.client_name is None :
 		client_class = clients.CLIENTS_MAP[cli_options.client_name]
-		interface = client_class(cli_options.client_url)
+		client = client_class(cli_options.client_url)
 
-	if not interface is None and not cli_options.save_customs_list is None :
+	if not client is None and not cli_options.save_customs_list is None :
 		cli_options.save_customs_list = list(set(cli_options.save_customs_list))
-		valid_keys_list = interface.customKeys()
+		valid_keys_list = client.customKeys()
 		for key in cli_options.save_customs_list :
 			if not key in valid_keys_list :
 				print >> sys.stderr, "Invalid custom key: %s" % (key)
 				sys.exit(1)
 
 
-	update(fetchers_list, interface,
+	update(fetchers_list, client,
 		cli_options.src_dir_path,
 		cli_options.backup_dir_path,
 		cli_options.names_filter,

@@ -23,10 +23,10 @@ import tfile
 
 
 ##### Public methods #####
-def indexed(interface, system_path_flag = False) :
+def indexed(client, system_path_flag = False) :
 	files_dict = {}
-	for torrent_hash in interface.hashs() :
-		for path in interface.files(torrent_hash, system_path_flag) :
+	for torrent_hash in client.hashs() :
+		for path in client.files(torrent_hash, system_path_flag) :
 			files_dict.setdefault(path, set())
 			files_dict[path].add(torrent_hash)
 	return files_dict
