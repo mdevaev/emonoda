@@ -69,7 +69,7 @@ class AbstractClient(object) :
 	def hashs(self) :
 		raise NotImplementedError
 
-	def path(self, torrent) :
+	def torrentPath(self, torrent) :
 		raise NotImplementedError
 
 	###

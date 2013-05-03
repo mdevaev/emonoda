@@ -43,7 +43,7 @@ def treeList(dir_path) :
 
 def formatTorrent(client, torrent) :
 	if not isinstance(torrent, tfile.Torrent) :
-		(path, name) = (client.path(torrent) or "<Temporary not saved>", client.name(torrent))
+		(path, name) = (client.torrentPath(torrent) or "<Temporary not saved>", client.name(torrent))
 	else :
 		(path, name) = (torrent.path(), torrent.name())
 	return "%s --- %s" % (path, name)

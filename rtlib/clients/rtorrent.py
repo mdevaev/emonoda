@@ -63,7 +63,7 @@ class Client(clientlib.AbstractClient) :
 	def hashs(self) :
 		return self.__server.download_list()
 
-	def path(self, torrent) :
+	def torrentPath(self, torrent) :
 		return self.__server.d.get_loaded_file(clientlib.maybeHash(torrent, False))
 
 	###
