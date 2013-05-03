@@ -31,6 +31,8 @@ import xmlrpclib
 ##### Public constants #####
 DEFAULT_URL = "http://localhost/RPC2"
 
+XMLRPC_SIZE_LIMIT = 67108863
+
 
 ##### Public classes #####
 class Client(clientlib.AbstractClient) :
@@ -42,6 +44,7 @@ class Client(clientlib.AbstractClient) :
 		clientlib.AbstractClient.__init__(self, url = DEFAULT_URL)
 
 		self.__server = xmlrpclib.ServerProxy(url)
+		self.__server.set_xmlrpc_size_limit(XMLRPC_SIZE_LIMIT)
 
 
 	### Public ###
