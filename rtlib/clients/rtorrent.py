@@ -22,7 +22,7 @@
 from rtlib import clientlib
 
 from rtlib import tools
-import rtlib.tools.coding
+import rtlib.tools.coding # pylint: disable=W0611
 
 import os
 import xmlrpclib
