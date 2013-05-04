@@ -37,3 +37,6 @@ def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) : 
 	output.write(text)
 	output.flush()
 
+def progress(value, limit) :
+	return (("%%%dd/" % (len(str(limit)))) + "%d") % (value, limit)
+
