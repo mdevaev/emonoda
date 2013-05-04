@@ -17,6 +17,7 @@ setup(
 	packages=[
 		"rtlib",
 		"rtlib/fetchers",
+		"rtlib/clients",
 		"rtlib/tools",
 	],
 	scripts=[
