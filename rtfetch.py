@@ -90,9 +90,15 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 	updated_count = 0
 	error_count = 0
 
-	for (torrent_file_name, torrent) in sorted(tfile.torrents(src_dir_path).items(), key=operator.itemgetter(0)) :
-		if not names_filter is None and not names_filter in torrent_file_name :
-			continue
+	torrents_list = tfile.torrents(src_dir_path).items()
+	if not names_filter is None :
+		torrents_list = filter(lambda item : names_filter in item[0], torrents_list)
+	torrents_list = sorted(torrents_list, key=operator.itemgetter(0))
+
+	torrents = len(torrents_list)
+	count = 0
+	for (torrent_file_name, torrent) in torrents_list :
+		count += 1
 
 		unknown_flag = ( not skip_unknown_flag )
 		for fetcher in fetchers_list :
@@ -100,7 +106,12 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 				continue
 			unknown_flag = False
 
-			status_line = "[%s] %s %s --- %s" % ("%s", fetcher.plugin(), torrent_file_name, torrent.comment())
+			status_line = "[%%s] %s %s %s --- %s" % (
+				tools.cli.progress(count, torrents),
+				fetcher.plugin(),
+				torrent_file_name,
+				torrent.comment(),
+			)
 			try :
 				if not fetcher.loggedIn() :
 					fetcher.login()
