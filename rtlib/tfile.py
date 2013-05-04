@@ -119,12 +119,10 @@ class Torrent(object) :
 
 	def files(self, prefix = "") :
 		base = os.path.join(prefix, self.__bencode_dict["info"]["name"])
-		if self.isSingleFile() : # Single File Mode
-			return [base]
-		else : # Multiple File Mode
-			files_set = set([base])
+		files_set = set([base]) # Single File Mode
+		if not self.isSingleFile() : # Multiple File Mode
 			for file_dict in self.__bencode_dict["info"]["files"] :
-				for (index, _) in enumerate(file_dict["path"]) :
+				for index in xrange(len(file_dict["path"])) :
 					files_set.add(os.path.join(base, os.path.sep.join(file_dict["path"][0:index + 1])))
-			return files_set
+		return files_set
 
