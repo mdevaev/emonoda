@@ -110,5 +110,5 @@ class Client(clientlib.AbstractClient) :
 			path_list = path.split(os.path.sep)
 			for index in xrange(len(path_list)) :
 				files_set.add(os.path.join(prefix, os.path.sep.join(path_list[0:index+1])))
-		return list(files_set)
+		return files_set
 

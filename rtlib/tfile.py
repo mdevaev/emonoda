@@ -118,5 +118,5 @@ class Torrent(object) :
 			for file_dict in self.__bencode_dict["info"]["files"] :
 				for (index, _) in enumerate(file_dict["path"]) :
 					files_set.add(os.path.join(base, os.path.sep.join(file_dict["path"][0:index + 1])))
-			return list(files_set)
+			return files_set
 
