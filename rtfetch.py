@@ -62,6 +62,8 @@ def replaceTorrent(torrent, new_file_path) :
 	torrent.reload()
 
 def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list) :
+	old_torrent = tfile.Torrent(torrent.path())
+
 	new_file_path = downloadTorrent(torrent, fetcher)
 	if not backup_dir_path is None :
 		backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
@@ -78,9 +80,11 @@ def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list) 
 		for (key, data) in customs_dict.iteritems() :
 			client.setCustom(key, torrent, data)
 
+	return tfile.diff(old_torrent, torrent)
+
 
 ###
-def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, save_customs_list) :
+def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, show_diff_flag, save_customs_list) :
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
@@ -106,8 +110,13 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 					passed_count += 1
 					continue
 
-				updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list)
+				(added_set, removed_set) = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list)
 				tools.cli.oneLine(status_line % ("+"), False)
+				if show_diff_flag :
+					for item in sorted(removed_set) :
+						print "\t- %s" % (item)
+					for item in sorted(added_set) :
+						print "\t+ %s" % (item)
 				updated_count += 1
 
 			except fetcherlib.CommonFetcherError, err :
@@ -147,6 +156,7 @@ def main() :
 	cli_parser.add_argument("-i", "--interative",    dest="interactive_flag",   action="store_true", default=False)
 	cli_parser.add_argument("-u", "--skip-unknown",  dest="skip_unknown_flag",  action="store_true", default=False)
 	cli_parser.add_argument("-p", "--show-passed",   dest="show_passed_flag",   action="store_true", default=False)
+	cli_parser.add_argument("-d", "--show-diff",     dest="show_diff_flag",     action="store_true", default=False)
 	cli_parser.add_argument(      "--client",        dest="client_name",        action="store",      default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument(      "--client-url",    dest="client_url",         action="store",      default=None, metavar="<url>")
 	cli_parser.add_argument(      "--save-customs",  dest="save_customs_list",  nargs="+",           default=None, metavar="<keys>")
@@ -194,6 +204,7 @@ def main() :
 		cli_options.names_filter,
 		cli_options.skip_unknown_flag,
 		cli_options.show_passed_flag,
+		cli_options.show_diff_flag,
 		cli_options.save_customs_list,
 	)
 
