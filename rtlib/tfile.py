@@ -41,6 +41,14 @@ def indexed(src_dir_path, prefix = "") :
 			files_dict[full_path].add(torrent)
 	return files_dict
 
+def diff(old_torrent, new_torrent) :
+	old_set = old_torrent.files()
+	new_set = new_torrent.files()
+	return (
+		new_set.difference(old_set), # Added
+		old_set.difference(new_set), # Removed
+	)
+
 
 ###
 def torrentStruct(torrent_data) :
