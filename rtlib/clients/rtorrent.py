@@ -99,9 +99,10 @@ class Client(clientlib.AbstractClient) :
 	@clientlib.hashOrTorrent
 	def files(self, torrent_hash, system_path_flag = False) :
 		method = ( self.__server.d.get_base_path if system_path_flag else self.__server.d.get_base_filename )
-		prefix = tools.coding.utf8(method(torrent_hash))
+		base = tools.coding.utf8(method(torrent_hash))
+		files_set = set([base])
 		if self.isSingleFile(torrent_hash) :
-			return [prefix]
+			return files_set
 
 		count = self.__server.d.get_size_files(torrent_hash)
 		multicall = xmlrpclib.MultiCall(self.__server)
@@ -109,11 +110,10 @@ class Client(clientlib.AbstractClient) :
 			multicall.f.get_path(torrent_hash, index)
 
 		fetched_list = list(multicall())
-		files_set = set([prefix])
 		for count in xrange(len(fetched_list)) :
 			path = tools.coding.utf8(fetched_list[count])
 			path_list = path.split(os.path.sep)
 			for index in xrange(len(path_list)) :
-				files_set.add(os.path.join(prefix, os.path.sep.join(path_list[0:index+1])))
+				files_set.add(os.path.join(base, os.path.sep.join(path_list[0:index+1])))
 		return files_set
 
