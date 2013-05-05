@@ -53,49 +53,54 @@ class Client(clientlib.AbstractClient) :
 	def plugin(self) :
 		return "rtorrent"
 
-	def removeTorrent(self, torrent) :
-		self.__server.d.erase(clientlib.maybeHash(torrent, False))
+	@clientlib.hashOrTorrent
+	def removeTorrent(self, torrent_hash) :
+		self.__server.d.erase(torrent_hash)
 
 	def loadTorrent(self, torrent) :
-		clientlib.maybeHash(torrent)
 		self.__server.load_start(torrent.path())
 
 	def hashs(self) :
 		return self.__server.download_list()
 
-	def torrentPath(self, torrent) :
-		return self.__server.d.get_loaded_file(clientlib.maybeHash(torrent, False))
+	@clientlib.hashOrTorrent
+	def torrentPath(self, torrent_hash) :
+		return self.__server.d.get_loaded_file(torrent_hash)
 
 	###
 
 	def customKeys(self) :
 		return ("1", "2", "3", "4", "5")
 
-	def setCustom(self, torrent, key, data) :
+	@clientlib.hashOrTorrent
+	def setCustom(self, torrent_hash, key, data) :
 		method = getattr(self.__server.d, "set_custom" + key)
-		method(clientlib.maybeHash(torrent, False), data)
+		method(torrent_hash, data)
 
-	def custom(self, torrent, key) :
+	@clientlib.hashOrTorrent
+	def custom(self, torrent_hash, key) :
 		method = getattr(self.__server.d, "get_custom" + key)
-		return method(clientlib.maybeHash(torrent, False))
+		return method(torrent_hash)
 
 	###
 
-	def fullPath(self, torrent) :
-		return self.__server.d.get_base_path(clientlib.maybeHash(torrent, False))
+	@clientlib.hashOrTorrent
+	def fullPath(self, torrent_hash) :
+		return self.__server.d.get_base_path(torrent_hash)
 
-	def name(self, torrent) :
-		return self.__server.d.get_name(clientlib.maybeHash(torrent, False))
+	@clientlib.hashOrTorrent
+	def name(self, torrent_hash) :
+		return self.__server.d.get_name(torrent_hash)
 
-	def isSingleFile(self, torrent) :
-		return not self.__server.d.is_multi_file(clientlib.maybeHash(torrent, False))
+	@clientlib.hashOrTorrent
+	def isSingleFile(self, torrent_hash) :
+		return not self.__server.d.is_multi_file(torrent_hash)
 
-	def files(self, torrent, system_path_flag = False) :
-		torrent_hash = clientlib.maybeHash(torrent, False)
-
+	@clientlib.hashOrTorrent
+	def files(self, torrent_hash, system_path_flag = False) :
 		method = ( self.__server.d.get_base_path if system_path_flag else self.__server.d.get_base_filename )
 		prefix = tools.coding.utf8(method(torrent_hash))
-		if self.isSingleFile(torrent) :
+		if self.isSingleFile(torrent_hash) :
 			return [prefix]
 
 		count = self.__server.d.get_size_files(torrent_hash)

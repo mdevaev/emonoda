@@ -33,16 +33,12 @@ def indexed(client, system_path_flag = False) :
 
 
 ###
-def maybeHash(item, required_torrent_flag = True) :
-	if required_torrent_flag :
-		assert isinstance(item, tfile.Torrent), "Required instance of the %s" % (str(tfile.Torrent))
-		return item.hash()
-	else :
-		if isinstance(item, tfile.Torrent) :
-			return item.hash()
-		else :
-			assert isinstance(item, (str, unicode)), "Required string hash"
-			return item
+def hashOrTorrent(method) :
+	def wrap(self, torrent_hash, *args_list, **kwargs_dict) :
+		if isinstance(torrent_hash, tfile.Torrent) :
+			torrent_hash = torrent_hash.hash()
+		return method(self, torrent_hash, *args_list, **kwargs_dict)
+	return wrap
 
 
 ##### Public classes #####
@@ -60,7 +56,8 @@ class AbstractClient(object) :
 
 	###
 
-	def removeTorrent(self, torrent) :
+	@hashOrTorrent
+	def removeTorrent(self, torrent_hash) :
 		raise NotImplementedError
 
 	def loadTorrent(self, torrent) :
@@ -69,28 +66,38 @@ class AbstractClient(object) :
 	def hashs(self) :
 		raise NotImplementedError
 
-	def torrentPath(self, torrent) :
+	@hashOrTorrent
+	def torrentPath(self, torrent_hash) :
 		raise NotImplementedError
 
 	###
 
-	def setCustom(self, index, torrent, data) :
+	def customKeys(self) :
 		raise NotImplementedError
 
-	def custom(self, index, torrent) :
+	@hashOrTorrent
+	def setCustom(self, torrent_hash, key, data) :
+		raise NotImplementedError
+
+	@hashOrTorrent
+	def custom(self, torrent_hash, key) :
 		raise NotImplementedError
 
 	###
 
-	def fullPath(self, torrent) :
+	@hashOrTorrent
+	def fullPath(self, torrent_hash) :
 		raise NotImplementedError
 
-	def name(self, torrent) :
+	@hashOrTorrent
+	def name(self, torrent_hash) :
 		raise NotImplementedError
 
-	def isSingleFile(self, torrent) :
+	@hashOrTorrent
+	def isSingleFile(self, torrent_hash) :
 		raise NotImplementedError
 
-	def files(self, torrent, system_path_flag = False) :
+	@hashOrTorrent
+	def files(self, torrent_hash, system_path_flag = False) :
 		raise NotImplementedError
 
