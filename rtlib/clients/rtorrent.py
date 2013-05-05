@@ -71,11 +71,11 @@ class Client(clientlib.AbstractClient) :
 	def customKeys(self) :
 		return ("1", "2", "3", "4", "5")
 
-	def setCustom(self, key, torrent, data) :
+	def setCustom(self, torrent, key, data) :
 		method = getattr(self.__server.d, "set_custom" + key)
 		method(clientlib.maybeHash(torrent, False), data)
 
-	def custom(self, key, torrent) :
+	def custom(self, torrent, key) :
 		method = getattr(self.__server.d, "get_custom" + key)
 		return method(clientlib.maybeHash(torrent, False))
 

@@ -71,14 +71,14 @@ def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list) 
 
 	if not client is None :
 		client.removeTorrent(torrent)
-		customs_dict = dict([ (key, client.custom(key, torrent)) for key in save_customs_list ])
+		customs_dict = dict([ (key, client.custom(torrent, key)) for key in save_customs_list ])
 
 	replaceTorrent(torrent, new_file_path)
 
 	if not client is None :
 		client.loadTorrent(torrent)
 		for (key, data) in customs_dict.iteritems() :
-			client.setCustom(key, torrent, data)
+			client.setCustom(torrent, key, data)
 
 	return tfile.diff(old_torrent, torrent)
 
