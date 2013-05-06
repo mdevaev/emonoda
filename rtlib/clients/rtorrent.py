@@ -29,6 +29,7 @@ import xmlrpclib
 
 
 ##### Public constants #####
+CLIENT_NAME = "rtorrent"
 DEFAULT_URL = "http://localhost/RPC2"
 
 XMLRPC_SIZE_LIMIT = 67108863
@@ -50,8 +51,8 @@ class Client(clientlib.AbstractClient) :
 	### Public ###
 
 	@classmethod
-	def plugin(self) :
-		return "rtorrent"
+	def plugin(cls) :
+		return CLIENT_NAME
 
 	@clientlib.hashOrTorrent
 	def removeTorrent(self, torrent_hash) :

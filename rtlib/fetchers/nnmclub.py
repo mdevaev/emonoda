@@ -29,6 +29,8 @@ import re
 
 
 ##### Public constants #####
+FETCHER_NAME = "nnm-club"
+
 NNMCLUB_DOMAIN = "nnm-club.ru"
 NNMCLUB_LOGIN_URL = "http://%s/forum/login.php" % (NNMCLUB_DOMAIN)
 #NNMCLUB_VIEWTOPIC_URL = "http://%s/forum/viewtopic.php" % (NNMCLUB_DOMAIN)
@@ -55,8 +57,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	### Public ###
 
 	@classmethod
-	def plugin(self) :
-		return "nnm-club"
+	def plugin(cls) :
+		return FETCHER_NAME
 
 	def match(self, torrent) :
 		return ( not self.__comment_regexp.match(torrent.comment()) is None )

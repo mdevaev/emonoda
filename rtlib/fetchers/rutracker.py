@@ -31,6 +31,8 @@ import re
 
 
 ##### Public constants #####
+FETCHER_NAME = "rutracker"
+
 RUTRACKER_DOMAIN = "rutracker.org"
 RUTRACKER_LOGIN_URL = "http://login.%s/forum/login.php" % (RUTRACKER_DOMAIN)
 RUTRACKER_VIEWTOPIC_URL = "http://%s/forum/viewtopic.php" % (RUTRACKER_DOMAIN)
@@ -63,8 +65,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	### Public ###
 
 	@classmethod
-	def plugin(self) :
-		return "rutracker"
+	def plugin(cls) :
+		return FETCHER_NAME
 
 	def match(self, torrent) :
 		return ( not self.__comment_regexp.match(torrent.comment()) is None )
