@@ -164,7 +164,7 @@ def main() :
 	cli_parser.add_argument("-f", "--filter",        dest="names_filter",       action="store",      default=None,  metavar="<substring>")
 	cli_parser.add_argument("-o", "--only-fetchers", dest="only_fetchers_list", nargs="+",           default=fetchers.FETCHERS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument("-t", "--timeout",       dest="socket_timeout",     action="store",      default=5, type=int, metavar="<seconds>")
-	cli_parser.add_argument("-i", "--interative",    dest="interactive_flag",   action="store_true", default=False)
+	cli_parser.add_argument("-i", "--interactive",   dest="interactive_flag",   action="store_true", default=False)
 	cli_parser.add_argument("-u", "--skip-unknown",  dest="skip_unknown_flag",  action="store_true", default=False)
 	cli_parser.add_argument("-p", "--show-passed",   dest="show_passed_flag",   action="store_true", default=False)
 	cli_parser.add_argument("-d", "--show-diff",     dest="show_diff_flag",     action="store_true", default=False)
