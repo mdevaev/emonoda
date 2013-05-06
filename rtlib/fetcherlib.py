@@ -47,6 +47,12 @@ class AbstractFetcher(object) :
 	def plugin(cls) :
 		raise NotImplementedError
 
+	@classmethod
+	def version(cls) :
+		raise NotImplementedError
+
+	###
+
 	def match(self, torrent) :
 		raise NotImplementedError
 

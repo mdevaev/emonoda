@@ -30,6 +30,7 @@ import re
 
 ##### Public constants #####
 FETCHER_NAME = "nnm-club"
+FETCHER_VERSION = 0
 
 NNMCLUB_DOMAIN = "nnm-club.ru"
 NNMCLUB_LOGIN_URL = "http://%s/forum/login.php" % (NNMCLUB_DOMAIN)
@@ -59,6 +60,12 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	@classmethod
 	def plugin(cls) :
 		return FETCHER_NAME
+
+	@classmethod
+	def version(cls) :
+		return FETCHER_VERSION
+
+	###
 
 	def match(self, torrent) :
 		return ( not self.__comment_regexp.match(torrent.comment()) is None )
