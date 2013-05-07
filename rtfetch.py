@@ -158,19 +158,20 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 ##### Main #####
 def main() :
 	cli_parser = argparse.ArgumentParser(description="Update rtorrent files from popular trackers")
-	cli_parser.add_argument("-c", "--config",        dest="config_file_path",   action="store",      required=True, metavar="<file>")
-	cli_parser.add_argument("-s", "--source-dir",    dest="src_dir_path",       action="store",      default=".",   metavar="<dir>")
-	cli_parser.add_argument("-b", "--backup-dir",    dest="backup_dir_path",    action="store",      default=None,  metavar="<dir>")
-	cli_parser.add_argument("-f", "--filter",        dest="names_filter",       action="store",      default=None,  metavar="<substring>")
-	cli_parser.add_argument("-o", "--only-fetchers", dest="only_fetchers_list", nargs="+",           default=fetchers.FETCHERS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument("-t", "--timeout",       dest="socket_timeout",     action="store",      default=5, type=int, metavar="<seconds>")
-	cli_parser.add_argument("-i", "--interactive",   dest="interactive_flag",   action="store_true", default=False)
-	cli_parser.add_argument("-u", "--skip-unknown",  dest="skip_unknown_flag",  action="store_true", default=False)
-	cli_parser.add_argument("-p", "--show-passed",   dest="show_passed_flag",   action="store_true", default=False)
-	cli_parser.add_argument("-d", "--show-diff",     dest="show_diff_flag",     action="store_true", default=False)
-	cli_parser.add_argument(      "--client",        dest="client_name",        action="store",      default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument(      "--client-url",    dest="client_url",         action="store",      default=None, metavar="<url>")
-	cli_parser.add_argument(      "--save-customs",  dest="save_customs_list",  nargs="+",           default=None, metavar="<keys>")
+	cli_parser.add_argument("-c", "--config",         dest="config_file_path",    action="store",      required=True, metavar="<file>")
+	cli_parser.add_argument("-s", "--source-dir",     dest="src_dir_path",        action="store",      default=".",   metavar="<dir>")
+	cli_parser.add_argument("-b", "--backup-dir",     dest="backup_dir_path",     action="store",      default=None,  metavar="<dir>")
+	cli_parser.add_argument("-f", "--filter",         dest="names_filter",        action="store",      default=None,  metavar="<substring>")
+	cli_parser.add_argument("-o", "--only-fetchers",  dest="only_fetchers_list",  nargs="+",           default=fetchers.FETCHERS_MAP.keys(), metavar="<plugin>")
+	cli_parser.add_argument("-t", "--timeout",        dest="socket_timeout",      action="store",      default=5, type=int, metavar="<seconds>")
+	cli_parser.add_argument("-i", "--interactive",    dest="interactive_flag",    action="store_true", default=False)
+	cli_parser.add_argument("-u", "--skip-unknown",   dest="skip_unknown_flag",   action="store_true", default=False)
+	cli_parser.add_argument("-p", "--show-passed",    dest="show_passed_flag",    action="store_true", default=False)
+	cli_parser.add_argument("-d", "--show-diff",      dest="show_diff_flag",      action="store_true", default=False)
+	cli_parser.add_argument("-k", "--check-versions", dest="check_versions_flag", action="store_true", default=False)
+	cli_parser.add_argument(      "--client",         dest="client_name",         action="store",      default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
+	cli_parser.add_argument(      "--client-url",     dest="client_url",          action="store",      default=None, metavar="<url>")
+	cli_parser.add_argument(      "--save-customs",   dest="save_customs_list",   nargs="+",           default=None, metavar="<keys>")
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
@@ -193,6 +194,9 @@ def main() :
 
 	if len(fetchers_list) == 0 :
 		print >> sys.stderr, "No available fetchers in config"
+		sys.exit(1)
+
+	if cli_options.check_versions_flag and not fetcherlib.checkVersions(fetchers_list) :
 		sys.exit(1)
 
 	client = None
