@@ -23,6 +23,7 @@ setup(
 	scripts=[
 		"rtfetch.py",
 		"rtquery.py",
+		"rtload.py",
 	],
 	classifiers=[
 		"Topic :: Software Development :: Libraries :: Python Modules",

@@ -36,5 +36,6 @@ build() {
 	python2 setup.py install --root="$pkgdir" --prefix=/usr
 	mv $pkgdir/usr/bin/rtfetch.py $pkgdir/usr/bin/rtfetch
 	mv $pkgdir/usr/bin/rtquery.py $pkgdir/usr/bin/rtquery
+	mv $pkgdir/usr/bin/rtload.py $pkgdir/usr/bin/rtload
 }
 
