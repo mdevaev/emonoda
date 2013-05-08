@@ -60,7 +60,7 @@ class AbstractClient(object) :
 	def removeTorrent(self, torrent_hash) :
 		raise NotImplementedError
 
-	def loadTorrent(self, torrent) :
+	def loadTorrent(self, torrent, prefix = None) :
 		raise NotImplementedError
 
 	def hashs(self) :
@@ -70,17 +70,21 @@ class AbstractClient(object) :
 	def torrentPath(self, torrent_hash) :
 		raise NotImplementedError
 
+	@hashOrTorrent
+	def dataPrefix(self, torrent_hash) :
+		raise NotImplementedError
+
 	###
 
 	def customKeys(self) :
 		raise NotImplementedError
 
 	@hashOrTorrent
-	def setCustom(self, torrent_hash, key, data) :
+	def setCustoms(self, torrent_hash, customs_dict) :
 		raise NotImplementedError
 
 	@hashOrTorrent
-	def custom(self, torrent_hash, key) :
+	def customs(self, torrent_hash, keys_list) :
 		raise NotImplementedError
 
 	###

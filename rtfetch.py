@@ -70,15 +70,15 @@ def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list) 
 		shutil.copyfile(torrent.path(), backup_file_path)
 
 	if not client is None :
+		customs_dict = client.customs(torrent, save_customs_list)
+		prefix = client.dataPrefix(torrent)
 		client.removeTorrent(torrent)
-		customs_dict = dict([ (key, client.custom(torrent, key)) for key in save_customs_list ])
 
 	replaceTorrent(torrent, new_file_path)
 
 	if not client is None :
-		client.loadTorrent(torrent)
-		for (key, data) in customs_dict.iteritems() :
-			client.setCustom(torrent, key, data)
+		client.loadTorrent(torrent, prefix)
+		client.setCustoms(torrent, customs_dict)
 
 	return tfile.diff(old_torrent, torrent)
 

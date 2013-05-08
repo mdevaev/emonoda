@@ -26,6 +26,7 @@ import rtlib.tools.coding # pylint: disable=W0611
 
 import os
 import xmlrpclib
+import time
 
 
 ##### Public constants #####
@@ -33,6 +34,8 @@ CLIENT_NAME = "rtorrent"
 DEFAULT_URL = "http://localhost/RPC2"
 
 XMLRPC_SIZE_LIMIT = 67108863
+LOAD_RETRIES = 10
+LOAD_RETRIES_SLEEP = 1
 
 
 ##### Public classes #####
@@ -54,12 +57,39 @@ class Client(clientlib.AbstractClient) :
 	def plugin(cls) :
 		return CLIENT_NAME
 
+	###
+
 	@clientlib.hashOrTorrent
 	def removeTorrent(self, torrent_hash) :
 		self.__server.d.erase(torrent_hash)
 
-	def loadTorrent(self, torrent) :
-		self.__server.load_start(torrent.path())
+	def loadTorrent(self, torrent, prefix = None) :
+		torrent_path = torrent.path()
+		torrent_hash = torrent.hash()
+
+		assert os.access(torrent_path, os.F_OK), "Torrent file does not exists"
+		if not prefix is None :
+			assert os.access("%s%s." % (prefix, os.path.sep), os.F_OK), "Invalid prefix"
+
+		# XXX: https://github.com/rakshasa/rtorrent/issues/22
+		# All load_* calls re asynchronous, so we need to wait until the load of torrent files is complete.
+		self.__server.load(torrent_path)
+		retries = LOAD_RETRIES
+		while True :
+			try :
+				self.__server.d.get_hash(torrent_hash)
+				break
+			except xmlrpclib.Fault, err :
+				if err.faultCode != -501 :
+					raise
+				if retries == 0 :
+					raise RuntimeError("Timed torrent uploads after %d seconds" % (LOAD_RETRIES * LOAD_RETRIES_SLEEP))
+				retries -= 1
+				time.sleep(LOAD_RETRIES_SLEEP)
+
+		if not prefix is None :
+			self.__server.d.set_directory(torrent_hash, prefix)
+		self.__server.d.start(torrent_hash)
 
 	def hashs(self) :
 		return self.__server.download_list()
@@ -68,20 +98,29 @@ class Client(clientlib.AbstractClient) :
 	def torrentPath(self, torrent_hash) :
 		return self.__server.d.get_loaded_file(torrent_hash)
 
+	@clientlib.hashOrTorrent
+	def dataPrefix(self, torrent_hash) :
+		return self.__server.d.get_directory(torrent_hash)
+
 	###
 
 	def customKeys(self) :
 		return ("1", "2", "3", "4", "5")
 
 	@clientlib.hashOrTorrent
-	def setCustom(self, torrent_hash, key, data) :
-		method = getattr(self.__server.d, "set_custom" + key)
-		method(torrent_hash, data)
+	def setCustoms(self, torrent_hash, customs_dict) :
+		multicall = xmlrpclib.MultiCall(self.__server)
+		for (key, value) in customs_dict.iteritems() :
+			getattr(multicall.d, "set_custom" + key)(torrent_hash, value)
+		multicall()
 
 	@clientlib.hashOrTorrent
-	def custom(self, torrent_hash, key) :
-		method = getattr(self.__server.d, "get_custom" + key)
-		return method(torrent_hash)
+	def customs(self, torrent_hash, keys_list) :
+		multicall = xmlrpclib.MultiCall(self.__server)
+		for key in keys_list :
+			getattr(multicall.d, "get_custom" + key)(torrent_hash)
+		results_list = list(multicall())
+		return dict([ (keys_list[index], results_list[index]) for index in xrange(len(keys_list)) ])
 
 	###
 
