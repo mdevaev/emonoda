@@ -74,6 +74,9 @@ class AbstractClient(object) :
 	def dataPrefix(self, torrent_hash) :
 		raise NotImplementedError
 
+	def defaultDataPrefix(self) :
+		raise NotImplementedError
+
 	###
 
 	def customKeys(self) :

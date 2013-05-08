@@ -102,6 +102,9 @@ class Client(clientlib.AbstractClient) :
 	def dataPrefix(self, torrent_hash) :
 		return self.__server.d.get_directory(torrent_hash)
 
+	def defaultDataPrefix(self) :
+		return self.__server.get_directory()
+
 	###
 
 	def customKeys(self) :
