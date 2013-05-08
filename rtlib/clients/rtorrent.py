@@ -92,7 +92,7 @@ class Client(clientlib.AbstractClient) :
 		self.__server.d.start(torrent_hash)
 
 	def hashs(self) :
-		return self.__server.download_list()
+		return map(str.lower, self.__server.download_list())
 
 	@clientlib.hashOrTorrent
 	def torrentPath(self, torrent_hash) :
