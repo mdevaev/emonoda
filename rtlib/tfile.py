@@ -126,3 +126,12 @@ class Torrent(object) :
 					files_set.add(os.path.join(base, os.path.sep.join(file_dict["path"][0:index + 1])))
 		return files_set
 
+	def size(self) :
+		if self.isSingleFile() :
+			return self.__bencode_dict["info"]["length"]
+		else :
+			size = 0
+			for file_dict in self.__bencode_dict["info"]["files"] :
+				size += file_dict["length"]
+			return size
+
