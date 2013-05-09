@@ -37,5 +37,6 @@ build() {
 	mv $pkgdir/usr/bin/rtfetch.py $pkgdir/usr/bin/rtfetch
 	mv $pkgdir/usr/bin/rtquery.py $pkgdir/usr/bin/rtquery
 	mv $pkgdir/usr/bin/rtload.py $pkgdir/usr/bin/rtload
+	mv $pkgdir/usr/bin/rtfile.py $pkgdir/usr/bin/rtfile
 }
 

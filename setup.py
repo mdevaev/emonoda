@@ -24,6 +24,7 @@ setup(
 		"rtfetch.py",
 		"rtquery.py",
 		"rtload.py",
+		"rtfile.py",
 	],
 	classifiers=[
 		"Topic :: Software Development :: Libraries :: Python Modules",
