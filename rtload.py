@@ -35,7 +35,7 @@ def makeDirsTree(path, last_mode) :
 	try :
 		os.makedirs(path)
 	except OSError, err :
-		if err.code != errno.EEXIST :
+		if err.errno != errno.EEXIST :
 			raise
 	os.chmod(path, last_mode)
 
