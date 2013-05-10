@@ -82,20 +82,29 @@ def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list) 
 
 	return tfile.diff(old_torrent, torrent)
 
+def torrents(src_dir_path, names_filter) :
+	torrents_list = tfile.torrents(src_dir_path).items()
+	if not names_filter is None :
+		torrents_list = [ item for item in torrents_list if names_filter in item[0] ]
+	return sorted(torrents_list, key=operator.itemgetter(0))
+
+def printDiff(added_set, removed_set) :
+	for item in sorted(removed_set) :
+		print "\t- %s" % (item)
+	for item in sorted(added_set) :
+		print "\t+ %s" % (item)
+
 
 ###
 def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, show_diff_flag, save_customs_list) :
+	torrents_list = torrents(src_dir_path, names_filter)
+	all_torrents = len(torrents_list)
+
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
 	error_count = 0
 
-	torrents_list = tfile.torrents(src_dir_path).items()
-	if not names_filter is None :
-		torrents_list = filter(lambda item : names_filter in item[0], torrents_list)
-	torrents_list = sorted(torrents_list, key=operator.itemgetter(0))
-
-	torrents = len(torrents_list)
 	count = 0
 	for (torrent_file_name, torrent) in torrents_list :
 		count += 1
@@ -107,7 +116,7 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 			unknown_flag = False
 
 			status_line = "[%%s] %s %s %s --- %s" % (
-				tools.cli.progress(count, torrents),
+				tools.cli.progress(count, all_torrents),
 				fetcher.plugin(),
 				torrent_file_name,
 				torrent.comment(),
@@ -121,13 +130,10 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 					passed_count += 1
 					continue
 
-				(added_set, removed_set) = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list)
+				diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list)
 				tools.cli.oneLine(status_line % ("+"), False)
 				if show_diff_flag :
-					for item in sorted(removed_set) :
-						print "\t- %s" % (item)
-					for item in sorted(added_set) :
-						print "\t+ %s" % (item)
+					printDiff(*diff_tuple)
 				updated_count += 1
 
 			except fetcherlib.CommonFetcherError, err :
