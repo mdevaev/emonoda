@@ -128,7 +128,7 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 				if not fetcher.torrentChanged(torrent) :
 					tools.cli.oneLine(status_line % (" "), not show_passed_flag)
 					passed_count += 1
-					continue
+					break
 
 				diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list)
 				tools.cli.oneLine(status_line % ("+"), False)
