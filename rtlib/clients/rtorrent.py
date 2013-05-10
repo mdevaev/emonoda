@@ -45,7 +45,7 @@ class Client(clientlib.AbstractClient) :
 	def __init__(self, url = DEFAULT_URL) :
 		if url is None :
 			url = DEFAULT_URL
-		clientlib.AbstractClient.__init__(self, url = DEFAULT_URL)
+		clientlib.AbstractClient.__init__(self, url)
 
 		self.__server = xmlrpclib.ServerProxy(url)
 		self.__server.set_xmlrpc_size_limit(XMLRPC_SIZE_LIMIT)

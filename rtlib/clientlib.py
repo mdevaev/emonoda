@@ -44,7 +44,6 @@ def hashOrTorrent(method) :
 ##### Public classes #####
 class AbstractClient(object) :
 	def __init__(self, url) :
-		self.__url = url
 		object.__init__(self)
 
 
