@@ -45,7 +45,7 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 	hashs_list = client.hashs()
 	for torrent in torrents_list :
 		if torrent.hash() in hashs_list :
-			print >> sys.stderr, "%s: is already loaded" % (torrent.path())
+			print >> sys.stderr, "%s: already loaded" % (torrent.path())
 			return -1
 
 	if data_dir_path is None :
@@ -54,6 +54,9 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 	for torrent in torrents_list :
 		torrent_hash = torrent.hash()
 		data_dir_path = os.path.join(data_dir_path, torrent_hash[0], torrent_hash)
+		if os.path.exists(data_dir_path) :
+			print >> sys.stderr, "%s: data directory already exists" % (data_dir_path)
+			return -1
 		makeDirsTree(data_dir_path, mkdir_mode)
 
 		if not link_to_path is None :
@@ -62,6 +65,9 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 				link_to_path = os.path.join(link_to_path, torrent.name())
 			else :
 				mkdir_path = os.path.dirname(link_to_path)
+			if os.path.exists(link_to_path) :
+				print >> sys.stderr, "%s: link target already exists" % (link_to_path)
+				return -1
 			makeDirsTree(mkdir_path, mkdir_mode)
 
 			fake_path = os.path.join(data_dir_path, torrent.name())
