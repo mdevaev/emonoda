@@ -150,7 +150,7 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 
 		if unknown_flag :
 			tools.cli.oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, torrent.comment()), False)
-			unknown_count += 1
+		unknown_count += 1
 
 	tools.cli.oneLine("", False)
 	print DELIMITER
