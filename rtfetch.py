@@ -96,7 +96,17 @@ def printDiff(added_set, removed_set) :
 
 
 ###
-def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, skip_unknown_flag, show_passed_flag, show_diff_flag, save_customs_list) :
+def update(fetchers_list, client,
+		src_dir_path,
+		backup_dir_path,
+		names_filter,
+		skip_unknown_flag,
+		show_failed_login_flag,
+		show_passed_flag,
+		show_diff_flag,
+		save_customs_list,
+	) :
+
 	torrents_list = torrents(src_dir_path, names_filter)
 	all_torrents = len(torrents_list)
 
@@ -123,7 +133,9 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 			)
 			try :
 				if not fetcher.loggedIn() :
-					fetcher.login()
+					print status_line % ("?")
+					error_count += 1
+					break
 
 				if not fetcher.torrentChanged(torrent) :
 					tools.cli.oneLine(status_line % (" "), not show_passed_flag)
@@ -161,6 +173,30 @@ def update(fetchers_list, client, src_dir_path, backup_dir_path, names_filter, s
 	print
 
 
+###
+def initFetchers(config_file_path, interactive_flag, only_fetchers_list, show_failed_login_flag) :
+	fetchers_list = []
+	config_parser = ConfigParser.ConfigParser()
+	config_parser.read(config_file_path)
+	enabled_fetchers_set = set(fetchers.FETCHERS_MAP.keys()).intersection(only_fetchers_list)
+	for fetcher_name in enabled_fetchers_set :
+		fetcher_class = fetchers.FETCHERS_MAP[fetcher_name]
+		if config_parser.has_section(fetcher_name) :
+			fetcher = fetcher_class(
+				config_parser.get(fetcher_name, "login"),
+				config_parser.get(fetcher_name, "passwd"),
+				interactive_flag,
+			)
+			try :
+				fetcher.login()
+			except fetcherlib.LoginError, err :
+				if not show_failed_login_flag :
+					raise
+				print ":: %s: %s(%s)" % (fetcher_name, type(err).__name__, str(err))
+			fetchers_list.append(fetcher)
+	return fetchers_list
+
+
 ##### Main #####
 def main() :
 	cli_parser = argparse.ArgumentParser(description="Update rtorrent files from popular trackers")
@@ -172,6 +208,7 @@ def main() :
 	cli_parser.add_argument("-t", "--timeout",        dest="socket_timeout",      action="store",      default=5, type=int, metavar="<seconds>")
 	cli_parser.add_argument("-i", "--interactive",    dest="interactive_flag",    action="store_true", default=False)
 	cli_parser.add_argument("-u", "--skip-unknown",   dest="skip_unknown_flag",   action="store_true", default=False)
+	cli_parser.add_argument("-l", "--show-failed-login", dest="show_failed_login_flag", action="store_true", default=False)
 	cli_parser.add_argument("-p", "--show-passed",    dest="show_passed_flag",    action="store_true", default=False)
 	cli_parser.add_argument("-d", "--show-diff",      dest="show_diff_flag",      action="store_true", default=False)
 	cli_parser.add_argument("-k", "--check-versions", dest="check_versions_flag", action="store_true", default=False)
@@ -182,25 +219,17 @@ def main() :
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
 
-	enabled_fetchers_set = set(fetchers.FETCHERS_MAP.keys()).intersection(cli_options.only_fetchers_list)
-	fetchers_list = []
-	config_parser = ConfigParser.ConfigParser()
-	config_parser.read(cli_options.config_file_path)
-	for fetcher_name in enabled_fetchers_set :
-		fetcher_class = fetchers.FETCHERS_MAP[fetcher_name]
-		if config_parser.has_section(fetcher_name) :
-			fetchers_list.append(fetcher_class(
-					config_parser.get(fetcher_name, "login"),
-					config_parser.get(fetcher_name, "passwd"),
-					cli_options.interactive_flag,
-				))
-
-	if len(enabled_fetchers_set) != len(fetchers.FETCHERS_MAP) :
-		cli_options.skip_unknown_flag = True
-
+	fetchers_list = initFetchers(
+		cli_options.config_file_path,
+		cli_options.interactive_flag,
+		cli_options.only_fetchers_list,
+		cli_options.show_failed_login_flag,
+	)
 	if len(fetchers_list) == 0 :
 		print >> sys.stderr, "No available fetchers in config"
 		sys.exit(1)
+	if len(fetchers_list) != len(fetchers.FETCHERS_MAP) :
+		cli_options.skip_unknown_flag = True
 
 	if cli_options.check_versions_flag and not fetcherlib.checkVersions(fetchers_list) :
 		sys.exit(1)
@@ -210,13 +239,13 @@ def main() :
 		client_class = clients.CLIENTS_MAP[cli_options.client_name]
 		client = client_class(cli_options.client_url)
 
-	if not client is None and not cli_options.save_customs_list is None :
-		cli_options.save_customs_list = list(set(cli_options.save_customs_list))
-		valid_keys_list = client.customKeys()
-		for key in cli_options.save_customs_list :
-			if not key in valid_keys_list :
-				print >> sys.stderr, "Invalid custom key: %s" % (key)
-				sys.exit(1)
+		if not cli_options.save_customs_list is None :
+			cli_options.save_customs_list = list(set(cli_options.save_customs_list))
+			valid_keys_list = client.customKeys()
+			for key in cli_options.save_customs_list :
+				if not key in valid_keys_list :
+					print >> sys.stderr, "Invalid custom key: %s" % (key)
+					sys.exit(1)
 
 
 	update(fetchers_list, client,
@@ -224,6 +253,7 @@ def main() :
 		cli_options.backup_dir_path,
 		cli_options.names_filter,
 		cli_options.skip_unknown_flag,
+		cli_options.show_failed_login_flag,
 		cli_options.show_passed_flag,
 		cli_options.show_diff_flag,
 		cli_options.save_customs_list,
