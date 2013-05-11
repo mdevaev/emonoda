@@ -152,8 +152,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			print ":: Enter the capthca [ %s ]:" % (cap_static_match.group(1)),
 			post_dict[cap_code_match.group(1)] = raw_input()
 			post_dict["cap_sid"] = cap_sid_match.group(1)
-			web_file = self.readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
-			self.assertLogin(self.__cap_static_regexp.search(web_file.read()) is None, "Invalid captcha")
+			data = self.readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
+			self.assertLogin(self.__cap_static_regexp.search(data) is None, "Invalid captcha or password")
 
 	def fetchHash(self, torrent) :
 		comment_match = self.__comment_regexp.match(torrent.comment())
