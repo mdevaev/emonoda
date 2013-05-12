@@ -100,7 +100,13 @@ class Client(clientlib.AbstractClient) :
 
 	@clientlib.hashOrTorrent
 	def dataPrefix(self, torrent_hash) :
-		return self.__server.d.get_directory(torrent_hash)
+		multicall = xmlrpclib.MultiCall(self.__server)
+		multicall.d.get_directory(torrent_hash)
+		multicall.d.is_multi_file(torrent_hash)
+		(path, is_multi_file) = multicall()
+		if is_multi_file :
+			path = os.path.dirname(os.path.normpath(path))
+		return path
 
 	def defaultDataPrefix(self) :
 		return self.__server.get_directory()
