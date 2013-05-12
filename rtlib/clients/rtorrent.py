@@ -91,7 +91,7 @@ class Client(clientlib.AbstractClient) :
 			self.__server.d.set_directory(torrent_hash, prefix)
 		self.__server.d.start(torrent_hash)
 
-	def hashs(self) :
+	def hashes(self) :
 		return map(str.lower, self.__server.download_list())
 
 	@clientlib.hashOrTorrent

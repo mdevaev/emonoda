@@ -25,7 +25,7 @@ import tfile
 ##### Public methods #####
 def indexed(client, system_path_flag = False) :
 	files_dict = {}
-	for torrent_hash in client.hashs() :
+	for torrent_hash in client.hashes() :
 		for path in client.files(torrent_hash, system_path_flag) :
 			files_dict.setdefault(path, set())
 			files_dict[path].add(torrent_hash)
@@ -62,7 +62,7 @@ class AbstractClient(object) :
 	def loadTorrent(self, torrent, prefix = None) :
 		raise NotImplementedError
 
-	def hashs(self) :
+	def hashes(self) :
 		raise NotImplementedError
 
 	@hashOrTorrent

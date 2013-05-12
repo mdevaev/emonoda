@@ -42,9 +42,9 @@ def makeDirsTree(path, last_mode) :
 ###
 def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, customs_dict) :
 	torrents_list = [ tfile.Torrent(os.path.abspath(item)) for item in torrents_list ]
-	hashs_list = client.hashs()
+	hashes_list = client.hashes()
 	for torrent in torrents_list :
-		if torrent.hash() in hashs_list :
+		if torrent.hash() in hashes_list :
 			print >> sys.stderr, "%s: already loaded" % (torrent.path())
 			return -1
 

@@ -34,7 +34,7 @@ import argparse
 ##### Public methods #####
 def printMeta(client, torrents_list) :
 	torrents_list = [ tfile.Torrent(item) for item in torrents_list ]
-	hashs_list = ( client.hashs() if not client is None else None )
+	hashes_list = ( client.hashes() if not client is None else None )
 
 	for torrent in torrents_list :
 		print "Torrent:     ", torrent.path()
@@ -43,7 +43,7 @@ def printMeta(client, torrents_list) :
 		print "Comment:     ", torrent.comment()
 		print "Size:        ", tools.fmt.formatSize(torrent.size())
 		if not client is None :
-			print "Client path: ", ( client.dataPrefix(torrent) if torrent.hash() in hashs_list else "" )
+			print "Client path: ", ( client.dataPrefix(torrent) if torrent.hash() in hashes_list else "" )
 		print "Provides:"
 		for file_path in sorted(torrent.files()) :
 			print "\t" + file_path
