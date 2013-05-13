@@ -39,14 +39,35 @@ def makeDirsTree(path, last_mode) :
 			raise
 	os.chmod(path, last_mode)
 
+def linkData(torrent, data_dir_path, link_to_path, mkdir_mode) :
+	mkdir_path = link_to_path = os.path.abspath(link_to_path)
+	if torrent.isSingleFile() :
+		link_to_path = os.path.join(link_to_path, torrent.name())
+	else :
+		mkdir_path = os.path.dirname(link_to_path)
+
+	if os.path.exists(link_to_path) :
+		raise RuntimeError("%s: link target already exists" % (link_to_path))
+
+	makeDirsTree(mkdir_path, mkdir_mode)
+
+	fake_path = os.path.join(data_dir_path, torrent.name())
+	unlink_flag = False
+	if not os.path.exists(fake_path) :
+		open(fake_path, "w").close()
+		unlink_flag = True
+	os.symlink(fake_path, link_to_path)
+	if unlink_flag :
+		os.unlink(fake_path)
+
+
 ###
 def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, customs_dict) :
 	torrents_list = [ tfile.Torrent(os.path.abspath(item)) for item in torrents_list ]
 	hashes_list = client.hashes()
 	for torrent in torrents_list :
 		if torrent.hash() in hashes_list :
-			print >> sys.stderr, "%s: already loaded" % (torrent.path())
-			return -1
+			raise RuntimeError("%s: already loaded" % (torrent.path()))
 
 	if data_dir_path is None :
 		data_dir_path = client.defaultDataPrefix()
@@ -54,31 +75,13 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 	for torrent in torrents_list :
 		torrent_hash = torrent.hash()
 		data_dir_path = os.path.join(data_dir_path, torrent_hash[0], torrent_hash)
-		if os.path.exists(data_dir_path) :
-			print >> sys.stderr, "%s: data directory already exists" % (data_dir_path)
-			return -1
 		makeDirsTree(data_dir_path, mkdir_mode)
 
 		if not link_to_path is None :
-			mkdir_path = link_to_path = os.path.abspath(link_to_path)
-			if torrent.isSingleFile() :
-				link_to_path = os.path.join(link_to_path, torrent.name())
-			else :
-				mkdir_path = os.path.dirname(link_to_path)
-			if os.path.exists(link_to_path) :
-				print >> sys.stderr, "%s: link target already exists" % (link_to_path)
-				return -1
-			makeDirsTree(mkdir_path, mkdir_mode)
-
-			fake_path = os.path.join(data_dir_path, torrent.name())
-			open(fake_path, "w").close()
-			os.symlink(fake_path, link_to_path)
-			os.unlink(fake_path)
+			linkData(torrent, data_dir_path, link_to_path, mkdir_mode)
 
 		client.loadTorrent(torrent, data_dir_path)
 		client.setCustoms(torrent, customs_dict)
-
-	return 0
 
 
 ##### Main #####
@@ -116,13 +119,13 @@ def main() :
 				sys.exit(1)
 			customs_dict[key] = value
 
-	sys.exit(abs(loadTorrent(client,
-			cli_options.torrents_list,
-			cli_options.data_dir_path,
-			cli_options.link_to_path,
-			cli_options.mkdir_mode,
-			customs_dict,
-		)))
+	loadTorrent(client,
+		cli_options.torrents_list,
+		cli_options.data_dir_path,
+		cli_options.link_to_path,
+		cli_options.mkdir_mode,
+		customs_dict,
+	)
 
 
 ###
