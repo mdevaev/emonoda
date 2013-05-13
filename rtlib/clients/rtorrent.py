@@ -118,6 +118,7 @@ class Client(clientlib.AbstractClient) :
 
 	@clientlib.hashOrTorrent
 	def setCustoms(self, torrent_hash, customs_dict) :
+		assert len(customs_dict) != 0, "Empty customs list"
 		multicall = xmlrpclib.MultiCall(self.__server)
 		for (key, value) in customs_dict.iteritems() :
 			getattr(multicall.d, "set_custom" + key)(torrent_hash, value)
@@ -125,6 +126,7 @@ class Client(clientlib.AbstractClient) :
 
 	@clientlib.hashOrTorrent
 	def customs(self, torrent_hash, keys_list) :
+		assert len(keys_list) != 0, "Empty customs list"
 		multicall = xmlrpclib.MultiCall(self.__server)
 		for key in keys_list :
 			getattr(multicall.d, "get_custom" + key)(torrent_hash)
