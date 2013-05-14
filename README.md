@@ -9,4 +9,5 @@ Set of tools to organize and manage your torrents.
 * `rtfile` -- Show torrents metadata;
 * ... And some client-specific hooks.
 
-See wiki for details: https://github.com/mdevaev/rtfetch/wiki
+See wiki for details: https://github.com/mdevaev/rtfetch/wiki  
+Actual builds for Arch Linux are available here: https://aur.archlinux.org/packages/rtfetch/
