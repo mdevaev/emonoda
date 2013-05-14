@@ -38,6 +38,18 @@ LOAD_RETRIES = 10
 LOAD_RETRIES_SLEEP = 1
 
 
+##### Private methods #####
+def catchUnknownTorrentFault(method) :
+	def wrap(self, *args_list, **kwargs_dict) :
+		try :
+			return method(self, *args_list, **kwargs_dict)
+		except xmlrpclib.Fault, err :
+			if err.faultCode == -501 :
+				raise clientlib.NoSuchTorrentError("Unknown torrent hash")
+			raise
+	return wrap
+
+
 ##### Public classes #####
 class Client(clientlib.AbstractClient) :
 	# XXX: API description: http://code.google.com/p/gi-torrent/wiki/rTorrent_XMLRPC_reference
@@ -60,6 +72,7 @@ class Client(clientlib.AbstractClient) :
 	###
 
 	@clientlib.hashOrTorrent
+	@catchUnknownTorrentFault
 	def removeTorrent(self, torrent_hash) :
 		self.__server.d.erase(torrent_hash)
 
@@ -95,10 +108,12 @@ class Client(clientlib.AbstractClient) :
 		return map(str.lower, self.__server.download_list())
 
 	@clientlib.hashOrTorrent
+	@catchUnknownTorrentFault
 	def torrentPath(self, torrent_hash) :
 		return self.__server.d.get_loaded_file(torrent_hash)
 
 	@clientlib.hashOrTorrent
+	@catchUnknownTorrentFault
 	def dataPrefix(self, torrent_hash) :
 		multicall = xmlrpclib.MultiCall(self.__server)
 		multicall.d.get_directory(torrent_hash)
@@ -117,6 +132,7 @@ class Client(clientlib.AbstractClient) :
 		return ("1", "2", "3", "4", "5")
 
 	@clientlib.hashOrTorrent
+	@catchUnknownTorrentFault
 	def setCustoms(self, torrent_hash, customs_dict) :
 		assert len(customs_dict) != 0, "Empty customs list"
 		multicall = xmlrpclib.MultiCall(self.__server)
@@ -125,6 +141,7 @@ class Client(clientlib.AbstractClient) :
 		multicall()
 
 	@clientlib.hashOrTorrent
+	@catchUnknownTorrentFault
 	def customs(self, torrent_hash, keys_list) :
 		assert len(keys_list) != 0, "Empty customs list"
 		multicall = xmlrpclib.MultiCall(self.__server)
@@ -136,18 +153,22 @@ class Client(clientlib.AbstractClient) :
 	###
 
 	@clientlib.hashOrTorrent
+	@catchUnknownTorrentFault
 	def fullPath(self, torrent_hash) :
 		return self.__server.d.get_base_path(torrent_hash)
 
 	@clientlib.hashOrTorrent
+	@catchUnknownTorrentFault
 	def name(self, torrent_hash) :
 		return self.__server.d.get_name(torrent_hash)
 
 	@clientlib.hashOrTorrent
+	@catchUnknownTorrentFault
 	def isSingleFile(self, torrent_hash) :
 		return not self.__server.d.is_multi_file(torrent_hash)
 
 	@clientlib.hashOrTorrent
+	@catchUnknownTorrentFault
 	def files(self, torrent_hash, system_path_flag = False) :
 		method = ( self.__server.d.get_base_path if system_path_flag else self.__server.d.get_base_filename )
 		base = tools.coding.utf8(method(torrent_hash))
