@@ -121,7 +121,7 @@ def update(fetchers_list, client,
 	for (torrent_file_name, torrent) in torrents_list :
 		count += 1
 
-		unknown_flag = ( not skip_unknown_flag )
+		unknown_flag = True
 		for fetcher in fetchers_list :
 			if not fetcher.match(torrent) :
 				continue
@@ -162,9 +162,9 @@ def update(fetchers_list, client,
 
 			break
 
-		if unknown_flag :
+		unknown_count += int(unknown_flag)
+		if not skip_unknown_flag :
 			tools.cli.oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, torrent.comment()), False)
-		unknown_count += 1
 
 	tools.cli.oneLine("", False)
 	print DELIMITER
