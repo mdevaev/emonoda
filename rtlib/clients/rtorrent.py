@@ -170,21 +170,23 @@ class Client(clientlib.AbstractClient) :
 	@clientlib.hashOrTorrent
 	@catchUnknownTorrentFault
 	def files(self, torrent_hash, system_path_flag = False) :
-		method = ( self.__server.d.get_base_path if system_path_flag else self.__server.d.get_base_filename )
-		base = tools.coding.utf8(method(torrent_hash))
+		multicall = xmlrpclib.MultiCall(self.__server)
+		multicall.d.get_base_path(torrent_hash)
+		multicall.d.get_base_filename(torrent_hash)
+		multicall.d.is_multi_file(torrent_hash)
+		multicall.d.get_size_files(torrent_hash)
+		(base_path, base_file_name, is_multi_file, count) = tuple(multicall())
+		base = tools.coding.utf8( base_path if system_path_flag else base_file_name )
 		files_set = set([base])
-		if self.isSingleFile(torrent_hash) :
+		if not is_multi_file :
 			return files_set
 
-		count = self.__server.d.get_size_files(torrent_hash)
 		multicall = xmlrpclib.MultiCall(self.__server)
 		for index in xrange(count) :
 			multicall.f.get_path(torrent_hash, index)
 
-		fetched_list = list(multicall())
-		for count in xrange(len(fetched_list)) :
-			path = tools.coding.utf8(fetched_list[count])
-			path_list = path.split(os.path.sep)
+		for path in multicall() :
+			path_list = tools.coding.utf8(path).split(os.path.sep)
 			for index in xrange(len(path_list)) :
 				files_set.add(os.path.join(base, os.path.sep.join(path_list[0:index+1])))
 		return files_set
