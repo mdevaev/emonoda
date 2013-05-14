@@ -28,7 +28,6 @@ import rtlib.tools.fmt # pylint: disable=W0611
 import rtlib.tools.fs
 
 import sys
-import os
 import socket
 import operator
 import argparse
@@ -98,7 +97,7 @@ def main() :
 			print file_path
 	elif cli_options.print_client_path_flag :
 		assert not client is None, "Required client"
-		print ( client.dataPrefix(torrent) if torrent.hash() in hashes_list else "" )
+		print ( client.dataPrefix(torrent) if torrent.hash() in client.hashes() else "" )
 	else :
 		printPrettyMeta(client, cli_options.torrents_list)
 
