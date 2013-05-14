@@ -172,7 +172,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			"form_token" : hash_form_token_match.group(1),
 		}
 		request = urllib2.Request(RUTRACKER_AJAX_URL, urllib.urlencode(post_dict), headers={
-				"User-Agent" : const.BROWSER_USER_AGENT
+				"User-Agent" : const.BROWSER_USER_AGENT,
 			})
 		response_dict = json.loads(self.readUrlRetry(request))
 		if response_dict.has_key("ih_hex") :
