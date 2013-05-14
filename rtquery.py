@@ -24,6 +24,9 @@ from rtlib import tfile
 from rtlib import clients
 from rtlib import clientlib
 
+from rtlib import tools
+import rtlib.tools.fs # pylint: disable=W0611
+
 import sys
 import os
 import socket
@@ -31,16 +34,6 @@ import argparse
 
 
 ##### Public methods #####
-def onWalkError(exception) :
-	raise exception
-
-def treeList(dir_path) :
-	tree_files_list = []
-	for (root, dirs_list, files_list) in os.walk(dir_path, onerror=onWalkError) :
-		for item in dirs_list + files_list :
-			tree_files_list.append(os.path.join(root, item))
-	return tree_files_list
-
 def formatTorrent(client, torrent) :
 	if not isinstance(torrent, tfile.Torrent) :
 		(path, name) = (client.torrentPath(torrent) or "<Temporary not saved>", client.name(torrent))
@@ -56,7 +49,7 @@ def querySearchLost(client, src_dir_path, data_dir_path) :
 		torrents_tree_set = set(clientlib.indexed(client, True))
 	else :
 		torrents_tree_set = set(tfile.indexed(src_dir_path, data_dir_path).keys())
-	data_tree_set = set(treeList(data_dir_path))
+	data_tree_set = set(tools.fs.treeList(data_dir_path))
 	for file_path in sorted(data_tree_set.difference(torrents_tree_set)) :
 		print file_path
 
