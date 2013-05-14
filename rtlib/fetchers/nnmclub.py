@@ -78,7 +78,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			"username" : self.__user_name,
 			"password" : self.__passwd,
 			"redirect" : "",
-			"login" : "\xc2\xf5\xee\xe4"
+			"login" : "\xc2\xf5\xee\xe4",
 		}
 		data = self.readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict), opener=opener)
 		self.assertLogin("[ %s ]" % (self.__user_name) in data, "Invalid login")
