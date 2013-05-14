@@ -12,3 +12,6 @@ def formatSize(size) :
 	else :
 		return "%d bytes" % (size)
 
+def formatProgress(value, limit) :
+	return (("%%%dd/" % (len(str(limit)))) + "%d") % (value, limit)
+

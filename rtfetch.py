@@ -128,7 +128,7 @@ def update(fetchers_list, client,
 			unknown_flag = False
 
 			status_line = "[%%s] %s %s %s --- %s" % (
-				tools.cli.progress(count, all_torrents),
+				tools.fmt.formatProgress(count, all_torrents),
 				fetcher.plugin(),
 				torrent_file_name,
 				torrent.comment(),
