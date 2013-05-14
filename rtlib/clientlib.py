@@ -22,6 +22,11 @@
 import tfile
 
 
+##### Exceptions #####
+class NoSuchTorrentError(Exception) :
+	pass
+
+
 ##### Public methods #####
 def indexed(client, system_path_flag = False) :
 	files_dict = {}
