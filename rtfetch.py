@@ -27,6 +27,7 @@ from rtlib import clients
 
 from rtlib import tools
 import rtlib.tools.cli # pylint: disable=W0611
+import rtlib.tools.fmt
 
 import sys
 import os
