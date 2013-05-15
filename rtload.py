@@ -65,8 +65,8 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 		data_dir_path = client.defaultDataPrefix()
 
 	for torrent in torrents_list :
-		torrent_hash = torrent.hash()
-		data_dir_path = os.path.join(data_dir_path, torrent_hash[0], torrent_hash)
+		data_dir_name = os.path.basename(torrent.path()) + ".data"
+		data_dir_path = os.path.join(data_dir_path, data_dir_name[0], data_dir_name)
 		makeDirsTree(data_dir_path, mkdir_mode)
 
 		if not link_to_path is None :
@@ -78,7 +78,7 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 
 ##### Main #####
 def main() :
-	cli_parser = argparse.ArgumentParser(description="Add torrent in the data model \"rthash\"")
+	cli_parser = argparse.ArgumentParser(description="Add torrent in the data model \"t.data\"")
 	cli_parser.add_argument("-d", "--data-dir",    dest="data_dir_path",    action="store", default=None, metavar="<path>")
 	cli_parser.add_argument("-l", "--link-to",     dest="link_to_path",     action="store", default=None, metavar="<path>")
 	cli_parser.add_argument("-t", "--timeout",     dest="socket_timeout",   action="store", default=5, type=int, metavar="<seconds>")
