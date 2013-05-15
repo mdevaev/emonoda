@@ -110,18 +110,13 @@ def update(fetchers_list, client,
 		save_customs_list,
 	) :
 
-	torrents_list = torrents(src_dir_path, names_filter)
-	all_torrents = len(torrents_list)
-
 	unknown_count = 0
 	passed_count = 0
 	updated_count = 0
 	error_count = 0
 
-	count = 0
-	for (torrent_file_name, torrent) in torrents_list :
-		count += 1
-
+	torrents_list = torrents(src_dir_path, names_filter)
+	for (count, (torrent_file_name, torrent)) in enumerate(torrents_list) :
 		unknown_flag = True
 		for fetcher in fetchers_list :
 			if not fetcher.match(torrent) :
@@ -129,7 +124,7 @@ def update(fetchers_list, client,
 			unknown_flag = False
 
 			status_line = "[%%s] %s %s %s --- %s" % (
-				tools.fmt.formatProgress(count, all_torrents),
+				tools.fmt.formatProgress(count + 1, len(torrents_list)),
 				fetcher.plugin(),
 				torrent_file_name,
 				torrent.comment(),
