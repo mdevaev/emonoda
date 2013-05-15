@@ -50,15 +50,7 @@ def linkData(torrent, data_dir_path, link_to_path, mkdir_mode) :
 		raise RuntimeError("%s: link target already exists" % (link_to_path))
 
 	makeDirsTree(mkdir_path, mkdir_mode)
-
-	fake_path = os.path.join(data_dir_path, torrent.name())
-	unlink_flag = False
-	if not os.path.exists(fake_path) :
-		open(fake_path, "w").close()
-		unlink_flag = True
-	os.symlink(fake_path, link_to_path)
-	if unlink_flag :
-		os.unlink(fake_path)
+	os.symlink(os.path.join(data_dir_path, torrent.name()), link_to_path)
 
 
 ###
