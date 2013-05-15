@@ -34,10 +34,10 @@ import argparse
 def makeDirsTree(path, last_mode) :
 	try :
 		os.makedirs(path)
+		os.chmod(path, last_mode)
 	except OSError, err :
 		if err.errno != errno.EEXIST :
 			raise
-	os.chmod(path, last_mode)
 
 def linkData(torrent, data_dir_path, link_to_path, mkdir_mode) :
 	mkdir_path = link_to_path = os.path.abspath(link_to_path)
