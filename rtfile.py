@@ -39,23 +39,19 @@ def printFilesDict(files_dict, depth = 0, prefix="\t") :
 		print prefix + "*   " * depth + key
 		printFilesDict(value_dict, depth + 1)
 
-def printPrettyMeta(client, torrents_list) :
-	torrents_list = [ tfile.Torrent(item) for item in torrents_list ]
-	hashes_list = ( client.hashes() if not client is None else None )
-
-	for torrent in torrents_list :
-		print "Torrent:     ", torrent.path()
-		print "Name:        ", torrent.name()
-		print "Hash:        ", torrent.hash()
-		print "Comment:     ", torrent.comment()
-		print "Size:        ", tools.fmt.formatSize(torrent.size())
-		if not client is None :
-			print "Client path: ", ( client.dataPrefix(torrent) if torrent.hash() in hashes_list else "" )
-		if torrent.isSingleFile() :
-			print "Provides:    ", tuple(torrent.files())[0]
-		else :
-			print "Provides:"
-			printFilesDict(tools.fs.treeListToDict(torrent.files()))
+def printPrettyMeta(torrent, client, hashes_list) :
+	print "Torrent:     ", torrent.path()
+	print "Name:        ", torrent.name()
+	print "Hash:        ", torrent.hash()
+	print "Comment:     ", torrent.comment()
+	print "Size:        ", tools.fmt.formatSize(torrent.size())
+	if not client is None :
+		print "Client path: ", ( client.dataPrefix(torrent) if torrent.hash() in hashes_list else "" )
+	if torrent.isSingleFile() :
+		print "Provides:    ", tuple(torrent.files())[0]
+	else :
+		print "Provides:"
+		printFilesDict(tools.fs.treeListToDict(torrent.files()))
 
 
 ##### Main #####
@@ -76,30 +72,35 @@ def main() :
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
 
-	client = None
+	torrents_list = [ tfile.Torrent(item) for item in cli_options.torrents_list ]
+
+	client = hashes_list = None
 	if not cli_options.client_name is None :
 		client_class = clients.CLIENTS_MAP[cli_options.client_name]
 		client = client_class(cli_options.client_url)
+		hashes_list = client.hashes()
 
-	torrent = tfile.Torrent(cli_options.torrents_list[0])
-	if cli_options.print_name_flag :
-		print torrent.name()
-	elif cli_options.print_hash_flag :
-		print torrent.hash()
-	elif cli_options.print_comment_flag :
-		print torrent.comment()
-	elif cli_options.print_size_flag :
-		print torrent.size()
-	elif cli_options.print_size_pretty_flag :
-		print tools.fmt.formatSize(torrent.size())
-	elif cli_options.print_provides_flag :
-		for file_path in sorted(torrent.files()) :
-			print file_path
-	elif cli_options.print_client_path_flag :
-		assert not client is None, "Required client"
-		print ( client.dataPrefix(torrent) if torrent.hash() in client.hashes() else "" )
-	else :
-		printPrettyMeta(client, cli_options.torrents_list)
+	for torrent in torrents_list :
+		if cli_options.print_name_flag :
+			print torrent.name()
+		elif cli_options.print_hash_flag :
+			print torrent.hash()
+		elif cli_options.print_comment_flag :
+			print torrent.comment()
+		elif cli_options.print_size_flag :
+			print torrent.size()
+		elif cli_options.print_size_pretty_flag :
+			print tools.fmt.formatSize(torrent.size())
+		elif cli_options.print_provides_flag :
+			for file_path in sorted(torrent.files()) :
+				print file_path
+		elif cli_options.print_client_path_flag :
+			assert not client is None, "Required client"
+			print ( client.dataPrefix(torrent) if torrent.hash() in hashes_list else "" )
+		else :
+			printPrettyMeta(torrent, client, hashes_list)
+			if len(torrents_list) > 1 :
+				print
 
 
 ###
