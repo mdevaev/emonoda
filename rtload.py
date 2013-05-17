@@ -65,14 +65,14 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 		data_dir_path = client.defaultDataPrefix()
 
 	for torrent in torrents_list :
-		data_dir_name = os.path.basename(torrent.path()) + ".data"
-		data_dir_path = os.path.join(data_dir_path, data_dir_name[0], data_dir_name)
-		makeDirsTree(data_dir_path, mkdir_mode)
+		base_dir_name = os.path.basename(torrent.path()) + ".data"
+		base_dir_path = os.path.join(data_dir_path, base_dir_name[0], base_dir_name)
+		makeDirsTree(base_dir_path, mkdir_mode)
 
 		if not link_to_path is None :
-			linkData(torrent, data_dir_path, link_to_path, mkdir_mode)
+			linkData(torrent, base_dir_path, link_to_path, mkdir_mode)
 
-		client.loadTorrent(torrent, data_dir_path)
+		client.loadTorrent(torrent, base_dir_path)
 		client.setCustoms(torrent, customs_dict)
 
 
