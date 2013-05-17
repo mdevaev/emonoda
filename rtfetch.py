@@ -165,9 +165,9 @@ def update(fetchers_list, client,
 	tools.cli.oneLine("", False)
 	print DELIMITER
 	print "Unknown: %d" % (unknown_count)
-	print "Passed: %d" % (passed_count)
+	print "Passed:  %d" % (passed_count)
 	print "Updated: %d" % (updated_count)
-	print "Errors: %d" % (error_count)
+	print "Errors:  %d" % (error_count)
 	print
 
 
