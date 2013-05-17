@@ -33,7 +33,6 @@ import sys
 import os
 import socket
 import errno
-import traceback
 import operator
 import argparse
 import ConfigParser
@@ -152,8 +151,7 @@ def update(fetchers_list, client,
 
 			except Exception, err :
 				print status_line % ("-")
-				for row in traceback.format_exc().strip().split("\n") :
-					print "\t" + row
+				tools.cli.printTraceback("\t")
 				error_count += 1
 
 			break

@@ -20,6 +20,7 @@
 
 
 import sys
+import traceback
 
 
 ##### Public methods #####
@@ -36,4 +37,8 @@ def oneLine(text, short_flag = True, output = sys.stdout, static_list = [""]) : 
 		static_list[0] = ""
 	output.write(text)
 	output.flush()
+
+def printTraceback(prefix = "", output = sys.stdout) :
+	for row in traceback.format_exc().strip().split("\n") :
+		print >> output, prefix + row
 
