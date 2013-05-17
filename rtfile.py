@@ -64,6 +64,8 @@ def main() :
 	cli_parser.add_argument(      "--size-pretty", dest="print_size_pretty_flag", action="store_true", default=False)
 	cli_parser.add_argument(      "--provides",    dest="print_provides_flag",    action="store_true", default=False)
 	cli_parser.add_argument(      "--client-path", dest="print_client_path_flag", action="store_true", default=False)
+	cli_parser.add_argument(      "--make-magnet", dest="print_magnet_flag",      action="store_true", default=False)
+	cli_parser.add_argument(      "--magnet-fields", dest="magnet_fields_list",   nargs="+", default=None, metavar="<fields>", choices=("dn", "tr"))
 	cli_parser.add_argument("-t", "--timeout",     dest="socket_timeout", action="store", default=5, type=int, metavar="<seconds>")
 	cli_parser.add_argument(      "--client",      dest="client_name",    action="store", default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument(      "--client-url",  dest="client_url",     action="store", default=None, metavar="<url>")
@@ -97,6 +99,8 @@ def main() :
 		elif cli_options.print_client_path_flag :
 			assert not client is None, "Required client"
 			print ( client.dataPrefix(torrent) if torrent.hash() in hashes_list else "" )
+		elif cli_options.print_magnet_flag :
+			print torrent.magnet(cli_options.magnet_fields_list)
 		else :
 			printPrettyMeta(torrent, client, hashes_list)
 			if len(torrents_list) > 1 :
