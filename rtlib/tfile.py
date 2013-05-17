@@ -20,8 +20,10 @@
 
 
 import os
+import base64
 import bencode
 import hashlib
+import urllib
 
 
 ##### Public methods #####
@@ -64,6 +66,20 @@ def scrapeHash(torrent_hash) :
 	for index in xrange(0, len(torrent_hash), 2) :
 		scrape_hash += "%{0}".format(torrent_hash[index:index + 2])
 	return scrape_hash
+
+def makeMagnet(bencode_dict, extra_list = ()) :
+	# XXX: http://stackoverflow.com/questions/12479570/given-a-torrent-file-how-do-i-generate-a-magnet-link-in-python
+	digest = hashlib.sha1(bencode.bencode(bencode_dict["info"])).digest()
+	b32_hash = base64.b32encode(digest)
+	args_dict = {
+		"xt" : "urn:btih:%s" % (b32_hash),
+		"dn" : bencode_dict["info"]["name"],
+		"tr" : bencode_dict["announce"],
+		#"xl" : bencode_dict["info"]["length"],
+	}
+	for key in set(args_dict).difference(tuple(extra_list) + ("xt",)) :
+		args_dict.pop(key)
+	return "magnet:?" + urllib.urlencode(args_dict)
 
 
 ##### Public classes #####
@@ -111,6 +127,11 @@ class Torrent(object) :
 		if self.__scrape_hash is None :
 			self.__scrape_hash = scrapeHash(self.hash())
 		return self.__scrape_hash
+
+	###
+
+	def magnet(self, extra_list) :
+		return makeMagnet(self.__bencode_dict, extra_list)
 
 	###
 
