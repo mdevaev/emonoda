@@ -68,7 +68,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	###
 
 	def match(self, torrent) :
-		return ( not self.__comment_regexp.match(torrent.comment()) is None )
+		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
 
 	def login(self) :
 		cookie_jar = cookielib.CookieJar()
@@ -95,7 +95,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( data.strip() == "d5:filesdee" )
 
 	def fetchTorrent(self, torrent) :
-		data = self.readUrlRetry(torrent.comment())
+		data = self.readUrlRetry(torrent.comment() or "")
 		torrent_id_match = self.__torrent_id_regexp.search(data)
 		assert not torrent_id_match is None, "Unknown torrent_id"
 		torrent_id = torrent_id_match.group(1)

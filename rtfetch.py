@@ -126,7 +126,7 @@ def update(fetchers_list, client,
 				tools.fmt.formatProgress(count + 1, len(torrents_list)),
 				fetcher.plugin(),
 				torrent_file_name,
-				torrent.comment(),
+				( torrent.comment() or "" ),
 			)
 			try :
 				if not fetcher.loggedIn() :
@@ -158,7 +158,7 @@ def update(fetchers_list, client,
 
 		unknown_count += int(unknown_flag)
 		if not skip_unknown_flag :
-			tools.cli.oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, torrent.comment()), False)
+			tools.cli.oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, ( torrent.comment() or "" )), False)
 
 	tools.cli.oneLine("", False)
 	print DELIMITER

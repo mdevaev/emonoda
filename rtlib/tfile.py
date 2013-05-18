@@ -105,19 +105,33 @@ class Torrent(object) :
 			self.__hash = None
 			self.__scrape_hash = None
 
-	###
-
 	def path(self) :
 		return self.__torrent_file_path
 
 	def bencode(self) :
 		return self.__bencode_dict
 
+	###
+
 	def name(self) :
 		return self.__bencode_dict["info"]["name"]
 
 	def comment(self) :
-		return self.__bencode_dict.get("comment", "")
+		return self.__bencode_dict.get("comment")
+
+	def creationDate(self) :
+		return self.__bencode_dict.get("creation date")
+
+	def createdBy(self) :
+		return self.__bencode_dict.get("created by")
+
+	def announce(self) :
+		return self.__bencode_dict.get("announce")
+
+	def announceList(self) :
+		return self.__bencode_dict.get("announce-list", [])
+
+	###
 
 	def hash(self) :
 		if self.__hash is None :
