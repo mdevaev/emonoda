@@ -1,16 +1,30 @@
 # -*- coding: utf-8 -*-
 
 
+import math
+
+
+##### Public constants #####
+UNITS_LIST = zip(
+	("bytes", "kB", "MB", "GB", "TB", "PB"),
+	(0, 0, 1, 2, 2, 2),
+)
+
+
 ##### Public methods #####
 def formatSize(size) :
-	if size >= 1073741824 :
-		return "%.1f Gb" % (size / 1073741824.0)
-	elif size > 1048576 :
-		return "%.1f Mb" % (size / 1048576.0)
-	elif size > 1024 :
-		return "%.1f Kb" % (size / 1024.0)
+	if size > 1 :
+		exponent = min(int(math.log(size, 1024)), len(UNITS_LIST) - 1)
+		quotient = float(size) / 1024 ** exponent
+		(unit, decimals) = UNITS_LIST[exponent]
+		result = ("{:.%sf} {}" % (decimals)).format(quotient, unit)
+	elif size == 0 :
+		result = "0 bytes"
+	elif size == 1 :
+		result = "1 byte"
 	else :
-		return "%d bytes" % (size)
+		ValueError("size must be >= 0")
+	return result
 
 def formatProgress(value, limit) :
 	return (("%%%dd/" % (len(str(limit)))) + "%d") % (value, limit)
