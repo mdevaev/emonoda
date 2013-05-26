@@ -21,12 +21,12 @@
 
 
 from rtlib import tfile
+from rtlib import fs
 from rtlib import clients
 from rtlib import clientlib
 
-from rtlib import tools
-import rtlib.tools.fmt # pylint: disable=W0611
-import rtlib.tools.fs
+from helib import tools
+import helib.tools.fmt # pylint: disable=W0611
 
 import sys
 import socket
@@ -71,7 +71,7 @@ def formatClientPath(torrent, client) :
 		return ""
 
 def formatFilesList(torrent) :
-	return makeFilesList(tools.fs.treeListToDict(torrent.files()))
+	return makeFilesList(fs.treeListToDict(torrent.files()))
 
 def printPrettyMeta(torrent, client) :
 	print "Torrent:       ", torrent.path()

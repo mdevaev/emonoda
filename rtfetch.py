@@ -25,9 +25,9 @@ from rtlib import fetcherlib
 from rtlib import fetchers
 from rtlib import clients
 
-from rtlib import tools
-import rtlib.tools.cli # pylint: disable=W0611
-import rtlib.tools.fmt
+from helib import tools
+import helib.tools.cli # pylint: disable=W0611
+import helib.tools.fmt
 
 import sys
 import os

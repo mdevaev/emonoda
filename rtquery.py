@@ -23,9 +23,7 @@
 from rtlib import tfile
 from rtlib import clients
 from rtlib import clientlib
-
-from rtlib import tools
-import rtlib.tools.fs # pylint: disable=W0611
+from rtlib import fs
 
 import sys
 import os
@@ -49,7 +47,7 @@ def querySearchLost(client, src_dir_path, data_dir_path) :
 		torrents_tree_set = set(clientlib.indexed(client, True))
 	else :
 		torrents_tree_set = set(tfile.indexed(src_dir_path, data_dir_path).keys())
-	data_tree_set = set(tools.fs.treeList(data_dir_path))
+	data_tree_set = set(fs.treeList(data_dir_path))
 	for file_path in sorted(data_tree_set.difference(torrents_tree_set)) :
 		print file_path
 

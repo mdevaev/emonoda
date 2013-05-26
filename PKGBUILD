@@ -7,7 +7,7 @@ pkgdesc="rtfetch -- Update rtorrent files from popular trackers"
 arch=('any')
 url="http://github.com/mdevaev/rtfetch.git"
 license="GPL"
-depends=('python2' 'python2-bencode')
+depends=('python2' 'python2-bencode' 'python2-helib-git')
 makedepends=('git')
 
 _gitroot="git://github.com/mdevaev/rtfetch.git"
