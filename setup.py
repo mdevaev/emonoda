@@ -24,7 +24,7 @@ setup(
 		"rtquery.py",
 		"rtload.py",
 		"rtfile.py",
-		"rthook-disable-retrackers.py",
+		"rthook-manage-trackers.py",
 	],
 	classifiers=[
 		"Topic :: Software Development :: Libraries :: Python Modules",

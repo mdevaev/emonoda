@@ -38,6 +38,6 @@ build() {
 	mv $pkgdir/usr/bin/rtquery.py $pkgdir/usr/bin/rtquery
 	mv $pkgdir/usr/bin/rtload.py $pkgdir/usr/bin/rtload
 	mv $pkgdir/usr/bin/rtfile.py $pkgdir/usr/bin/rtfile
-	mv $pkgdir/usr/bin/rthook-disable-retrackers.py $pkgdir/usr/bin/rthook-disable-retrackers
+	mv $pkgdir/usr/bin/rthook-manage-trackers.py $pkgdir/usr/bin/rthook-manage-trackers
 }
 
