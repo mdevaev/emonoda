@@ -73,7 +73,8 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 			linkData(torrent, base_dir_path, link_to_path, mkdir_mode)
 
 		client.loadTorrent(torrent, base_dir_path)
-		client.setCustoms(torrent, customs_dict)
+		if not customs_dict is None :
+			client.setCustoms(torrent, customs_dict)
 
 
 ##### Main #####
