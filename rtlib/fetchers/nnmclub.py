@@ -30,9 +30,9 @@ import re
 
 ##### Public constants #####
 FETCHER_NAME = "nnm-club"
-FETCHER_VERSION = 0
+FETCHER_VERSION = 1
 
-NNMCLUB_DOMAIN = "nnm-club.ru"
+NNMCLUB_DOMAIN = "nnm-club.me"
 NNMCLUB_LOGIN_URL = "http://%s/forum/login.php" % (NNMCLUB_DOMAIN)
 #NNMCLUB_VIEWTOPIC_URL = "http://%s/forum/viewtopic.php" % (NNMCLUB_DOMAIN)
 NNMCLUB_DL_URL = "http://%s/forum/download.php" % (NNMCLUB_DOMAIN)
