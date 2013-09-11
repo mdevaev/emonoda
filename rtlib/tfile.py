@@ -70,7 +70,7 @@ def scrapeHash(torrent_hash) :
 def makeMagnet(bencode_dict, extra_list = None) :
 	# XXX: http://stackoverflow.com/questions/12479570/given-a-torrent-file-how-do-i-generate-a-magnet-link-in-python
 	info_sha1 = hashlib.sha1(bencode.bencode(bencode_dict["info"]))
-	info_digest = info_sha1.digest() # pylint: disable=E1101
+	info_digest = info_sha1.digest() # pylint: disable=E1121
 	b32_hash = base64.b32encode(info_digest)
 	args_dict = {
 		"xt" : "urn:btih:%s" % (b32_hash),
