@@ -73,7 +73,7 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 			linkData(torrent, base_dir_path, link_to_path, mkdir_mode)
 
 		client.loadTorrent(torrent, base_dir_path)
-		if not customs_dict is None :
+		if len(customs_dict) != 0 :
 			client.setCustoms(torrent, customs_dict)
 
 
@@ -86,7 +86,7 @@ def main() :
 	cli_parser.add_argument("-m", "--mkdir-mode",  dest="mkdir_mode",       action="store", default=None, type=int, metavar="<mode>")
 	cli_parser.add_argument(      "--client",      dest="client_name",      action="store", required=True, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument(      "--client-url",  dest="client_url",       action="store", default=None, metavar="<url>")
-	cli_parser.add_argument(      "--set-customs", dest="set_customs_list", nargs="+",      default=None, metavar="<key(=value)>")
+	cli_parser.add_argument(      "--set-customs", dest="set_customs_list", nargs="+",      metavar="<key(=value)>")
 	cli_parser.add_argument("torrents_list", type=str, nargs="+")
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 
