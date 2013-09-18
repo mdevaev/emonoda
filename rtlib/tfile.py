@@ -85,25 +85,29 @@ def makeMagnet(bencode_dict, extra_list = None) :
 
 ##### Public classes #####
 class Torrent(object) :
-	def __init__(self, torrent_file_path) :
+	def __init__(self, torrent_file_path = None) :
 		# XXX: File format: https://wiki.theory.org/BitTorrentSpecification
 
-		self.__torrent_file_path = torrent_file_path
-
+		self.__torrent_file_path = None
 		self.__bencode_dict = None
 		self.__hash = None
 		self.__scrape_hash = None
 
-		self.reload()
+		if not torrent_file_path is None :
+			self.loadFile(torrent_file_path)
 
 
 	### Public ###
 
-	def reload(self) :
-		with open(self.__torrent_file_path) as torrent_file :
-			self.__bencode_dict = torrentStruct(torrent_file.read())
-			self.__hash = None
-			self.__scrape_hash = None
+	def loadFile(self, torrent_file_path) :
+		with open(torrent_file_path) as torrent_file :
+			self.loadData(torrent_file.read(), torrent_file_path)
+
+	def loadData(self, data, torrent_file_path = None) :
+		self.initData(data)
+		self.__torrent_file_path = torrent_file_path
+
+	###
 
 	def path(self) :
 		return self.__torrent_file_path
@@ -170,4 +174,12 @@ class Torrent(object) :
 			for file_dict in self.__bencode_dict["info"]["files"] :
 				size += file_dict["length"]
 			return size
+
+
+	### Private ###
+
+	def initData(self, data) :
+		self.__bencode_dict = torrentStruct(data)
+		self.__hash = None
+		self.__scrape_hash = None
 
