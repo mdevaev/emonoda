@@ -32,7 +32,6 @@ import helib.tools.fmt
 import sys
 import os
 import socket
-import errno
 import operator
 import argparse
 import ConfigParser
@@ -45,44 +44,33 @@ DELIMITER = "-" * 10
 
 
 ##### Public methods #####
-def downloadTorrent(torrent, fetcher) :
-	torrent_data = fetcher.fetchTorrent(torrent)
-	new_file_path = torrent.path() + ".new"
-	with open(new_file_path, "w") as new_file :
-		new_file.write(torrent_data)
-	return new_file_path
+def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, noop_flag) :
+	new_data = fetcher.fetchTorrent(torrent)
+	tmp_torrent = tfile.Torrent()
+	tmp_torrent.loadData(new_data)
+	diff_tuple = tfile.diff(torrent, tmp_torrent)
 
-def replaceTorrent(torrent, new_file_path) :
-	try :
-		os.remove(torrent.path())
-	except OSError, err :
-		if err.errno != errno.ENOENT :
-			raise
-	os.rename(new_file_path, torrent.path())
-	torrent.reload()
+	if not noop_flag :
+		if not backup_dir_path is None :
+			backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
+			shutil.copyfile(torrent.path(), backup_file_path)
 
-def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list) :
-	old_torrent = tfile.Torrent(torrent.path())
+		if not client is None :
+			if not save_customs_list is None :
+				customs_dict = client.customs(torrent, save_customs_list)
+			prefix = client.dataPrefix(torrent)
+			client.removeTorrent(torrent)
 
-	new_file_path = downloadTorrent(torrent, fetcher)
-	if not backup_dir_path is None :
-		backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
-		shutil.copyfile(torrent.path(), backup_file_path)
+		with open(torrent.path(), "w") as torrent_file :
+			torrent_file.write(new_data)
+		torrent.loadData(new_data, torrent.path())
 
-	if not client is None :
-		if not save_customs_list is None :
-			customs_dict = client.customs(torrent, save_customs_list)
-		prefix = client.dataPrefix(torrent)
-		client.removeTorrent(torrent)
+		if not client is None :
+			client.loadTorrent(torrent, prefix)
+			if not save_customs_list is None :
+				client.setCustoms(torrent, customs_dict)
 
-	replaceTorrent(torrent, new_file_path)
-
-	if not client is None :
-		client.loadTorrent(torrent, prefix)
-		if not save_customs_list is None :
-			client.setCustoms(torrent, customs_dict)
-
-	return tfile.diff(old_torrent, torrent)
+	return diff_tuple
 
 def torrents(src_dir_path, names_filter) :
 	torrents_list = tfile.torrents(src_dir_path).items()
@@ -102,11 +90,12 @@ def update(fetchers_list, client,
 		src_dir_path,
 		backup_dir_path,
 		names_filter,
+		save_customs_list,
 		skip_unknown_flag,
 		show_failed_login_flag,
 		show_passed_flag,
 		show_diff_flag,
-		save_customs_list,
+		noop_flag,
 	) :
 
 	unknown_count = 0
@@ -139,7 +128,7 @@ def update(fetchers_list, client,
 					passed_count += 1
 					break
 
-				diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list)
+				diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, noop_flag)
 				tools.cli.oneLine(status_line % ("+"), False)
 				if show_diff_flag :
 					printDiff(*diff_tuple)
@@ -208,6 +197,7 @@ def main() :
 	cli_parser.add_argument("-p", "--show-passed",    dest="show_passed_flag",    action="store_true", default=False)
 	cli_parser.add_argument("-d", "--show-diff",      dest="show_diff_flag",      action="store_true", default=False)
 	cli_parser.add_argument("-k", "--check-versions", dest="check_versions_flag", action="store_true", default=False)
+	cli_parser.add_argument("-n", "--noop",           dest="noop_flag",           action="store_true", default=False)
 	cli_parser.add_argument(      "--client",         dest="client_name",         action="store",      default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument(      "--client-url",     dest="client_url",          action="store",      default=None, metavar="<url>")
 	cli_parser.add_argument(      "--save-customs",   dest="save_customs_list",   nargs="+",           default=None, metavar="<keys>")
@@ -248,11 +238,12 @@ def main() :
 		cli_options.src_dir_path,
 		cli_options.backup_dir_path,
 		cli_options.names_filter,
+		cli_options.save_customs_list,
 		cli_options.skip_unknown_flag,
 		cli_options.show_failed_login_flag,
 		cli_options.show_passed_flag,
 		cli_options.show_diff_flag,
-		cli_options.save_customs_list,
+		cli_options.noop_flag,
 	)
 
 
