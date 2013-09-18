@@ -75,7 +75,7 @@ def checkVersions(fetchers_list) :
 		plugin_name = fetcher.plugin()
 		local_version = fetcher.version()
 		upstream_version = versions_dict[plugin_name]["version"]
-		if local_version != upstream_version :
+		if local_version < upstream_version :
 			print "# Plug-in \"%s\" is outdated." % (plugin_name)
 			print "#    Local version:    %d" % (local_version)
 			print "#    Upstream version: %d" % (upstream_version)
