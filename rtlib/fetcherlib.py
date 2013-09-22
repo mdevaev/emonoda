@@ -87,7 +87,7 @@ def checkVersions(fetchers_list) :
 
 ##### Public classes #####
 class AbstractFetcher(object) :
-	def __init__(self, user_name, passwd, interactive_flag = False) :
+	def __init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag) :
 		object.__init__(self)
 
 

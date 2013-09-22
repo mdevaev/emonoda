@@ -159,7 +159,7 @@ def update(fetchers_list, client,
 
 
 ###
-def initFetchers(config_file_path, interactive_flag, only_fetchers_list, show_failed_login_flag) :
+def initFetchers(config_file_path, url_retries, url_sleep_time, interactive_flag, only_fetchers_list, show_failed_login_flag) :
 	fetchers_list = []
 	config_parser = ConfigParser.ConfigParser()
 	config_parser.read(config_file_path)
@@ -170,6 +170,8 @@ def initFetchers(config_file_path, interactive_flag, only_fetchers_list, show_fa
 			fetcher = fetcher_class(
 				config_parser.get(fetcher_name, "login"),
 				config_parser.get(fetcher_name, "passwd"),
+				url_retries,
+				url_sleep_time,
 				interactive_flag,
 			)
 			try :
@@ -198,6 +200,8 @@ def main() :
 	cli_parser.add_argument("-d", "--show-diff",      dest="show_diff_flag",      action="store_true", default=False)
 	cli_parser.add_argument("-k", "--check-versions", dest="check_versions_flag", action="store_true", default=False)
 	cli_parser.add_argument("-n", "--noop",           dest="noop_flag",           action="store_true", default=False)
+	cli_parser.add_argument(      "--url-retries",    dest="url_retries",         action="store",      default=10, type=int, metavar="<number>")
+	cli_parser.add_argument(      "--url-sleep-time", dest="url_sleep_time",      action="store",      default=1, type=int, metavar="<seconds>")
 	cli_parser.add_argument(      "--client",         dest="client_name",         action="store",      default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument(      "--client-url",     dest="client_url",          action="store",      default=None, metavar="<url>")
 	cli_parser.add_argument(      "--save-customs",   dest="save_customs_list",   nargs="+",           default=None, metavar="<keys>")
@@ -207,6 +211,8 @@ def main() :
 
 	fetchers_list = initFetchers(
 		cli_options.config_file_path,
+		cli_options.url_retries,
+		cli_options.url_sleep_time,
 		cli_options.interactive_flag,
 		cli_options.only_fetchers_list,
 		cli_options.show_failed_login_flag,

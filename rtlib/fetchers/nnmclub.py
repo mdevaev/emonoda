@@ -41,11 +41,13 @@ NNMCLUB_SCRAPE_URL = "http://bt.%s:2710/scrape" % (NNMCLUB_DOMAIN)
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
-	def __init__(self, user_name, passwd, interactive_flag = False) :
-		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, interactive_flag)
+	def __init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag) :
+		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag)
 
 		self.__user_name = user_name
 		self.__passwd = passwd
+		self.__url_retries = url_retries
+		self.__url_sleep_time = url_sleep_time
 		self.__interactive_flag = interactive_flag
 
 		self.__comment_regexp = re.compile(r"http://nnm-club\.ru/forum/viewtopic\.php\?p=(\d+)")
@@ -108,5 +110,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def readUrlRetry(self, *args_list, **kwargs_dict) :
 		kwargs_dict.setdefault("opener", self.__opener)
+		kwargs_dict["retries"] = self.__url_retries
+		kwargs_dict["sleep_time"] = self.__url_sleep_time
 		return fetcherlib.readUrlRetry(*args_list, **kwargs_dict)
 
