@@ -46,14 +46,20 @@ def makeFilesList(files_dict, depth = 0, prefix = "\t") :
 
 
 ###
-def formatSize(torrent) :
+def formatSizePretty(torrent) :
 	return tools.fmt.formatSize(torrent.size())
 
 def formatAnnounce(torrent) :
 	return ( torrent.announce() or "" )
 
+def formatAnnounceList(torrent) :
+	return list(itertools.chain.from_iterable(torrent.announceList()))
+
 def formatAnnounceListPretty(torrent) :
-	return " ".join(itertools.chain.from_iterable(torrent.announceList()))
+	return " ".join(formatAnnounceList(torrent))
+
+def formatCreationDate(torrent) :
+	return ( torrent.creationDate() or "" )
 
 def formatCreationDatePretty(torrent) :
 	return ( datetime.datetime.utcfromtimestamp(torrent.creationDate()) if not torrent.creationDate() is None else "" )
@@ -61,10 +67,14 @@ def formatCreationDatePretty(torrent) :
 def formatCreatedBy(torrent) :
 	return ( torrent.createdBy() or "" )
 
+def formatProvides(torrent) :
+	return sorted(torrent.files())
+
 def formatComment(torrent) :
 	return ( torrent.comment() or "" )
 
 def formatClientPath(torrent, client) :
+	assert not client is None, "Required client"
 	try :
 		return client.dataPrefix(torrent)
 	except clientlib.NoSuchTorrentError :
@@ -74,10 +84,10 @@ def formatFilesList(torrent) :
 	return makeFilesList(fs.treeListToDict(torrent.files()))
 
 def printPrettyMeta(torrent, client) :
-	print "Torrent:       ", torrent.path()
+	print "Path:          ", torrent.path()
 	print "Name:          ", torrent.name()
 	print "Hash:          ", torrent.hash()
-	print "Size:          ", formatSize(torrent)
+	print "Size:          ", formatSizePretty(torrent)
 	print "Announce:      ", formatAnnounce(torrent)
 	print "Announce list: ", formatAnnounceListPretty(torrent)
 	print "Creation date: ", formatCreationDatePretty(torrent)
@@ -94,23 +104,33 @@ def printPrettyMeta(torrent, client) :
 ##### Main #####
 def main() :
 	cli_parser = argparse.ArgumentParser(description="Show torrents metadata")
-	cli_parser.add_argument(      "--name",        dest="print_name_flag",        action="store_true", default=False)
-	cli_parser.add_argument(      "--hash",        dest="print_hash_flag",        action="store_true", default=False)
-	cli_parser.add_argument(      "--comment",     dest="print_comment_flag",     action="store_true", default=False)
-	cli_parser.add_argument(      "--size",        dest="print_size_flag",        action="store_true", default=False)
-	cli_parser.add_argument(      "--size-pretty", dest="print_size_pretty_flag", action="store_true", default=False)
-	cli_parser.add_argument(      "--announce",             dest="print_announce_flag",             action="store_true", default=False)
-	cli_parser.add_argument(      "--announce-list",        dest="print_announce_list_flag",        action="store_true", default=False)
-	cli_parser.add_argument(      "--creation-date",        dest="print_creation_date_flag",        action="store_true", default=False)
-	cli_parser.add_argument(      "--creation-date-pretty", dest="print_creation_date_pretty_flag", action="store_true", default=False)
-	cli_parser.add_argument(      "--created-by",           dest="print_created_by_flag",           action="store_true", default=False)
-	cli_parser.add_argument(      "--provides",    dest="print_provides_flag",    action="store_true", default=False)
-	cli_parser.add_argument(      "--client-path", dest="print_client_path_flag", action="store_true", default=False)
-	cli_parser.add_argument(      "--make-magnet", dest="print_magnet_flag",      action="store_true", default=False)
-	cli_parser.add_argument(      "--magnet-fields", dest="magnet_fields_list",   nargs="+", default=None, metavar="<fields>", choices=("dn", "tr"))
-	cli_parser.add_argument("-t", "--timeout",     dest="socket_timeout", action="store", default=5, type=int, metavar="<seconds>")
-	cli_parser.add_argument(      "--client",      dest="client_name",    action="store", default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument(      "--client-url",  dest="client_url",     action="store", default=None, metavar="<url>")
+	print_options_list = []
+	for (print_option, print_dest, print_method) in (
+			("--path",                 "print_path_flag",                 lambda torrent : torrent.path()),
+			("--name",                 "print_name_flag",                 lambda torrent : torrent.name()),
+			("--hash",                 "print_hash_flag",                 lambda torrent : torrent.hash()),
+			("--comment",              "print_comment_flag",              formatComment),
+			("--size",                 "print_size_flag",                 lambda torrent : torrent.size()),
+			("--size-pretty",          "print_size_pretty_flag",          formatSizePretty),
+			("--announce",             "print_announce_flag",             formatAnnounce),
+			("--announce-list",        "print_announce_list_flag",        formatAnnounceList),
+			("--announce-list-pretty", "print_announce_list_pretty_flag", formatAnnounceListPretty),
+			("--creation-date",        "print_creation_date_flag",        formatCreationDate),
+			("--creation-date-pretty", "print_creation_date_pretty_flag", formatCreationDatePretty),
+			("--created-by",           "print_created_by_flag",           formatCreatedBy),
+			("--provides",             "print_provides_flag",             formatProvides),
+			("--client-path",          "print_client_path_flag",          lambda torrent : formatClientPath(torrent, client)),
+			("--make-magnet",          "print_magnet_flag",               lambda torrent : torrent.magnet(cli_options.magnet_fields_list)),
+		) :
+		print_options_list.append((
+				cli_parser.add_argument(print_option, dest=print_dest, action="store_true"),
+				print_method,
+			))
+	cli_parser.add_argument(      "--without-headers", dest="without_headers_flag", action="store_true")
+	cli_parser.add_argument(      "--magnet-fields",   dest="magnet_fields_list",   nargs="+",      default=None, metavar="<fields>", choices=("dn", "tr"))
+	cli_parser.add_argument("-t", "--timeout",         dest="socket_timeout",       action="store", default=5, type=int, metavar="<seconds>")
+	cli_parser.add_argument(      "--client",          dest="client_name",          action="store", default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
+	cli_parser.add_argument(      "--client-url",      dest="client_url",           action="store", default=None, metavar="<url>")
 	cli_parser.add_argument("torrents_list", type=str, nargs="+")
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 
@@ -123,39 +143,25 @@ def main() :
 		client_class = clients.CLIENTS_MAP[cli_options.client_name]
 		client = client_class(cli_options.client_url)
 
+	to_print_list = [
+		(print_option.option_strings[0][2:], print_method)
+		for (print_option, print_method) in print_options_list
+		if getattr(cli_options, print_option.dest)
+	]
 	for torrent in torrents_list :
-		if cli_options.print_name_flag :
-			print torrent.name()
-		elif cli_options.print_hash_flag :
-			print torrent.hash()
-		elif cli_options.print_size_flag :
-			print torrent.size()
-		elif cli_options.print_size_pretty_flag :
-			print formatSize(torrent)
-		elif cli_options.print_announce_flag :
-			print formatAnnounce(torrent)
-		elif cli_options.print_announce_list_flag :
-			print formatAnnounceListPretty(torrent)
-		elif cli_options.print_creation_date_flag :
-			print ( torrent.creationDate() or "" )
-		elif cli_options.print_creation_date_pretty_flag :
-			print formatCreationDatePretty(torrent)
-		elif cli_options.print_created_by_flag :
-			print formatCreatedBy(torrent)
-		elif cli_options.print_comment_flag :
-			print formatComment(torrent)
-		elif cli_options.print_provides_flag :
-			for file_path in sorted(torrent.files()) :
-				print file_path
-		elif cli_options.print_client_path_flag :
-			assert not client is None, "Required client"
-			print formatClientPath(torrent, client)
-		elif cli_options.print_magnet_flag :
-			print torrent.magnet(cli_options.magnet_fields_list)
-		else :
+		if len(to_print_list) == 0 :
 			printPrettyMeta(torrent, client)
-			if len(torrents_list) > 1 :
-				print
+		else :
+			for (header, print_method) in to_print_list :
+				prefix = ( "" if cli_options.without_headers_flag else header + ": " )
+				retval = print_method(torrent)
+				if isinstance(retval, (list, tuple)) :
+					for item in retval :
+						print prefix + item
+				else :
+					print prefix + retval
+		if len(torrents_list) > 1 :
+			print
 
 
 ###
