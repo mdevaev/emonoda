@@ -1,7 +1,7 @@
 # Contributor: Devaev Maxim <mdevaev@gmail.com>
 
 pkgname=rtfetch
-pkgver=20130922
+pkgver=20130924
 pkgrel=1
 pkgdesc="rtfetch -- Update rtorrent files from popular trackers"
 arch=('any')
