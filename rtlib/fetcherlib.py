@@ -54,10 +54,10 @@ def readUrlRetry(*args_list, **kwargs_dict) :
 	while True :
 		try :
 			return opener.open(*args_list, **kwargs_dict).read()
-		except (socket.timeout, urllib2.HTTPError), err :
+		except (socket.timeout, urllib2.URLError, urllib2.HTTPError), err :
 			if retries == 0 :
 				raise
-			if isinstance(err, socket.timeout) :
+			if isinstance(err, socket.timeout) or isinstance(err, urllib2.URLError) and err.reason == "timed out" :
 				if not retry_timeout_flag :
 					raise
 			elif isinstance(err, urllib2.HTTPError) :
