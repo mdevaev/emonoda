@@ -105,7 +105,7 @@ def printPrettyMeta(torrent, client) :
 	if torrent.isSingleFile() :
 		print "Provides:      ", tuple(torrent.files())[0]
 	else :
-		print "Provides:\n%s" % (formatFilesList(torrent))
+		print "Provides:\n%s" % (formatFilesList(torrent)),
 
 
 ##### Main #####
