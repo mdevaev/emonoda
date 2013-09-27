@@ -135,6 +135,9 @@ class Torrent(object) :
 	def announceList(self) :
 		return self.__bencode_dict.get("announce-list", [])
 
+	def isPrivate(self) :
+		return bool(self.__bencode_dict["info"].get("private", 0))
+
 	###
 
 	def hash(self) :

@@ -70,6 +70,12 @@ def formatCreatedBy(torrent) :
 def formatProvides(torrent) :
 	return sorted(torrent.files())
 
+def formatIsPrivate(torrent) :
+	return str(int(torrent.isPrivate()))
+
+def formatIsPrivatePretty(torrent) :
+	return ( "yes" if torrent.isPrivate() else "no" )
+
 def formatComment(torrent) :
 	return ( torrent.comment() or "" )
 
@@ -92,6 +98,7 @@ def printPrettyMeta(torrent, client) :
 	print "Announce list: ", formatAnnounceListPretty(torrent)
 	print "Creation date: ", formatCreationDatePretty(torrent)
 	print "Created by:    ", formatCreatedBy(torrent)
+	print "Private:       ", formatIsPrivatePretty(torrent)
 	print "Comment:       ", formatComment(torrent)
 	if not client is None :
 		print "Client path:   ", formatClientPath(torrent, client)
@@ -119,6 +126,8 @@ def main() :
 			("--creation-date-pretty", "print_creation_date_pretty_flag", formatCreationDatePretty),
 			("--created-by",           "print_created_by_flag",           formatCreatedBy),
 			("--provides",             "print_provides_flag",             formatProvides),
+			("--is-private",           "print_is_private_flag",           formatIsPrivate),
+			("--is-private-pretty",    "print_is_private_pretty_flag",    formatIsPrivatePretty),
 			("--client-path",          "print_client_path_flag",          lambda torrent : formatClientPath(torrent, client)),
 			("--make-magnet",          "print_magnet_flag",               lambda torrent : torrent.magnet(cli_options.magnet_fields_list)),
 		) :
