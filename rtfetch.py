@@ -104,19 +104,22 @@ def update(fetchers_list, client,
 	error_count = 0
 
 	torrents_list = torrents(src_dir_path, names_filter)
+	hashes_list = ( client.hashes() if not client is None else [] )
+
 	for (count, (torrent_file_name, torrent)) in enumerate(torrents_list) :
+		progress = tools.fmt.formatProgress(count + 1, len(torrents_list))
+
+		if not client is None and not torrent.hash() in hashes_list :
+			tools.cli.oneLine("[!] %s NOT_IN_CLIENT %s --- %s" % (progress, torrent_file_name, ( torrent.comment() or "" )), False)
+			continue
+
 		unknown_flag = True
 		for fetcher in fetchers_list :
 			if not fetcher.match(torrent) :
 				continue
 			unknown_flag = False
 
-			status_line = "[%%s] %s %s %s --- %s" % (
-				tools.fmt.formatProgress(count + 1, len(torrents_list)),
-				fetcher.plugin(),
-				torrent_file_name,
-				( torrent.comment() or "" ),
-			)
+			status_line = "[%%s] %s %s %s --- %s" % (progress, fetcher.plugin(), torrent_file_name, ( torrent.comment() or "" ))
 			try :
 				if not fetcher.loggedIn() :
 					print status_line % ("?")
@@ -147,7 +150,7 @@ def update(fetchers_list, client,
 
 		unknown_count += int(unknown_flag)
 		if not skip_unknown_flag :
-			tools.cli.oneLine("[ ] UNKNOWN %s --- %s" % (torrent_file_name, ( torrent.comment() or "" )), False)
+			tools.cli.oneLine("[!] %s UNKNOWN %s --- %s" % (progress, torrent_file_name, ( torrent.comment() or "" )), False)
 
 	tools.cli.oneLine("", False)
 	print DELIMITER
