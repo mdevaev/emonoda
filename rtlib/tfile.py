@@ -100,7 +100,7 @@ class Torrent(object) :
 		return self
 
 	def loadData(self, data, torrent_file_path = None) :
-		self.initData(data)
+		self.__initData(data)
 		self.__torrent_file_path = torrent_file_path
 		return self
 
@@ -178,7 +178,7 @@ class Torrent(object) :
 
 	### Private ###
 
-	def initData(self, data) :
+	def __initData(self, data) :
 		self.__bencode_dict = bencode.bdecode(data)
 		self.__hash = None
 		self.__scrape_hash = None

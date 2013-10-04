@@ -121,15 +121,15 @@ class AbstractFetcher(object) :
 	###
 
 	def assertLogin(self, *args_list) :
-		self.customAssert(LoginError, *args_list)
+		self.__customAssert(LoginError, *args_list)
 
 	def assertFetcher(self, *args_list) :
-		self.customAssert(FetcherError, *args_list)
+		self.__customAssert(FetcherError, *args_list)
 
 
 	### Private ###
 
-	def customAssert(self, exception, arg, message = "") :
+	def __customAssert(self, exception, arg, message = "") :
 		if not arg :
 			raise exception(message)
 

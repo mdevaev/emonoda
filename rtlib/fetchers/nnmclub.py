@@ -82,7 +82,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			"redirect" : "",
 			"login" : "\xc2\xf5\xee\xe4",
 		}
-		data = self.readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict), opener=opener)
+		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict), opener=opener)
 		self.assertLogin("[ %s ]" % (self.__user_name) in data, "Invalid login")
 
 		self.__cookie_jar = cookie_jar
@@ -92,23 +92,23 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( not self.__opener is None )
 
 	def torrentChanged(self, torrent) :
-		data = self.readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())))
+		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())))
 		self.assertFetcher(data.startswith("d5:"), "Invalid scrape answer")
 		return ( data.strip() == "d5:filesdee" )
 
 	def fetchTorrent(self, torrent) :
-		data = self.readUrlRetry(torrent.comment() or "")
+		data = self.__readUrlRetry(torrent.comment() or "")
 		torrent_id_match = self.__torrent_id_regexp.search(data)
 		assert not torrent_id_match is None, "Unknown torrent_id"
 		torrent_id = torrent_id_match.group(1)
-		data = self.readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
+		data = self.__readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
 		tfile.Torrent().loadData(data)
 		return data
 
 
 	### Private ###
 
-	def readUrlRetry(self, *args_list, **kwargs_dict) :
+	def __readUrlRetry(self, *args_list, **kwargs_dict) :
 		kwargs_dict.setdefault("opener", self.__opener)
 		kwargs_dict["retries"] = self.__url_retries
 		kwargs_dict["sleep_time"] = self.__url_sleep_time

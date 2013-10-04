@@ -81,7 +81,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.__cookie_jar = cookielib.CookieJar()
 		self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.__cookie_jar))
 		try :
-			self.tryLogin()
+			self.__tryLogin()
 		except :
 			self.__cookie_jar = None
 			self.__opener = None
@@ -91,7 +91,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( not self.__opener is None )
 
 	def torrentChanged(self, torrent) :
-		return ( torrent.hash() != self.fetchHash(torrent) )
+		return ( torrent.hash() != self.__fetchHash(torrent) )
 
 	def fetchTorrent(self, torrent) :
 		comment_match = self.__comment_regexp.match(torrent.comment() or "")
@@ -124,20 +124,20 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 				"User-Agent" : const.BROWSER_USER_AGENT,
 			})
 
-		data = self.readUrlRetry(request)
+		data = self.__readUrlRetry(request)
 		tfile.Torrent().loadData(data)
 		return data
 
 
 	### Private ###
 
-	def tryLogin(self) :
+	def __tryLogin(self) :
 		post_dict = {
 			"login_username" : self.__user_name,
 			"login_password" : self.__passwd,
 			"login" : "\xc2\xf5\xee\xe4",
 		}
-		data = self.readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
+		data = self.__readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
 
 		cap_static_match = self.__cap_static_regexp.search(data)
 		if not cap_static_match is None :
@@ -151,19 +151,19 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			print ":: Enter the capthca [ %s ]:" % (cap_static_match.group(1)),
 			post_dict[cap_code_match.group(1)] = raw_input()
 			post_dict["cap_sid"] = cap_sid_match.group(1)
-			data = self.readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
+			data = self.__readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
 			self.assertLogin(self.__cap_static_regexp.search(data) is None, "Invalid captcha or password")
 
-	def fetchHash(self, torrent) :
+	def __fetchHash(self, torrent) :
 		comment_match = self.__comment_regexp.match(torrent.comment() or "")
 		assert not comment_match is None, "No comment match"
 
-		data = self.readUrlRetry(torrent.comment() or "")
+		data = self.__readUrlRetry(torrent.comment() or "")
 		hash_match = self.__hash_regexp.search(data)
 		self.assertFetcher(not hash_match is None, "Hash not found")
 		return hash_match.group(1).lower()
 
-	def readUrlRetry(self, *args_list, **kwargs_dict) :
+	def __readUrlRetry(self, *args_list, **kwargs_dict) :
 		kwargs_dict.setdefault("opener", self.__opener)
 		kwargs_dict.setdefault("retry_codes_list", (503, 404))
 		kwargs_dict["retries"] = self.__url_retries
