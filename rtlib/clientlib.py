@@ -71,6 +71,10 @@ class AbstractClient(object) :
 		raise NotImplementedError
 
 	@hashOrTorrent
+	def hasTorrent(self, torrent_hash) :
+		raise NotImplementedError
+
+	@hashOrTorrent
 	def torrentPath(self, torrent_hash) :
 		raise NotImplementedError
 
