@@ -90,20 +90,20 @@ def formatFilesList(torrent) :
 	return makeFilesList(fs.treeListToDict(torrent.files()))
 
 def printPrettyMeta(torrent, client) :
-	print "Path:          ", torrent.path()
-	print "Name:          ", torrent.name()
-	print "Hash:          ", torrent.hash()
-	print "Size:          ", formatSizePretty(torrent)
-	print "Announce:      ", formatAnnounce(torrent)
-	print "Announce list: ", formatAnnounceListPretty(torrent)
-	print "Creation date: ", formatCreationDatePretty(torrent)
-	print "Created by:    ", formatCreatedBy(torrent)
-	print "Private:       ", formatIsPrivatePretty(torrent)
-	print "Comment:       ", formatComment(torrent)
+	print "Path:         ", torrent.path()
+	print "Name:         ", torrent.name()
+	print "Hash:         ", torrent.hash()
+	print "Size:         ", formatSizePretty(torrent)
+	print "Announce:     ", formatAnnounce(torrent)
+	print "Announce list:", formatAnnounceListPretty(torrent)
+	print "Creation date:", formatCreationDatePretty(torrent)
+	print "Created by:   ", formatCreatedBy(torrent)
+	print "Private:      ", formatIsPrivatePretty(torrent)
+	print "Comment:      ", formatComment(torrent)
 	if not client is None :
-		print "Client path:   ", formatClientPath(torrent, client)
+		print "Client path:  ", formatClientPath(torrent, client)
 	if torrent.isSingleFile() :
-		print "Provides:      ", tuple(torrent.files())[0]
+		print "Provides:     ", tuple(torrent.files())[0]
 	else :
 		print "Provides:\n%s" % (formatFilesList(torrent)),
 
