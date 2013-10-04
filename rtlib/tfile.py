@@ -53,11 +53,6 @@ def diff(old_torrent, new_torrent) :
 
 
 ###
-def torrentStruct(torrent_data) :
-	return bencode.bdecode(torrent_data)
-
-
-###
 def torrentHash(bencode_dict) :
 	return hashlib.sha1(bencode.bencode(bencode_dict["info"])).hexdigest().lower()
 
@@ -102,10 +97,12 @@ class Torrent(object) :
 	def loadFile(self, torrent_file_path) :
 		with open(torrent_file_path) as torrent_file :
 			self.loadData(torrent_file.read(), torrent_file_path)
+		return self
 
 	def loadData(self, data, torrent_file_path = None) :
 		self.initData(data)
 		self.__torrent_file_path = torrent_file_path
+		return self
 
 	###
 
@@ -182,7 +179,7 @@ class Torrent(object) :
 	### Private ###
 
 	def initData(self, data) :
-		self.__bencode_dict = torrentStruct(data)
+		self.__bencode_dict = bencode.bdecode(data)
 		self.__hash = None
 		self.__scrape_hash = None
 

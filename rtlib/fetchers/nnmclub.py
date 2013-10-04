@@ -102,7 +102,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		assert not torrent_id_match is None, "Unknown torrent_id"
 		torrent_id = torrent_id_match.group(1)
 		data = self.readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
-		tfile.torrentStruct(data)
+		tfile.Torrent().loadData(data)
 		return data
 
 

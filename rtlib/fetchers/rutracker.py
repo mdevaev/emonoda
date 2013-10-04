@@ -125,7 +125,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			})
 
 		data = self.readUrlRetry(request)
-		tfile.torrentStruct(data)
+		tfile.Torrent().loadData(data)
 		return data
 
 
