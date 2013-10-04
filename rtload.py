@@ -56,9 +56,8 @@ def linkData(torrent, data_dir_path, link_to_path, mkdir_mode) :
 ###
 def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, customs_dict) :
 	torrents_list = [ tfile.Torrent(os.path.abspath(item)) for item in torrents_list ]
-	hashes_list = client.hashes()
 	for torrent in torrents_list :
-		if torrent.hash() in hashes_list :
+		if client.hasTorrent(torrent) :
 			raise RuntimeError("%s: already loaded" % (torrent.path()))
 
 	if data_dir_path is None :
