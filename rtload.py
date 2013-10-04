@@ -78,7 +78,7 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 
 ##### Main #####
 def main() :
-	cli_parser = argparse.ArgumentParser(description="Add torrent in the data model \"t.data\"")
+	cli_parser = argparse.ArgumentParser(description="Add torrent to the data model \"t.data\"")
 	cli_parser.add_argument("-d", "--data-dir",    dest="data_dir_path",    action="store", default=None, metavar="<path>")
 	cli_parser.add_argument("-l", "--link-to",     dest="link_to_path",     action="store", default=None, metavar="<path>")
 	cli_parser.add_argument("-t", "--timeout",     dest="socket_timeout",   action="store", default=5, type=int, metavar="<seconds>")
