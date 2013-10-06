@@ -92,7 +92,7 @@ class Client(clientlib.AbstractClient) :
 		retries = LOAD_RETRIES
 		while True :
 			try :
-				assert self.__server.d.get_hash(torrent_hash) == torrent_hash
+				assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
 				break
 			except xmlrpclib.Fault, err :
 				if err.faultCode != FAULT_CODE_UNKNOWN_HASH :
@@ -109,7 +109,7 @@ class Client(clientlib.AbstractClient) :
 	@clientlib.hashOrTorrent
 	def hasTorrent(self, torrent_hash) :
 		try :
-			assert self.__server.d.get_hash(torrent_hash) == torrent_hash
+			assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
 			return True
 		except xmlrpclib.Fault, err :
 			if err.faultCode != FAULT_CODE_UNKNOWN_HASH :
