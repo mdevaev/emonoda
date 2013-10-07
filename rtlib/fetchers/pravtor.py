@@ -31,12 +31,13 @@ import re
 
 ##### Public constants #####
 FETCHER_NAME = "pravtor"
-FETCHER_VERSION = 1
+FETCHER_VERSION = 0
 
 PRAVTOR_DOMAIN = "pravtor.ru"
 PRAVTOR_LOGIN_URL = "http://%s/login.php" % (PRAVTOR_DOMAIN)
 PRAVTOR_VIEWTOPIC_URL = "http://%s/viewtopic.php" % (PRAVTOR_DOMAIN)
 PRAVTOR_DL_URL = "http://%s/download.php" % (PRAVTOR_DOMAIN)
+
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
