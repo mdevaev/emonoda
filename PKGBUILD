@@ -1,7 +1,7 @@
 # Contributor: Devaev Maxim <mdevaev@gmail.com>
 
 pkgname=rtfetch
-pkgver=20131006
+pkgver=20131007
 pkgrel=1
 pkgdesc="rtfetch -- The set of tools to organize and management of your torrents"
 arch=('any')
