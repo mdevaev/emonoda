@@ -29,15 +29,19 @@ import urllib
 
 ##### Public methods #####
 def torrents(src_dir_path, extension = ".torrent") :
-	return dict([
-			(name, Torrent(os.path.join(src_dir_path, name)))
-			for name in os.listdir(src_dir_path)
-			if name.endswith(extension)
-		])
+	torrents_dict = {}
+	for name in os.listdir(src_dir_path) :
+		if not name.endswith(extension) :
+			continue
+		try :
+			torrent = Torrent(os.path.join(src_dir_path, name))
+		except bencode.BTL.BTFailure :
+			torrent = None
+		torrents_dict[name] = torrent
 
 def indexed(src_dir_path, prefix = "") :
 	files_dict = {}
-	for torrent in torrents(src_dir_path).values() :
+	for torrent in filter(None, torrents(src_dir_path).values()) :
 		for path in torrent.files() :
 			full_path = os.path.join(prefix, path)
 			files_dict.setdefault(full_path, set())

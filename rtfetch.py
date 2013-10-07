@@ -92,6 +92,7 @@ def update(fetchers_list, client,
 		noop_flag,
 	) :
 
+	invalid_count = 0
 	not_in_client_count = 0
 	unknown_count = 0
 	passed_count = 0
@@ -103,6 +104,11 @@ def update(fetchers_list, client,
 
 	for (count, (torrent_file_name, torrent)) in enumerate(torrents_list) :
 		progress = tools.fmt.formatProgress(count + 1, len(torrents_list))
+
+		if torrent is None :
+			tools.cli.oneLine("[!] %s INVALID_TORRENT %s" % (progress, torrent_file_name))
+			invalid_count += 1
+			continue
 
 		if not client is None and not torrent.hash() in hashes_list :
 			tools.cli.oneLine("[!] %s NOT_IN_CLIENT %s --- %s" % (progress, torrent_file_name, ( torrent.comment() or "" )), False)
@@ -150,6 +156,7 @@ def update(fetchers_list, client,
 
 	tools.cli.oneLine("", False)
 	print DELIMITER
+	print "Invalid:       %d" % (invalid_count)
 	if not client is None :
 		print "Not in client: %d" % (not_in_client_count)
 	print "Unknown:       %d" % (unknown_count)
