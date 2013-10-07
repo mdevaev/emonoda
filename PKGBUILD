@@ -3,7 +3,7 @@
 pkgname=rtfetch
 pkgver=20131006
 pkgrel=1
-pkgdesc="rtfetch -- Update rtorrent files from popular trackers"
+pkgdesc="rtfetch -- The set of tools to organize and management of your torrents"
 arch=('any')
 url="http://github.com/mdevaev/rtfetch.git"
 license="GPL"
@@ -17,7 +17,7 @@ _gitname="rtfetch"
 build() {
 	cd $startdir/src
 	if [ -d $_gitname ]; then
-		msg "Updateing local repository..."
+		msg "Updating local repository..."
 		cd $_gitname
 		git pull origin master || return 1
 		msg "The local files are updated."
@@ -38,6 +38,7 @@ build() {
 	mv $pkgdir/usr/bin/rtquery.py $pkgdir/usr/bin/rtquery
 	mv $pkgdir/usr/bin/rtload.py $pkgdir/usr/bin/rtload
 	mv $pkgdir/usr/bin/rtfile.py $pkgdir/usr/bin/rtfile
+	mv $pkgdir/usr/bin/rtdiff.py $pkgdir/usr/bin/rtdiff
 	mv $pkgdir/usr/bin/rthook-manage-trackers.py $pkgdir/usr/bin/rthook-manage-trackers
 }
 

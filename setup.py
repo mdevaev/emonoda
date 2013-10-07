@@ -12,7 +12,7 @@ setup(
 	license="GPLv3",
 	author="Devaev Maxim",
 	author_email="mdevaev@gmail.com",
-	description="rtfetch -- Update rtorrent files from popular trackers",
+	description="rtfetch -- The set of tools to organize and managament of your torrents",
 	platforms="any",
 	packages=[
 		"rtlib",
@@ -24,6 +24,7 @@ setup(
 		"rtquery.py",
 		"rtload.py",
 		"rtfile.py",
+		"rtdiff.py",
 		"rthook-manage-trackers.py",
 	],
 	classifiers=[
