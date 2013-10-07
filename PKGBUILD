@@ -7,7 +7,7 @@ pkgdesc="rtfetch -- The set of tools to organize and management of your torrents
 arch=('any')
 url="http://github.com/mdevaev/rtfetch.git"
 license="GPL"
-depends=('python2' 'python2-bencode' 'python2-helib-git')
+depends=('python2' 'python2-bencode' 'python2-ulib-git')
 makedepends=('git')
 
 _gitroot="git://github.com/mdevaev/rtfetch.git"

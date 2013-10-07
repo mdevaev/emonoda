@@ -11,8 +11,8 @@ Set of tools to organize and manage your torrents.
 * ... And some client-specific hooks.
 
 See wiki for details: https://github.com/mdevaev/rtfetch/wiki  
-Required: https://github.com/mdevaev/helib  
+Required: https://github.com/mdevaev/ulib  
 
 Actual builds for Arch Linux are available here:  
 * https://aur.archlinux.org/packages/rtfetch/
-* https://aur.archlinux.org/packages/python2-helib-git/
+* https://aur.archlinux.org/packages/python2-ulib-git/
