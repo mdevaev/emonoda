@@ -25,6 +25,7 @@ import rutracker
 import nnmclub
 import pravtor
 
+
 ##### Public constants #####
 FETCHERS_MAP = plugin.mapObjects(
 	rutracker.Fetcher,
