@@ -1,7 +1,8 @@
 # -*- coding: UTF-8 -*-
 #
-#    rtfetch -- Update rtorrent files from popular trackers
+#    rtfetch -- Plugin for http://pravtor.ru (based on rutracker.py)
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
+#    Copyright (C) 2013  Vitaly Lipatov <lav@etersoft.ru>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
