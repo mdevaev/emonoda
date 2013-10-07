@@ -78,12 +78,6 @@ def torrents(src_dir_path, names_filter) :
 		torrents_list = [ item for item in torrents_list if names_filter in item[0] ]
 	return sorted(torrents_list, key=operator.itemgetter(0))
 
-def printDiff(added_set, removed_set) :
-	for item in sorted(removed_set) :
-		print "\t- %s" % (item)
-	for item in sorted(added_set) :
-		print "\t+ %s" % (item)
-
 
 ###
 def update(fetchers_list, client,
@@ -136,7 +130,7 @@ def update(fetchers_list, client,
 				diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, noop_flag)
 				tools.cli.oneLine(status_line % ("+"), False)
 				if show_diff_flag :
-					printDiff(*diff_tuple)
+					tfile.printDiff(diff_tuple, "\t")
 				updated_count += 1
 
 			except fetcherlib.CommonFetcherError, err :

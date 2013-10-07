@@ -19,6 +19,7 @@
 #####
 
 
+import sys
 import os
 import base64
 import bencode
@@ -43,13 +44,53 @@ def indexed(src_dir_path, prefix = "") :
 			files_dict[full_path].add(torrent)
 	return files_dict
 
+
+###
 def diff(old_torrent, new_torrent) :
-	old_set = old_torrent.files()
-	new_set = new_torrent.files()
+	assert isinstance(old_torrent, (Torrent, dict))
+	assert isinstance(new_torrent, (Torrent, dict))
+	old_dict = ( old_torrent.files() if isinstance(old_torrent, Torrent) else old_torrent )
+	new_dict = ( new_torrent.files() if isinstance(new_torrent, Torrent) else new_torrent )
+
+	old_set = set(old_dict)
+	new_set = set(new_dict)
+
+	modified_set = set()
+	modified_type_set = set()
+	for path in old_set.intersection(new_set) :
+		old_attrs_dict = old_dict[path]
+		new_attrs_dict = new_dict[path]
+
+		real = len(filter(None, (new_attrs_dict, old_attrs_dict)))
+		if real == 0 :
+			continue
+		elif real == 1 :
+			modified_type_set.add(path)
+			continue
+
+		#old_id_tuple = (old_attrs_dict["size"], old_attrs_dict["md5"])
+		#new_id_tuple = (new_attrs_dict["size"], new_attrs_dict["md5"])
+		#if old_id_tuple != new_id_tuple :
+		if old_attrs_dict["size"] != new_attrs_dict["size"] :
+			modified_set.add(path)
+
 	return (
 		new_set.difference(old_set), # Added
 		old_set.difference(new_set), # Removed
+		modified_set,
+		modified_type_set,
 	)
+
+def printDiff(diff_tuple, prefix = "", output = sys.stdout) :
+	(added_set, removed_set, modified_set, modified_type_set) = diff_tuple
+	for (sign, files_set) in (
+			("-", removed_set),
+			("+", added_set),
+			("~", modified_set),
+			("?", modified_type_set),
+		) :
+		for item in files_set :
+			print >> output, "%s%s %s" % (prefix, sign, item)
 
 
 ###
@@ -159,12 +200,18 @@ class Torrent(object) :
 
 	def files(self, prefix = "") :
 		base = os.path.join(prefix, self.__bencode_dict["info"]["name"])
-		files_set = set([base]) # Single File Mode
-		if not self.isSingleFile() : # Multiple File Mode
-			for file_dict in self.__bencode_dict["info"]["files"] :
-				for index in xrange(len(file_dict["path"])) :
-					files_set.add(os.path.join(base, os.path.sep.join(file_dict["path"][0:index + 1])))
-		return files_set
+		if self.isSingleFile() :
+			return { base : self.__fileAttrs(self.__bencode_dict["info"]) }
+		else :
+			files_dict = { base : None }
+			for f_dict in self.__bencode_dict["info"]["files"] :
+				name = None
+				for index in xrange(len(f_dict["path"])) :
+					name = os.path.join(base, os.path.sep.join(f_dict["path"][0:index + 1]))
+					files_dict[name] = None
+				assert not name is None
+				files_dict[name] = self.__fileAttrs(f_dict)
+			return files_dict
 
 	def size(self) :
 		if self.isSingleFile() :
@@ -182,4 +229,10 @@ class Torrent(object) :
 		self.__bencode_dict = bencode.bdecode(data)
 		self.__hash = None
 		self.__scrape_hash = None
+
+	def __fileAttrs(self, file_dict) :
+		return {
+			"size" : file_dict["length"],
+			"md5"  : file_dict.get("md5sum"),
+		}
 
