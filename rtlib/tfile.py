@@ -38,6 +38,7 @@ def torrents(src_dir_path, extension = ".torrent") :
 		except bencode.BTL.BTFailure :
 			torrent = None
 		torrents_dict[name] = torrent
+	return torrents_dict
 
 def indexed(src_dir_path, prefix = "") :
 	files_dict = {}
