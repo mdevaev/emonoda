@@ -133,8 +133,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def __tryLogin(self) :
 		post_dict = {
-			"login_username" : self.__user_name,
-			"login_password" : self.__passwd,
+			"login_username" : self.__user_name.decode("utf-8").encode("cp1251"),
+			"login_password" : self.__passwd.decode("utf-8").encode("cp1251"),
 			"login" : "\xc2\xf5\xee\xe4",
 		}
 		data = self.__readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
