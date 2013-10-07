@@ -106,7 +106,7 @@ def update(fetchers_list, client,
 		progress = tools.fmt.formatProgress(count + 1, len(torrents_list))
 
 		if torrent is None :
-			tools.cli.oneLine("[!] %s INVALID_TORRENT %s" % (progress, torrent_file_name))
+			tools.cli.oneLine("[!] %s INVALID_TORRENT %s" % (progress, torrent_file_name), False)
 			invalid_count += 1
 			continue
 
