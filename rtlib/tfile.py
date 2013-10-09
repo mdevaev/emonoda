@@ -49,6 +49,12 @@ def indexed(src_dir_path, prefix = "") :
 			files_dict[full_path].add(torrent)
 	return files_dict
 
+def isValidTorrentData(data) :
+	try :
+		return isinstance(bencode.bdecode(data), dict) # Must be True
+	except bencode.BTL.BTFailure :
+		return False
+
 
 ###
 def diff(old_torrent, new_torrent) :
