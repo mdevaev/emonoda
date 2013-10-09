@@ -20,6 +20,7 @@
 #####
 
 
+from rtlib import const
 from rtlib import tfile
 from rtlib import fetcherlib
 from rtlib import fetchers
@@ -200,7 +201,7 @@ def main() :
 	cli_parser.add_argument("-b", "--backup-dir",     dest="backup_dir_path",     action="store",      default=None,  metavar="<dir>")
 	cli_parser.add_argument("-f", "--filter",         dest="names_filter",        action="store",      default=None,  metavar="<substring>")
 	cli_parser.add_argument("-o", "--only-fetchers",  dest="only_fetchers_list",  nargs="+",           default=fetchers.FETCHERS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument("-t", "--timeout",        dest="socket_timeout",      action="store",      default=5, type=int, metavar="<seconds>")
+	cli_parser.add_argument("-t", "--timeout",        dest="socket_timeout",      action="store",      default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
 	cli_parser.add_argument("-i", "--interactive",    dest="interactive_flag",    action="store_true", default=False)
 	cli_parser.add_argument("-u", "--skip-unknown",   dest="skip_unknown_flag",   action="store_true", default=False)
 	cli_parser.add_argument("-l", "--show-failed-login", dest="show_failed_login_flag", action="store_true", default=False)
@@ -208,8 +209,8 @@ def main() :
 	cli_parser.add_argument("-d", "--show-diff",      dest="show_diff_flag",      action="store_true", default=False)
 	cli_parser.add_argument("-k", "--check-versions", dest="check_versions_flag", action="store_true", default=False)
 	cli_parser.add_argument("-n", "--noop",           dest="noop_flag",           action="store_true", default=False)
-	cli_parser.add_argument(      "--url-retries",    dest="url_retries",         action="store",      default=10, type=int, metavar="<number>")
-	cli_parser.add_argument(      "--url-sleep-time", dest="url_sleep_time",      action="store",      default=1, type=int, metavar="<seconds>")
+	cli_parser.add_argument(      "--url-retries",    dest="url_retries",         action="store",      default=fetcherlib.DEFAULT_URL_RETRIES, type=int, metavar="<number>")
+	cli_parser.add_argument(      "--url-sleep-time", dest="url_sleep_time",      action="store",      default=fetcherlib.DEFAULT_URL_SLEEP_TIME, type=int, metavar="<seconds>")
 	cli_parser.add_argument(      "--client",         dest="client_name",         action="store",      default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument(      "--client-url",     dest="client_url",          action="store",      default=None, metavar="<url>")
 	cli_parser.add_argument(      "--save-customs",   dest="save_customs_list",   nargs="+",           default=None, metavar="<keys>")

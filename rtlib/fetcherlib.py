@@ -19,6 +19,7 @@
 #####
 
 
+import const
 import tfile
 
 from ulib import tools
@@ -30,9 +31,11 @@ import json
 import time
 
 
-#####
-UPSTREAM_URL = "https://raw.github.com/mdevaev/rtfetch/master"
-VERSIONS_URL = UPSTREAM_URL + "/fetchers.json"
+##### Public constants #####
+DEFAULT_URL_RETRIES = 10
+DEFAULT_URL_SLEEP_TIME = 1
+
+VERSIONS_URL = const.RAW_UPSTREAM_URL + "/fetchers.json"
 
 
 ##### Exceptions #####
@@ -51,8 +54,8 @@ def readUrlRetry(*args_list, **kwargs_dict) :
 	opener = kwargs_dict.pop("opener", None)
 	if opener is None :
 		opener = urllib2.build_opener()
-	retries = kwargs_dict.pop("retries", 10)
-	sleep_time = kwargs_dict.pop("sleep_time", 1)
+	retries = kwargs_dict.pop("retries", DEFAULT_URL_RETRIES)
+	sleep_time = kwargs_dict.pop("sleep_time", DEFAULT_URL_SLEEP_TIME)
 	retry_codes_list = kwargs_dict.pop("retry_codes_list", (503, 502, 500))
 	retry_timeout_flag = kwargs_dict.pop("retry_timeout_flag", True)
 

@@ -20,6 +20,7 @@
 #####
 
 
+from rtlib import const
 from rtlib import tfile
 from rtlib import clients
 from rtlib import clientlib
@@ -106,7 +107,7 @@ def main() :
 
 	data_dir_opt = cli_parser.add_argument("-d", "--data-dir",   dest="data_dir_path",  action="store", metavar="<dir>")
 	file_opt     = cli_parser.add_argument("-f", "--file",       dest="file_path",      action="store", metavar="<file>")
-	cli_parser.add_argument(               "-t", "--timeout",    dest="socket_timeout", action="store", default=5, type=int, metavar="<seconds>")
+	cli_parser.add_argument(               "-t", "--timeout",    dest="socket_timeout", action="store", default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
 	cli_parser.add_argument(                     "--client-url", dest="client_url",     action="store", default=None, metavar="<url>")
 
 	cli_options = cli_parser.parse_args(sys.argv[1:])

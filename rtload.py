@@ -20,6 +20,7 @@
 #####
 
 
+from rtlib import const
 from rtlib import tfile
 from rtlib import clients
 
@@ -81,7 +82,7 @@ def main() :
 	cli_parser = argparse.ArgumentParser(description="Add torrent to the data model \"t.data\"")
 	cli_parser.add_argument("-d", "--data-dir",    dest="data_dir_path",    action="store", default=None, metavar="<path>")
 	cli_parser.add_argument("-l", "--link-to",     dest="link_to_path",     action="store", default=None, metavar="<path>")
-	cli_parser.add_argument("-t", "--timeout",     dest="socket_timeout",   action="store", default=5, type=int, metavar="<seconds>")
+	cli_parser.add_argument("-t", "--timeout",     dest="socket_timeout",   action="store", default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
 	cli_parser.add_argument("-m", "--mkdir-mode",  dest="mkdir_mode",       action="store", default=None, type=int, metavar="<mode>")
 	cli_parser.add_argument(      "--client",      dest="client_name",      action="store", required=True, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument(      "--client-url",  dest="client_url",       action="store", default=None, metavar="<url>")

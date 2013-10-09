@@ -2,6 +2,11 @@
 # -*- coding: utf-8 -*-
 
 
+from rtlib import const
+
+from rtlib import clients
+import rtlib.clients.rtorrent # pylint: disable=W0611
+
 import sys
 import socket
 import xmlrpclib
@@ -37,8 +42,8 @@ def main() :
 	cli_parser = argparse.ArgumentParser(description="Manage trackers (rtorrent only)")
 	cli_parser.add_argument(      "--enable",     dest="enable_list",  nargs="+", metavar="<pattern>")
 	cli_parser.add_argument(      "--disable",    dest="disable_list", nargs="+", metavar="<pattern>")
-	cli_parser.add_argument("-t", "--timeout",    dest="socket_timeout", action="store", default=5, type=int, metavar="<seconds>")
-	cli_parser.add_argument(      "--client-url", dest="client_url",     action="store", default="http://localhost/RPC2", metavar="<url>")
+	cli_parser.add_argument("-t", "--timeout",    dest="socket_timeout", action="store", default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
+	cli_parser.add_argument(      "--client-url", dest="client_url",     action="store", default=clients.rtorrent.DEFAULT_URL, metavar="<url>")
 
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 	socket.setdefaulttimeout(cli_options.socket_timeout)
