@@ -19,6 +19,11 @@
 #####
 
 
+import tfile
+
+from ulib import tools
+import ulib.tools.coding # pylint: disable=W0611
+
 import socket
 import urllib2
 import json
@@ -127,6 +132,12 @@ class AbstractFetcher(object) :
 
 	def assertFetcher(self, *args_list) :
 		self.__customAssert(FetcherError, *args_list)
+
+	###
+
+	def assertValidTorrentData(self, data) :
+		message = "Received an invalid torrent data: %s ..." % (tools.coding.utf8(data[:20]))
+		self.assertFetcher(tfile.isValidTorrentData(data), message)
 
 
 	### Private ###
