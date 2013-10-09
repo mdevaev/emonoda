@@ -22,7 +22,6 @@
 
 from rtlib import const
 from rtlib import fetcherlib
-from rtlib import tfile
 
 import urllib
 import urllib2
@@ -126,7 +125,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			})
 
 		data = self.__readUrlRetry(request)
-		tfile.Torrent().loadData(data)
+		self.assertValidTorrentData(data)
 		return data
 
 

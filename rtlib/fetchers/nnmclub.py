@@ -20,7 +20,6 @@
 
 
 from rtlib import fetcherlib
-from rtlib import tfile
 
 import urllib
 import urllib2
@@ -101,8 +100,9 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		torrent_id_match = self.__torrent_id_regexp.search(data)
 		assert not torrent_id_match is None, "Unknown torrent_id"
 		torrent_id = torrent_id_match.group(1)
+
 		data = self.__readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
-		tfile.Torrent().loadData(data)
+		self.assertValidTorrentData(data)
 		return data
 
 
