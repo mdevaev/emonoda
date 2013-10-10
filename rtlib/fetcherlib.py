@@ -107,6 +107,11 @@ def checkVersions(fetchers_list) :
 class AbstractFetcher(object) :
 	def __init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag) :
 		object.__init__(self)
+		assert isinstance(user_name, basestring)
+		assert isinstance(passwd, basestring)
+		assert isinstance(url_retries, (int, long))
+		assert isinstance(url_sleep_time, (int, long))
+		assert isinstance(interactive_flag, bool)
 
 
 	### Public ###
@@ -145,6 +150,9 @@ class AbstractFetcher(object) :
 		self.__customAssert(FetcherError, *args_list)
 
 	###
+
+	def assertNonAnonymous(self, login) :
+		self.assertLogin(len(login) != 0, "This tracker can not be used anonymously")
 
 	def assertValidTorrentData(self, data) :
 		message = "Received an invalid torrent data: %s ..." % (tools.coding.utf8(data[:20]))

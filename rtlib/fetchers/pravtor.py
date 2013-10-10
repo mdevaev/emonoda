@@ -77,6 +77,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
 
 	def login(self) :
+		self.assertNonAnonymous(self.__user_name)
 		self.__cookie_jar = cookielib.CookieJar()
 		self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.__cookie_jar))
 		try :

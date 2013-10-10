@@ -50,6 +50,7 @@ def hashOrTorrent(method) :
 class AbstractClient(object) :
 	def __init__(self, url) :
 		object.__init__(self)
+		assert isinstance(url, basestring)
 
 
 	### Public ###
