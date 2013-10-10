@@ -1,9 +1,9 @@
 # Contributor: Devaev Maxim <mdevaev@gmail.com>
 
 pkgname=rtfetch
-pkgver=20131009
+pkgver=20131010
 pkgrel=1
-pkgdesc="rtfetch -- The set of tools to organize and management of your torrents"
+pkgdesc="The set of tools to organize and management of your torrents"
 arch=('any')
 url="http://github.com/mdevaev/rtfetch.git"
 license="GPL"
