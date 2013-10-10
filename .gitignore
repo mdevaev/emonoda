@@ -1,2 +1,6 @@
 /pkg-root.arch
+/pkg
+/src
+/build
+/rtfetch.egg-info
 *.pyc
