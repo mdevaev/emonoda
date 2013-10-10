@@ -104,58 +104,55 @@ def update(fetchers_list, client,
 	hashes_list = ( client.hashes() if not client is None else [] )
 
 	for (count, (torrent_file_name, torrent)) in enumerate(torrents_list) :
-		progress = tools.fmt.formatProgress(count + 1, len(torrents_list))
+		status_line = "[%%s] %s %%s %s" % (tools.fmt.formatProgress(count + 1, len(torrents_list)), torrent_file_name)
 
 		if torrent is None :
-			tools.cli.oneLine("[!] %s INVALID_TORRENT %s" % (progress, torrent_file_name), False)
+			tools.cli.newLine(status_line % ("!", "INVALID_TORRENT"))
 			invalid_count += 1
 			continue
 
+		status_line += " --- %s" % (torrent.comment() or "")
+
 		if not client is None and not torrent.hash() in hashes_list :
-			tools.cli.oneLine("[!] %s NOT_IN_CLIENT %s --- %s" % (progress, torrent_file_name, ( torrent.comment() or "" )), False)
+			tools.cli.newLine(status_line % ("!", "NOT_IN_CLIENT"))
 			not_in_client_count += 1
 			continue
 
-		unknown_flag = True
-		for fetcher in fetchers_list :
-			if not fetcher.match(torrent) :
+		fetcher = fetcherlib.selectFetcher(torrent, fetchers_list)
+		if fetcher is None :
+			unknown_count += 1
+			if not skip_unknown_flag :
+				tools.cli.newLine(status_line % ("!", "UNKNOWN"))
+			continue
+
+		status_line = status_line % ("%s", fetcher.plugin())
+		try :
+			if not fetcher.loggedIn() :
+				tools.cli.newLine(status_line % ("?"))
+				error_count += 1
 				continue
-			unknown_flag = False
 
-			status_line = "[%%s] %s %s %s --- %s" % (progress, fetcher.plugin(), torrent_file_name, ( torrent.comment() or "" ))
-			try :
-				if not fetcher.loggedIn() :
-					print status_line % ("?")
-					error_count += 1
-					break
+			if not fetcher.torrentChanged(torrent) :
+				tools.cli.oneLine(status_line % (" "), not show_passed_flag)
+				passed_count += 1
+				continue
 
-				if not fetcher.torrentChanged(torrent) :
-					tools.cli.oneLine(status_line % (" "), not show_passed_flag)
-					passed_count += 1
-					break
+			diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, noop_flag)
+			tools.cli.newLine(status_line % ("+"))
+			if show_diff_flag :
+				tfile.printDiff(diff_tuple, "\t")
+			updated_count += 1
 
-				diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, noop_flag)
-				tools.cli.oneLine(status_line % ("+"), False)
-				if show_diff_flag :
-					tfile.printDiff(diff_tuple, "\t")
-				updated_count += 1
+		except fetcherlib.CommonFetcherError, err :
+			tools.cli.newLine((status_line + " :: %s(%s)") % ("-", type(err).__name__, str(err)))
+			error_count += 1
 
-			except fetcherlib.CommonFetcherError, err :
-				print (status_line + " :: %s(%s)") % ("-", type(err).__name__, str(err))
-				error_count += 1
+		except Exception, err :
+			tools.cli.newLine(status_line % ("-"))
+			tools.cli.printTraceback("\t")
+			error_count += 1
 
-			except Exception, err :
-				print status_line % ("-")
-				tools.cli.printTraceback("\t")
-				error_count += 1
-
-			break
-
-		unknown_count += int(unknown_flag)
-		if not skip_unknown_flag :
-			tools.cli.oneLine("[!] %s UNKNOWN %s --- %s" % (progress, torrent_file_name, ( torrent.comment() or "" )), False)
-
-	tools.cli.oneLine("", False)
+	tools.cli.newLine("")
 	print DELIMITER
 	print "Invalid:       %d" % (invalid_count)
 	if not client is None :
