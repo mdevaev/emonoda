@@ -50,6 +50,14 @@ class FetcherError(CommonFetcherError) :
 
 
 ##### Public methods #####
+def selectFetcher(torrent, fetchers_list) :
+	for fetcher in fetchers_list :
+		if fetcher.match(torrent) :
+			return fetcher
+	return None
+
+
+###
 def readUrlRetry(*args_list, **kwargs_dict) :
 	opener = kwargs_dict.pop("opener", None)
 	if opener is None :
