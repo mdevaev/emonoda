@@ -69,12 +69,12 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return True
 
 	def torrentChanged(self, torrent) :
-		self.assertFetcher(self.match(torrent), "No comment match")
+		self.assertMatch(torrent)
 		return ( torrent.hash() != self.__fetchHash(torrent) )
 
 
 	def fetchTorrent(self, torrent) :
-		self.assertFetcher(self.match(torrent), "No comment match")
+		self.assertMatch(torrent)
 		self.__loadPage(torrent)
 		dl_match = self.__dl_regexp.search(self.__last_page)
 		self.assertFetcher(not dl_match is None, "Download not found")

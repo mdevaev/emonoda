@@ -91,11 +91,12 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( not self.__opener is None )
 
 	def torrentChanged(self, torrent) :
+		self.assertMatch(torrent)
 		return ( torrent.hash() != self.__fetchHash(torrent) )
 
 	def fetchTorrent(self, torrent) :
 		comment_match = self.__comment_regexp.match(torrent.comment() or "")
-		assert not comment_match is None, "No comment match"
+		self.assertFetcher(not comment_match is None, "No comment match")
 		topic_id = comment_match.group(1)
 
 		cookie = cookielib.Cookie(
@@ -155,10 +156,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			self.assertLogin(self.__cap_static_regexp.search(data) is None, "Invalid captcha or password")
 
 	def __fetchHash(self, torrent) :
-		comment_match = self.__comment_regexp.match(torrent.comment() or "")
-		assert not comment_match is None, "No comment match"
-
-		data = self.__readUrlRetry(torrent.comment() or "")
+		data = self.__readUrlRetry(torrent.comment())
 		hash_match = self.__hash_regexp.search(data)
 		self.assertFetcher(not hash_match is None, "Hash not found")
 		return hash_match.group(1).lower()

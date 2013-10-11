@@ -33,7 +33,6 @@ FETCHER_VERSION = 1
 
 NNMCLUB_DOMAIN = "nnm-club.me"
 NNMCLUB_LOGIN_URL = "http://%s/forum/login.php" % (NNMCLUB_DOMAIN)
-#NNMCLUB_VIEWTOPIC_URL = "http://%s/forum/viewtopic.php" % (NNMCLUB_DOMAIN)
 NNMCLUB_DL_URL = "http://%s/forum/download.php" % (NNMCLUB_DOMAIN)
 NNMCLUB_SCRAPE_URL = "http://bt.%s:2710/scrape" % (NNMCLUB_DOMAIN)
 
@@ -93,14 +92,17 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( not self.__opener is None )
 
 	def torrentChanged(self, torrent) :
+		self.assertMatch(torrent)
 		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())))
 		self.assertFetcher(data.startswith("d5:"), "Invalid scrape answer")
 		return ( data.strip() == "d5:filesdee" )
 
 	def fetchTorrent(self, torrent) :
-		data = self.__readUrlRetry(torrent.comment() or "")
+		self.assertMatch(torrent)
+		data = self.__readUrlRetry(torrent.comment())
+
 		torrent_id_match = self.__torrent_id_regexp.search(data)
-		assert not torrent_id_match is None, "Unknown torrent_id"
+		self.assertFetcher(not torrent_id_match is None, "Unknown torrent_id")
 		torrent_id = torrent_id_match.group(1)
 
 		data = self.__readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))

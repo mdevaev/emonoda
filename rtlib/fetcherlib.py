@@ -154,6 +154,9 @@ class AbstractFetcher(object) :
 	def assertNonAnonymous(self, login) :
 		self.assertLogin(len(login) != 0, "This tracker can not be used anonymously")
 
+	def assertMatch(self, torrent) :
+		self.assertFetcher(self.match(torrent), "No comment match")
+
 	def assertValidTorrentData(self, data) :
 		message = "Received an invalid torrent data: %s ..." % (tools.coding.utf8(data[:20]))
 		self.assertFetcher(tfile.isValidTorrentData(data), message)
