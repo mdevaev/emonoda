@@ -23,6 +23,7 @@ from rtlib import plugin
 
 import rutracker
 import nnmclub
+import everypony
 import pravtor
 
 
@@ -30,6 +31,7 @@ import pravtor
 FETCHERS_MAP = plugin.mapObjects(
 	rutracker.Fetcher,
 	nnmclub.Fetcher,
+	everypony.Fetcher,
 	pravtor.Fetcher,
 )
 
