@@ -152,7 +152,7 @@ class AbstractFetcher(object) :
 	###
 
 	def assertNonAnonymous(self, login) :
-		self.assertLogin(len(login) != 0, "This tracker can not be used anonymously")
+		self.assertLogin(len(login) != 0, "The tracker \"%s\" can not be used anonymously" % (self.plugin()))
 
 	def assertMatch(self, torrent) :
 		self.assertFetcher(self.match(torrent), "No comment match")
