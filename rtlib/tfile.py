@@ -25,6 +25,11 @@ import base64
 import bencode
 import hashlib
 import urllib
+import itertools
+
+
+##### Public constants #####
+ALL_MAGNET_FIELDS_TUPLE = ("dn", "tr", "xl")
 
 
 ##### Public methods #####
@@ -105,9 +110,23 @@ def printDiff(diff_tuple, prefix = "", output = sys.stdout) :
 
 
 ###
+def isSingleFile(bencode_dict) :
+	return not bencode_dict["info"].has_key("files")
+
+def torrentSize(bencode_dict) :
+	if isSingleFile(bencode_dict) :
+		return bencode_dict["info"]["length"]
+	else :
+		size = 0
+		for file_dict in bencode_dict["info"]["files"] :
+			size += file_dict["length"]
+		return size
+
 def torrentHash(bencode_dict) :
 	return hashlib.sha1(bencode.bencode(bencode_dict["info"])).hexdigest().lower()
 
+
+###
 def scrapeHash(torrent_hash) :
 	scrape_hash = ""
 	for index in xrange(0, len(torrent_hash), 2) :
@@ -119,15 +138,20 @@ def makeMagnet(bencode_dict, extra_list = None) :
 	info_sha1 = hashlib.sha1(bencode.bencode(bencode_dict["info"]))
 	info_digest = info_sha1.digest() # pylint: disable=E1121
 	b32_hash = base64.b32encode(info_digest)
-	args_dict = {
-		"xt" : "urn:btih:%s" % (b32_hash),
-		"dn" : bencode_dict["info"]["name"],
-		"tr" : bencode_dict["announce"],
-		#"xl" : bencode_dict["info"]["length"],
-	}
-	for key in set(args_dict).difference(tuple(extra_list or ()) + ("xt",)) :
-		args_dict.pop(key)
-	return "magnet:?" + urllib.urlencode(args_dict)
+
+	magnet = "magnet:?xt=%s" % (urllib.quote_plus("urn:btih:%s" % (b32_hash)))
+	if "dn" in extra_list :
+		magnet += "&dn=" + urllib.quote_plus(bencode_dict["info"]["name"])
+	if "tr" in extra_list :
+		announce_list = bencode_dict.get("announce-list", [])
+		if bencode_dict.has_key("announce") :
+			announce_list.append([bencode_dict["announce"]])
+		for announce in set(itertools.chain.from_iterable(announce_list)) :
+			magnet += "&tr=" + urllib.quote_plus(announce)
+	if "xl" in extra_list :
+		magnet += "&xl=%d" % (torrentSize(bencode_dict))
+
+	return magnet
 
 
 ##### Public classes #####
@@ -207,7 +231,7 @@ class Torrent(object) :
 	###
 
 	def isSingleFile(self) :
-		return not self.__bencode_dict["info"].has_key("files")
+		return isSingleFile(self.__bencode_dict)
 
 	def files(self, prefix = "") :
 		base = os.path.join(prefix, self.__bencode_dict["info"]["name"])
@@ -225,13 +249,7 @@ class Torrent(object) :
 			return files_dict
 
 	def size(self) :
-		if self.isSingleFile() :
-			return self.__bencode_dict["info"]["length"]
-		else :
-			size = 0
-			for file_dict in self.__bencode_dict["info"]["files"] :
-				size += file_dict["length"]
-			return size
+		return torrentSize(self.__bencode_dict)
 
 
 	### Private ###
