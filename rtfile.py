@@ -63,7 +63,7 @@ def formatCreationDate(torrent) :
 	return ( torrent.creationDate() or "" )
 
 def formatCreationDatePretty(torrent) :
-	return ( datetime.datetime.utcfromtimestamp(torrent.creationDate()) if not torrent.creationDate() is None else "" )
+	return str( datetime.datetime.utcfromtimestamp(torrent.creationDate()) if not torrent.creationDate() is None else "" )
 
 def formatCreatedBy(torrent) :
 	return ( torrent.createdBy() or "" )
