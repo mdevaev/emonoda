@@ -105,7 +105,7 @@ def printDiff(diff_tuple, prefix = "", output = sys.stdout) :
 			("~", modified_set),
 			("?", modified_type_set),
 		) :
-		for item in files_set :
+		for item in sorted(files_set) :
 			print >> output, "%s%s %s" % (prefix, sign, item)
 
 
