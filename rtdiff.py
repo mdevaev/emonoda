@@ -34,9 +34,11 @@ import argparse
 ##### Main #####
 def main() :
 	cli_parser = argparse.ArgumentParser(description="Show torrents metadata")
-	cli_parser.add_argument("-t", "--timeout",    dest="socket_timeout", action="store", default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
-	cli_parser.add_argument(      "--client",     dest="client_name",    action="store", default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument(      "--client-url", dest="client_url",     action="store", default=None, metavar="<url>")
+	cli_parser.add_argument("-t", "--timeout",      dest="socket_timeout",    action="store", default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
+	cli_parser.add_argument(      "--client",       dest="client_name",       action="store", default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
+	cli_parser.add_argument(      "--client-url",   dest="client_url",        action="store", default=None, metavar="<url>")
+	cli_parser.add_argument(      "--no-colors",    dest="no_colors_flag",    action="store_true", default=False)
+	cli_parser.add_argument(      "--force-colors", dest="force_colors_flag", action="store_true", default=False)
 	cli_parser.add_argument("torrents_list", type=str, nargs=2, metavar="<path/hash>")
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 
@@ -59,7 +61,10 @@ def main() :
 		else :
 			raise RuntimeError("Invalid file or hash: %s" % (item))
 
-	tfile.printDiff(tfile.diff(*cli_options.torrents_list), " ")
+	tfile.printDiff(tfile.diff(*cli_options.torrents_list), " ",
+		use_colors_flag=(not cli_options.no_colors_flag),
+		force_colors_flag=cli_options.force_colors_flag,
+	)
 
 
 ###
