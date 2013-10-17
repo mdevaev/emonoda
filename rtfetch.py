@@ -165,7 +165,7 @@ def update(fetchers_list, client,
 
 
 ###
-def initFetchers(config_file_path, url_retries, url_sleep_time, interactive_flag, only_fetchers_list, show_failed_login_flag) :
+def initFetchers(config_file_path, url_retries, url_sleep_time, proxy_url, interactive_flag, only_fetchers_list, show_failed_login_flag) :
 	fetchers_list = []
 	config_parser = ConfigParser.ConfigParser()
 	config_parser.read(config_file_path)
@@ -178,6 +178,7 @@ def initFetchers(config_file_path, url_retries, url_sleep_time, interactive_flag
 				config_parser.get(fetcher_name, "passwd"),
 				url_retries,
 				url_sleep_time,
+				proxy_url,
 				interactive_flag,
 			)
 			try :
@@ -208,6 +209,7 @@ def main() :
 	cli_parser.add_argument("-n", "--noop",           dest="noop_flag",           action="store_true", default=False)
 	cli_parser.add_argument(      "--url-retries",    dest="url_retries",         action="store",      default=fetcherlib.DEFAULT_URL_RETRIES, type=int, metavar="<number>")
 	cli_parser.add_argument(      "--url-sleep-time", dest="url_sleep_time",      action="store",      default=fetcherlib.DEFAULT_URL_SLEEP_TIME, type=int, metavar="<seconds>")
+	cli_parser.add_argument(      "--proxy-url",      dest="proxy_url",           action="store",      default=None, metavar="<(http|socks4|socks5)://username:passwd@host:port>")
 	cli_parser.add_argument(      "--client",         dest="client_name",         action="store",      default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
 	cli_parser.add_argument(      "--client-url",     dest="client_url",          action="store",      default=None, metavar="<url>")
 	cli_parser.add_argument(      "--save-customs",   dest="save_customs_list",   nargs="+",           default=None, metavar="<keys>")
@@ -219,6 +221,7 @@ def main() :
 		cli_options.config_file_path,
 		cli_options.url_retries,
 		cli_options.url_sleep_time,
+		cli_options.proxy_url,
 		cli_options.interactive_flag,
 		cli_options.only_fetchers_list,
 		cli_options.show_failed_login_flag,

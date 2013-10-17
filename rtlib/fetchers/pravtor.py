@@ -41,13 +41,14 @@ PRAVTOR_DL_URL = "http://%s/download.php" % (PRAVTOR_DOMAIN)
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
-	def __init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag) :
-		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag)
+	def __init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag) :
+		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag)
 
 		self.__user_name = user_name
 		self.__passwd = passwd
 		self.__url_retries = url_retries
 		self.__url_sleep_time = url_sleep_time
+		self.__proxy_url = proxy_url
 		self.__interactive_flag = interactive_flag
 
 		self.__comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
@@ -79,7 +80,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	def login(self) :
 		self.assertNonAnonymous(self.__user_name)
 		self.__cookie_jar = cookielib.CookieJar()
-		self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.__cookie_jar))
+		self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.__proxy_url)
 		try :
 			self.__tryLogin()
 		except :

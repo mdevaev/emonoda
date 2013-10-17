@@ -22,7 +22,6 @@
 from rtlib import fetcherlib
 
 import urllib
-import urllib2
 import cookielib
 import re
 
@@ -39,13 +38,14 @@ NNMCLUB_SCRAPE_URL = "http://bt.%s:2710/scrape" % (NNMCLUB_DOMAIN)
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
-	def __init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag) :
-		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag)
+	def __init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag) :
+		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag)
 
 		self.__user_name = user_name
 		self.__passwd = passwd
 		self.__url_retries = url_retries
 		self.__url_sleep_time = url_sleep_time
+		self.__proxy_url = proxy_url
 		self.__interactive_flag = interactive_flag
 
 		self.__comment_regexp = re.compile(r"http://nnm-club\.ru/forum/viewtopic\.php\?p=(\d+)")
@@ -74,7 +74,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.assertNonAnonymous(self.__user_name)
 
 		cookie_jar = cookielib.CookieJar()
-		opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(self.__cookie_jar))
+		opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.__proxy_url)
 
 		post_dict = {
 			"username" : self.__user_name,

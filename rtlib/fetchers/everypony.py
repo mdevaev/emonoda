@@ -22,7 +22,6 @@
 from rtlib import fetcherlib
 
 import re
-import urllib2
 
 
 ##### Public constants #####
@@ -32,11 +31,12 @@ FETCHER_VERSION = 0
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
-	def __init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag) :
-		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, interactive_flag)
+	def __init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag) :
+		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag)
 
 		self.__url_retries = url_retries
 		self.__url_sleep_time = url_sleep_time
+		self.__proxy_url = proxy_url
 
 		self.__comment_regexp = re.compile(r"http://tabun\.everypony\.ru/blog/torrents/\d+\.html")
 		self.__hash_regexp = re.compile(r"<blockquote>\s*Hash\s*:\s*([a-fA-F0-9]{40})\s*<br/>")
@@ -63,7 +63,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
 
 	def login(self) :
-		self.__opener = urllib2.build_opener()
+		self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.__proxy_url)
 
 	def loggedIn(self) :
 		return True
