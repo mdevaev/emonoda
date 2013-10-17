@@ -27,6 +27,8 @@ import hashlib
 import urllib
 import itertools
 
+import ulib.tools.term
+
 
 ##### Public constants #####
 ALL_MAGNET_FIELDS_TUPLE = ("dn", "tr", "xl")
@@ -84,9 +86,6 @@ def diff(old_torrent, new_torrent) :
 			modified_type_set.add(path)
 			continue
 
-		#old_id_tuple = (old_attrs_dict["size"], old_attrs_dict["md5"])
-		#new_id_tuple = (new_attrs_dict["size"], new_attrs_dict["md5"])
-		#if old_id_tuple != new_id_tuple :
 		if old_attrs_dict["size"] != new_attrs_dict["size"] :
 			modified_set.add(path)
 
@@ -97,15 +96,18 @@ def diff(old_torrent, new_torrent) :
 		modified_type_set,
 	)
 
-def printDiff(diff_tuple, prefix = "", output = sys.stdout) :
+def printDiff(diff_tuple, prefix = "", use_colors_flag = True, force_colors_flag = False, output = sys.stdout) :
+	# XXX: See man 4 console_codes
 	(added_set, removed_set, modified_set, modified_type_set) = diff_tuple
-	for (sign, files_set) in (
-			("-", removed_set),
-			("+", added_set),
-			("~", modified_set),
-			("?", modified_type_set),
+	for (sign, color, files_set) in (
+			("-", 31, removed_set),
+			("+", 32, added_set),
+			("~", 36, modified_set),
+			("?", 33, modified_type_set),
 		) :
 		for item in sorted(files_set) :
+			if use_colors_flag :
+				sign = ulib.tools.term.colored(color, sign, force_colors_flag=force_colors_flag, output=output)
 			print >> output, "%s%s %s" % (prefix, sign, item)
 
 

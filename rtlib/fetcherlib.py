@@ -117,7 +117,6 @@ def checkVersions(fetchers_list) :
 			print "#    Local version:    %d" % (local_version)
 			print "#    Upstream version: %d" % (upstream_version)
 			print "# The plugin can not work properly. It is recommended to upgrade the program."
-			print
 			ok_flag = False
 	return ok_flag
 
