@@ -101,15 +101,15 @@ class AbstractClient(object) :
 
 	@classmethod
 	def customKeys(cls) :
-		raise NotImplementedError
+		return ()
 
 	@hashOrTorrent
 	def setCustoms(self, torrent_hash, customs_dict) :
-		raise NotImplementedError
+		pass
 
 	@hashOrTorrent
 	def customs(self, torrent_hash, keys_list) :
-		raise NotImplementedError
+		return {}
 
 	###
 
