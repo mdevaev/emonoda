@@ -34,13 +34,14 @@ def __validMaybeEmptyPath(path) :
 	return validMaybeEmpty(path, validAccessiblePath)
 
 def __validMaybeEmptyMode(mode) :
-	make_mode = ( lambda arg : int(str(arg), 8) )
-	valid_mode = ( lambda arg : validNumber(arg, 0, value_type=make_mode) )
+	valid_mode = ( lambda arg : validNumber(( arg if isinstance(arg, int) else int(str(arg), 8) ), 0) )
 	return validMaybeEmpty(mode, valid_mode)
 
-def __validSetCustoms(pairs_list) :
+def __validSetCustoms(pairs) :
+	if isinstance(pairs, dict) :
+		return pairs
 	customs_dict = {}
-	for pair in pairs_list :
+	for pair in pairs :
 		(key, value) = map(str.strip, (pair.split("=", 1)+[""])[:2])
 		customs_dict[notEmptyStrip(key, "custom key")] = value
 	return customs_dict
@@ -212,9 +213,6 @@ def __lastValue(config_dict, first, requests_list) :
 		if config_dict.get(section, {}).has_key(option) :
 			last_value = config_dict[section][option]
 	return last_value
-
-def __raiseUnknownOption(option) :
-	pass
 
 def __raiseIncorrectValue(option, validator, value) :
 	try :
