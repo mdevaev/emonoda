@@ -20,27 +20,31 @@
 #####
 
 
-from rtlib import const
 from rtlib import tfile
 from rtlib import clients
+from rtlib import config
 
 import re
 import sys
 import os
 import socket
-import argparse
 
 
 ##### Main #####
 def main() :
-	cli_parser = argparse.ArgumentParser(description="Show torrents metadata")
-	cli_parser.add_argument("-t", "--timeout",      dest="socket_timeout",    action="store", default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
-	cli_parser.add_argument(      "--client",       dest="client_name",       action="store", default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument(      "--client-url",   dest="client_url",        action="store", default=None, metavar="<url>")
-	cli_parser.add_argument(      "--no-colors",    dest="no_colors_flag",    action="store_true", default=False)
-	cli_parser.add_argument(      "--force-colors", dest="force_colors_flag", action="store_true", default=False)
+	(cli_parser, config_dict, argv_list) = config.partialParser(sys.argv[1:], description="Show the difference between two torrent files")
+	config.addArguments(cli_parser,
+		config.ARG_TIMEOUT,
+		config.ARG_CLIENT,
+		config.ARG_CLIENT_URL,
+		config.ARG_NO_COLORS,
+		config.ARG_USE_COLORS,
+		config.ARG_FORCE_COLORS,
+		config.ARG_NO_FORCE_COLORS,
+	)
 	cli_parser.add_argument("torrents_list", type=str, nargs=2, metavar="<path/hash>")
-	cli_options = cli_parser.parse_args(sys.argv[1:])
+	cli_options = cli_parser.parse_args(argv_list)
+	config.syncParsers(config.SECTION_RTDIFF, cli_options, config_dict)
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
 
