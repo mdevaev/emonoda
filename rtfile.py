@@ -118,7 +118,7 @@ def main() :
 			("--name",                 "print_name_flag",                 lambda torrent : torrent.name()),
 			("--hash",                 "print_hash_flag",                 lambda torrent : torrent.hash()),
 			("--comment",              "print_comment_flag",              formatComment),
-			("--size",                 "print_size_flag",                 lambda torrent : torrent.size()),
+			("--size",                 "print_size_flag",                 lambda torrent : str(torrent.size())),
 			("--size-pretty",          "print_size_pretty_flag",          formatSizePretty),
 			("--announce",             "print_announce_flag",             formatAnnounce),
 			("--announce-list",        "print_announce_list_flag",        formatAnnounceList),
