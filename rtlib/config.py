@@ -76,7 +76,7 @@ def __makeOptions() :
 
 
 ###
-OPTION_MKDIR_MODE        = ("mkdir-mode",        "mdir_mode",              None,                                __validMaybeEmptyMode)
+OPTION_MKDIR_MODE        = ("mkdir-mode",        "mkdir_mode",             None,                                __validMaybeEmptyMode)
 OPTION_DATA_DIR          = ("data-dir",          "data_dir_path",          None,                                __validMaybeEmptyPath)
 OPTION_SOURCE_DIR        = ("source-dir",        "src_dir_path",           ".",                                 validAccessiblePath)
 OPTION_BACKUP_DIR        = ("backup-dir",        "backup_dir_path",        None,                                __validMaybeEmptyPath)
