@@ -48,7 +48,7 @@ class Client(clientlib.AbstractClient) :
 	# XXX: API description: http://pythonhosted.org/transmissionrpc/
 
 	def __init__(self, url = DEFAULT_URL) :
-		raise RuntimeError("NOT IMPLEMENTED!") # FIXME FIXME FIXME!!!
+		raise RuntimeError("NOT TESTED! Comment this line and try again on your own risk! Backup your data!") # FIXME FIXME FIXME!!!
 		if transmissionrpc is None :
 			raise RuntimeError("Required module transmissionrpc")
 
@@ -89,7 +89,7 @@ class Client(clientlib.AbstractClient) :
 		return False
 
 	def hashes(self) :
-		return [ item.hashString.lower() for item in self.__server.get_torrents(arguments=("hashString",)) ]
+		return [ item.hashString.lower() for item in self.__server.get_torrents(arguments=("id", "hashString")) ]
 
 	@clientlib.hashOrTorrent
 	def torrentPath(self, torrent_hash) :
@@ -98,20 +98,17 @@ class Client(clientlib.AbstractClient) :
 		raise NotImplementedError # TODO
 
 	@clientlib.hashOrTorrent
+	# get torrent data dir
 	def dataPrefix(self, torrent_hash) :
-		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
-		#multicall = xmlrpclib.MultiCall(self.__server)
-		#multicall.d.get_directory(torrent_hash)
-		#multicall.d.is_multi_file(torrent_hash)
-		#(path, is_multi_file) = multicall()
-		#if is_multi_file :
-		#	path = os.path.dirname(os.path.normpath(path))
-		#return path
-		raise NotImplementedError # TODO
+		torrent_obj = self.__server.get_torrent(torrent_hash, arguments=("id", "hashString", "downloadDir",))
+		if not torrent_obj is None :
+			print torrent_obj.downloadDir
+			return torrent_obj.downloadDir
+		return False
 
 	def defaultDataPrefix(self) :
-		#return self.__server.get_directory()
-		raise NotImplementedError # TODO
+		session = self.__server.get_session()
+		return session.download_dir
 
 	###
 
