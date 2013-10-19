@@ -82,14 +82,14 @@ class Client(clientlib.AbstractClient) :
 
 	@clientlib.hashOrTorrent
 	def hasTorrent(self, torrent_hash) :
-		torrent_obj = self.__server.get_torrent(torrent_hash, arguments="hashString")
+		torrent_obj = self.__server.get_torrent(torrent_hash, arguments=("hashString",))
 		if not torrent_obj is None :
 			assert torrent_obj.hashString.lower() == torrent_hash
 			return True
 		return False
 
 	def hashes(self) :
-		return [ item.hashString.lower() for item in self.__server.get_torrents(arguments="hashString") ]
+		return [ item.hashString.lower() for item in self.__server.get_torrents(arguments=("hashString",)) ]
 
 	@clientlib.hashOrTorrent
 	def torrentPath(self, torrent_hash) :
