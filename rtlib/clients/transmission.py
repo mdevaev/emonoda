@@ -21,16 +21,17 @@
 
 from rtlib import clientlib
 
-from ulib import tools
-import ulib.tools.coding # pylint: disable=W0611
+#from ulib import tools
+#import ulib.tools.coding # pylint: disable=W0611
 
 import os
-import time
+import operator
 
 try :
-    import transmissionrpc
+	import transmissionrpc # pylint: disable=F0401
 except ImportError :
-    transmissionrpc = None
+	transmissionrpc = None # pylint: disable=C0103
+
 
 ##### Public constants #####
 CLIENT_NAME = "transmission"
@@ -47,12 +48,17 @@ class Client(clientlib.AbstractClient) :
 	# XXX: API description: http://pythonhosted.org/transmissionrpc/
 
 	def __init__(self, url = DEFAULT_URL) :
+		raise RuntimeError("NOT IMPLEMENTED!") # FIXME FIXME FIXME!!!
+		if transmissionrpc is None :
+			raise RuntimeError("Required module transmissionrpc")
+
 		if url is None :
 			url = DEFAULT_URL
 		clientlib.AbstractClient.__init__(self, url)
 
 		# Client uses urlparse for get user and password from URL
 		self.__server = transmissionrpc.Client(url)
+
 
 	### Public ###
 
@@ -62,38 +68,82 @@ class Client(clientlib.AbstractClient) :
 
 	###
 
-    
+	@clientlib.hashOrTorrent
 	def removeTorrent(self, torrent_hash) :
+		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
 		self.__server.remove_torrent(torrent_hash)
 
 	def loadTorrent(self, torrent, prefix = None) :
 		torrent_path = torrent.path()
-		torrent_hash = torrent.hash()
-
 		assert os.access(torrent_path, os.F_OK), "Torrent file does not exists"
 		if not prefix is None :
 			assert os.access("%s%s." % (prefix, os.path.sep), os.F_OK), "Invalid prefix"
-
-		__server.add_torrent(torrent_path)
+		self.__server.add_torrent(torrent_path)
 
 	@clientlib.hashOrTorrent
 	def hasTorrent(self, torrent_hash) :
-		assert __server.get_torrent(torrent_hash, arguments='hashString').hashString == torrent_hash
-		return True
+		torrent_obj = self.__server.get_torrent(torrent_hash, arguments="hashString")
+		if not torrent_obj is None :
+			assert torrent_obj.hashString.lower() == torrent_hash
+			return True
+		return False
 
 	def hashes(self) :
-		# TODO: check what with arguments here
-		#return map(lambda x:x.hashString, self.__server.get_torrents(arguments='hashString'))
-		return map(lambda x:x.hashString, self.__server.get_torrents())
+		return [ item.hashString.lower() for item in self.__server.get_torrents(arguments="hashString") ]
 
 	@clientlib.hashOrTorrent
-	@_catchUnknownTorrentFault
+	def torrentPath(self, torrent_hash) :
+		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
+		#return self.__server.d.get_loaded_file(torrent_hash)
+		raise NotImplementedError # TODO
+
+	@clientlib.hashOrTorrent
+	def dataPrefix(self, torrent_hash) :
+		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
+		#multicall = xmlrpclib.MultiCall(self.__server)
+		#multicall.d.get_directory(torrent_hash)
+		#multicall.d.is_multi_file(torrent_hash)
+		#(path, is_multi_file) = multicall()
+		#if is_multi_file :
+		#	path = os.path.dirname(os.path.normpath(path))
+		#return path
+		raise NotImplementedError # TODO
+
+	def defaultDataPrefix(self) :
+		#return self.__server.get_directory()
+		raise NotImplementedError # TODO
+
+	###
+
+	@clientlib.hashOrTorrent
+	def fullPath(self, torrent_hash) :
+		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
+		#return self.__server.d.get_base_path(torrent_hash)
+		raise NotImplementedError # TODO
+
+	@clientlib.hashOrTorrent
+	def name(self, torrent_hash) :
+		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
+		#return self.__server.d.get_name(torrent_hash)
+		raise NotImplementedError # TODO
+
+	@clientlib.hashOrTorrent
+	def isSingleFile(self, torrent_hash) :
+		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
+		#return not self.__server.d.is_multi_file(torrent_hash)
+		raise NotImplementedError # TODO
+
+	@clientlib.hashOrTorrent
 	def files(self, torrent_hash, system_path_flag = False) :
-		torrent_files = __server.get_files(torrent_hash)
+		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
+		torrent_files = self.__server.get_files(torrent_hash)
 		#base = tools.coding.utf8
+		base = None # FIXME!
 		files_dict = { base : None }
-		for (numtor, allfiles) in torrent_files.iteritems():
-			for (numfile, value) in allfiles.iteritems():
+		#for (numtor, allfiles) in torrent_files.iteritems():
+		for allfiles in torrent_files.values() :
+			#for (numfile, value) in allfiles.iteritems():
+			for value in allfiles.values() :
 				files_dict[value['name']] = { "size" : value['size'], "md5" : None }
 				# TODO: Нужно включать каталоги с атрибутом (none)
 		return files_dict
