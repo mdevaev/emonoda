@@ -44,13 +44,13 @@ DELIMITER = "-" * 10
 
 
 ##### Public methods #####
-def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, noop_flag) :
+def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, real_update_flag) :
 	new_data = fetcher.fetchTorrent(torrent)
 	tmp_torrent = tfile.Torrent()
 	tmp_torrent.loadData(new_data)
 	diff_tuple = tfile.diff(torrent, tmp_torrent)
 
-	if not noop_flag :
+	if real_update_flag :
 		if not backup_dir_path is None :
 			backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
 			shutil.copyfile(torrent.path(), backup_file_path)
@@ -89,7 +89,7 @@ def update(fetchers_list, client,
 		pass_failed_login_flag,
 		show_passed_flag,
 		show_diff_flag,
-		noop_flag,
+		real_update_flag,
 		no_colors_flag,
 		force_colors_flag,
 	) :
@@ -144,7 +144,7 @@ def update(fetchers_list, client,
 				passed_count += 1
 				continue
 
-			diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, noop_flag)
+			diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, real_update_flag)
 			tools.cli.newLine(status_line % (colored(32, "+")))
 			if show_diff_flag :
 				tfile.printDiff(diff_tuple, "\t", use_colors_flag=(not no_colors_flag), force_colors_flag=force_colors_flag)
@@ -231,8 +231,8 @@ def main() :
 		config.ARG_NO_SHOW_DIFF,
 		config.ARG_CHECK_VERSIONS,
 		config.ARG_NO_CHECK_VERSIONS,
-		config.ARG_NOOP,
-		config.ARG_OPERATE,
+		config.ARG_REAL_UPDATE,
+		config.ARG_NO_REAL_UPDATE,
 		config.ARG_URL_RETRIES,
 		config.ARG_URL_SLEEP_TIME,
 		config.ARG_PROXY_URL,
@@ -294,7 +294,7 @@ def main() :
 		cli_options.pass_failed_login_flag,
 		cli_options.show_passed_flag,
 		cli_options.show_diff_flag,
-		cli_options.noop_flag,
+		cli_options.real_update_flag,
 		cli_options.no_colors_flag,
 		cli_options.force_colors_flag,
 	)
