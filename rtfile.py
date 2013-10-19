@@ -20,11 +20,11 @@
 #####
 
 
-from rtlib import const
 from rtlib import tfile
 from rtlib import fs
 from rtlib import clients
 from rtlib import clientlib
+from rtlib import config
 
 from ulib import tools
 import ulib.tools.fmt # pylint: disable=W0611
@@ -34,7 +34,6 @@ import socket
 import operator
 import itertools
 import datetime
-import argparse
 
 
 ##### Public methods #####
@@ -111,7 +110,7 @@ def printPrettyMeta(torrent, client) :
 
 ##### Main #####
 def main() :
-	cli_parser = argparse.ArgumentParser(description="Show torrents metadata")
+	(cli_parser, config_dict, argv_list) = config.partialParser(sys.argv[1:], description="Show torrents metadata")
 	print_options_list = []
 	for (print_option, print_dest, print_method) in (
 			("--path",                 "print_path_flag",                 lambda torrent : torrent.path()),
@@ -136,13 +135,16 @@ def main() :
 				cli_parser.add_argument(print_option, dest=print_dest, action="store_true"),
 				print_method,
 			))
-	cli_parser.add_argument(      "--without-headers", dest="without_headers_flag", action="store_true")
-	cli_parser.add_argument(      "--magnet-fields",   dest="magnet_fields_list",   nargs="+",      default=None, metavar="<fields>", choices=tfile.ALL_MAGNET_FIELDS_TUPLE)
-	cli_parser.add_argument("-t", "--timeout",         dest="socket_timeout",       action="store", default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
-	cli_parser.add_argument(      "--client",          dest="client_name",          action="store", default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument(      "--client-url",      dest="client_url",           action="store", default=None, metavar="<url>")
+	cli_parser.add_argument("--without-headers", dest="without_headers_flag", action="store_true")
+	cli_parser.add_argument("--magnet-fields",   dest="magnet_fields_list",   nargs="+",      default=None, metavar="<fields>", choices=tfile.ALL_MAGNET_FIELDS_TUPLE)
+	config.addArguments(cli_parser,
+		config.ARG_TIMEOUT,
+		config.ARG_CLIENT,
+		config.ARG_CLIENT_URL,
+	)
 	cli_parser.add_argument("torrents_list", type=str, nargs="+")
-	cli_options = cli_parser.parse_args(sys.argv[1:])
+	cli_options = cli_parser.parse_args(argv_list)
+	config.syncParsers(config.SECTION_RTFILE, cli_options, config_dict)
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
 

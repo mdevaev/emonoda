@@ -23,6 +23,7 @@ from ulib.validators.fs import validAccessiblePath
 ##### Public constants #####
 SECTION_MAIN = "main"
 SECTION_RTFETCH = "rtfetch"
+SECTION_RTFILE = "rtfile"
 SECTION_RTDIFF = "rtdiff"
 
 
