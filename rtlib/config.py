@@ -5,7 +5,6 @@ import os
 import argparse
 import ConfigParser
 
-import const
 import fetcherlib
 import fetchers
 import clients
@@ -22,6 +21,11 @@ from ulib.validators.fs import validAccessiblePath
 
 
 ##### Public constants #####
+DEFAULT_CONFIG_PATH = "~/.config/rtlib.conf"
+DEFAULT_TIMEOUT = 5
+
+
+###
 SECTION_MAIN = "main"
 SECTION_RTFETCH = "rtfetch"
 SECTION_RTFILE = "rtfile"
@@ -83,7 +87,7 @@ OPTION_SOURCE_DIR        = ("source-dir",        "src_dir_path",           ".", 
 OPTION_BACKUP_DIR        = ("backup-dir",        "backup_dir_path",        None,                                __validMaybeEmptyPath)
 OPTION_NAMES_FILTER      = ("names-filter",      "names_filter",           None,                                validEmpty)
 OPTION_ONLY_FETCHERS     = ("only-fetchers",     "only_fetchers_list",     fetchers.FETCHERS_MAP.keys(),        __makeValidList(fetchers.FETCHERS_MAP.keys()))
-OPTION_TIMEOUT           = ("timeout",           "socket_timeout",         const.DEFAULT_TIMEOUT,               __makeValidNumber(0))
+OPTION_TIMEOUT           = ("timeout",           "socket_timeout",         DEFAULT_TIMEOUT,                     __makeValidNumber(0))
 OPTION_LOGIN             = ("login",             None,                     fetcherlib.DEFAULT_LOGIN,            str)
 OPTION_PASSWD            = ("passwd",            None,                     fetcherlib.DEFAULT_PASSWD,           str)
 OPTION_URL_RETRIES       = ("url-retries",       "url_retries",            fetcherlib.DEFAULT_URL_RETRIES,      __makeValidNumber(0))
@@ -150,7 +154,7 @@ def syncParsers(app_section, cli_options, config_dict, ignore_list = ()) :
 
 def partialParser(argv_list, **kwargs_dict) :
 	cli_parser = argparse.ArgumentParser(add_help=False)
-	cli_parser.add_argument("-c", "--config", dest="config_file_path", default=os.path.join(os.path.expanduser("~"), ".config/rtlib.conf"), metavar="<file>")
+	cli_parser.add_argument("-c", "--config", dest="config_file_path", default=os.path.expanduser(DEFAULT_CONFIG_PATH), metavar="<file>")
 	(cli_options, remaining_list) = cli_parser.parse_known_args()
 	config_dict = ( {} if cli_options.config_file_path is None else __readConfig(cli_options.config_file_path) )
 	kwargs_dict.update({

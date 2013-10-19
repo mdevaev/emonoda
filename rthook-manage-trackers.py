@@ -3,7 +3,7 @@
 
 
 try :
-	from rtlib.const import DEFAULT_TIMEOUT
+	from rtlib.config import DEFAULT_TIMEOUT
 	from rtlib.clients.rtorrent import DEFAULT_URL
 except ImportError :
 	DEFAULT_TIMEOUT = 5
