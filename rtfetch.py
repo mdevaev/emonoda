@@ -23,6 +23,7 @@
 from rtlib import tfile
 from rtlib import fetcherlib
 from rtlib import fetchers
+from rtlib import clientlib
 from rtlib import clients
 from rtlib import config
 
@@ -208,15 +209,6 @@ def initFetchers(config_dict, url_retries, url_sleep_time, proxy_url, interactiv
 			fetchers_list.append(fetcher)
 	return fetchers_list
 
-def initClient(client_name, client_url, save_customs_list) :
-	if not client_name is None :
-		client_class = clients.CLIENTS_MAP[client_name]
-		valid_customs_list = client_class.customKeys()
-		for custom_key in save_customs_list :
-			ulib.validators.common.validRange(custom_key, valid_customs_list)
-		return client_class(client_url)
-	return None
-
 
 ##### Main #####
 def main() :
@@ -285,11 +277,13 @@ def main() :
 
 	print
 
-	client = initClient(
-		cli_options.client_name,
-		cli_options.client_url,
-		cli_options.save_customs_list,
-	)
+	client = None
+	if not cli_options.client_name is None :
+		client = clientlib.initClient(
+			clients.CLIENTS_MAP[cli_options.client_name],
+			cli_options.client_url,
+			save_customs_list=cli_options.save_customs_list,
+		)
 
 	update(fetchers_list, client,
 		cli_options.src_dir_path,
