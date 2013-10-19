@@ -20,11 +20,11 @@
 #####
 
 
-from rtlib import const
 from rtlib import tfile
 from rtlib import fetcherlib
 from rtlib import fetchers
 from rtlib import clients
+from rtlib import config
 
 from ulib import tools
 import ulib.tools.cli # pylint: disable=W0611
@@ -34,8 +34,6 @@ import sys
 import os
 import socket
 import operator
-import argparse
-import ConfigParser
 import shutil
 import time
 
@@ -57,7 +55,7 @@ def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, 
 			shutil.copyfile(torrent.path(), backup_file_path)
 
 		if not client is None :
-			if not save_customs_list is None :
+			if len(save_customs_list) != 0 :
 				customs_dict = client.customs(torrent, save_customs_list)
 			prefix = client.dataPrefix(torrent)
 			client.removeTorrent(torrent)
@@ -68,7 +66,7 @@ def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, 
 
 		if not client is None :
 			client.loadTorrent(torrent, prefix)
-			if not save_customs_list is None :
+			if len(save_customs_list) != 0 :
 				client.setCustoms(torrent, customs_dict)
 
 	return diff_tuple
@@ -176,30 +174,38 @@ def update(fetchers_list, client,
 
 
 ###
-def initFetchers(config_file_path, url_retries, url_sleep_time, proxy_url, interactive_flag, only_fetchers_list, pass_failed_login_flag) :
+def initFetchers(config_dict, url_retries, url_sleep_time, proxy_url, interactive_flag, only_fetchers_list, pass_failed_login_flag) :
 	fetchers_list = []
-	config_parser = ConfigParser.ConfigParser()
-	config_parser.read(config_file_path)
-	enabled_fetchers_set = set(fetchers.FETCHERS_MAP.keys()).intersection(only_fetchers_list)
-	for fetcher_name in enabled_fetchers_set :
+	for fetcher_name in set(fetchers.FETCHERS_MAP.keys()).intersection(only_fetchers_list) :
+		get_fetcher_option = ( lambda option : config.getOption(fetcher_name, option, config_dict) )
+		get_common_option = ( lambda option, cli_value : config.getCommonOption((
+			config.SECTION_MAIN, config.SECTION_RTFETCH, fetcher_name), option, config_dict, cli_value) )
+
 		fetcher_class = fetchers.FETCHERS_MAP[fetcher_name]
-		if config_parser.has_section(fetcher_name) :
-			fetcher = fetcher_class(
-				config_parser.get(fetcher_name, "login"),
-				config_parser.get(fetcher_name, "passwd"),
-				url_retries,
-				url_sleep_time,
-				proxy_url,
-				interactive_flag,
-			)
+		if config_dict.has_key(fetcher_name) :
+			tools.cli.oneLine("# Enabling the fetcher \"%s\"..." % (fetcher_name))
+
+			f_login            = get_fetcher_option(config.OPTION_LOGIN)
+			f_passwd           = get_fetcher_option(config.OPTION_PASSWD)
+			f_url_retries      = get_common_option(config.OPTION_URL_RETRIES, url_retries)
+			f_url_sleep_time   = get_common_option(config.OPTION_URL_SLEEP_TIME, url_sleep_time)
+			f_proxy_url        = get_common_option(config.OPTION_PROXY_URL, proxy_url)
+			f_interactive_flag = get_common_option(config.OPTION_INTERACTIVE, interactive_flag)
+
 			try :
+				fetcher = fetcher_class(f_login, f_passwd, f_url_retries, f_url_sleep_time, f_proxy_url, f_interactive_flag)
 				fetcher.login()
+				tools.cli.newLine("# Fetcher \"%s\" is ready (user: %s; proxy: %s; interactive: %s)" % (
+						fetcher_name,
+						( f_login or "<anonymous>" ),
+						( f_proxy_url or "<none>" ),
+						( "yes" if f_interactive_flag else "no" ),
+					))
 			except Exception, err :
-				print "# Login error: %s: %s(%s)" % (fetcher_name, type(err).__name__, str(err))
+				tools.cli.newLine("# Init error: %s: %s(%s)" % (fetcher_name, type(err).__name__, err))
 				if not pass_failed_login_flag :
 					raise
 			fetchers_list.append(fetcher)
-	print
 	return fetchers_list
 
 def initClient(client_name, client_url, save_customs_list) :
@@ -214,34 +220,53 @@ def initClient(client_name, client_url, save_customs_list) :
 
 ##### Main #####
 def main() :
-	cli_parser = argparse.ArgumentParser(description="Update rtorrent files from popular trackers")
-	cli_parser.add_argument("-c", "--config",         dest="config_file_path",    action="store",      required=True, metavar="<file>")
-	cli_parser.add_argument("-s", "--source-dir",     dest="src_dir_path",        action="store",      default=".",   metavar="<dir>")
-	cli_parser.add_argument("-b", "--backup-dir",     dest="backup_dir_path",     action="store",      default=None,  metavar="<dir>")
-	cli_parser.add_argument("-f", "--filter",         dest="names_filter",        action="store",      default=None,  metavar="<substring>")
-	cli_parser.add_argument("-o", "--only-fetchers",  dest="only_fetchers_list",  nargs="+",           default=fetchers.FETCHERS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument("-t", "--timeout",        dest="socket_timeout",      action="store",      default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
-	cli_parser.add_argument("-i", "--interactive",    dest="interactive_flag",    action="store_true", default=False)
-	cli_parser.add_argument("-u", "--skip-unknown",   dest="skip_unknown_flag",   action="store_true", default=False)
-	cli_parser.add_argument("-l", "--pass-failed-login", dest="pass_failed_login_flag", action="store_true", default=False)
-	cli_parser.add_argument("-p", "--show-passed",    dest="show_passed_flag",    action="store_true", default=False)
-	cli_parser.add_argument("-d", "--show-diff",      dest="show_diff_flag",      action="store_true", default=False)
-	cli_parser.add_argument("-k", "--check-versions", dest="check_versions_flag", action="store_true", default=False)
-	cli_parser.add_argument("-n", "--noop",           dest="noop_flag",           action="store_true", default=False)
-	cli_parser.add_argument(      "--url-retries",    dest="url_retries",         action="store",      default=fetcherlib.DEFAULT_URL_RETRIES, type=int, metavar="<number>")
-	cli_parser.add_argument(      "--url-sleep-time", dest="url_sleep_time",      action="store",      default=fetcherlib.DEFAULT_URL_SLEEP_TIME, type=int, metavar="<seconds>")
-	cli_parser.add_argument(      "--proxy-url",      dest="proxy_url",           action="store",      default=None, metavar="<(http|socks4|socks5)://username:passwd@host:port>")
-	cli_parser.add_argument(      "--client",         dest="client_name",         action="store",      default=None, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument(      "--client-url",     dest="client_url",          action="store",      default=None, metavar="<url>")
-	cli_parser.add_argument(      "--save-customs",   dest="save_customs_list",   nargs="+",           default=None, metavar="<keys>")
-	cli_parser.add_argument(      "--no-colors",      dest="no_colors_flag",      action="store_true", default=False)
-	cli_parser.add_argument(      "--force-colors",   dest="force_colors_flag",   action="store_true", default=False)
-	cli_options = cli_parser.parse_args(sys.argv[1:])
+	(cli_parser, config_dict, argv_list) = config.partialParser(sys.argv[1:], description="Update rtorrent files from popular trackers")
+	config.addArguments(cli_parser,
+		config.ARG_SOURCE_DIR,
+		config.ARG_BACKUP_DIR,
+		config.ARG_NAMES_FILTER,
+		config.ARG_ONLY_FETCHERS,
+		config.ARG_TIMEOUT,
+		config.ARG_INTERACTIVE,
+		config.ARG_NO_INTERACTIVE,
+		config.ARG_SKIP_UNKNOWN,
+		config.ARG_NO_SKIP_UNKNOWN,
+		config.ARG_PASS_FAILED_LOGIN,
+		config.ARG_NO_PASS_FAILED_LOGIN,
+		config.ARG_SHOW_PASSED,
+		config.ARG_NO_SHOW_PASSED,
+		config.ARG_SHOW_DIFF,
+		config.ARG_NO_SHOW_DIFF,
+		config.ARG_CHECK_VERSIONS,
+		config.ARG_NO_CHECK_VERSIONS,
+		config.ARG_NOOP,
+		config.ARG_OPERATE,
+		config.ARG_URL_RETRIES,
+		config.ARG_URL_SLEEP_TIME,
+		config.ARG_PROXY_URL,
+		config.ARG_CLIENT,
+		config.ARG_CLIENT_URL,
+		config.ARG_SAVE_CUSTOMS,
+		config.ARG_NO_COLORS,
+		config.ARG_USE_COLORS,
+		config.ARG_FORCE_COLORS,
+		config.ARG_NO_FORCE_COLORS,
+	)
+	cli_options = cli_parser.parse_args(argv_list)
+	config.syncParsers(config.SECTION_RTFETCH, cli_options, config_dict, (
+			# For fetchers: validate this options later
+			config.OPTION_LOGIN,
+			config.OPTION_PASSWD,
+			config.OPTION_URL_RETRIES,
+			config.OPTION_URL_SLEEP_TIME,
+			config.OPTION_PROXY_URL,
+			config.OPTION_INTERACTIVE,
+		))
+
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
 
-	fetchers_list = initFetchers(
-		cli_options.config_file_path,
+	fetchers_list = initFetchers(config_dict,
 		cli_options.url_retries,
 		cli_options.url_sleep_time,
 		cli_options.proxy_url,
