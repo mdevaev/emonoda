@@ -22,10 +22,12 @@
 from rtlib import plugin
 
 import rtorrent
+import transmission
 
 
 ##### Public constants #####
 CLIENTS_MAP = plugin.mapObjects(
 	rtorrent.Client,
+	transmission.Client,
 )
 
