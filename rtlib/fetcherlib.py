@@ -34,8 +34,12 @@ import time
 
 
 ##### Public constants #####
+DEFAULT_LOGIN = ""
+DEFAULT_PASSWD = ""
 DEFAULT_URL_RETRIES = 10
 DEFAULT_URL_SLEEP_TIME = 1
+DEFAULT_PROXY_URL = None
+DEFAULT_INTERACTIVE_FLAG = False
 
 VERSIONS_URL = const.RAW_UPSTREAM_URL + "/fetchers.json"
 
