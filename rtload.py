@@ -90,6 +90,7 @@ def main() :
 		config.ARG_CLIENT_URL,
 		config.ARG_SET_CUSTOMS,
 	)
+	cli_parser.add_argument("--link-to", dest="link_to_path", action="store", default=None, metavar="<path>")
 	cli_parser.add_argument("torrents_list", type=str, nargs="+")
 	cli_options = cli_parser.parse_args(argv_list)
 	config.syncParsers(config.SECTION_RTLOAD, cli_options, config_dict)
