@@ -10,6 +10,7 @@ import fetcherlib
 import fetchers
 import clients
 
+from ulib.validatorlib import notEmptyStrip
 from ulib.validatorlib import ValidatorError
 from ulib.validators.common import validStringList
 from ulib.validators.common import validRange
@@ -25,11 +26,24 @@ SECTION_MAIN = "main"
 SECTION_RTFETCH = "rtfetch"
 SECTION_RTFILE = "rtfile"
 SECTION_RTDIFF = "rtdiff"
+SECTION_RTLOAD = "rtload"
 
 
 ###
 def __validMaybeEmptyPath(path) :
 	return validMaybeEmpty(path, validAccessiblePath)
+
+def __validMaybeEmptyMode(mode) :
+	make_mode = ( lambda arg : int(str(arg), 8) )
+	valid_mode = ( lambda arg : validNumber(arg, 0, value_type=make_mode) )
+	return validMaybeEmpty(mode, valid_mode)
+
+def __validSetCustoms(pairs_list) :
+	customs_dict = {}
+	for pair in pairs_list :
+		(key, value) = map(str.strip, (pair.split("=", 1)+[""])[:2])
+		customs_dict[notEmptyStrip(key, "custom key")] = value
+	return customs_dict
 
 def __makeValidMaybeEmptyRange(valid_list) :
 	valid_range = ( lambda arg : validRange(arg, valid_list) )
@@ -41,6 +55,8 @@ def __makeValidList(valid_list) :
 def __makeValidNumber(*args_tuple) :
 	return ( lambda arg : validNumber(arg, *args_tuple) )
 
+
+###
 def __makeOptions() :
 	options_list = [ value for (key, value) in globals().iteritems() if key.startswith("OPTION_") ]
 	all_options_dict = {}
@@ -60,6 +76,7 @@ def __makeOptions() :
 
 
 ###
+OPTION_MKDIR_MODE        = ("mkdir-mode",        "mdir_mode",              None,                                __validMaybeEmptyMode)
 OPTION_DATA_DIR          = ("data-dir",          "data_dir_path",          None,                                __validMaybeEmptyPath)
 OPTION_SOURCE_DIR        = ("source-dir",        "src_dir_path",           ".",                                 validAccessiblePath)
 OPTION_BACKUP_DIR        = ("backup-dir",        "backup_dir_path",        None,                                __validMaybeEmptyPath)
@@ -81,9 +98,11 @@ OPTION_NOOP              = ("noop",              "noop_flag",              False
 OPTION_CLIENT            = ("client",            "client_name",            None,                                __makeValidMaybeEmptyRange(clients.CLIENTS_MAP.keys()))
 OPTION_CLIENT_URL        = ("client-url",        "client_url",             None,                                validEmpty)
 OPTION_SAVE_CUSTOMS      = ("save-customs",      "save_customs_list",      (),                                  validStringList)
+OPTION_SET_CUSTOMS       = ("set-customs",       "set_customs_dict",       {},                                  __validSetCustoms)
 OPTION_NO_COLORS         = ("no-colors",         "no_colors_flag",         False,                               validBool)
 OPTION_FORCE_COLORS      = ("force-colors",      "force_colors_flag",      False,                               validBool)
 
+ARG_MKDIR_MODE           = (("-m", OPTION_MKDIR_MODE[0],),              OPTION_MKDIR_MODE,        { "action" : "store", "metavar" : "<mode>" })
 ARG_DATA_DIR             = (("-a", OPTION_DATA_DIR[0],),                OPTION_DATA_DIR,          { "action" : "store", "metavar" : "<dir>" })
 ARG_SOURCE_DIR           = (("-s", OPTION_SOURCE_DIR[0],),              OPTION_SOURCE_DIR,        { "action" : "store", "metavar" : "<dir>" })
 ARG_BACKUP_DIR           = (("-b", OPTION_BACKUP_DIR[0],),              OPTION_BACKUP_DIR,        { "action" : "store", "metavar" : "<dir>" })
@@ -110,6 +129,7 @@ ARG_OPERATE              = ((      "operate",),                         OPTION_N
 ARG_CLIENT               = ((      OPTION_CLIENT[0],),                  OPTION_CLIENT,            { "action" : "store", "metavar" : "<plugin>" })
 ARG_CLIENT_URL           = ((      OPTION_CLIENT_URL[0],),              OPTION_CLIENT_URL,        { "action" : "store", "metavar" : "<url>" })
 ARG_SAVE_CUSTOMS         = ((      OPTION_SAVE_CUSTOMS[0],),            OPTION_SAVE_CUSTOMS,      { "nargs"  : "+",     "metavar" : "<key>" })
+ARG_SET_CUSTOMS          = ((      OPTION_SET_CUSTOMS[0],),             OPTION_SET_CUSTOMS,       { "nargs"  : "+",     "metavar" : "<key(=value)>" })
 ARG_NO_COLORS            = ((      OPTION_NO_COLORS[0],),               OPTION_NO_COLORS,         { "action" : "store_true" })
 ARG_USE_COLORS           = ((      "use-colors",),                      OPTION_NO_COLORS,         { "action" : "store_false" })
 ARG_FORCE_COLORS         = ((      OPTION_FORCE_COLORS[0],),            OPTION_FORCE_COLORS,      { "action" : "store_true" })

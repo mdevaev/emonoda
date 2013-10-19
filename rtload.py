@@ -20,15 +20,15 @@
 #####
 
 
-from rtlib import const
 from rtlib import tfile
+from rtlib import clientlib
 from rtlib import clients
+from rtlib import config
 
 import sys
 import os
 import errno
 import socket
-import argparse
 
 
 ##### Public classes #####
@@ -53,10 +53,11 @@ def linkData(torrent, data_dir_path, link_to_path, mkdir_mode) :
 	makeDirsTree(mkdir_path, mkdir_mode)
 	os.symlink(os.path.join(data_dir_path, torrent.name()), link_to_path)
 
-
-###
-def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, customs_dict) :
-	torrents_list = [ tfile.Torrent(os.path.abspath(item)) for item in torrents_list ]
+def loadTorrent(client, src_dir_path, torrents_list, data_dir_path, link_to_path, mkdir_mode, customs_dict) :
+	torrents_list = [
+		tfile.Torrent( os.path.abspath(item) if src_dir_path == "." else os.path.join(src_dir_path, item) )
+		for item in torrents_list
+	]
 	for torrent in torrents_list :
 		if client.hasTorrent(torrent) :
 			raise RuntimeError("%s: already loaded" % (torrent.path()))
@@ -79,45 +80,42 @@ def loadTorrent(client, torrents_list, data_dir_path, link_to_path, mkdir_mode, 
 
 ##### Main #####
 def main() :
-	cli_parser = argparse.ArgumentParser(description="Add torrent to the data model \"t.data\"")
-	cli_parser.add_argument("-d", "--data-dir",    dest="data_dir_path",    action="store", default=None, metavar="<path>")
-	cli_parser.add_argument("-l", "--link-to",     dest="link_to_path",     action="store", default=None, metavar="<path>")
-	cli_parser.add_argument("-t", "--timeout",     dest="socket_timeout",   action="store", default=const.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
-	cli_parser.add_argument("-m", "--mkdir-mode",  dest="mkdir_mode",       action="store", default=None, type=int, metavar="<mode>")
-	cli_parser.add_argument(      "--client",      dest="client_name",      action="store", required=True, choices=clients.CLIENTS_MAP.keys(), metavar="<plugin>")
-	cli_parser.add_argument(      "--client-url",  dest="client_url",       action="store", default=None, metavar="<url>")
-	cli_parser.add_argument(      "--set-customs", dest="set_customs_list", nargs="+",      metavar="<key(=value)>")
+	(cli_parser, config_dict, argv_list) = config.partialParser(sys.argv[1:], description="Add torrent to the data model \"t.data\"")
+	config.addArguments(cli_parser,
+		config.ARG_MKDIR_MODE,
+		config.ARG_DATA_DIR,
+		config.ARG_SOURCE_DIR,
+		config.ARG_TIMEOUT,
+		config.ARG_CLIENT,
+		config.ARG_CLIENT_URL,
+		config.ARG_SET_CUSTOMS,
+	)
 	cli_parser.add_argument("torrents_list", type=str, nargs="+")
-	cli_options = cli_parser.parse_args(sys.argv[1:])
+	cli_options = cli_parser.parse_args(argv_list)
+	config.syncParsers(config.SECTION_RTLOAD, cli_options, config_dict)
 
 	if len(cli_options.torrents_list) > 1 and not cli_options.link_to_path is None :
 		print >> sys.stderr, "Option -l/--link-to be used with only one torrent"
 		sys.exit(1)
-
-	if not cli_options.mkdir_mode is None :
-		cli_options.mkdir_mode = int(str(cli_options.mkdir_mode), 8)
+	if cli_options.client_name is None :
+		print >> sys.stderr, "Required client"
+		sys.exit(1)
 
 	socket.setdefaulttimeout(cli_options.socket_timeout)
 
-	client_class = clients.CLIENTS_MAP[cli_options.client_name]
-	client = client_class(cli_options.client_url)
-
-	customs_dict = {}
-	if not cli_options.set_customs_list is None :
-		valid_keys_list = client.customKeys()
-		for pair in cli_options.set_customs_list :
-			(key, value) = map(str.strip, (pair.split("=", 1)+[""])[:2])
-			if not key in valid_keys_list :
-				print >> sys.stderr, "Invalid custom key: %s" % (key or "<empty>")
-				sys.exit(1)
-			customs_dict[key] = value
+	client = clientlib.initClient(
+		clients.CLIENTS_MAP[cli_options.client_name],
+		cli_options.client_url,
+		set_customs_dict=cli_options.set_customs_dict
+	)
 
 	loadTorrent(client,
+		cli_options.src_dir_path,
 		cli_options.torrents_list,
 		cli_options.data_dir_path,
 		cli_options.link_to_path,
 		cli_options.mkdir_mode,
-		customs_dict,
+		cli_options.set_customs_dict,
 	)
 
 
