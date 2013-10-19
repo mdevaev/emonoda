@@ -21,6 +21,8 @@
 
 import tfile
 
+import ulib.validators.common
+
 
 ##### Exceptions #####
 class NoSuchTorrentError(Exception) :
@@ -28,6 +30,15 @@ class NoSuchTorrentError(Exception) :
 
 
 ##### Public methods #####
+def initClient(client_class, client_url, save_customs_list = (), set_customs_dict = None) :
+	set_customs_dict = ( set_customs_dict or {} )
+	valid_customs_list = client_class.customKeys()
+	for custom_key in list(save_customs_list) + list(set_customs_dict) :
+		ulib.validators.common.validRange(custom_key, valid_customs_list)
+	return client_class(client_url)
+
+
+###
 def indexed(client, system_path_flag = False) :
 	files_dict = {}
 	for torrent_hash in client.hashes() :
