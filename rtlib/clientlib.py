@@ -88,7 +88,8 @@ class AbstractClient(object) :
 
 	###
 
-	def customKeys(self) :
+	@classmethod
+	def customKeys(cls) :
 		raise NotImplementedError
 
 	@hashOrTorrent

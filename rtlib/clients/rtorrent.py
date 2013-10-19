@@ -140,7 +140,8 @@ class Client(clientlib.AbstractClient) :
 
 	###
 
-	def customKeys(self) :
+	@classmethod
+	def customKeys(cls) :
 		return ("1", "2", "3", "4", "5")
 
 	@clientlib.hashOrTorrent
@@ -156,6 +157,7 @@ class Client(clientlib.AbstractClient) :
 	@_catchUnknownTorrentFault
 	def customs(self, torrent_hash, keys_list) :
 		assert len(keys_list) != 0, "Empty customs list"
+		keys_list = list(set(keys_list))
 		multicall = xmlrpclib.MultiCall(self.__server)
 		for key in keys_list :
 			getattr(multicall.d, "get_custom" + key)(torrent_hash)

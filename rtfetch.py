@@ -202,6 +202,15 @@ def initFetchers(config_file_path, url_retries, url_sleep_time, proxy_url, inter
 	print
 	return fetchers_list
 
+def initClient(client_name, client_url, save_customs_list) :
+	if not client_name is None :
+		client_class = clients.CLIENTS_MAP[client_name]
+		valid_customs_list = client_class.customKeys()
+		for custom_key in save_customs_list :
+			ulib.validators.common.validRange(custom_key, valid_customs_list)
+		return client_class(client_url)
+	return None
+
 
 ##### Main #####
 def main() :
@@ -249,19 +258,13 @@ def main() :
 	if cli_options.check_versions_flag and not fetcherlib.checkVersions(fetchers_list) :
 		sys.exit(1)
 
-	client = None
-	if not cli_options.client_name is None :
-		client_class = clients.CLIENTS_MAP[cli_options.client_name]
-		client = client_class(cli_options.client_url)
+	print
 
-		if not cli_options.save_customs_list is None :
-			cli_options.save_customs_list = list(set(cli_options.save_customs_list))
-			valid_keys_list = client.customKeys()
-			for key in cli_options.save_customs_list :
-				if not key in valid_keys_list :
-					print >> sys.stderr, "Invalid custom key: %s" % (key)
-					sys.exit(1)
-
+	client = initClient(
+		cli_options.client_name,
+		cli_options.client_url,
+		cli_options.save_customs_list,
+	)
 
 	update(fetchers_list, client,
 		cli_options.src_dir_path,
