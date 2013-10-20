@@ -73,12 +73,24 @@ class Client(clientlib.AbstractClient) :
 		return CLIENT_NAME
 
 	###
+	
+	def hashToId(torrent_hash):
+		torrents = self.__server.info()
+		torrentId = None
+		for i,j in torrents.items():
+			if j.hash.String == __hash :
+					torrentId = i
+					break
+		return torrentId				
+		
+		
 
 	@clientlib.hashOrTorrent
 	@_catchUnknownTorrentFault
 	def removeTorrent(self, torrent_hash) :
 		#Удаляем торренты, без удаления файлов по их id
-		self.__server.remove(torrent_hash)
+		torrentId = self.hashToId(torrent_hash)
+		self.__server.remove(torrentId)
 
 	def loadTorrent(self, torrent, prefix = None) :
 		torrent_path = torrent.path()
@@ -88,11 +100,15 @@ class Client(clientlib.AbstractClient) :
 		if not prefix is None :
 			assert os.access("%s%s." % (prefix, os.path.sep), os.F_OK), "Invalid prefix"
 
-		# XXX: https://github.com/rakshasa/rtorrent/issues/22
-		# All load_* calls re asynchronous, so we need to wait until the load of torrent files is complete.
-		self.__server.add(torrent_path)
+		
+		if prefix != None :
+			self.__server.add(torrent_path, 'download_dir' = prefix, 'paused' = False)
+		else:
+			self.__server.add(torrent_path, 'paused' = False)
+			
+		"""
 		retries = LOAD_RETRIES
-		"""while True :
+		while True :
 			try :
 				assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
 				break
@@ -104,44 +120,41 @@ class Client(clientlib.AbstractClient) :
 				retries -= 1
 				time.sleep(LOAD_RETRIES_SLEEP)"""
 
-		if not prefix is None :
-			self.__server.move(torrent_hash, prefix)
-		self.__server.start(torrent_hash)
 
 	@clientlib.hashOrTorrent
 	def hasTorrent(self, torrent_hash) :
-		try :
-			assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
+		#Проверка на существование торрента по хэшу.
+		#Возвращает True если существует и False если нет.
+		torrentId = self.hashToId(torrent_hash)
+		if torrentId != None :
 			return True
-		except xmlrpclib.Fault, err :
-			if err.faultCode != FAULT_CODE_UNKNOWN_HASH :
-				raise
-		return False
+		else:
+			return False
 
 	def hashes(self) :
-		#Возвращает список хэшей (id) торрентов
-		return self.__server.list().keys()
+		#Возвращает список хэшей торрентов
+		hashes = []
+		for i in self.__server.info().values():
+			hashes.append(i.hashString)
+		return heshes
 
 	@clientlib.hashOrTorrent
 	@_catchUnknownTorrentFault
 	def torrentPath(self, torrent_hash) :
-		#Скорей всего требуют путь к .torrent файлу. Уточнить.
-		#Еще одна мысль, занимается ли сам трансмишн отсеканием одинаковых хэшей или этим занимаются клиенты. Склоняюсь к первому
-		return self.__server.d.get_loaded_file(torrent_hash)
+		#Возвращает путь к .torrent файлу
+		torrentId = self.hashToId(torrent_hash)
+		return self.__server.info(torrentId)[torrentId].torrentFile
 
 	@clientlib.hashOrTorrent
 	@_catchUnknownTorrentFault
 	def dataPrefix(self, torrent_hash) :
-		multicall = xmlrpclib.MultiCall(self.__server)
-		multicall.d.get_directory(torrent_hash)
-		multicall.d.is_multi_file(torrent_hash)
-		(path, is_multi_file) = multicall()
-		if is_multi_file :
-			path = os.path.dirname(os.path.normpath(path))
-		return path
+		#Возвращает каталог, куда качается торрент
+		torrentId = self.hashToId(torrent_hash)
+		return self.__server.info(torrentId)[torrentId].downloadDir
 
 	def defaultDataPrefix(self) :
-		return self.__server.get_directory()
+		#Возвращает дефолтный каталог сессии
+		return tc.get_session().download_dir
 
 	###
 
@@ -172,48 +185,46 @@ class Client(clientlib.AbstractClient) :
 	@clientlib.hashOrTorrent
 	@_catchUnknownTorrentFault
 	def fullPath(self, torrent_hash) :
+		#Узнать, если файлов больше, то что возвращать?
 		return self.__server.d.get_base_path(torrent_hash)
 
 	@clientlib.hashOrTorrent
 	@_catchUnknownTorrentFault
 	def name(self, torrent_hash) :
-		return self.__server.d.get_name(torrent_hash)
+		#Возвращаем имя торрента
+		torrentId = self.hashToId(torrent_hash)
+		return self.__server.info(torrentId)[torrentId].name
 
 	@clientlib.hashOrTorrent
 	@_catchUnknownTorrentFault
 	def isSingleFile(self, torrent_hash) :
-		return not self.__server.d.is_multi_file(torrent_hash)
+		#Возвращает True, если в торренте всего один файл, или False, если их много
+		torrentId = self.hashToId(torrent_hash)
+		count_files = len(self.__server.get_files(torrentId)[torrentId].keys())
+		if count_files > 1:
+			return False
+		else:
+			return True
+			
 
 	@clientlib.hashOrTorrent
 	@_catchUnknownTorrentFault
 	def files(self, torrent_hash, system_path_flag = False) :
-		multicall = xmlrpclib.MultiCall(self.__server)
-		multicall.d.get_base_path(torrent_hash)
-		multicall.d.get_base_filename(torrent_hash)
-		multicall.d.is_multi_file(torrent_hash)
-		multicall.d.get_size_files(torrent_hash)
-		multicall.f.get_size_bytes(torrent_hash, 0)
-		(base_path, base_file_name, is_multi_file, count, first_file_size) = tuple(multicall())
-		base = tools.coding.utf8( base_path if system_path_flag else base_file_name )
-
-		if not is_multi_file :
-			return { base : { "size" : first_file_size, "md5" : None } }
-
-		multicall = xmlrpclib.MultiCall(self.__server)
-		for index in xrange(count) :
-			multicall.f.get_path(torrent_hash, index)
-			multicall.f.get_size_bytes(torrent_hash, index)
-		files_list = list(multicall())
-		files_list = zip(files_list[::2], files_list[1::2])
-
-		files_dict = { base : None }
-		for (path, size) in files_list :
-			path_list = tools.coding.utf8(path).split(os.path.sep)
-			name = None
-			for index in xrange(len(path_list)) :
-				name = os.path.join(base, os.path.sep.join(path_list[0:index+1]))
-				files_dict[name] = None
-			assert not name is None
-			files_dict[name] = { "size" : size, "md5" : None }
+		#тут все сложно, нужно вернуть сложный словарь списка файлов.
+		#если установлен system_path_flag, то путь должен быть полным, иначе пути относительно каталога, куда скачиваем торрент
+		torrentId = self.hashToId(torrent_hash)
+		files_dict = {}
+		dirs_dict = []
+		prefix = ""
+		if system_path_flag :
+			prefix = os.path.sep.join([self.__server.info(torrentId)[torrentId].downloadDir, ""])
+		if self.isSingleFile(torrent_hash):
+			i = self.__server.get_files(torrentId)[torrentId][0]
+			return { "".join(prefix,i['name']) : { 'size' : i['size'] }}
+		for i in self.__server.get_files(torrentId)[torrentId].values():
+			dirname = os.path.dirname(i['name']
+			if dirname not in dir_dict:
+				dir_dict.append(dirname)
+				files_dict["".join([prefix,dirname])] = None
+			files_dict["".join([prefix,i['name']])] = { 'size' : i['size'] }
 		return files_dict
-
