@@ -32,7 +32,7 @@ import time
 
 ##### Public constants #####
 CLIENT_NAME = "transmission"
-DEFAULT_URL = "http://localhost:9091/transmission"
+DEFAULT_URL = "127.0.0.1"
 
 XMLRPC_SIZE_LIMIT = 67108863
 LOAD_RETRIES = 10
@@ -62,7 +62,7 @@ class Client(clientlib.AbstractClient) :
 			url = DEFAULT_URL
 		clientlib.AbstractClient.__init__(self, url)
 
-		self.__server = transmissionrpc.Client(address=url)
+		self.__server = transmissionrpc.Client(url)
 		#self.__server.set_xmlrpc_size_limit(XMLRPC_SIZE_LIMIT)
 
 
