@@ -78,13 +78,10 @@ class Client(clientlib.AbstractClient) :
 	def removeTorrent(self, torrent_hash) :
 		self.__server.d.erase(torrent_hash)
 
+	@clientlib.loadTorrentAccessible
 	def loadTorrent(self, torrent, prefix = None) :
 		torrent_path = torrent.path()
 		torrent_hash = torrent.hash()
-
-		assert os.access(torrent_path, os.F_OK), "Torrent file does not exists"
-		if not prefix is None :
-			assert os.access("%s%s." % (prefix, os.path.sep), os.F_OK), "Invalid prefix"
 
 		# XXX: https://github.com/rakshasa/rtorrent/issues/22
 		# All load_* calls re asynchronous, so we need to wait until the load of torrent files is complete.

@@ -19,6 +19,8 @@
 #####
 
 
+import os
+
 import tfile
 
 import ulib.validators.common
@@ -56,6 +58,15 @@ def hashOrTorrent(method) :
 		return method(self, torrent_hash, *args_list, **kwargs_dict)
 	return wrap
 
+def loadTorrentAccessible(method) :
+	def wrap(self, torrent, prefix = None) :
+		torrent_path = torrent.path()
+		open(torrent_path).close() # Check accessible file
+		if not prefix is None :
+			os.listdir(prefix) # Check accessible prefix
+		return method(self, torrent, prefix)
+	return wrap
+
 
 ##### Public classes #####
 class AbstractClient(object) :
@@ -76,6 +87,7 @@ class AbstractClient(object) :
 	def removeTorrent(self, torrent_hash) :
 		raise NotImplementedError
 
+	@loadTorrentAccessible
 	def loadTorrent(self, torrent, prefix = None) :
 		raise NotImplementedError
 

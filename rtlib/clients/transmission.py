@@ -73,12 +73,11 @@ class Client(clientlib.AbstractClient) :
 		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
 		self.__server.remove_torrent(torrent_hash)
 
+	@clientlib.loadTorrentAccessible
 	def loadTorrent(self, torrent, prefix = None) :
 		torrent_path = torrent.path()
-		assert os.access(torrent_path, os.F_OK), "Torrent file does not exists"
 		kwargs_dict = {}
 		if not prefix is None :
-			assert os.access("%s%s." % (prefix, os.path.sep), os.F_OK), "Invalid prefix"
 			kwargs_dict["download_dir"] = prefix
 		self.__server.add_torrent(torrent_path, **kwargs_dict)
 
