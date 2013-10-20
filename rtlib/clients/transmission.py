@@ -76,9 +76,11 @@ class Client(clientlib.AbstractClient) :
 	def loadTorrent(self, torrent, prefix = None) :
 		torrent_path = torrent.path()
 		assert os.access(torrent_path, os.F_OK), "Torrent file does not exists"
+		kwargs_dict = {}
 		if not prefix is None :
 			assert os.access("%s%s." % (prefix, os.path.sep), os.F_OK), "Invalid prefix"
-		self.__server.add_torrent(torrent_path)
+			kwargs_dict["download_dir"] = prefix
+		self.__server.add_torrent(torrent_path, **kwargs_dict)
 
 	@clientlib.hashOrTorrent
 	def hasTorrent(self, torrent_hash) :
@@ -98,13 +100,12 @@ class Client(clientlib.AbstractClient) :
 		raise NotImplementedError # TODO
 
 	@clientlib.hashOrTorrent
-	# get torrent data dir
 	def dataPrefix(self, torrent_hash) :
 		torrent_obj = self.__server.get_torrent(torrent_hash, arguments=("id", "hashString", "downloadDir",))
-		if not torrent_obj is None :
-			print torrent_obj.downloadDir
-			return torrent_obj.downloadDir
-		return False
+		if torrent_obj is None :
+			raise clientlib.NoSuchTorrentError("Unknown torrent hash")
+		assert torrent_obj.hashString.lower() == torrent_hash
+		return torrent_obj.downloadDir
 
 	def defaultDataPrefix(self) :
 		session = self.__server.get_session()
