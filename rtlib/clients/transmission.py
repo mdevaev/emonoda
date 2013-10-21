@@ -42,7 +42,9 @@ LOAD_RETRIES_SLEEP = 1
 
 ##### Public classes #####
 class Client(clientlib.AbstractClient) :
-	# XXX: API description: http://pythonhosted.org/transmissionrpc/
+	# XXX: API description: 
+	#   http://pythonhosted.org/transmissionrpc/
+	#   https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
 
 	def __init__(self, url = DEFAULT_URL) :
 		if transmissionrpc is None :
