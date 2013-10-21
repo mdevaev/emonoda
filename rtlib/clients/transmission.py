@@ -22,7 +22,9 @@
 from rtlib import clientlib
 
 import os
-import operator
+
+from ulib import tools
+import ulib.tools.coding # pylint: disable=W0611
 
 try :
 	import transmissionrpc # pylint: disable=F0401
@@ -36,8 +38,6 @@ DEFAULT_URL = "http://localhost:9091/transmission/rpc"
 
 LOAD_RETRIES = 10
 LOAD_RETRIES_SLEEP = 1
-
-FAULT_CODE_UNKNOWN_HASH = -501
 
 
 ##### Public classes #####
@@ -66,7 +66,7 @@ class Client(clientlib.AbstractClient) :
 
 	@clientlib.hashOrTorrent
 	def removeTorrent(self, torrent_hash) :
-		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
+		self.__getTorrent(torrent_hash) # XXX: raise clientlib.NoSuchTorrentError for non-existent torrent
 		self.__server.remove_torrent(torrent_hash)
 
 	@clientlib.loadTorrentAccessible
@@ -86,72 +86,68 @@ class Client(clientlib.AbstractClient) :
 			return False
 
 	def hashes(self) :
-		return [ item.hashString.lower() for item in self.__server.get_torrents(arguments=("id", "hashString")) ]
+		return [ str(item.hashString.lower()) for item in self.__server.get_torrents(arguments=("id", "hashString")) ]
 
 	@clientlib.hashOrTorrent
 	def torrentPath(self, torrent_hash) :
-		return self.__getTorrent(torrent_hash).torrentFile
+		return self.__getTorrentArg(torrent_hash, "torrentFile")
 
 	@clientlib.hashOrTorrent
 	def dataPrefix(self, torrent_hash) :
-		return self.__getTorrent(torrent_hash, args_list=("downloadDir",)).downloadDir
+		return self.__getTorrentArg(torrent_hash, "downloadDir")
 
 	def defaultDataPrefix(self) :
 		session = self.__server.get_session()
 		assert not session is None
-		return session.download_dir
+		return tools.coding.utf8(session.download_dir)
 
 	###
 
 	@clientlib.hashOrTorrent
 	def fullPath(self, torrent_hash) :
-		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
-		#return self.__server.d.get_base_path(torrent_hash)
-		raise NotImplementedError # TODO
+		torrent_obj = self.__getTorrent(torrent_hash, ("name", "downloadDir"))
+		return tools.coding.utf8(os.path.join(torrent_obj.downloadDir, torrent_obj.name))
 
 	@clientlib.hashOrTorrent
 	def name(self, torrent_hash) :
-		return self.__getTorrent(torrent_hash, args_list=("name",)).name
+		return self.__getTorrentArg(torrent_hash, "name")
 
 	@clientlib.hashOrTorrent
 	def isSingleFile(self, torrent_hash) :
 		files_dict = self.__getFiles(torrent_hash)
 		if len(files_dict) > 1 :
-			return True
+			return False
 		return ( not os.path.sep in files_dict.values()[0]["name"] )
 
 	@clientlib.hashOrTorrent
 	def files(self, torrent_hash, system_path_flag = False) :
-		#тут все сложно, нужно вернуть сложный словарь списка файлов.
-		#если установлен system_path_flag, то путь должен быть полным, иначе пути относительно каталога, куда скачиваем торрент
-		t_files_dict = self.__getFiles(torrent_hash)
-		files_dict = {}
-		dirs_dict = []
 		prefix = ( self.dataPrefix(torrent_hash) if system_path_flag else "" )
-		if self.isSingleFile(torrent_hash):
-			i = t_files_dict[0]
-			return { "".join(prefix,i['name']) : { 'size' : i['size'] }}
-		for i in t_files_dict.values():
-			dirname = os.path.dirname(i['name'])
-			if dirname not in dirs_dict:
-				dirs_dict.append(dirname)
-				files_dict["".join([prefix,dirname])] = None
-			files_dict["".join([prefix,i['name']])] = { 'size' : i['size'] }
-		return files_dict
+		files_list = [
+			(tools.coding.utf8(item["name"]), item["size"])
+			for item in self.__getFiles(torrent_hash).values()
+		]
+		return clientlib.buildFiles(prefix, files_list)
+
 
 	### Private ###
 
+	def __getTorrentArg(self, torrent_hash, arg_name) :
+		return tools.coding.utf8(getattr(self.__getTorrent(torrent_hash, (arg_name,)), arg_name))
+
 	def __getTorrent(self, torrent_hash, args_list = ()) :
 		args_set = set(args_list).union(("id", "hashString"))
-		torrent_obj = self.__server.get_torrent(torrent_hash, arguments=tuple(args_set))
-		if torrent_obj is None: # FIXME: Is that right?
-			raise clientlib.NoSuchTorrentError("Unknown torrent hash")
-		assert torrent_obj.hashString.lower() == torrent_hash
+		try :
+			torrent_obj = self.__server.get_torrent(torrent_hash, arguments=tuple(args_set))
+		except KeyError, err :
+			if str(err) == "\'Torrent not found in result\'" :
+				raise clientlib.NoSuchTorrentError("Unknown torrent hash")
+			raise
+		assert str(torrent_obj.hashString).lower() == torrent_hash
 		return torrent_obj
 
 	def __getFiles(self, torrent_hash) :
-		files_dict = self.__server.get_file(torrent_hash)
-		if len(files_dict) == 0 : # FIXME: Is that right?
+		files_dict = self.__server.get_files(torrent_hash)
+		if len(files_dict) == 0 :
 			raise clientlib.NoSuchTorrentError("Unknown torrent hash")
 		assert len(files_dict) == 1
 		files_dict = files_dict.values()[0]

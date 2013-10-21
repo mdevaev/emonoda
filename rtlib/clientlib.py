@@ -23,6 +23,7 @@ import os
 
 import tfile
 
+import ulib.tools.coding
 import ulib.validators.common
 
 
@@ -66,6 +67,20 @@ def loadTorrentAccessible(method) :
 			os.listdir(prefix) # Check accessible prefix
 		return method(self, torrent, prefix)
 	return wrap
+
+
+###
+def buildFiles(prefix, files_list) :
+	files_dict = {}
+	for (path, size) in files_list :
+		path_list = ulib.tools.coding.utf8(path).split(os.path.sep)
+		name = None
+		for index in xrange(len(path_list)) :
+			name = os.path.join(prefix, os.path.sep.join(path_list[0:index+1]))
+			files_dict[name] = None
+		assert not name is None
+		files_dict[name] = { "size" : size }
+	return files_dict
 
 
 ##### Public classes #####
