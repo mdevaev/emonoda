@@ -36,7 +36,7 @@ import os
 import socket
 import operator
 import shutil
-import time
+import datetime
 
 
 ##### Public constants #####
@@ -44,7 +44,7 @@ DELIMITER = "-" * 10
 
 
 ##### Public methods #####
-def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, real_update_flag) :
+def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save_customs_list, real_update_flag) :
 	new_data = fetcher.fetchTorrent(torrent)
 	tmp_torrent = tfile.Torrent()
 	tmp_torrent.loadData(new_data)
@@ -52,7 +52,8 @@ def updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, 
 
 	if real_update_flag :
 		if not backup_dir_path is None :
-			backup_file_path = os.path.join(backup_dir_path, "%s.%d.bak" % (os.path.basename(torrent.path()), time.time()))
+			backup_suffix = datetime.datetime.now().strftime(backup_suffix)
+			backup_file_path = os.path.join(backup_dir_path, os.path.basename(torrent.path()) + backup_suffix)
 			shutil.copyfile(torrent.path(), backup_file_path)
 
 		if not client is None :
@@ -83,6 +84,7 @@ def torrents(src_dir_path, names_filter) :
 def update(fetchers_list, client,
 		src_dir_path,
 		backup_dir_path,
+		backup_suffix,
 		names_filter,
 		save_customs_list,
 		skip_unknown_flag,
@@ -144,7 +146,7 @@ def update(fetchers_list, client,
 				passed_count += 1
 				continue
 
-			diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, client, save_customs_list, real_update_flag)
+			diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save_customs_list, real_update_flag)
 			tools.cli.newLine(status_line % (colored(32, "+")))
 			if show_diff_flag :
 				tfile.printDiff(diff_tuple, "\t", use_colors_flag=(not no_colors_flag), force_colors_flag=force_colors_flag)
@@ -216,6 +218,7 @@ def main() :
 	config.addArguments(cli_parser,
 		config.ARG_SOURCE_DIR,
 		config.ARG_BACKUP_DIR,
+		config.ARG_BACKUP_SUFFIX,
 		config.ARG_NAMES_FILTER,
 		config.ARG_ONLY_FETCHERS,
 		config.ARG_TIMEOUT,
@@ -288,6 +291,7 @@ def main() :
 	update(fetchers_list, client,
 		cli_options.src_dir_path,
 		cli_options.backup_dir_path,
+		cli_options.backup_suffix,
 		cli_options.names_filter,
 		cli_options.save_customs_list,
 		cli_options.skip_unknown_flag,
