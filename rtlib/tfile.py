@@ -263,8 +263,5 @@ class Torrent(object) :
 		self.__scrape_hash = None
 
 	def __fileAttrs(self, file_dict) :
-		return {
-			"size" : file_dict["length"],
-			"md5"  : file_dict.get("md5sum"),
-		}
+		return { "size" : file_dict["length"] }
 
