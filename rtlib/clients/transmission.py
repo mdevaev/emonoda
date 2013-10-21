@@ -32,7 +32,7 @@ import time
 
 ##### Public constants #####
 CLIENT_NAME = "transmission"
-DEFAULT_URL = "127.0.0.1"
+DEFAULT_URL = "http://localhost:9091/transmission"
 
 XMLRPC_SIZE_LIMIT = 67108863
 LOAD_RETRIES = 10
@@ -57,12 +57,22 @@ def _catchUnknownTorrentFault(method) :
 class Client(clientlib.AbstractClient) :
 	# XXX: API description: https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
 
-	def __init__(self, url = DEFAULT_URL) :
+	def __init__(self, url = DEFAULT_URL, user=None, password=None ) :
 		if url is None :
 			url = DEFAULT_URL
 		clientlib.AbstractClient.__init__(self, url)
+		if url.find("http://") != -1 :
+			pos = 7
+		else:
+			pos = 0
+		address = url[pos:].split("/")[0].split(":")[0]
+		if url[pos:].find(':') != -1 :
+			port = url[pos:].split("/")[0].split(":")[1]
+		else :
+			port = 9091
+			
 
-		self.__server = transmissionrpc.Client(url)
+		self.__server = transmissionrpc.Client(address='localhost', port=9091, user=None, password=None)
 		#self.__server.set_xmlrpc_size_limit(XMLRPC_SIZE_LIMIT)
 
 
