@@ -67,6 +67,17 @@ class Client(clientlib.AbstractClient) :
 		return CLIENT_NAME
 
 	###
+	
+	def hashToId(torrent_hash):
+		torrents = self.__server.info()
+		torrentId = None
+		for i,j in torrents.items():
+			if j.hash.String == __hash :
+					torrentId = i
+					break
+		return torrentId				
+		
+		
 
 	@clientlib.hashOrTorrent
 	def removeTorrent(self, torrent_hash) :
@@ -76,7 +87,7 @@ class Client(clientlib.AbstractClient) :
 	@clientlib.loadTorrentAccessible
 	def loadTorrent(self, torrent, prefix = None) :
 		torrent_path = torrent.path()
-		kwargs_dict = {}
+		kwargs_dict = { "paused" : False }
 		if not prefix is None :
 			kwargs_dict["download_dir"] = prefix
 		self.__server.add_torrent(torrent_path, **kwargs_dict)
@@ -95,8 +106,9 @@ class Client(clientlib.AbstractClient) :
 	@clientlib.hashOrTorrent
 	def torrentPath(self, torrent_hash) :
 		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
-		#return self.__server.d.get_loaded_file(torrent_hash)
-		raise NotImplementedError # TODO
+		#Возвращает путь к .torrent файлу
+		torrentId = self.hashToId(torrent_hash)
+		return self.__server.info(torrentId)[torrentId].torrentFile
 
 	@clientlib.hashOrTorrent
 	def dataPrefix(self, torrent_hash) :
@@ -120,28 +132,39 @@ class Client(clientlib.AbstractClient) :
 
 	@clientlib.hashOrTorrent
 	def name(self, torrent_hash) :
-		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
-		#return self.__server.d.get_name(torrent_hash)
-		raise NotImplementedError # TODO
+		#Возвращаем имя торрента
+		torrentId = self.hashToId(torrent_hash)
+		return self.__server.info(torrentId)[torrentId].name
 
 	@clientlib.hashOrTorrent
 	def isSingleFile(self, torrent_hash) :
-		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
-		#return not self.__server.d.is_multi_file(torrent_hash)
-		raise NotImplementedError # TODO
+		#Возвращает True, если в торренте всего один файл, или False, если их много
+		torrentId = self.hashToId(torrent_hash)
+		count_files = len(self.__server.get_files(torrentId)[torrentId].keys())
+		if count_files > 1:
+			return False
+		else:
+			return True
+			
 
 	@clientlib.hashOrTorrent
 	def files(self, torrent_hash, system_path_flag = False) :
-		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
-		torrent_files = self.__server.get_files(torrent_hash)
-		#base = tools.coding.utf8
-		base = None # FIXME!
-		files_dict = { base : None }
-		#for (numtor, allfiles) in torrent_files.iteritems():
-		for allfiles in torrent_files.values() :
-			#for (numfile, value) in allfiles.iteritems():
-			for value in allfiles.values() :
-				files_dict[value['name']] = { "size" : value['size'], "md5" : None }
-				# TODO: Нужно включать каталоги с атрибутом (none)
+		#тут все сложно, нужно вернуть сложный словарь списка файлов.
+		#если установлен system_path_flag, то путь должен быть полным, иначе пути относительно каталога, куда скачиваем торрент
+		torrentId = self.hashToId(torrent_hash)
+		files_dict = {}
+		dirs_dict = []
+		prefix = ""
+		if system_path_flag :
+			prefix = os.path.sep.join([self.__server.info(torrentId)[torrentId].downloadDir, ""])
+		if self.isSingleFile(torrent_hash):
+			i = self.__server.get_files(torrentId)[torrentId][0]
+			return { "".join(prefix,i['name']) : { 'size' : i['size'] }}
+		for i in self.__server.get_files(torrentId)[torrentId].values():
+			dirname = os.path.dirname(i['name']
+			if dirname not in dir_dict:
+				dir_dict.append(dirname)
+				files_dict["".join([prefix,dirname])] = None
+			files_dict["".join([prefix,i['name']])] = { 'size' : i['size'] }
 		return files_dict
 
