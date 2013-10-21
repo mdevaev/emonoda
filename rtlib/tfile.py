@@ -23,6 +23,7 @@ import sys
 import os
 import base64
 import bencode
+import bencode.BTL
 import hashlib
 import urllib
 import itertools
