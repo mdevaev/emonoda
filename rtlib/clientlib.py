@@ -70,8 +70,9 @@ def loadTorrentAccessible(method) :
 
 
 ###
-def buildFiles(prefix, files_list) :
-	files_dict = {}
+def buildFiles(prefix, files_list, files_dict = None) :
+	if files_dict is None :
+		files_dict = {}
 	for (path, size) in files_list :
 		path_list = ulib.tools.coding.utf8(path).split(os.path.sep)
 		name = None

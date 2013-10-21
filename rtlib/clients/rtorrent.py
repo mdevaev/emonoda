@@ -191,7 +191,7 @@ class Client(clientlib.AbstractClient) :
 		base = tools.coding.utf8( base_path if system_path_flag else base_file_name )
 
 		if not is_multi_file :
-			return { base : { "size" : first_file_size, "md5" : None } }
+			return { base : { "size" : first_file_size } }
 
 		multicall = xmlrpclib.MultiCall(self.__server)
 		for index in xrange(count) :
@@ -200,14 +200,5 @@ class Client(clientlib.AbstractClient) :
 		files_list = list(multicall())
 		files_list = zip(files_list[::2], files_list[1::2])
 
-		files_dict = { base : None }
-		for (path, size) in files_list :
-			path_list = tools.coding.utf8(path).split(os.path.sep)
-			name = None
-			for index in xrange(len(path_list)) :
-				name = os.path.join(base, os.path.sep.join(path_list[0:index+1]))
-				files_dict[name] = None
-			assert not name is None
-			files_dict[name] = { "size" : size, "md5" : None }
-		return files_dict
+		return clientlib.buildFiles(base, files_list, { base : None })
 
