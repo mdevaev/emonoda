@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 #
 #    transmission client for rtfetch
-#    Copyright (C) 2013  Vitaly Lipatov <lav@etersoft.ru>
+#    Copyright (C) 2013  Vitaly Lipatov <lav@etersoft.ru>, Devaev Maxim <mdevaev@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -21,9 +21,6 @@
 
 from rtlib import clientlib
 
-#from ulib import tools
-#import ulib.tools.coding # pylint: disable=W0611
-
 import os
 import operator
 
@@ -35,7 +32,7 @@ except ImportError :
 
 ##### Public constants #####
 CLIENT_NAME = "transmission"
-DEFAULT_URL = "http://localhost:9091/transmission/rpc/"
+DEFAULT_URL = "http://localhost:9091/transmission/rpc"
 
 LOAD_RETRIES = 10
 LOAD_RETRIES_SLEEP = 1
@@ -48,7 +45,6 @@ class Client(clientlib.AbstractClient) :
 	# XXX: API description: http://pythonhosted.org/transmissionrpc/
 
 	def __init__(self, url = DEFAULT_URL) :
-		raise RuntimeError("NOT TESTED! Comment this line and try again on your own risk! Backup your data!") # FIXME FIXME FIXME!!!
 		if transmissionrpc is None :
 			raise RuntimeError("Required module transmissionrpc")
 
@@ -67,17 +63,6 @@ class Client(clientlib.AbstractClient) :
 		return CLIENT_NAME
 
 	###
-	
-	def hashToId(torrent_hash):
-		torrents = self.__server.info()
-		torrentId = None
-		for i,j in torrents.items():
-			if j.hash.String == __hash :
-					torrentId = i
-					break
-		return torrentId				
-		
-		
 
 	@clientlib.hashOrTorrent
 	def removeTorrent(self, torrent_hash) :
@@ -94,32 +79,26 @@ class Client(clientlib.AbstractClient) :
 
 	@clientlib.hashOrTorrent
 	def hasTorrent(self, torrent_hash) :
-		torrent_obj = self.__server.get_torrent(torrent_hash, arguments=("hashString",))
-		if not torrent_obj is None :
-			assert torrent_obj.hashString.lower() == torrent_hash
+		try :
+			self.__getTorrent(torrent_hash)
 			return True
-		return False
+		except clientlib.NoSuchTorrentError :
+			return False
 
 	def hashes(self) :
 		return [ item.hashString.lower() for item in self.__server.get_torrents(arguments=("id", "hashString")) ]
 
 	@clientlib.hashOrTorrent
 	def torrentPath(self, torrent_hash) :
-		# TODO: raise clientlib.NoSuchTorrentError for non-existent torrent
-		#Возвращает путь к .torrent файлу
-		torrentId = self.hashToId(torrent_hash)
-		return self.__server.info(torrentId)[torrentId].torrentFile
+		return self.__getTorrent(torrent_hash).torrentFile
 
 	@clientlib.hashOrTorrent
 	def dataPrefix(self, torrent_hash) :
-		torrent_obj = self.__server.get_torrent(torrent_hash, arguments=("id", "hashString", "downloadDir",))
-		if torrent_obj is None :
-			raise clientlib.NoSuchTorrentError("Unknown torrent hash")
-		assert torrent_obj.hashString.lower() == torrent_hash
-		return torrent_obj.downloadDir
+		return self.__getTorrent(torrent_hash, args_list=("downloadDir",)).downloadDir
 
 	def defaultDataPrefix(self) :
 		session = self.__server.get_session()
+		assert not session is None
 		return session.download_dir
 
 	###
@@ -132,39 +111,50 @@ class Client(clientlib.AbstractClient) :
 
 	@clientlib.hashOrTorrent
 	def name(self, torrent_hash) :
-		#Возвращаем имя торрента
-		torrentId = self.hashToId(torrent_hash)
-		return self.__server.info(torrentId)[torrentId].name
+		return self.__getTorrent(torrent_hash, args_list=("name",)).name
 
 	@clientlib.hashOrTorrent
 	def isSingleFile(self, torrent_hash) :
-		#Возвращает True, если в торренте всего один файл, или False, если их много
-		torrentId = self.hashToId(torrent_hash)
-		count_files = len(self.__server.get_files(torrentId)[torrentId].keys())
-		if count_files > 1:
-			return False
-		else:
+		files_dict = self.__getFiles(torrent_hash)
+		if len(files_dict) > 1 :
 			return True
-			
+		return ( not os.path.sep in files_dict.values()[0]["name"] )
 
 	@clientlib.hashOrTorrent
 	def files(self, torrent_hash, system_path_flag = False) :
 		#тут все сложно, нужно вернуть сложный словарь списка файлов.
 		#если установлен system_path_flag, то путь должен быть полным, иначе пути относительно каталога, куда скачиваем торрент
-		torrentId = self.hashToId(torrent_hash)
+		t_files_dict = self.__getFiles(torrent_hash)
 		files_dict = {}
 		dirs_dict = []
-		prefix = ""
-		if system_path_flag :
-			prefix = os.path.sep.join([self.__server.info(torrentId)[torrentId].downloadDir, ""])
+		prefix = ( self.dataPrefix(torrent_hash) if system_path_flag else "" )
 		if self.isSingleFile(torrent_hash):
-			i = self.__server.get_files(torrentId)[torrentId][0]
+			i = t_files_dict[0]
 			return { "".join(prefix,i['name']) : { 'size' : i['size'] }}
-		for i in self.__server.get_files(torrentId)[torrentId].values():
-			dirname = os.path.dirname(i['name']
-			if dirname not in dir_dict:
-				dir_dict.append(dirname)
+		for i in t_files_dict.values():
+			dirname = os.path.dirname(i['name'])
+			if dirname not in dirs_dict:
+				dirs_dict.append(dirname)
 				files_dict["".join([prefix,dirname])] = None
 			files_dict["".join([prefix,i['name']])] = { 'size' : i['size'] }
+		return files_dict
+
+	### Private ###
+
+	def __getTorrent(self, torrent_hash, args_list = ()) :
+		args_set = set(args_list).union(("id", "hashString"))
+		torrent_obj = self.__server.get_torrent(torrent_hash, arguments=tuple(args_set))
+		if torrent_obj is None: # FIXME: Is that right?
+			raise clientlib.NoSuchTorrentError("Unknown torrent hash")
+		assert torrent_obj.hashString.lower() == torrent_hash
+		return torrent_obj
+
+	def __getFiles(self, torrent_hash) :
+		files_dict = self.__server.get_file(torrent_hash)
+		if len(files_dict) == 0 : # FIXME: Is that right?
+			raise clientlib.NoSuchTorrentError("Unknown torrent hash")
+		assert len(files_dict) == 1
+		files_dict = files_dict.values()[0]
+		assert len(files_dict) > 0
 		return files_dict
 
