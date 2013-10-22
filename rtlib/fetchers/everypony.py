@@ -19,6 +19,7 @@
 #####
 
 
+from rtlib import const
 from rtlib import fetcherlib
 
 import re
@@ -97,9 +98,10 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.assertFetcher(not hash_match is None, "Hash not found")
 		return hash_match.group(1).lower()
 
-	def __readUrlRetry(self, *args_list, **kwargs_dict) :
-		kwargs_dict.setdefault("opener", self.__opener)
-		kwargs_dict["retries"] = self.__url_retries
-		kwargs_dict["sleep_time"] = self.__url_sleep_time
-		return fetcherlib.readUrlRetry(*args_list, **kwargs_dict)
+	def __readUrlRetry(self, url) :
+		return fetcherlib.readUrlRetry(self.__opener, url,
+			headers_dict={ "User-Agent" : const.BROWSER_USER_AGENT },
+			retries=self.__url_retries,
+			sleep_time=self.__url_sleep_time,
+		)
 

@@ -19,6 +19,7 @@
 #####
 
 
+from rtlib import const
 from rtlib import fetcherlib
 
 import urllib
@@ -80,9 +81,9 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			"username" : self.__user_name,
 			"password" : self.__passwd,
 			"redirect" : "",
-			"login" : "\xc2\xf5\xee\xe4",
+			"login"    : "\xc2\xf5\xee\xe4",
 		}
-		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict), opener=opener)
+		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict))
 		self.assertLogin("[ %s ]" % (self.__user_name) in data, "Invalid login")
 
 		self.__cookie_jar = cookie_jar
@@ -93,7 +94,9 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def torrentChanged(self, torrent) :
 		self.assertMatch(torrent)
-		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())))
+		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict={
+				"User-Agent" : const.CLIENT_USER_AGENT,
+			})
 		self.assertFetcher(data.startswith("d5:"), "Invalid scrape answer")
 		return ( data.strip() == "d5:filesdee" )
 
@@ -112,9 +115,12 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	### Private ###
 
-	def __readUrlRetry(self, *args_list, **kwargs_dict) :
-		kwargs_dict.setdefault("opener", self.__opener)
-		kwargs_dict["retries"] = self.__url_retries
-		kwargs_dict["sleep_time"] = self.__url_sleep_time
-		return fetcherlib.readUrlRetry(*args_list, **kwargs_dict)
+	def __readUrlRetry(self, url, data = None, headers_dict = None) :
+		headers_dict = ( headers_dict or {} )
+		headers_dict.update({ "User-Agent" : const.BROWSER_USER_AGENT })
+		return fetcherlib.readUrlRetry(self.__opener, url, data,
+			headers_dict=headers_dict,
+			retries=self.__url_retries,
+			sleep_time=self.__url_sleep_time,
+		)
 

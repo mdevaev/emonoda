@@ -38,6 +38,7 @@ DEFAULT_LOGIN = ""
 DEFAULT_PASSWD = ""
 DEFAULT_URL_RETRIES = 10
 DEFAULT_URL_SLEEP_TIME = 1
+DEFAULT_RETRY_CODES_TUPLE = (503, 502, 500)
 DEFAULT_PROXY_URL = None
 DEFAULT_INTERACTIVE_FLAG = False
 
@@ -81,18 +82,20 @@ def buildTypicalOpener(cookie_jar = None, proxy_url = None) :
 			raise RuntimeError("Invalid proxy protocol: %s" % (scheme))
 	return urllib2.build_opener(*handlers_list)
 
-def readUrlRetry(*args_list, **kwargs_dict) :
-	opener = kwargs_dict.pop("opener", None)
-	if opener is None :
-		opener = urllib2.build_opener()
-	retries = kwargs_dict.pop("retries", DEFAULT_URL_RETRIES)
-	sleep_time = kwargs_dict.pop("sleep_time", DEFAULT_URL_SLEEP_TIME)
-	retry_codes_list = kwargs_dict.pop("retry_codes_list", (503, 502, 500))
-	retry_timeout_flag = kwargs_dict.pop("retry_timeout_flag", True)
+def readUrlRetry(opener, url,
+	data = None,
+	headers_dict = None,
+	timeout = socket._GLOBAL_DEFAULT_TIMEOUT, # pylint: disable=W0212
+	retries = DEFAULT_URL_RETRIES,
+	sleep_time = DEFAULT_URL_SLEEP_TIME,
+	retry_codes_list = DEFAULT_RETRY_CODES_TUPLE,
+	retry_timeout_flag = True,
+	) :
 
 	while True :
 		try :
-			return opener.open(*args_list, **kwargs_dict).read()
+			request = urllib2.Request(url, data, ( headers_dict or {} ))
+			return opener.open(request, timeout=timeout).read()
 		except (socket.timeout, urllib2.URLError, urllib2.HTTPError), err :
 			if retries == 0 :
 				raise

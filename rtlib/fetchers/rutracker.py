@@ -23,7 +23,6 @@ from rtlib import const
 from rtlib import fetcherlib
 
 import urllib
-import urllib2
 import cookielib
 import re
 
@@ -120,13 +119,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			rfc2109=False,
 		)
 		self.__cookie_jar.set_cookie(cookie)
-		request = urllib2.Request(RUTRACKER_DL_URL+("?t=%s" % (topic_id)), "", headers={
-				"Referer" : RUTRACKER_VIEWTOPIC_URL+("?t=%s" % (topic_id)),
-				"Origin" : "http://%s" % (RUTRACKER_DOMAIN),
-				"User-Agent" : const.BROWSER_USER_AGENT,
-			})
 
-		data = self.__readUrlRetry(request)
+		data = self.__readUrlRetry(RUTRACKER_DL_URL+("?t=%s" % (topic_id)), "", {
+				"Referer"    : RUTRACKER_VIEWTOPIC_URL+("?t=%s" % (topic_id)),
+				"Origin"     : "http://%s" % (RUTRACKER_DOMAIN),
+			})
 		self.assertValidTorrentData(data)
 		return data
 
@@ -137,7 +134,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		post_dict = {
 			"login_username" : self.__user_name.decode("utf-8").encode("cp1251"),
 			"login_password" : self.__passwd.decode("utf-8").encode("cp1251"),
-			"login" : "\xc2\xf5\xee\xe4",
+			"login"          : "\xc2\xf5\xee\xe4",
 		}
 		data = self.__readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
 
@@ -162,10 +159,13 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.assertFetcher(not hash_match is None, "Hash not found")
 		return hash_match.group(1).lower()
 
-	def __readUrlRetry(self, *args_list, **kwargs_dict) :
-		kwargs_dict.setdefault("opener", self.__opener)
-		kwargs_dict.setdefault("retry_codes_list", (503, 404))
-		kwargs_dict["retries"] = self.__url_retries
-		kwargs_dict["sleep_time"] = self.__url_sleep_time
-		return fetcherlib.readUrlRetry(*args_list, **kwargs_dict)
+	def __readUrlRetry(self, url, data = None, headers_dict = None) :
+		headers_dict = ( headers_dict or {} )
+		headers_dict.update({ "User-Agent" : const.BROWSER_USER_AGENT })
+		return fetcherlib.readUrlRetry(self.__opener, url, data,
+			headers_dict=headers_dict,
+			retries=self.__url_retries,
+			sleep_time=self.__url_sleep_time,
+			retry_codes_list=(503, 404),
+		)
 
