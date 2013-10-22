@@ -73,21 +73,14 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def login(self) :
 		self.assertNonAnonymous(self.__user_name)
-
-		cookie_jar = cookielib.CookieJar()
-		opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.__proxy_url)
-
-		post_dict = {
-			"username" : self.__user_name,
-			"password" : self.__passwd,
-			"redirect" : "",
-			"login"    : "\xc2\xf5\xee\xe4",
-		}
-		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict))
-		self.assertLogin("[ %s ]" % (self.__user_name) in data, "Invalid login")
-
-		self.__cookie_jar = cookie_jar
-		self.__opener = opener
+		self.__cookie_jar = cookielib.CookieJar()
+		self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.__proxy_url)
+		try :
+			self.__tryLogin()
+		except :
+			self.__cookie_jar = None
+			self.__opener = None
+			raise
 
 	def loggedIn(self) :
 		return ( not self.__opener is None )
@@ -114,6 +107,16 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 
 	### Private ###
+
+	def __tryLogin(self) :
+		post_dict = {
+			"username" : self.__user_name,
+			"password" : self.__passwd,
+			"redirect" : "",
+			"login"    : "\xc2\xf5\xee\xe4",
+		}
+		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict))
+		self.assertLogin("[ %s ]" % (self.__user_name) in data, "Invalid login")
 
 	def __readUrlRetry(self, url, data = None, headers_dict = None) :
 		headers_dict = ( headers_dict or {} )
