@@ -37,15 +37,24 @@ SECTION_RTLOAD = "rtload"
 def __validMaybeEmptyPath(path) :
 	return validMaybeEmpty(path, validAccessiblePath)
 
+def __validFetchers(fetchers_list) :
+	return [
+		validRange(item, fetchers.FETCHERS_MAP.keys())
+		for item in filter(None, map(str.strip, validStringList(fetchers_list)))
+	]
+
 def __validMaybeEmptyMode(mode) :
 	valid_mode = ( lambda arg : validNumber(( arg if isinstance(arg, int) else int(str(arg), 8) ), 0) )
 	return validMaybeEmpty(mode, valid_mode)
 
-def __validSetCustoms(pairs) :
-	if isinstance(pairs, dict) :
-		return pairs
+def __validSaveCustoms(keys_list) :
+	return filter(None, map(str.strip, validStringList(keys_list)))
+
+def __validSetCustoms(pairs_list) :
+	if isinstance(pairs_list, dict) :
+		return pairs_list
 	customs_dict = {}
-	for pair in pairs :
+	for pair in filter(None, map(str.strip, pairs_list)) :
 		(key, value) = map(str.strip, (pair.split("=", 1)+[""])[:2])
 		customs_dict[notEmptyStrip(key, "custom key")] = value
 	return customs_dict
@@ -53,9 +62,6 @@ def __validSetCustoms(pairs) :
 def __makeValidMaybeEmptyRange(valid_list) :
 	valid_range = ( lambda arg : validRange(arg, valid_list) )
 	return ( lambda arg : validMaybeEmpty(arg, valid_range) )
-
-def __makeValidList(valid_list) :
-	return ( lambda arg : [ validRange(item, valid_list) for item in validStringList(arg) ] )
 
 def __makeValidNumber(*args_tuple) :
 	return ( lambda arg : validNumber(arg, *args_tuple) )
@@ -87,7 +93,7 @@ OPTION_SOURCE_DIR        = ("source-dir",        "src_dir_path",           ".", 
 OPTION_BACKUP_DIR        = ("backup-dir",        "backup_dir_path",        None,                                __validMaybeEmptyPath)
 OPTION_BACKUP_SUFFIX     = ("backup-suffix",     "backup_suffix",          ".%Y.%m.%d-%H:%M:%S.bak",            str)
 OPTION_NAMES_FILTER      = ("names-filter",      "names_filter",           None,                                validEmpty)
-OPTION_ONLY_FETCHERS     = ("only-fetchers",     "only_fetchers_list",     fetchers.FETCHERS_MAP.keys(),        __makeValidList(fetchers.FETCHERS_MAP.keys()))
+OPTION_ONLY_FETCHERS     = ("only-fetchers",     "only_fetchers_list",     fetchers.FETCHERS_MAP.keys(),        __validFetchers)
 OPTION_TIMEOUT           = ("timeout",           "socket_timeout",         DEFAULT_TIMEOUT,                     __makeValidNumber(0))
 OPTION_LOGIN             = ("login",             None,                     fetcherlib.DEFAULT_LOGIN,            str)
 OPTION_PASSWD            = ("passwd",            None,                     fetcherlib.DEFAULT_PASSWD,           str)
@@ -103,7 +109,7 @@ OPTION_CHECK_VERSIONS    = ("check-versions",    "check_versions_flag",    False
 OPTION_REAL_UPDATE       = ("real-update",       "real_update_flag",       False,                               validBool)
 OPTION_CLIENT            = ("client",            "client_name",            None,                                __makeValidMaybeEmptyRange(clients.CLIENTS_MAP.keys()))
 OPTION_CLIENT_URL        = ("client-url",        "client_url",             None,                                validEmpty)
-OPTION_SAVE_CUSTOMS      = ("save-customs",      "save_customs_list",      (),                                  validStringList)
+OPTION_SAVE_CUSTOMS      = ("save-customs",      "save_customs_list",      (),                                  __validSaveCustoms)
 OPTION_SET_CUSTOMS       = ("set-customs",       "set_customs_dict",       {},                                  __validSetCustoms)
 OPTION_NO_COLORS         = ("no-colors",         "no_colors_flag",         False,                               validBool)
 OPTION_FORCE_COLORS      = ("force-colors",      "force_colors_flag",      False,                               validBool)
