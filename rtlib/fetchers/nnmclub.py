@@ -35,6 +35,7 @@ NNMCLUB_DOMAIN = "nnm-club.me"
 NNMCLUB_LOGIN_URL = "http://%s/forum/login.php" % (NNMCLUB_DOMAIN)
 NNMCLUB_DL_URL = "http://%s/forum/download.php" % (NNMCLUB_DOMAIN)
 NNMCLUB_SCRAPE_URL = "http://bt.%s:2710/scrape" % (NNMCLUB_DOMAIN)
+REPLACE_DOMAINS = ("nnm-club.ru", "nnm-club.me")
 
 
 ##### Public classes #####
@@ -95,7 +96,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def fetchTorrent(self, torrent) :
 		self.assertMatch(torrent)
-		data = self.__readUrlRetry(torrent.comment())
+		data = self.__readUrlRetry(torrent.comment().replace(*REPLACE_DOMAINS))
 
 		torrent_id_match = self.__torrent_id_regexp.search(data)
 		self.assertFetcher(not torrent_id_match is None, "Unknown torrent_id")
