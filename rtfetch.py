@@ -110,20 +110,20 @@ def update(fetchers_list, client,
 		colored = ( lambda codes_list, text : ulib.tools.term.colored(codes_list, text, force_colors_flag) )
 	else :
 		colored = ( lambda codes_list, text : text )
-	make_fail = ( lambda text : (colored(31, "!"), colored(31, text)) )
 
 	for (count, (torrent_file_name, torrent)) in enumerate(torrents_list) :
-		status_line = "[%%s] %s %%s %s" % (tools.fmt.formatProgress(count + 1, len(torrents_list)), torrent_file_name)
+		status_line = "[$sign$] %s $fetcher$ %s" % (tools.fmt.formatProgress(count + 1, len(torrents_list)), torrent_file_name)
+		format_fail = ( lambda error : status_line.replace("$sign$", colored(31, "!"), 1).replace("$fetcher$", colored(31, error), 1) )
 
 		if torrent is None :
-			tools.cli.newLine(status_line % (make_fail("INVALID_TORRENT")))
+			tools.cli.newLine(format_fail("INVALID_TORRENT"))
 			invalid_count += 1
 			continue
 
 		status_line += " --- %s" % (torrent.comment() or "")
 
 		if not client is None and not torrent.hash() in hashes_list :
-			tools.cli.newLine(status_line % (make_fail("NOT_IN_CLIENT")))
+			tools.cli.newLine(format_fail("NOT_IN_CLIENT"))
 			not_in_client_count += 1
 			continue
 
@@ -131,33 +131,34 @@ def update(fetchers_list, client,
 		if fetcher is None :
 			unknown_count += 1
 			if not skip_unknown_flag :
-				tools.cli.newLine(status_line % (make_fail("UNKNOWN")))
+				tools.cli.newLine(format_fail("UNKNOWN"))
 			continue
 
-		status_line = status_line % ("%s", fetcher.plugin())
+		status_line = status_line.replace("$fetcher$", fetcher.plugin(), 1)
+		format_sign = ( lambda color, sign : status_line.replace("$sign$", ( colored(color, sign) if not color is None else sign ), 1) )
 		try :
 			if not fetcher.loggedIn() :
-				tools.cli.newLine(status_line % (colored(33, "?")))
+				tools.cli.newLine(format_sign(33, "?"))
 				error_count += 1
 				continue
 
 			if not fetcher.torrentChanged(torrent) :
-				tools.cli.oneLine(status_line % (" "), not show_passed_flag)
+				tools.cli.oneLine(format_sign(None, " "), not show_passed_flag)
 				passed_count += 1
 				continue
 
 			diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save_customs_list, real_update_flag)
-			tools.cli.newLine(status_line % (colored(32, "+")))
+			tools.cli.newLine(format_sign(32, "+"))
 			if show_diff_flag :
 				tfile.printDiff(diff_tuple, "\t", use_colors_flag=(not no_colors_flag), force_colors_flag=force_colors_flag)
 			updated_count += 1
 
 		except fetcherlib.CommonFetcherError, err :
-			tools.cli.newLine((status_line + " :: %s(%s)") % (colored(31, "-"), type(err).__name__, str(err)))
+			tools.cli.newLine(format_sign(31, "-") + (" :: %s(%s)" % (type(err).__name__, err)))
 			error_count += 1
 
 		except Exception, err :
-			tools.cli.newLine(status_line % ("-"))
+			tools.cli.newLine(format_sign(31, "-"))
 			tools.cli.printTraceback("\t")
 			error_count += 1
 
