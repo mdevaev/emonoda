@@ -49,7 +49,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.__proxy_url = proxy_url
 		self.__interactive_flag = interactive_flag
 
-		self.__comment_regexp = re.compile(r"http://nnm-club\.ru/forum/viewtopic\.php\?p=(\d+)")
+		self.__comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
 		self.__torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
 
 		self.__cookie_jar = None
