@@ -275,7 +275,7 @@ def main() :
 	if len(fetchers_list) == 0 :
 		print >> sys.stderr, "No available fetchers in config"
 		sys.exit(1)
-	if len(fetchers_list) != len(fetchers.FETCHERS_MAP) :
+	if len(cli_options.only_fetchers_list) != 0 or len(cli_options.exclude_fetchers_list) != 0 :
 		cli_options.skip_unknown_flag = True
 
 	if cli_options.check_versions_flag and not fetcherlib.checkVersions(fetchers_list) :
