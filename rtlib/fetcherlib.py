@@ -38,7 +38,7 @@ DEFAULT_LOGIN = ""
 DEFAULT_PASSWD = ""
 DEFAULT_URL_RETRIES = 10
 DEFAULT_URL_SLEEP_TIME = 1
-DEFAULT_RETRY_CODES_TUPLE = (503, 502, 500)
+DEFAULT_RETRY_CODES = (503, 502, 500)
 DEFAULT_PROXY_URL = None
 DEFAULT_INTERACTIVE_FLAG = False
 
@@ -88,7 +88,7 @@ def readUrlRetry(opener, url,
 	timeout = socket._GLOBAL_DEFAULT_TIMEOUT, # pylint: disable=W0212
 	retries = DEFAULT_URL_RETRIES,
 	sleep_time = DEFAULT_URL_SLEEP_TIME,
-	retry_codes_list = DEFAULT_RETRY_CODES_TUPLE,
+	retry_codes_list = DEFAULT_RETRY_CODES,
 	retry_timeout_flag = True,
 	) :
 

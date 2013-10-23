@@ -32,7 +32,7 @@ import ulib.tools.term
 
 
 ##### Public constants #####
-ALL_MAGNET_FIELDS_TUPLE = ("dn", "tr", "xl")
+ALL_MAGNET_FIELDS = ("dn", "tr", "xl")
 
 
 ##### Public methods #####
