@@ -177,9 +177,9 @@ def update(fetchers_list, client,
 
 
 ###
-def initFetchers(config_dict, url_retries, url_sleep_time, proxy_url, interactive_flag, only_fetchers_list, pass_failed_login_flag) :
+def initFetchers(config_dict, url_retries, url_sleep_time, proxy_url, interactive_flag, only_fetchers_list, exclude_fetchers_list, pass_failed_login_flag) :
 	fetchers_list = []
-	for fetcher_name in set(fetchers.FETCHERS_MAP.keys()).intersection(only_fetchers_list) :
+	for fetcher_name in set(fetchers.FETCHERS_MAP.keys()).intersection(only_fetchers_list).difference(exclude_fetchers_list) :
 		get_fetcher_option = ( lambda option : config.getOption(fetcher_name, option, config_dict) )
 		get_common_option = ( lambda option, cli_value : config.getCommonOption((
 			config.SECTION_MAIN, config.SECTION_RTFETCH, fetcher_name), option, config_dict, cli_value) )
@@ -221,6 +221,7 @@ def main() :
 		config.ARG_BACKUP_SUFFIX,
 		config.ARG_NAMES_FILTER,
 		config.ARG_ONLY_FETCHERS,
+		config.ARG_EXCLUDE_FETCHERS,
 		config.ARG_TIMEOUT,
 		config.ARG_INTERACTIVE,
 		config.ARG_NO_INTERACTIVE,
@@ -267,6 +268,7 @@ def main() :
 		cli_options.proxy_url,
 		cli_options.interactive_flag,
 		cli_options.only_fetchers_list,
+		cli_options.exclude_fetchers_list,
 		cli_options.pass_failed_login_flag,
 	)
 	if len(fetchers_list) == 0 :
