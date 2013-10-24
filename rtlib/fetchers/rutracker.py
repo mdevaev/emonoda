@@ -139,8 +139,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			self.assertLogin(not cap_sid_match is None, "Unknown cap_sid")
 			self.assertLogin(not cap_code_match is None, "Unknown cap_code")
 
-			print ":: Enter the capthca [ %s ]:" % (cap_static_match.group(1)),
-			post_dict[cap_code_match.group(1)] = raw_input()
+			post_dict[cap_code_match.group(1)] = self.decodeCaptcha(cap_static_match.group(1))
 			post_dict["cap_sid"] = cap_sid_match.group(1)
 			data = self.__readUrlRetry(RUTRACKER_LOGIN_URL, urllib.urlencode(post_dict))
 			self.assertLogin(self.__cap_static_regexp.search(data) is None, "Invalid captcha or password")

@@ -132,7 +132,7 @@ def checkVersions(fetchers_list) :
 
 ##### Public classes #####
 class AbstractFetcher(object) :
-	def __init__(self, user_name, passwd, url_retries, url_sleep_time, user_agent, client_agent, proxy_url, interactive_flag) :
+	def __init__(self, user_name, passwd, url_retries, url_sleep_time, user_agent, client_agent, proxy_url, interactive_flag, captcha_callback) :
 		object.__init__(self)
 
 		self.__user_name        = self.__assertIsInstance(user_name,        basestring)
@@ -143,6 +143,9 @@ class AbstractFetcher(object) :
 		self.__client_agent     = self.__assertIsInstance(client_agent,     (basestring, types.NoneType))
 		self.__proxy_url        = self.__assertIsInstance(proxy_url,        (basestring, types.NoneType))
 		self.__interactive_flag = self.__assertIsInstance(interactive_flag, bool)
+
+		assert callable(captcha_callback)
+		self.__captcha_callback = captcha_callback
 
 
 	### Public ###
@@ -197,6 +200,9 @@ class AbstractFetcher(object) :
 
 	def isInteractive(self) :
 		return self.__interactive_flag
+
+	def decodeCaptcha(self, url) :
+		return self.__captcha_callback(url)
 
 	###
 

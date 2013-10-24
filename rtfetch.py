@@ -79,6 +79,10 @@ def torrents(src_dir_path, names_filter) :
 		torrents_list = [ item for item in torrents_list if names_filter in item[0] ]
 	return sorted(torrents_list, key=operator.itemgetter(0))
 
+def readCaptchaCallback(url) :
+	print "# Enter the captcha from [ %s ] ?>" % (url)
+	return raw_input()
+
 
 ###
 def update(fetchers_list, client,
@@ -209,6 +213,7 @@ def initFetchers(config_dict,
 				get_common_option(config.OPTION_CLIENT_AGENT, client_agent),
 				get_common_option(config.OPTION_PROXY_URL, proxy_url),
 				get_common_option(config.OPTION_INTERACTIVE, interactive_flag),
+				readCaptchaCallback,
 			)
 
 			try :
