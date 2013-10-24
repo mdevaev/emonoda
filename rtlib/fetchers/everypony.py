@@ -19,7 +19,6 @@
 #####
 
 
-from rtlib import const
 from rtlib import fetcherlib
 
 import re
@@ -32,12 +31,8 @@ FETCHER_VERSION = 0
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
-	def __init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag) :
-		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag)
-
-		self.__url_retries = url_retries
-		self.__url_sleep_time = url_sleep_time
-		self.__proxy_url = proxy_url
+	def __init__(self, *args_tuple, **kwargs_dict) :
+		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
 		self.__comment_regexp = re.compile(r"http://tabun\.everypony\.ru/blog/torrents/\d+\.html")
 		self.__hash_regexp = re.compile(r"<blockquote>\s*Hash\s*:\s*([a-fA-F0-9]{40})\s*<br/>")
@@ -64,7 +59,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
 
 	def login(self) :
-		self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.__proxy_url)
+		self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
 
 	def loggedIn(self) :
 		return True
@@ -99,9 +94,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return hash_match.group(1).lower()
 
 	def __readUrlRetry(self, url) :
+		user_agent = self.userAgent()
+		headers_dict = ( { "User-Agent" : user_agent } if not user_agent is None else None )
 		return fetcherlib.readUrlRetry(self.__opener, url,
-			headers_dict={ "User-Agent" : const.BROWSER_USER_AGENT },
-			retries=self.__url_retries,
-			sleep_time=self.__url_sleep_time,
+			headers_dict=headers_dict,
+			retries=self.urlRetries(),
+			sleep_time=self.urlSleepTime(),
 		)
 

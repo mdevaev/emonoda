@@ -178,7 +178,18 @@ def update(fetchers_list, client,
 
 
 ###
-def initFetchers(config_dict, url_retries, url_sleep_time, proxy_url, interactive_flag, only_fetchers_list, exclude_fetchers_list, pass_failed_login_flag) :
+def initFetchers(config_dict,
+		url_retries,
+		url_sleep_time,
+		user_agent,
+		client_agent,
+		proxy_url,
+		interactive_flag,
+		only_fetchers_list,
+		exclude_fetchers_list,
+		pass_failed_login_flag,
+	) :
+
 	fetchers_list = []
 	for fetcher_name in set(fetchers.FETCHERS_MAP.keys()).intersection(only_fetchers_list).difference(exclude_fetchers_list) :
 		get_fetcher_option = ( lambda option : config.getOption(fetcher_name, option, config_dict) )
@@ -189,21 +200,24 @@ def initFetchers(config_dict, url_retries, url_sleep_time, proxy_url, interactiv
 		if config_dict.has_key(fetcher_name) :
 			tools.cli.oneLine("# Enabling the fetcher \"%s\"..." % (fetcher_name))
 
-			f_login            = get_fetcher_option(config.OPTION_LOGIN)
-			f_passwd           = get_fetcher_option(config.OPTION_PASSWD)
-			f_url_retries      = get_common_option(config.OPTION_URL_RETRIES, url_retries)
-			f_url_sleep_time   = get_common_option(config.OPTION_URL_SLEEP_TIME, url_sleep_time)
-			f_proxy_url        = get_common_option(config.OPTION_PROXY_URL, proxy_url)
-			f_interactive_flag = get_common_option(config.OPTION_INTERACTIVE, interactive_flag)
+			fetcher = fetcher_class(
+				get_fetcher_option(config.OPTION_LOGIN),
+				get_fetcher_option(config.OPTION_PASSWD),
+				get_common_option(config.OPTION_URL_RETRIES, url_retries),
+				get_common_option(config.OPTION_URL_SLEEP_TIME, url_sleep_time),
+				get_common_option(config.OPTION_USER_AGENT, user_agent),
+				get_common_option(config.OPTION_CLIENT_AGENT, client_agent),
+				get_common_option(config.OPTION_PROXY_URL, proxy_url),
+				get_common_option(config.OPTION_INTERACTIVE, interactive_flag),
+			)
 
 			try :
-				fetcher = fetcher_class(f_login, f_passwd, f_url_retries, f_url_sleep_time, f_proxy_url, f_interactive_flag)
 				fetcher.login()
 				tools.cli.newLine("# Fetcher \"%s\" is ready (user: %s; proxy: %s; interactive: %s)" % (
 						fetcher_name,
-						( f_login or "<anonymous>" ),
-						( f_proxy_url or "<none>" ),
-						( "yes" if f_interactive_flag else "no" ),
+						( fetcher.userName() or "<anonymous>" ),
+						( fetcher.proxyUrl() or "<none>" ),
+						( "yes" if fetcher.isInteractive() else "no" ),
 					))
 			except Exception, err :
 				tools.cli.newLine("# Init error: %s: %s(%s)" % (fetcher_name, type(err).__name__, err))
@@ -240,6 +254,8 @@ def main() :
 		config.ARG_NO_REAL_UPDATE,
 		config.ARG_URL_RETRIES,
 		config.ARG_URL_SLEEP_TIME,
+		config.ARG_USER_AGENT,
+		config.ARG_CLIENT_AGENT,
 		config.ARG_PROXY_URL,
 		config.ARG_CLIENT,
 		config.ARG_CLIENT_URL,
@@ -256,6 +272,8 @@ def main() :
 			config.OPTION_PASSWD,
 			config.OPTION_URL_RETRIES,
 			config.OPTION_URL_SLEEP_TIME,
+			config.OPTION_USER_AGENT,
+			config.OPTION_CLIENT_AGENT,
 			config.OPTION_PROXY_URL,
 			config.OPTION_INTERACTIVE,
 		))
@@ -266,6 +284,8 @@ def main() :
 	fetchers_list = initFetchers(config_dict,
 		cli_options.url_retries,
 		cli_options.url_sleep_time,
+		cli_options.user_agent,
+		cli_options.client_agent,
 		cli_options.proxy_url,
 		cli_options.interactive_flag,
 		cli_options.only_fetchers_list,

@@ -19,7 +19,6 @@
 #####
 
 
-from rtlib import const
 from rtlib import fetcherlib
 
 import urllib
@@ -40,15 +39,8 @@ REPLACE_DOMAINS = ("nnm-club.ru", "nnm-club.me")
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
-	def __init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag) :
-		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag)
-
-		self.__user_name = user_name
-		self.__passwd = passwd
-		self.__url_retries = url_retries
-		self.__url_sleep_time = url_sleep_time
-		self.__proxy_url = proxy_url
-		self.__interactive_flag = interactive_flag
+	def __init__(self, *args_tuple, **kwargs_dict) :
+		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
 		self.__comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
 		self.__torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
@@ -73,9 +65,9 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
 
 	def login(self) :
-		self.assertNonAnonymous(self.__user_name)
+		self.assertNonAnonymous()
 		self.__cookie_jar = cookielib.CookieJar()
-		self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.__proxy_url)
+		self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.proxyUrl())
 		try :
 			self.__tryLogin()
 		except :
@@ -88,9 +80,9 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def torrentChanged(self, torrent) :
 		self.assertMatch(torrent)
-		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict={
-				"User-Agent" : const.CLIENT_USER_AGENT,
-			})
+		client_agent = self.clientAgent()
+		headers_dict = ( { "User-Agent" : client_agent } if not client_agent is None else None )
+		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict)
 		self.assertFetcher(data.startswith("d5:"), "Invalid scrape answer")
 		return ( data.strip() == "d5:filesdee" )
 
@@ -111,20 +103,22 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def __tryLogin(self) :
 		post_dict = {
-			"username" : self.__user_name,
-			"password" : self.__passwd,
+			"username" : self.userName(),
+			"password" : self.passwd(),
 			"redirect" : "",
 			"login"    : "\xc2\xf5\xee\xe4",
 		}
 		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict))
-		self.assertLogin("[ %s ]" % (self.__user_name) in data, "Invalid login")
+		self.assertLogin("[ %s ]" % (self.userName()) in data, "Invalid login")
 
 	def __readUrlRetry(self, url, data = None, headers_dict = None) :
 		headers_dict = ( headers_dict or {} )
-		headers_dict.update({ "User-Agent" : const.BROWSER_USER_AGENT })
+		user_agent = self.userAgent()
+		if not user_agent is None :
+			headers_dict.setdefault("User-Agent", user_agent)
 		return fetcherlib.readUrlRetry(self.__opener, url, data,
 			headers_dict=headers_dict,
-			retries=self.__url_retries,
-			sleep_time=self.__url_sleep_time,
+			retries=self.urlRetries(),
+			sleep_time=self.urlSleepTime(),
 		)
 

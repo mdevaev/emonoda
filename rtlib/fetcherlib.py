@@ -39,6 +39,8 @@ DEFAULT_PASSWD = ""
 DEFAULT_URL_RETRIES = 10
 DEFAULT_URL_SLEEP_TIME = 1
 DEFAULT_RETRY_CODES = (503, 502, 500)
+DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.89 Safari/537.1"
+DEFAULT_CLIENT_AGENT = "rtorrent/0.9.2/0.13.2"
 DEFAULT_PROXY_URL = None
 DEFAULT_INTERACTIVE_FLAG = False
 
@@ -130,14 +132,17 @@ def checkVersions(fetchers_list) :
 
 ##### Public classes #####
 class AbstractFetcher(object) :
-	def __init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag) :
+	def __init__(self, user_name, passwd, url_retries, url_sleep_time, user_agent, client_agent, proxy_url, interactive_flag) :
 		object.__init__(self)
-		assert isinstance(user_name, basestring)
-		assert isinstance(passwd, basestring)
-		assert isinstance(url_retries, (int, long))
-		assert isinstance(url_sleep_time, (int, long))
-		assert isinstance(proxy_url, (basestring, types.NoneType))
-		assert isinstance(interactive_flag, bool)
+
+		self.__user_name        = self.__assertIsInstance(user_name,        basestring)
+		self.__passwd           = self.__assertIsInstance(passwd,           basestring)
+		self.__url_retries      = self.__assertIsInstance(url_retries,      (int, long))
+		self.__url_sleep_time   = self.__assertIsInstance(url_sleep_time,   (int, long, float))
+		self.__user_agent       = self.__assertIsInstance(user_agent,       (basestring, types.NoneType))
+		self.__client_agent     = self.__assertIsInstance(client_agent,     (basestring, types.NoneType))
+		self.__proxy_url        = self.__assertIsInstance(proxy_url,        (basestring, types.NoneType))
+		self.__interactive_flag = self.__assertIsInstance(interactive_flag, bool)
 
 
 	### Public ###
@@ -169,6 +174,32 @@ class AbstractFetcher(object) :
 
 	###
 
+	def userName(self) :
+		return self.__user_name
+
+	def passwd(self) :
+		return self.__passwd
+
+	def urlRetries(self) :
+		return self.__url_retries
+
+	def urlSleepTime(self) :
+		return self.__url_sleep_time
+
+	def userAgent(self) :
+		return self.__user_agent
+
+	def clientAgent(self) :
+		return self.__client_agent
+
+	def proxyUrl(self) :
+		return self.__proxy_url
+
+	def isInteractive(self) :
+		return self.__interactive_flag
+
+	###
+
 	def assertLogin(self, *args_list) :
 		self.__customAssert(LoginError, *args_list)
 
@@ -177,8 +208,8 @@ class AbstractFetcher(object) :
 
 	###
 
-	def assertNonAnonymous(self, login) :
-		self.assertLogin(len(login) != 0, "The tracker \"%s\" can not be used anonymously" % (self.plugin()))
+	def assertNonAnonymous(self) :
+		self.assertLogin(len(self.__user_name) != 0, "The tracker \"%s\" can not be used anonymously" % (self.plugin()))
 
 	def assertMatch(self, torrent) :
 		self.assertFetcher(self.match(torrent), "No comment match")
@@ -193,4 +224,10 @@ class AbstractFetcher(object) :
 	def __customAssert(self, exception, arg, message = "") :
 		if not arg :
 			raise exception(message)
+
+	###
+
+	def __assertIsInstance(self, value, value_type) :
+		assert isinstance(value, value_type)
+		return value
 

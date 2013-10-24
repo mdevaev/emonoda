@@ -20,7 +20,6 @@
 #####
 
 
-from rtlib import const
 from rtlib import fetcherlib
 
 import urllib
@@ -40,15 +39,8 @@ PRAVTOR_DL_URL = "http://%s/download.php" % (PRAVTOR_DOMAIN)
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
-	def __init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag) :
-		fetcherlib.AbstractFetcher.__init__(self, user_name, passwd, url_retries, url_sleep_time, proxy_url, interactive_flag)
-
-		self.__user_name = user_name
-		self.__passwd = passwd
-		self.__url_retries = url_retries
-		self.__url_sleep_time = url_sleep_time
-		self.__proxy_url = proxy_url
-		self.__interactive_flag = interactive_flag
+	def __init__(self, *args_tuple, **kwargs_dict) :
+		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
 		self.__comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
 
@@ -77,9 +69,9 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
 
 	def login(self) :
-		self.assertNonAnonymous(self.__user_name)
+		self.assertNonAnonymous()
 		self.__cookie_jar = cookielib.CookieJar()
-		self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.__proxy_url)
+		self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.proxyUrl())
 		try :
 			self.__tryLogin()
 		except :
@@ -135,8 +127,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def __tryLogin(self) :
 		post_dict = {
-			"login_username" : self.__user_name.decode("utf-8").encode("cp1251"),
-			"login_password" : self.__passwd.decode("utf-8").encode("cp1251"),
+			"login_username" : self.userName().decode("utf-8").encode("cp1251"),
+			"login_password" : self.passwd().decode("utf-8").encode("cp1251"),
 			"login"          : "\xc2\xf5\xee\xe4",
 		}
 		data = self.__readUrlRetry(PRAVTOR_LOGIN_URL, urllib.urlencode(post_dict))
@@ -156,10 +148,12 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def __readUrlRetry(self, url, data = None, headers_dict = None) :
 		headers_dict = ( headers_dict or {} )
-		headers_dict.update({ "User-Agent" : const.BROWSER_USER_AGENT })
+		user_agent = self.userAgent()
+		if not user_agent is None :
+			headers_dict.setdefault("User-Agent", user_agent)
 		return fetcherlib.readUrlRetry(self.__opener, url, data,
 			headers_dict=headers_dict,
-			retries=self.__url_retries,
-			sleep_time=self.__url_sleep_time,
+			retries=self.urlRetries(),
+			sleep_time=self.urlSleepTime(),
 		)
 
