@@ -23,7 +23,10 @@ import os
 
 import tfile
 
-import ulib.tools.coding
+from ulib import tools
+import ulib.tools.coding # pylint: disable=W0611
+
+from ulib import validators
 import ulib.validators.common
 
 
@@ -37,7 +40,7 @@ def initClient(client_class, client_url, save_customs_list = (), set_customs_dic
 	set_customs_dict = ( set_customs_dict or {} )
 	valid_customs_list = client_class.customKeys()
 	for custom_key in list(save_customs_list) + list(set_customs_dict) :
-		ulib.validators.common.validRange(custom_key, valid_customs_list)
+		validators.common.validRange(custom_key, valid_customs_list)
 	return client_class(client_url)
 
 
@@ -74,7 +77,7 @@ def buildFiles(prefix, files_list, files_dict = None) :
 	if files_dict is None :
 		files_dict = {}
 	for (path, size) in files_list :
-		path_list = ulib.tools.coding.utf8(path).split(os.path.sep)
+		path_list = tools.coding.utf8(path).split(os.path.sep)
 		name = None
 		for index in xrange(len(path_list)) :
 			name = os.path.join(prefix, os.path.sep.join(path_list[0:index+1]))

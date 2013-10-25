@@ -111,7 +111,7 @@ def update(fetchers_list, client,
 	hashes_list = ( client.hashes() if not client is None else [] )
 
 	if not no_colors_flag :
-		colored = ( lambda codes_list, text : ulib.tools.term.colored(codes_list, text, force_colors_flag) )
+		colored = ( lambda codes_list, text : tools.term.colored(codes_list, text, force_colors_flag) )
 	else :
 		colored = ( lambda codes_list, text : text )
 

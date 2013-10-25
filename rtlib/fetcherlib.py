@@ -22,7 +22,8 @@
 import const
 import tfile
 
-import ulib.tools.coding
+from ulib import tools
+import ulib.tools.coding # pylint: disable=W0611
 import ulib.tools.url
 
 import socket
@@ -79,7 +80,7 @@ def buildTypicalOpener(cookie_jar = None, proxy_url = None) :
 					"https" : proxy_url,
 				}))
 		elif scheme in ("socks4", "socks5") :
-			handlers_list.append(ulib.tools.url.SocksHandler(proxy_url=proxy_url))
+			handlers_list.append(tools.url.SocksHandler(proxy_url=proxy_url))
 		else :
 			raise RuntimeError("Invalid proxy protocol: %s" % (scheme))
 	return urllib2.build_opener(*handlers_list)
@@ -221,7 +222,7 @@ class AbstractFetcher(object) :
 		self.assertFetcher(self.match(torrent), "No comment match")
 
 	def assertValidTorrentData(self, data) :
-		message = "Received an invalid torrent data: %s ..." % (ulib.tools.coding.utf8(data[:20]))
+		message = "Received an invalid torrent data: %s ..." % (tools.coding.utf8(data[:20]))
 		self.assertFetcher(tfile.isValidTorrentData(data), message)
 
 

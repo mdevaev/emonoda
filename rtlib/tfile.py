@@ -28,7 +28,8 @@ import hashlib
 import urllib
 import itertools
 
-import ulib.tools.term
+from ulib import tools
+import ulib.tools.term # pylint: disable=W0611
 
 
 ##### Public constants #####
@@ -108,7 +109,7 @@ def printDiff(diff_tuple, prefix = "", use_colors_flag = True, force_colors_flag
 		) :
 		for item in sorted(files_set) :
 			if use_colors_flag :
-				sign = ulib.tools.term.colored(color, sign, force_colors_flag=force_colors_flag, output=output)
+				sign = tools.term.colored(color, sign, force_colors_flag=force_colors_flag, output=output)
 			print >> output, "%s%s %s" % (prefix, sign, item)
 
 
