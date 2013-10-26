@@ -92,8 +92,7 @@ def main() :
 	)
 	cli_parser.add_argument("--link-to", dest="link_to_path", action="store", default=None, metavar="<path>")
 	cli_parser.add_argument("torrents_list", type=str, nargs="+")
-	cli_options = cli_parser.parse_args(argv_list)
-	config.syncParsers(config.SECTION_RTLOAD, cli_options, config_dict)
+	cli_options = config.syncParsers(config.SECTION_RTLOAD, cli_parser.parse_args(argv_list), config_dict)
 
 	if len(cli_options.torrents_list) > 1 and not cli_options.link_to_path is None :
 		print >> sys.stderr, "Option -l/--link-to be used with only one torrent"
@@ -102,7 +101,7 @@ def main() :
 		print >> sys.stderr, "Required client"
 		sys.exit(1)
 
-	socket.setdefaulttimeout(cli_options.socket_timeout)
+	socket.setdefaulttimeout(cli_options.timeout)
 
 	client = clientlib.initClient(
 		clients.CLIENTS_MAP[cli_options.client_name],

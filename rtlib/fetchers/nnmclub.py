@@ -116,8 +116,10 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		user_agent = self.userAgent()
 		if not user_agent is None :
 			headers_dict.setdefault("User-Agent", user_agent)
+
 		return fetcherlib.readUrlRetry(self.__opener, url, data,
 			headers_dict=headers_dict,
+			timeout=self.timeout(),
 			retries=self.urlRetries(),
 			sleep_time=self.urlSleepTime(),
 		)

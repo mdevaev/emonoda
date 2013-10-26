@@ -2,6 +2,7 @@
 
 
 import os
+import copy
 import argparse
 import ConfigParser
 
@@ -95,7 +96,7 @@ OPTION_BACKUP_SUFFIX     = ("backup-suffix",     "backup_suffix",          ".%Y.
 OPTION_NAMES_FILTER      = ("names-filter",      "names_filter",           None,                                validEmpty)
 OPTION_ONLY_FETCHERS     = ("only-fetchers",     "only_fetchers_list",     fetchers.FETCHERS_MAP.keys(),        __validFetchers)
 OPTION_EXCLUDE_FETCHERS  = ("exclude-fetchers",  "exclude_fetchers_list",  (),                                  __validFetchers)
-OPTION_TIMEOUT           = ("timeout",           "socket_timeout",         DEFAULT_TIMEOUT,                     __makeValidNumber(0))
+OPTION_TIMEOUT           = ("timeout",           "timeout",                DEFAULT_TIMEOUT,                     __makeValidNumber(0))
 OPTION_LOGIN             = ("login",             None,                     fetcherlib.DEFAULT_LOGIN,            str)
 OPTION_PASSWD            = ("passwd",            None,                     fetcherlib.DEFAULT_PASSWD,           str)
 OPTION_URL_RETRIES       = ("url-retries",       "url_retries",            fetcherlib.DEFAULT_URL_RETRIES,      __makeValidNumber(0))
@@ -159,12 +160,14 @@ ARG_NO_FORCE_COLORS      = ((      "no-"+OPTION_FORCE_COLORS[0],),      OPTION_F
 
 ##### Public methods #####
 def syncParsers(app_section, cli_options, config_dict, ignore_list = ()) :
+	new_options = copy.copy(cli_options)
 	for (dest, option_dict) in ALL_DESTS_MAP.iteritems() :
 		option = option_dict["option"]
 		if option in ignore_list or not hasattr(cli_options, dest) :
 			continue
 		value = getCommonOption((SECTION_MAIN, app_section), option_dict["option"], config_dict, getattr(cli_options, dest))
-		setattr(cli_options, dest, value)
+		setattr(new_options, dest, value)
+	return new_options
 
 def partialParser(argv_list, **kwargs_dict) :
 	cli_parser = argparse.ArgumentParser(add_help=False)

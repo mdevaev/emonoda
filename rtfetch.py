@@ -185,6 +185,7 @@ def update(fetchers_list, client, # pylint: disable=R0913
 def initFetchers(config_dict,
 		url_retries,
 		url_sleep_time,
+		timeout,
 		user_agent,
 		client_agent,
 		proxy_url,
@@ -209,6 +210,7 @@ def initFetchers(config_dict,
 				get_fetcher_option(config.OPTION_PASSWD),
 				get_common_option(config.OPTION_URL_RETRIES, url_retries),
 				get_common_option(config.OPTION_URL_SLEEP_TIME, url_sleep_time),
+				get_common_option(config.OPTION_TIMEOUT, timeout),
 				get_common_option(config.OPTION_USER_AGENT, user_agent),
 				get_common_option(config.OPTION_CLIENT_AGENT, client_agent),
 				get_common_option(config.OPTION_PROXY_URL, proxy_url),
@@ -270,8 +272,8 @@ def main() :
 		config.ARG_FORCE_COLORS,
 		config.ARG_NO_FORCE_COLORS,
 	)
-	cli_options = cli_parser.parse_args(argv_list)
-	config.syncParsers(config.SECTION_RTFETCH, cli_options, config_dict, (
+	raw_options = cli_parser.parse_args(argv_list)
+	cli_options = config.syncParsers(config.SECTION_RTFETCH, raw_options, config_dict, (
 			# For fetchers: validate this options later
 			config.OPTION_LOGIN,
 			config.OPTION_PASSWD,
@@ -284,15 +286,16 @@ def main() :
 		))
 
 
-	socket.setdefaulttimeout(cli_options.socket_timeout)
+	socket.setdefaulttimeout(cli_options.timeout)
 
 	fetchers_list = initFetchers(config_dict,
-		cli_options.url_retries,
-		cli_options.url_sleep_time,
-		cli_options.user_agent,
-		cli_options.client_agent,
-		cli_options.proxy_url,
-		cli_options.interactive_flag,
+		raw_options.url_retries,
+		raw_options.url_sleep_time,
+		raw_options.timeout,
+		raw_options.user_agent,
+		raw_options.client_agent,
+		raw_options.proxy_url,
+		raw_options.interactive_flag,
 		cli_options.only_fetchers_list,
 		cli_options.exclude_fetchers_list,
 		cli_options.pass_failed_login_flag,

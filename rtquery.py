@@ -107,12 +107,12 @@ def main() :
 
 	data_dir_opt = cli_parser.add_argument("-d", "--data-dir",   dest="data_dir_path",  action="store", metavar="<dir>")
 	file_opt     = cli_parser.add_argument("-f", "--file",       dest="file_path",      action="store", metavar="<file>")
-	cli_parser.add_argument(               "-t", "--timeout",    dest="socket_timeout", action="store", default=config.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
+	cli_parser.add_argument(               "-t", "--timeout",    dest="timeout",        action="store", default=config.DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
 	cli_parser.add_argument(                     "--client-url", dest="client_url",     action="store", default=None, metavar="<url>")
 
 	cli_options = cli_parser.parse_args(sys.argv[1:])
 
-	socket.setdefaulttimeout(cli_options.socket_timeout)
+	socket.setdefaulttimeout(cli_options.timeout)
 	client = None
 	if not cli_options.client_name is None :
 		client_class = clients.CLIENTS_MAP[cli_options.client_name]

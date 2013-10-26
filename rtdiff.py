@@ -43,10 +43,9 @@ def main() :
 		config.ARG_NO_FORCE_COLORS,
 	)
 	cli_parser.add_argument("torrents_list", type=str, nargs=2, metavar="<path/hash>")
-	cli_options = cli_parser.parse_args(argv_list)
-	config.syncParsers(config.SECTION_RTDIFF, cli_options, config_dict)
+	cli_options = config.syncParsers(config.SECTION_RTDIFF, cli_parser.parse_args(argv_list), config_dict)
 
-	socket.setdefaulttimeout(cli_options.socket_timeout)
+	socket.setdefaulttimeout(cli_options.timeout)
 
 	client = None
 	if not cli_options.client_name is None :

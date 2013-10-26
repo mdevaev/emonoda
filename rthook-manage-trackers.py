@@ -44,11 +44,11 @@ def main() :
 	cli_parser = argparse.ArgumentParser(description="Manage trackers (rtorrent only)")
 	cli_parser.add_argument(      "--enable",     dest="enable_list",  nargs="+", metavar="<pattern>")
 	cli_parser.add_argument(      "--disable",    dest="disable_list", nargs="+", metavar="<pattern>")
-	cli_parser.add_argument("-t", "--timeout",    dest="socket_timeout", action="store", default=DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
-	cli_parser.add_argument(      "--client-url", dest="client_url",     action="store", default=DEFAULT_URL, metavar="<url>")
+	cli_parser.add_argument("-t", "--timeout",    dest="timeout",      action="store", default=DEFAULT_TIMEOUT, type=int, metavar="<seconds>")
+	cli_parser.add_argument(      "--client-url", dest="client_url",   action="store", default=DEFAULT_URL, metavar="<url>")
 
 	cli_options = cli_parser.parse_args(sys.argv[1:])
-	socket.setdefaulttimeout(cli_options.socket_timeout)
+	socket.setdefaulttimeout(cli_options.timeout)
 	manageTrackers(
 		cli_options.client_url,
 		cli_options.enable_list,

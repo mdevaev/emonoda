@@ -143,10 +143,9 @@ def main() :
 		config.ARG_CLIENT_URL,
 	)
 	cli_parser.add_argument("torrents_list", type=str, nargs="+")
-	cli_options = cli_parser.parse_args(argv_list)
-	config.syncParsers(config.SECTION_RTFILE, cli_options, config_dict)
+	cli_options = config.syncParsers(config.SECTION_RTFILE, cli_parser.parse_args(argv_list), config_dict)
 
-	socket.setdefaulttimeout(cli_options.socket_timeout)
+	socket.setdefaulttimeout(cli_options.timeout)
 
 	torrents_list = [ tfile.Torrent(item) for item in cli_options.torrents_list ]
 
