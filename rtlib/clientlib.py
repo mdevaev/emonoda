@@ -91,7 +91,9 @@ def buildFiles(prefix, files_list, files_dict = None) :
 class AbstractClient(object) :
 	def __init__(self, url) :
 		object.__init__(self)
+
 		assert isinstance(url, basestring)
+		self.__url = url
 
 
 	### Public ###
@@ -159,4 +161,9 @@ class AbstractClient(object) :
 	@hashOrTorrent
 	def files(self, torrent_hash, system_path_flag = False) :
 		raise NotImplementedError
+
+	###
+
+	def url(self) :
+		return self.__url
 
