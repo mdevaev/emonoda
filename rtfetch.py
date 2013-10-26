@@ -85,7 +85,7 @@ def readCaptchaCallback(url) :
 
 
 ###
-def update(fetchers_list, client,
+def update(fetchers_list, client, # pylint: disable=R0913
 		src_dir_path,
 		backup_dir_path,
 		backup_suffix,
