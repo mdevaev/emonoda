@@ -85,14 +85,16 @@ def buildTypicalOpener(cookie_jar = None, proxy_url = None) :
 			raise RuntimeError("Invalid proxy protocol: %s" % (scheme))
 	return urllib2.build_opener(*handlers_list)
 
-def readUrlRetry(opener, url,
-	data = None,
-	headers_dict = None,
-	timeout = socket._GLOBAL_DEFAULT_TIMEOUT, # pylint: disable=W0212
-	retries = DEFAULT_URL_RETRIES,
-	sleep_time = DEFAULT_URL_SLEEP_TIME,
-	retry_codes_list = DEFAULT_RETRY_CODES,
-	retry_timeout_flag = True,
+def readUrlRetry(
+		opener,
+		url,
+		data = None,
+		headers_dict = None,
+		timeout = socket._GLOBAL_DEFAULT_TIMEOUT, # pylint: disable=W0212
+		retries = DEFAULT_URL_RETRIES,
+		sleep_time = DEFAULT_URL_SLEEP_TIME,
+		retry_codes_list = DEFAULT_RETRY_CODES,
+		retry_timeout_flag = True,
 	) :
 
 	while True :

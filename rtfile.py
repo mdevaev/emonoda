@@ -136,7 +136,7 @@ def main() :
 				print_method,
 			))
 	cli_parser.add_argument("--without-headers", dest="without_headers_flag", action="store_true")
-	cli_parser.add_argument("--magnet-fields",   dest="magnet_fields_list",   nargs="+",      default=None, metavar="<fields>", choices=tfile.ALL_MAGNET_FIELDS)
+	cli_parser.add_argument("--magnet-fields",   dest="magnet_fields_list",   nargs="+",  default=None, metavar="<fields>", choices=tfile.ALL_MAGNET_FIELDS)
 	config.addArguments(cli_parser,
 		config.ARG_TIMEOUT,
 		config.ARG_CLIENT,

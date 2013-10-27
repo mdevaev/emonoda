@@ -36,9 +36,6 @@ except ImportError :
 CLIENT_NAME = "transmission"
 DEFAULT_URL = "http://localhost:9091/transmission/rpc"
 
-LOAD_RETRIES = 10
-LOAD_RETRIES_SLEEP = 1
-
 
 ##### Public classes #####
 class Client(clientlib.AbstractClient) :
