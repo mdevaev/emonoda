@@ -200,5 +200,7 @@ class Client(clientlib.AbstractClient) :
 		files_list = list(multicall())
 		files_list = zip(files_list[::2], files_list[1::2])
 
-		return clientlib.buildFiles(base, files_list, { base : None })
+		files_dict = clientlib.buildFiles(base, files_list)
+		files_dict.update({ base : None })
+		return files_dict
 
