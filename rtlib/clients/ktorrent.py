@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 #
-#    transmission client for rtfetch
-#    Copyright (C) 2013  Vitaly Lipatov <lav@etersoft.ru>, Devaev Maxim <mdevaev@gmail.com>
+#    KTorrent client for rtfetch
+#    Copyright (C) 2013  Devaev Maxim <mdevaev@gmail.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
