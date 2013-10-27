@@ -111,13 +111,16 @@ def update(fetchers_list, client, # pylint: disable=R0913
 	hashes_list = ( client.hashes() if not client is None else [] )
 
 	if not no_colors_flag :
-		colored = ( lambda codes_list, text : tools.term.colored(codes_list, text, force_colors_flag) )
+		colored = ( lambda code, text : tools.term.colored(code, text, force_colors_flag) )
 	else :
-		colored = ( lambda codes_list, text : text )
+		colored = ( lambda code, text : text )
 
 	for (count, (torrent_file_name, torrent)) in enumerate(torrents_list) :
 		status_line = "[$sign$] %s $fetcher$ %s" % (tools.fmt.formatProgress(count + 1, len(torrents_list)), torrent_file_name)
-		format_fail = ( lambda error : status_line.replace("$sign$", colored(31, "!"), 1).replace("$fetcher$", colored(31, error), 1) )
+		format_fail = ( lambda error, code = 31, sign = "!" : ( status_line
+				.replace("$sign$", colored(code, sign), 1)
+				.replace("$fetcher$", colored(code, error), 1)
+			))
 
 		if torrent is None :
 			tools.cli.newLine(format_fail("INVALID_TORRENT"))
@@ -135,7 +138,7 @@ def update(fetchers_list, client, # pylint: disable=R0913
 		if fetcher is None :
 			unknown_count += 1
 			if not skip_unknown_flag :
-				tools.cli.newLine(format_fail("UNKNOWN"))
+				tools.cli.newLine(format_fail("UNKNOWN", 33, " "))
 			continue
 
 		status_line = status_line.replace("$fetcher$", fetcher.plugin(), 1)
