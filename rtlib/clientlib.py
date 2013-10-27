@@ -20,6 +20,7 @@
 
 
 import os
+import types
 
 import tfile
 
@@ -91,7 +92,7 @@ class AbstractClient(object) :
 	def __init__(self, url) :
 		object.__init__(self)
 
-		assert isinstance(url, basestring)
+		assert isinstance(url, (basestring, types.NoneType))
 		self.__url = url
 
 
