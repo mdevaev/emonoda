@@ -66,7 +66,7 @@ class Client(clientlib.AbstractClient) :
 	def loadTorrent(self, torrent, prefix = None) :
 		if not prefix is None :
 			self.__settings.setLastSaveDir(prefix)
-		self.__core.loadSilently(torrent.path())
+		self.__core.loadSilently(torrent.path(), "")
 
 	@clientlib.hashOrTorrent
 	def hasTorrent(self, torrent_hash) :

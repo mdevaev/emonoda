@@ -37,13 +37,16 @@ ALL_MAGNET_FIELDS = ("dn", "tr", "xl")
 
 
 ##### Public methods #####
-def torrents(src_dir_path, extension = ".torrent") :
+def torrents(src_dir_path, extension = ".torrent", abs_flag = False) :
 	torrents_dict = {}
 	for name in os.listdir(src_dir_path) :
 		if not name.endswith(extension) :
 			continue
 		try :
-			torrent = Torrent(os.path.join(src_dir_path, name))
+			path = os.path.join(src_dir_path, name)
+			if abs_flag :
+				path = os.path.abspath(path)
+			torrent = Torrent(path)
 		except bencode.BTL.BTFailure :
 			torrent = None
 		torrents_dict[name] = torrent

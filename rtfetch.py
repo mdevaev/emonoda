@@ -74,7 +74,7 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
 	return diff_tuple
 
 def torrents(src_dir_path, names_filter) :
-	torrents_list = tfile.torrents(src_dir_path).items()
+	torrents_list = tfile.torrents(src_dir_path, abs_flag=True).items()
 	if not names_filter is None :
 		torrents_list = [ item for item in torrents_list if names_filter in item[0] ]
 	return sorted(torrents_list, key=operator.itemgetter(0))
