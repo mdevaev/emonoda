@@ -8,7 +8,10 @@ arch=('any')
 url="http://github.com/mdevaev/rtfetch.git"
 license="GPL"
 depends=('python2' 'python2-bencode' 'python2-ulib-git>=0.4')
-optdepends=('python2-transmissionrpc')
+optdepends=(
+	'python2-transmissionrpc: Transmission support'
+	'python2-dbus: KTorrent support'
+)
 makedepends=('git')
 
 _gitroot="git://github.com/mdevaev/rtfetch.git"
