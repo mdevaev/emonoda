@@ -45,6 +45,9 @@ class Client(clientlib.AbstractClient) :
 		self.__core = self.__bus.get_object("org.ktorrent.ktorrent", "/core")
 		self.__settings = self.__bus.get_object("org.ktorrent.ktorrent", "/settings")
 
+		if self.__settings.useSaveDir() :
+			raise RuntimeError("Turn off the path by default in the settings of KTorrent")
+
 
 	### Public ###
 
@@ -61,13 +64,9 @@ class Client(clientlib.AbstractClient) :
 
 	@clientlib.loadTorrentAccessible
 	def loadTorrent(self, torrent, prefix = None) :
-		raise NotImplementedError
-		# TODO:
-		#   Я не знаю, как указать ktorrent`у, куда качать файлы.
-		#   Буду признателей за патч.
 		if not prefix is None :
-			self.__settings.setLastSaveDir(prefix) # FIXME: Это не работает!
-		self.__core.loadSilently(torrent.path(), "1")
+			self.__settings.setLastSaveDir(prefix)
+		self.__core.loadSilently(torrent.path())
 
 	@clientlib.hashOrTorrent
 	def hasTorrent(self, torrent_hash) :
