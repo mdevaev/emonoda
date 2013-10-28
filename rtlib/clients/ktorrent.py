@@ -113,10 +113,10 @@ class Client(clientlib.AbstractClient) :
 		if count == 0 : # Single file
 			files_list = [(name, int(torrent_obj.totalSize()))]
 		else :
-			files_list = [
-				(os.path.join(name, str(torrent_obj.filePath(dbus.UInt32(index), utf8_strings=True))), int(torrent_obj.fileSize(dbus.UInt32(index))))
-				for index in xrange(count)
-			]
+			files_list = [ (
+					os.path.join(name, str(torrent_obj.filePath(dbus.UInt32(index), utf8_strings=True))),
+					int(torrent_obj.fileSize(dbus.UInt32(index))),
+				) for index in xrange(count) ]
 		return clientlib.buildFiles(prefix, files_list)
 
 
