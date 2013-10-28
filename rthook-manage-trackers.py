@@ -4,7 +4,7 @@
 
 try :
 	from rtlib.config import DEFAULT_TIMEOUT
-	from rtlib.clients.rtorrent import DEFAULT_URL
+	from rtlib.clients.cmod_rtorrent import DEFAULT_URL
 except ImportError :
 	DEFAULT_TIMEOUT = 5
 	DEFAULT_URL = "http://localhost/RPC2"

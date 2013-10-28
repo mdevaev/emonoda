@@ -21,17 +21,17 @@
 
 from rtlib import plugin
 
-import rutracker
-import nnmclub
-import everypony
-import pravtor
+import fmod_rutracker
+import fmod_nnmclub
+import fmod_everypony
+import fmod_pravtor
 
 
 ##### Public constants #####
 FETCHERS_MAP = plugin.mapObjects(
-	rutracker.Fetcher,
-	nnmclub.Fetcher,
-	everypony.Fetcher,
-	pravtor.Fetcher,
+	fmod_rutracker.Fetcher,
+	fmod_nnmclub.Fetcher,
+	fmod_everypony.Fetcher,
+	fmod_pravtor.Fetcher,
 )
 

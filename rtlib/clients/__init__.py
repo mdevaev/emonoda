@@ -21,15 +21,15 @@
 
 from rtlib import plugin
 
-import rtorrent
-import transmission
-import ktorrent
+import cmod_rtorrent
+import cmod_transmission
+import cmod_ktorrent
 
 
 ##### Public constants #####
 CLIENTS_MAP = plugin.mapObjects(
-	rtorrent.Client,
-	transmission.Client,
-	ktorrent.Client,
+	cmod_rtorrent.Client,
+	cmod_transmission.Client,
+	cmod_ktorrent.Client,
 )
 
