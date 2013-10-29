@@ -27,7 +27,7 @@ build() {
 		msg "The local files are updated."
 		cd ..
 	else
-		git clone $_gitroot --depth=1
+		git clone --branch=v$pkgver --depth=1 $_gitroot
 	fi
 
 	msg "Git clone done or server timeout"
