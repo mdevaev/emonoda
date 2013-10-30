@@ -6,6 +6,7 @@ import copy
 import argparse
 import ConfigParser
 
+import const
 import fetcherlib
 import fetchers
 import clients
@@ -171,6 +172,7 @@ def syncParsers(app_section, cli_options, config_dict, ignore_list = ()) :
 
 def partialParser(argv_list, **kwargs_dict) :
 	cli_parser = argparse.ArgumentParser(add_help=False)
+	cli_parser.add_argument("-v", "--version", action="version", version=const.VERSION)
 	cli_parser.add_argument("-c", "--config", dest="config_file_path", default=os.path.expanduser(DEFAULT_CONFIG_PATH), metavar="<file>")
 	(cli_options, remaining_list) = cli_parser.parse_known_args()
 	config_dict = ( {} if cli_options.config_file_path is None else __readConfig(cli_options.config_file_path) )
