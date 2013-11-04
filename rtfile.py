@@ -82,6 +82,13 @@ def formatComment(torrent) :
 def formatClientPath(torrent, client) :
 	assert not client is None, "Required client"
 	try :
+		return client.fullPath(torrent)
+	except clientlib.NoSuchTorrentError :
+		return ""
+
+def formatClientPrefix(torrent, client) :
+	assert not client is None, "Required client"
+	try :
 		return client.dataPrefix(torrent)
 	except clientlib.NoSuchTorrentError :
 		return ""
@@ -129,6 +136,7 @@ def main() :
 			("--is-private",           "print_is_private_flag",           formatIsPrivate),
 			("--is-private-pretty",    "print_is_private_pretty_flag",    formatIsPrivatePretty),
 			("--client-path",          "print_client_path_flag",          lambda torrent : formatClientPath(torrent, client)),
+			("--client-prefix",        "print_client_prefix_flag",        lambda torrent : formatClientPrefix(torrent, client)),
 			("--make-magnet",          "print_magnet_flag",               lambda torrent : torrent.magnet(cli_options.magnet_fields_list)),
 		) :
 		print_options_list.append((
