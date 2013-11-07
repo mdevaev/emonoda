@@ -37,6 +37,11 @@ build() {
 	cp -r $_gitname $_gitname-build
 	cd $_gitname-build
 
+	python2 setup.py build
+}
+
+package() {
+	cd $startdir/src/$_gitname-build
 	python2 setup.py install --root="$pkgdir" --prefix=/usr
 	mv $pkgdir/usr/bin/rtfetch.py $pkgdir/usr/bin/rtfetch
 	mv $pkgdir/usr/bin/rtquery.py $pkgdir/usr/bin/rtquery
