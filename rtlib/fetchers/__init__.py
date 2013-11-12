@@ -24,7 +24,7 @@ from rtlib import plugin
 import fmod_rutor
 import fmod_rutracker
 import fmod_nnmclub
-import fmod_everypony
+import fmod_ponytracker
 import fmod_pravtor
 
 
@@ -33,7 +33,7 @@ FETCHERS_MAP = plugin.mapObjects(
 	fmod_rutor.Fetcher,
 	fmod_rutracker.Fetcher,
 	fmod_nnmclub.Fetcher,
-	fmod_everypony.Fetcher,
+	fmod_ponytracker.Fetcher,
 	fmod_pravtor.Fetcher,
 )
 
