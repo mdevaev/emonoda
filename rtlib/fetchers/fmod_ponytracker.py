@@ -25,7 +25,7 @@ import re
 
 
 ##### Public constants #####
-FETCHER_NAME = "everypony"
+FETCHER_NAME = "ponytracker"
 FETCHER_VERSION = 0
 
 PONYTRACKER_DOMAIN = "tabun.everypony.ru"
