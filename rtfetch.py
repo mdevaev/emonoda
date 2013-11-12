@@ -83,6 +83,12 @@ def readCaptchaCallback(url) :
 	print "# Enter the captcha from [ %s ] ?>" % (url)
 	return raw_input()
 
+def makeColored(no_colors_flag, force_colors_flag) :
+	if not no_colors_flag :
+		return ( lambda code, text : tools.term.colored(code, text, force_colors_flag) )
+	else :
+		return ( lambda code, text : text )
+
 
 ###
 def update( # pylint: disable=R0913
@@ -102,6 +108,8 @@ def update( # pylint: disable=R0913
 		force_colors_flag,
 	) :
 
+	colored = makeColored(no_colors_flag, force_colors_flag)
+
 	invalid_count = 0
 	not_in_client_count = 0
 	unknown_count = 0
@@ -112,14 +120,9 @@ def update( # pylint: disable=R0913
 	torrents_list = torrents(src_dir_path, names_filter)
 	hashes_list = ( client.hashes() if not client is None else [] )
 
-	if not no_colors_flag :
-		colored = ( lambda code, text : tools.term.colored(code, text, force_colors_flag) )
-	else :
-		colored = ( lambda code, text : text )
-
 	for (count, (torrent_file_name, torrent)) in enumerate(torrents_list) :
 		status_line = "[$sign$] %s $fetcher$ %s" % (tools.fmt.formatProgress(count + 1, len(torrents_list)), torrent_file_name)
-		format_fail = ( lambda error, code = 31, sign = "!" : ( status_line
+		format_fail = ( lambda error, code = (31, 1), sign = "!" : ( status_line
 				.replace("$sign$", colored(code, sign), 1)
 				.replace("$fetcher$", colored(code, error), 1)
 			))
@@ -140,14 +143,14 @@ def update( # pylint: disable=R0913
 		if fetcher is None :
 			unknown_count += 1
 			if not skip_unknown_flag :
-				tools.cli.newLine(format_fail("UNKNOWN", 33, " "))
+				tools.cli.newLine(format_fail("UNKNOWN", (33, 1), " "))
 			continue
 
-		status_line = status_line.replace("$fetcher$", fetcher.plugin(), 1)
+		status_line = status_line.replace("$fetcher$", colored((36, 1), fetcher.plugin()), 1)
 		format_sign = ( lambda color, sign : status_line.replace("$sign$", ( colored(color, sign) if not color is None else sign ), 1) )
 		try :
 			if not fetcher.loggedIn() :
-				tools.cli.newLine(format_sign(33, "?"))
+				tools.cli.newLine(format_sign((33, 1), "?"))
 				error_count += 1
 				continue
 
@@ -157,17 +160,17 @@ def update( # pylint: disable=R0913
 				continue
 
 			diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save_customs_list, real_update_flag)
-			tools.cli.newLine(format_sign(32, "+"))
+			tools.cli.newLine(format_sign((32, 1), "+"))
 			if show_diff_flag :
 				tfile.printDiff(diff_tuple, "\t", use_colors_flag=(not no_colors_flag), force_colors_flag=force_colors_flag)
 			updated_count += 1
 
 		except fetcherlib.CommonFetcherError, err :
-			tools.cli.newLine(format_sign(31, "-") + (" :: %s(%s)" % (type(err).__name__, err)))
+			tools.cli.newLine(format_sign((31, 1), "-") + (" :: %s(%s)" % (type(err).__name__, err)))
 			error_count += 1
 
 		except Exception, err :
-			tools.cli.newLine(format_sign(31, "-"))
+			tools.cli.newLine(format_sign((31, 1), "-"))
 			tools.cli.printTraceback("\t")
 			error_count += 1
 
@@ -183,7 +186,6 @@ def update( # pylint: disable=R0913
 	print "Passed:        %d" % (passed_count)
 	print "Updated:       %d" % (updated_count)
 	print "Errors:        %d" % (error_count)
-	print
 
 
 ###
@@ -199,7 +201,11 @@ def initFetchers(
 		only_fetchers_list,
 		exclude_fetchers_list,
 		pass_failed_login_flag,
+		no_colors_flag,
+		force_colors_flag,
 	) :
+
+	colored = makeColored(no_colors_flag, force_colors_flag)
 
 	fetchers_list = []
 	for fetcher_name in set(fetchers.FETCHERS_MAP.keys()).intersection(only_fetchers_list).difference(exclude_fetchers_list) :
@@ -209,7 +215,7 @@ def initFetchers(
 
 		fetcher_class = fetchers.FETCHERS_MAP[fetcher_name]
 		if config_dict.has_key(fetcher_name) :
-			tools.cli.oneLine("# Enabling the fetcher \"%s\"..." % (fetcher_name))
+			tools.cli.oneLine("# Enabling the fetcher \"%s\"..." % (colored((36, 1), fetcher_name)))
 
 			fetcher = fetcher_class(
 				get_fetcher_option(config.OPTION_LOGIN),
@@ -226,14 +232,19 @@ def initFetchers(
 
 			try :
 				fetcher.login()
-				tools.cli.newLine("# Fetcher \"%s\" is ready (user: %s; proxy: %s; interactive: %s)" % (
-						fetcher_name,
+				tools.cli.newLine("# Fetcher \"%s\" is %s (user: %s; proxy: %s; interactive: %s)" % (
+						colored((36, 1), fetcher_name),
+						colored((32, 1), "ready"),
 						( fetcher.userName() or "<anonymous>" ),
 						( fetcher.proxyUrl() or "<none>" ),
 						( "yes" if fetcher.isInteractive() else "no" ),
 					))
 			except Exception, err :
-				tools.cli.newLine("# Init error: %s: %s(%s)" % (fetcher_name, type(err).__name__, err))
+				tools.cli.newLine("# Init error: %s: %s(%s)" % (
+						colored((36, 1), fetcher_name),
+						colored((31, 1), type(err).__name__),
+						err,
+					))
 				if not pass_failed_login_flag :
 					raise
 			fetchers_list.append(fetcher)
@@ -291,7 +302,7 @@ def main() :
 			config.OPTION_INTERACTIVE,
 		))
 
-
+	colored = makeColored(cli_options.no_colors_flag, cli_options.force_colors_flag)
 	socket.setdefaulttimeout(cli_options.timeout)
 
 	fetchers_list = initFetchers(config_dict,
@@ -305,6 +316,8 @@ def main() :
 		cli_options.only_fetchers_list,
 		cli_options.exclude_fetchers_list,
 		cli_options.pass_failed_login_flag,
+		cli_options.no_colors_flag,
+		cli_options.force_colors_flag,
 	)
 	if len(fetchers_list) == 0 :
 		print >> sys.stderr, "No available fetchers in config"
@@ -315,8 +328,6 @@ def main() :
 	if cli_options.check_versions_flag and not fetcherlib.checkVersions(fetchers_list) :
 		sys.exit(1)
 
-	print
-
 	client = None
 	if not cli_options.client_name is None :
 		client = clientlib.initClient(
@@ -325,6 +336,10 @@ def main() :
 			save_customs_list=cli_options.save_customs_list,
 		)
 
+	if not cli_options.real_update_flag :
+		print "#", colored((31, 1), "WARNING! Running mode NOOP. For a real operation, use the option -e/--real-update")
+
+	print
 	update(fetchers_list, client,
 		cli_options.src_dir_path,
 		cli_options.backup_dir_path,
@@ -339,6 +354,7 @@ def main() :
 		cli_options.no_colors_flag,
 		cli_options.force_colors_flag,
 	)
+	print
 
 
 ###

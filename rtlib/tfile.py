@@ -105,10 +105,10 @@ def printDiff(diff_tuple, prefix = "", use_colors_flag = True, force_colors_flag
 	# XXX: See man 4 console_codes
 	(added_set, removed_set, modified_set, modified_type_set) = diff_tuple
 	for (sign, color, files_set) in (
-			("-", 31, removed_set),
-			("+", 32, added_set),
-			("~", 36, modified_set),
-			("?", 33, modified_type_set),
+			("-", (31, 1), removed_set),
+			("+", (32, 1), added_set),
+			("~", (36, 1), modified_set),
+			("?", (33, 1), modified_type_set),
 		) :
 		for item in sorted(files_set) :
 			if use_colors_flag :
