@@ -28,6 +28,10 @@ import re
 FETCHER_NAME = "everypony"
 FETCHER_VERSION = 0
 
+PONYTRACKER_DOMAIN = "tabun.everypony.ru"
+PONYTRACKER_URL = "http://%s" % (PONYTRACKER_DOMAIN)
+PONYTRACKER_BLOG_URL = "%s/blog/torrents" % (PONYTRACKER_URL)
+
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
@@ -58,6 +62,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	def match(self, torrent) :
 		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
 
+	def ping(self) :
+		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
+		data = self.__readUrlRetry(PONYTRACKER_BLOG_URL, opener=opener)
+		self.assertSite("<link href=\"%s/templates/skin/synio/images/favicon.ico?v1\" rel=\"shortcut icon\" />" % (PONYTRACKER_URL) in data)
+
 	def login(self) :
 		self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
 
@@ -67,7 +76,6 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	def torrentChanged(self, torrent) :
 		self.assertMatch(torrent)
 		return ( torrent.hash() != self.__fetchHash(torrent) )
-
 
 	def fetchTorrent(self, torrent) :
 		self.assertMatch(torrent)
@@ -93,10 +101,10 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.assertFetcher(not hash_match is None, "Hash not found")
 		return hash_match.group(1).lower()
 
-	def __readUrlRetry(self, url) :
+	def __readUrlRetry(self, url, opener = None) :
 		user_agent = self.userAgent()
 		headers_dict = ( { "User-Agent" : user_agent } if not user_agent is None else None )
-		return fetcherlib.readUrlRetry(self.__opener, url,
+		return fetcherlib.readUrlRetry(( opener or self.__opener ), url,
 			headers_dict=headers_dict,
 			timeout=self.timeout(),
 			retries=self.urlRetries(),

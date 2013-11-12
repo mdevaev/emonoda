@@ -31,8 +31,9 @@ FETCHER_NAME = "rutracker"
 FETCHER_VERSION = 1
 
 RUTRACKER_DOMAIN = "rutracker.org"
+RUTRACKER_URL = "http://%s" % (RUTRACKER_DOMAIN)
 RUTRACKER_LOGIN_URL = "http://login.%s/forum/login.php" % (RUTRACKER_DOMAIN)
-RUTRACKER_VIEWTOPIC_URL = "http://%s/forum/viewtopic.php" % (RUTRACKER_DOMAIN)
+RUTRACKER_VIEWTOPIC_URL = "%s/forum/viewtopic.php" % (RUTRACKER_URL)
 RUTRACKER_DL_URL = "http://dl.%s/forum/dl.php" % (RUTRACKER_DOMAIN)
 
 
@@ -67,6 +68,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def match(self, torrent) :
 		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
+
+	def ping(self) :
+		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
+		data = self.__readUrlRetry(RUTRACKER_URL, opener=opener)
+		self.assertSite("<link rel=\"shortcut icon\" href=\"http://static.%s/favicon.ico\" type=\"image/x-icon\">" % (RUTRACKER_DOMAIN) in data)
 
 	def login(self) :
 		self.assertNonAnonymous()
@@ -150,13 +156,13 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.assertFetcher(not hash_match is None, "Hash not found")
 		return hash_match.group(1).lower()
 
-	def __readUrlRetry(self, url, data = None, headers_dict = None) :
+	def __readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
 		headers_dict = ( headers_dict or {} )
 		user_agent = self.userAgent()
 		if not user_agent is None :
 			headers_dict.setdefault("User-Agent", user_agent)
 
-		return fetcherlib.readUrlRetry(self.__opener, url, data,
+		return fetcherlib.readUrlRetry(( opener or self.__opener ), url, data,
 			headers_dict=headers_dict,
 			timeout=self.timeout(),
 			retries=self.urlRetries(),

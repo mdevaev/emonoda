@@ -31,8 +31,9 @@ FETCHER_NAME = "nnm-club"
 FETCHER_VERSION = 1
 
 NNMCLUB_DOMAIN = "nnm-club.me"
-NNMCLUB_LOGIN_URL = "http://%s/forum/login.php" % (NNMCLUB_DOMAIN)
-NNMCLUB_DL_URL = "http://%s/forum/download.php" % (NNMCLUB_DOMAIN)
+NNMCLUB_URL = "http://%s" % (NNMCLUB_DOMAIN)
+NNMCLUB_LOGIN_URL = "%s/forum/login.php" % (NNMCLUB_URL)
+NNMCLUB_DL_URL = "%s/forum/download.php" % (NNMCLUB_URL)
 NNMCLUB_SCRAPE_URL = "http://bt.%s:2710/scrape" % (NNMCLUB_DOMAIN)
 REPLACE_DOMAINS = ("nnm-club.ru", "nnm-club.me")
 
@@ -63,6 +64,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def match(self, torrent) :
 		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
+
+	def ping(self) :
+		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
+		data = self.__readUrlRetry(NNMCLUB_URL, opener=opener)
+		self.assertSite("<link rel=\"canonical\" href=\"%s/\">" % (NNMCLUB_URL) in data)
 
 	def login(self) :
 		self.assertNonAnonymous()
@@ -111,13 +117,13 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict))
 		self.assertLogin("[ %s ]" % (self.userName()) in data, "Invalid login")
 
-	def __readUrlRetry(self, url, data = None, headers_dict = None) :
+	def __readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
 		headers_dict = ( headers_dict or {} )
 		user_agent = self.userAgent()
 		if not user_agent is None :
 			headers_dict.setdefault("User-Agent", user_agent)
 
-		return fetcherlib.readUrlRetry(self.__opener, url, data,
+		return fetcherlib.readUrlRetry(( opener or self.__opener ), url, data,
 			headers_dict=headers_dict,
 			timeout=self.timeout(),
 			retries=self.urlRetries(),

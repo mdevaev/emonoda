@@ -231,6 +231,7 @@ def initFetchers(
 			)
 
 			try :
+				fetcher.ping()
 				fetcher.login()
 				tools.cli.newLine("# Fetcher \"%s\" is %s (user: %s; proxy: %s; interactive: %s)" % (
 						colored((36, 1), fetcher_name),

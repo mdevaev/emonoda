@@ -52,6 +52,9 @@ VERSIONS_URL = const.RAW_UPSTREAM_URL + "/fetchers.json"
 class CommonFetcherError(Exception) :
 	pass
 
+class SiteError(CommonFetcherError) :
+	pass
+
 class LoginError(CommonFetcherError) :
 	pass
 
@@ -167,6 +170,9 @@ class AbstractFetcher(object) :
 	def match(self, torrent) :
 		raise NotImplementedError
 
+	def ping(self) :
+		raise NotImplementedError
+
 	def login(self) :
 		raise NotImplementedError
 
@@ -213,13 +219,14 @@ class AbstractFetcher(object) :
 
 	###
 
+	def assertSite(self, arg) :
+		self.__customAssert(SiteError, arg, "Invalid site body, maybe site is blocked")
+
 	def assertLogin(self, *args_list) :
 		self.__customAssert(LoginError, *args_list)
 
 	def assertFetcher(self, *args_list) :
 		self.__customAssert(FetcherError, *args_list)
-
-	###
 
 	def assertNonAnonymous(self) :
 		self.assertLogin(len(self.__user_name) != 0, "The tracker \"%s\" can not be used anonymously" % (self.plugin()))

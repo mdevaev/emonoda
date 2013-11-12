@@ -32,9 +32,10 @@ FETCHER_NAME = "pravtor"
 FETCHER_VERSION = 0
 
 PRAVTOR_DOMAIN = "pravtor.ru"
-PRAVTOR_LOGIN_URL = "http://%s/login.php" % (PRAVTOR_DOMAIN)
-PRAVTOR_VIEWTOPIC_URL = "http://%s/viewtopic.php" % (PRAVTOR_DOMAIN)
-PRAVTOR_DL_URL = "http://%s/download.php" % (PRAVTOR_DOMAIN)
+PRAVTOR_URL = "http://%s" % (PRAVTOR_DOMAIN)
+PRAVTOR_LOGIN_URL = "%s/login.php" % (PRAVTOR_URL)
+PRAVTOR_VIEWTOPIC_URL = "%s/viewtopic.php" % (PRAVTOR_URL)
+PRAVTOR_DL_URL = "%s/download.php" % (PRAVTOR_URL)
 
 
 ##### Public classes #####
@@ -67,6 +68,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def match(self, torrent) :
 		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
+
+	def ping(self) :
+		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
+		data = self.__readUrlRetry(PRAVTOR_URL, opener=opener)
+		self.assertSite("<img src=\"/images/pravtor_beta1.png\"" in data)
 
 	def login(self) :
 		self.assertNonAnonymous()
@@ -146,13 +152,13 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 		return hash_match.group(1).lower()
 
-	def __readUrlRetry(self, url, data = None, headers_dict = None) :
+	def __readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
 		headers_dict = ( headers_dict or {} )
 		user_agent = self.userAgent()
 		if not user_agent is None :
 			headers_dict.setdefault("User-Agent", user_agent)
 
-		return fetcherlib.readUrlRetry(self.__opener, url, data,
+		return fetcherlib.readUrlRetry(( opener or self.__opener ), url, data,
 			headers_dict=headers_dict,
 			timeout=self.timeout(),
 			retries=self.urlRetries(),
