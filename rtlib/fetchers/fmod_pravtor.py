@@ -153,12 +153,15 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return hash_match.group(1).lower()
 
 	def __readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
+		opener = ( opener or self.__opener )
+		assert not opener is None
+
 		headers_dict = ( headers_dict or {} )
 		user_agent = self.userAgent()
 		if not user_agent is None :
 			headers_dict.setdefault("User-Agent", user_agent)
 
-		return fetcherlib.readUrlRetry(( opener or self.__opener ), url, data,
+		return fetcherlib.readUrlRetry(opener, url, data,
 			headers_dict=headers_dict,
 			timeout=self.timeout(),
 			retries=self.urlRetries(),

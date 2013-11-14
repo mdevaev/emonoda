@@ -71,7 +71,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
 
 	def loggedIn(self) :
-		return True
+		return ( not self.__opener is None )
 
 	def torrentChanged(self, torrent) :
 		self.assertMatch(torrent)
@@ -102,9 +102,13 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		return hash_match.group(1).lower()
 
 	def __readUrlRetry(self, url, opener = None) :
+		opener = ( opener or self.__opener )
+		assert not opener is None
+
 		user_agent = self.userAgent()
 		headers_dict = ( { "User-Agent" : user_agent } if not user_agent is None else None )
-		return fetcherlib.readUrlRetry(( opener or self.__opener ), url,
+
+		return fetcherlib.readUrlRetry(opener, url,
 			headers_dict=headers_dict,
 			timeout=self.timeout(),
 			retries=self.urlRetries(),
