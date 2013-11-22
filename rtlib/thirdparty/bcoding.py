@@ -56,7 +56,7 @@ def _decode_buffer(f):
 	String types are normal (byte)strings
 	starting with an integer followed by ':'
 	which designates the string’s length.
-	
+
 	Since there’s no way to specify the byte type
 	in bencoded files, we have to guess
 	"""
@@ -97,15 +97,14 @@ TYPES = {
 	_TYPE_END:  None,
 	#_TYPE_SEP only appears in strings, not here
 }
-for byte in _TYPES_STR:
-	TYPES[bytes([byte])] = _decode_buffer #b'0': str, b'1': str, …
+TYPES.update(dict([ (bytes([byte]), _decode_buffer) for byte in _TYPES_STR ])) #b'0': str, b'1': str, ...
 
 def bdecode(f_or_data):
 	"""
 	bdecodes data by looking up the type byte,
 	and using it to look up the respective decoding function,
 	which in turn is used to return the decoded object
-	
+
 	The parameter can be a file opened in bytes mode,
 	bytes or a string (the last of which will be decoded)
 	"""
@@ -113,7 +112,7 @@ def bdecode(f_or_data):
 		f_or_data = f_or_data.encode()
 	if isinstance(f_or_data, bytes):
 		f_or_data = BytesIO(f_or_data)
-	
+
 	#TODO: the following like is the only one that needs readahead.
 	#peek returns a arbitrary amount of bytes, so we have to slice.
 	if f_or_data.seekable():
@@ -178,7 +177,7 @@ def bencode(data, f=None):
 	Writes a serializable data piece to f
 	The order of tests is nonarbitrary,
 	as strings and mappings are iterable.
-	
+
 	If f is None, it writes to a byte buffer
 	and returns a bytestring
 	"""
@@ -199,7 +198,7 @@ def main(args=None):
 	parser.add_argument('outfile', nargs='?', type=FileType('w'), default=sys.stdout,
 		help='python-syntax serialization [Default: stdout]')
 	args = parser.parse_args(args)
-	
+
 	data = bdecode(args.infile)
 	pprint.pprint(data, stream=args.outfile)
 
