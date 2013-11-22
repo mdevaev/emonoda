@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Plugin for http://pravtor.ru (based on rutracker.py)
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -20,11 +20,11 @@
 #####
 
 
-from rtlib import fetcherlib
-
-import urllib
-import cookielib
+import urllib.parse
+import http.cookiejar
 import re
+
+from .. import fetcherlib
 
 
 ##### Public constants #####
@@ -36,13 +36,12 @@ PRAVTOR_URL = "http://%s" % (PRAVTOR_DOMAIN)
 PRAVTOR_LOGIN_URL = "%s/login.php" % (PRAVTOR_URL)
 PRAVTOR_VIEWTOPIC_URL = "%s/viewtopic.php" % (PRAVTOR_URL)
 PRAVTOR_DL_URL = "%s/download.php" % (PRAVTOR_URL)
+PRAVTOR_ENCODING = "cp1251"
 
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
 	def __init__(self, *args_tuple, **kwargs_dict) :
-		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
-
 		self.__comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
 
 		self.__hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-fA-F0-9]+)</span>")
@@ -52,6 +51,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.__cookie_jar = None
 		self.__opener = None
 		self.__torrent_id = None
+
+		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
 
 	### Public ###
@@ -71,12 +72,12 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def ping(self) :
 		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-		data = self.__readUrlRetry(PRAVTOR_URL, opener=opener)
+		data = self.__readUrlRetry(PRAVTOR_URL, opener=opener).decode(PRAVTOR_ENCODING)
 		self.assertSite("<img src=\"/images/pravtor_beta1.png\"" in data)
 
 	def login(self) :
 		self.assertNonAnonymous()
-		self.__cookie_jar = cookielib.CookieJar()
+		self.__cookie_jar = http.cookiejar.CookieJar()
 		self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.proxyUrl())
 		try :
 			self.__tryLogin()
@@ -100,7 +101,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 		assert not self.__torrent_id is None, "Programming error, torrent_id == None"
 
-		cookie = cookielib.Cookie(
+		cookie = http.cookiejar.Cookie(
 			version=0,
 			name="bb_dl",
 			value=topic_id,
@@ -121,7 +122,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		)
 		self.__cookie_jar.set_cookie(cookie)
 
-		data = self.__readUrlRetry(PRAVTOR_DL_URL+("?id=%d" % (self.__torrent_id)), "", {
+		data = self.__readUrlRetry(PRAVTOR_DL_URL+("?id=%d" % (self.__torrent_id)), b"", {
 				"Referer" : PRAVTOR_VIEWTOPIC_URL+("?t=%s" % (topic_id)),
 				"Origin"  : "http://%s" % (PRAVTOR_DOMAIN),
 			})
@@ -133,15 +134,16 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def __tryLogin(self) :
 		post_dict = {
-			"login_username" : self.userName().decode("utf-8").encode("cp1251"),
-			"login_password" : self.passwd().decode("utf-8").encode("cp1251"),
+			"login_username" : self.userName(),#.decode("utf-8").encode("cp1251"),
+			"login_password" : self.passwd(),#.decode("utf-8").encode("cp1251"),
 			"login"          : "\xc2\xf5\xee\xe4",
 		}
-		data = self.__readUrlRetry(PRAVTOR_LOGIN_URL, urllib.urlencode(post_dict))
+		post_data = urllib.parse.urlencode(post_dict).encode(PRAVTOR_ENCODING)
+		data = self.__readUrlRetry(PRAVTOR_LOGIN_URL, post_data).decode(PRAVTOR_ENCODING)
 		self.assertLogin(self.__loginform_regexp.search(data) is None, "Invalid login or password")
 
 	def __fetchHash(self, torrent) :
-		data = self.__readUrlRetry(torrent.comment())
+		data = self.__readUrlRetry(torrent.comment()).decode(PRAVTOR_ENCODING)
 
 		hash_match = self.__hash_regexp.search(data)
 		self.assertFetcher(not hash_match is None, "Hash is not found")

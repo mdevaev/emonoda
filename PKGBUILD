@@ -1,16 +1,17 @@
 # Contributor: Devaev Maxim <mdevaev@gmail.com>
+# Author: Devaev Maxim <mdevaev@gmail.com>
 
 pkgname=rtfetch
-pkgver="0.8"
+pkgver="0.9"
 pkgrel=1
 pkgdesc="The set of tools to organize and management of your torrents"
 arch=('any')
 url="http://github.com/mdevaev/rtfetch.git"
 license="GPL"
-depends=('python2' 'python2-bencode' 'python2-ulib-git>=0.4')
+depends=('python' 'python-ulib-git>=0.6')
 optdepends=(
-	'python2-transmissionrpc: Transmission support'
-	'python2-dbus: KTorrent support'
+	'python-transmissionrpc: Transmission support'
+	'python-dbus: KTorrent support'
 )
 makedepends=('git')
 
@@ -37,14 +38,13 @@ build() {
 	cp -r $_gitname $_gitname-build
 	cd $_gitname-build
 
-	python2 setup.py build
+	python setup.py build
 }
 
 package() {
 	cd $startdir/src/$_gitname-build
-	python2 setup.py install --root="$pkgdir" --prefix=/usr
+	python setup.py install --root="$pkgdir" --prefix=/usr
 	mv $pkgdir/usr/bin/rtfetch.py $pkgdir/usr/bin/rtfetch
-	mv $pkgdir/usr/bin/rtquery.py $pkgdir/usr/bin/rtquery
 	mv $pkgdir/usr/bin/rtload.py $pkgdir/usr/bin/rtload
 	mv $pkgdir/usr/bin/rtfile.py $pkgdir/usr/bin/rtfile
 	mv $pkgdir/usr/bin/rtdiff.py $pkgdir/usr/bin/rtdiff

@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -19,19 +19,18 @@
 #####
 
 
-import const
-import tfile
-
-from ulib import tools
-import ulib.tools.coding # pylint: disable=W0611
-import ulib.tools.url
-
 import socket
-import urllib2
-import urlparse
-import types
+import urllib.request
+import urllib.parse
+import urllib.error
 import json
 import time
+
+from ulib import network
+import ulib.network.url # pylint: disable=W0611
+
+from . import const
+from . import tfile
 
 
 ##### Public constants #####
@@ -74,19 +73,19 @@ def selectFetcher(torrent, fetchers_list) :
 def buildTypicalOpener(cookie_jar = None, proxy_url = None) :
 	handlers_list = []
 	if not cookie_jar is None :
-		handlers_list.append(urllib2.HTTPCookieProcessor(cookie_jar))
+		handlers_list.append(urllib.request.HTTPCookieProcessor(cookie_jar))
 	if not proxy_url is None :
-		scheme = ( urlparse.urlparse(proxy_url).scheme or "" ).lower()
+		scheme = ( urllib.parse.urlparse(proxy_url).scheme or "" ).lower()
 		if scheme == "http" :
-			handlers_list.append(urllib2.ProxyHandler({
+			handlers_list.append(urllib.request.ProxyHandler({
 					"http"  : proxy_url,
 					"https" : proxy_url,
 				}))
 		elif scheme in ("socks4", "socks5") :
-			handlers_list.append(tools.url.SocksHandler(proxy_url=proxy_url))
+			handlers_list.append(network.url.SocksHandler(proxy_url=proxy_url))
 		else :
 			raise RuntimeError("Invalid proxy protocol: %s" % (scheme))
-	return urllib2.build_opener(*handlers_list)
+	return urllib.request.build_opener(*handlers_list)
 
 def readUrlRetry(
 		opener,
@@ -102,15 +101,15 @@ def readUrlRetry(
 
 	while True :
 		try :
-			request = urllib2.Request(url, data, ( headers_dict or {} ))
+			request = urllib.request.Request(url, data, ( headers_dict or {} ))
 			return opener.open(request, timeout=timeout).read()
-		except (socket.timeout, urllib2.URLError, urllib2.HTTPError), err :
+		except (socket.timeout, urllib.error.URLError, urllib.error.HTTPError) as err :
 			if retries == 0 :
 				raise
-			if isinstance(err, socket.timeout) or isinstance(err, urllib2.URLError) and err.reason == "timed out" :
+			if isinstance(err, socket.timeout) or isinstance(err, urllib.error.URLError) and err.reason == "timed out" :
 				if not retry_timeout_flag :
 					raise
-			elif isinstance(err, urllib2.HTTPError) :
+			elif isinstance(err, urllib.error.HTTPError) :
 				if not err.code in retry_codes_list :
 					raise
 			retries -= 1
@@ -119,36 +118,34 @@ def readUrlRetry(
 
 ###
 def checkVersions(fetchers_list) :
-	versions_dict = json.loads(urllib2.urlopen(VERSIONS_URL).read())
+	versions_dict = json.loads(urllib.request.urlopen(VERSIONS_URL).read().decode("utf-8"))
 	ok_flag = True
 	for fetcher in fetchers_list :
 		plugin_name = fetcher.plugin()
 		local_version = fetcher.version()
-		if not versions_dict.has_key(plugin_name) :
+		if not plugin_name in versions_dict :
 			continue
 		upstream_version = versions_dict[plugin_name]["version"]
 		if local_version < upstream_version :
-			print "# Plug-in \"%s\" is outdated." % (plugin_name)
-			print "#    Local version:    %d" % (local_version)
-			print "#    Upstream version: %d" % (upstream_version)
-			print "# The plugin can not work properly. It is recommended to upgrade the program."
+			print("# Plug-in \"%s\" is outdated." % (plugin_name))
+			print("#    Local version:    %d" % (local_version))
+			print("#    Upstream version: %d" % (upstream_version))
+			print("# The plugin can not work properly. It is recommended to upgrade the program.")
 			ok_flag = False
 	return ok_flag
 
 
 ##### Public classes #####
-class AbstractFetcher(object) :
+class AbstractFetcher :
 	def __init__(self, user_name, passwd, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url, interactive_flag, captcha_callback) :
-		object.__init__(self)
-
-		self.__user_name        = self.__assertIsInstance(user_name,        basestring)
-		self.__passwd           = self.__assertIsInstance(passwd,           basestring)
-		self.__url_retries      = self.__assertIsInstance(url_retries,      (int, long))
-		self.__url_sleep_time   = self.__assertIsInstance(url_sleep_time,   (int, long, float))
-		self.__timeout          = self.__assertIsInstance(timeout,          (int, long, float))
-		self.__user_agent       = self.__assertIsInstance(user_agent,       (basestring, types.NoneType))
-		self.__client_agent     = self.__assertIsInstance(client_agent,     (basestring, types.NoneType))
-		self.__proxy_url        = self.__assertIsInstance(proxy_url,        (basestring, types.NoneType))
+		self.__user_name        = self.__assertIsInstance(user_name,        str)
+		self.__passwd           = self.__assertIsInstance(passwd,           str)
+		self.__url_retries      = self.__assertIsInstance(url_retries,      int)
+		self.__url_sleep_time   = self.__assertIsInstance(url_sleep_time,   (int, float))
+		self.__timeout          = self.__assertIsInstance(timeout,          (int, float))
+		self.__user_agent       = self.__assertIsInstance(user_agent,       (str, type(None)))
+		self.__client_agent     = self.__assertIsInstance(client_agent,     (str, type(None)))
+		self.__proxy_url        = self.__assertIsInstance(proxy_url,        (str, type(None)))
 		self.__interactive_flag = self.__assertIsInstance(interactive_flag, bool)
 
 		assert callable(captcha_callback)
@@ -235,7 +232,7 @@ class AbstractFetcher(object) :
 		self.assertFetcher(self.match(torrent), "No comment match")
 
 	def assertValidTorrentData(self, data) :
-		message = "Received an invalid torrent data: %s ..." % (tools.coding.utf8(data[:20]))
+		message = "Received an invalid torrent data: %s ..." % (repr(data[:20]))
 		self.assertFetcher(tfile.isValidTorrentData(data), message)
 
 

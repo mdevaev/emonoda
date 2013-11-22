@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -19,9 +19,9 @@
 #####
 
 
-from rtlib import fetcherlib
-
 import re
+
+from .. import fetcherlib
 
 
 ##### Public constants #####
@@ -31,13 +31,12 @@ FETCHER_VERSION = 0
 PONYTRACKER_DOMAIN = "tabun.everypony.ru"
 PONYTRACKER_URL = "http://%s" % (PONYTRACKER_DOMAIN)
 PONYTRACKER_BLOG_URL = "%s/blog/torrents" % (PONYTRACKER_URL)
+PONYTRACKER_ENCODING = "utf-8"
 
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
 	def __init__(self, *args_tuple, **kwargs_dict) :
-		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
-
 		self.__comment_regexp = re.compile(r"http://tabun\.everypony\.ru/blog/torrents/\d+\.html")
 		self.__hash_regexp = re.compile(r"<blockquote>\s*Hash\s*:\s*([a-fA-F0-9]{40})\s*<br/>")
 		self.__dl_regexp = re.compile(r"Torrent\s*:\s*<a href=\"(http://[^\"]+)\"")
@@ -45,6 +44,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.__opener = None
 		self.__last_hash = None
 		self.__last_page = None
+
+		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
 
 	### Public ###
@@ -64,7 +65,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def ping(self) :
 		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-		data = self.__readUrlRetry(PONYTRACKER_BLOG_URL, opener=opener)
+		data = self.__readUrlRetry(PONYTRACKER_BLOG_URL, opener=opener).decode(PONYTRACKER_ENCODING)
 		self.assertSite("<link href=\"%s/templates/skin/synio/images/favicon.ico?v1\" rel=\"shortcut icon\" />" % (PONYTRACKER_URL) in data)
 
 	def login(self) :
@@ -92,7 +93,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	def __loadPage(self, torrent) :
 		torrent_hash = torrent.hash()
 		if self.__last_hash != torrent_hash :
-			self.__last_page = self.__readUrlRetry(torrent.comment())
+			self.__last_page = self.__readUrlRetry(torrent.comment()).decode(PONYTRACKER_ENCODING)
 			self.__last_hash = torrent_hash
 
 	def __fetchHash(self, torrent) :

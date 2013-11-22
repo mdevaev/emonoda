@@ -15,4 +15,6 @@ Required: https://github.com/mdevaev/ulib
 
 Actual builds for Arch Linux are available here:  
 * https://aur.archlinux.org/packages/rtfetch/
-* https://aur.archlinux.org/packages/python2-ulib-git/
+* https://aur.archlinux.org/packages/python-ulib-git/
+
+The program uses the library bcoding, taken from here: https://github.com/flying-sheep/bcode/

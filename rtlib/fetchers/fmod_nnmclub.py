@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -19,11 +19,11 @@
 #####
 
 
-from rtlib import fetcherlib
-
-import urllib
-import cookielib
+import urllib.parse
+import http.cookiejar
 import re
+
+from .. import fetcherlib
 
 
 ##### Public constants #####
@@ -35,19 +35,20 @@ NNMCLUB_URL = "http://%s" % (NNMCLUB_DOMAIN)
 NNMCLUB_LOGIN_URL = "%s/forum/login.php" % (NNMCLUB_URL)
 NNMCLUB_DL_URL = "%s/forum/download.php" % (NNMCLUB_URL)
 NNMCLUB_SCRAPE_URL = "http://bt.%s:2710/scrape" % (NNMCLUB_DOMAIN)
+NNMCLUB_ENCODING = "cp1251"
 REPLACE_DOMAINS = ("nnm-club.ru", "nnm-club.me")
 
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
 	def __init__(self, *args_tuple, **kwargs_dict) :
-		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
-
 		self.__comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
 		self.__torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
 
 		self.__cookie_jar = None
 		self.__opener = None
+
+		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
 
 	### Public ###
@@ -67,12 +68,12 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def ping(self) :
 		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-		data = self.__readUrlRetry(NNMCLUB_URL, opener=opener)
+		data = self.__readUrlRetry(NNMCLUB_URL, opener=opener).decode(NNMCLUB_ENCODING)
 		self.assertSite("<link rel=\"canonical\" href=\"%s/\">" % (NNMCLUB_URL) in data)
 
 	def login(self) :
 		self.assertNonAnonymous()
-		self.__cookie_jar = cookielib.CookieJar()
+		self.__cookie_jar = http.cookiejar.CookieJar()
 		self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.proxyUrl())
 		try :
 			self.__tryLogin()
@@ -88,13 +89,13 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.assertMatch(torrent)
 		client_agent = self.clientAgent()
 		headers_dict = ( { "User-Agent" : client_agent } if not client_agent is None else None )
-		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict)
+		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict).decode(NNMCLUB_ENCODING)
 		self.assertFetcher(data.startswith("d5:"), "Invalid scrape answer")
 		return ( data.strip() == "d5:filesdee" )
 
 	def fetchTorrent(self, torrent) :
 		self.assertMatch(torrent)
-		data = self.__readUrlRetry(torrent.comment().replace(*REPLACE_DOMAINS))
+		data = self.__readUrlRetry(torrent.comment().replace(*REPLACE_DOMAINS)).decode(NNMCLUB_ENCODING)
 
 		torrent_id_match = self.__torrent_id_regexp.search(data)
 		self.assertFetcher(not torrent_id_match is None, "Unknown torrent_id")
@@ -114,7 +115,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 			"redirect" : "",
 			"login"    : "\xc2\xf5\xee\xe4",
 		}
-		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, urllib.urlencode(post_dict))
+		post_data = urllib.parse.urlencode(post_dict).encode(NNMCLUB_ENCODING)
+		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, post_data).decode(NNMCLUB_ENCODING)
 		self.assertLogin("[ %s ]" % (self.userName()) in data, "Invalid login")
 
 	def __readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :

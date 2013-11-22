@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -21,5 +21,5 @@
 
 ##### Public methods #####
 def mapObjects(*cls_list) :
-	return dict([ (cls.plugin(), cls) for cls in cls_list ])
+	return { cls.plugin() : cls for cls in cls_list }
 

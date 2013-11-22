@@ -1,10 +1,9 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
-
-from rtlib import const
 
 import setuptools
+
+from rtlib import const
 
 
 ##### Main #####
@@ -27,7 +26,6 @@ if __name__ == "__main__" :
 
 		scripts=(
 			"rtfetch.py",
-			"rtquery.py",
 			"rtload.py",
 			"rtfile.py",
 			"rtdiff.py",

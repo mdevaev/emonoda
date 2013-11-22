@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -19,11 +19,11 @@
 #####
 
 
-from rtlib import plugin
+from .. import plugin
 
-import cmod_rtorrent
-import cmod_transmission
-import cmod_ktorrent
+from . import cmod_rtorrent
+from . import cmod_transmission
+from . import cmod_ktorrent
 
 
 ##### Public constants #####

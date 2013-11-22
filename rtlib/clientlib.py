@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -20,15 +20,11 @@
 
 
 import os
-import types
-
-import tfile
-
-from ulib import tools
-import ulib.tools.coding # pylint: disable=W0611
 
 from ulib import validators
-import ulib.validators.common
+import ulib.validators.common # pylint: disable=W0611
+
+from . import tfile
 
 
 ##### Exceptions #####
@@ -66,7 +62,7 @@ def hashOrTorrent(method) :
 def loadTorrentAccessible(method) :
 	def wrap(self, torrent, prefix = None) :
 		torrent_path = torrent.path()
-		open(torrent_path).close() # Check accessible file
+		open(torrent_path, "rb").close() # Check accessible file
 		if not prefix is None :
 			os.listdir(prefix) # Check accessible prefix
 		return method(self, torrent, prefix)
@@ -77,9 +73,9 @@ def loadTorrentAccessible(method) :
 def buildFiles(prefix, files_list) :
 	files_dict = {}
 	for (path, size) in files_list :
-		path_list = tools.coding.utf8(path).split(os.path.sep)
+		path_list = path.split(os.path.sep)
 		name = None
-		for index in xrange(len(path_list)) :
+		for index in range(len(path_list)) :
 			name = os.path.join(prefix, os.path.sep.join(path_list[0:index+1]))
 			files_dict[name] = None
 		assert not name is None
@@ -88,11 +84,9 @@ def buildFiles(prefix, files_list) :
 
 
 ##### Public classes #####
-class AbstractClient(object) :
+class AbstractClient :
 	def __init__(self, url) :
-		object.__init__(self)
-
-		assert isinstance(url, (basestring, types.NoneType))
+		assert isinstance(url, (str, type(None)))
 		self.__url = url
 
 

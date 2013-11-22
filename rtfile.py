@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python
 #
 #    rtfile -- Show torrents metadata
 #    Copyright (C) 2013  Devaev Maxim <mdevaev@gmail.com>
@@ -20,26 +19,26 @@
 #####
 
 
-from rtlib import tfile
-from rtlib import fs
-from rtlib import clients
-from rtlib import clientlib
-from rtlib import config
-
-from ulib import tools
-import ulib.tools.fmt # pylint: disable=W0611
-
 import sys
 import socket
 import operator
 import itertools
 import datetime
 
+from ulib import fmt
+
+from rtlib import tfile
+from rtlib import fs
+from rtlib import clients
+from rtlib import clientlib
+from rtlib import config
+
+
 
 ##### Public methods #####
 def makeFilesList(files_dict, depth = 0, prefix = "\t") :
 	text = ""
-	for (key, value_dict) in sorted(files_dict.iteritems(), key=operator.itemgetter(0)) :
+	for (key, value_dict) in sorted(files_dict.items(), key=operator.itemgetter(0)) :
 		text += prefix + "*   " * depth + key + "\n"
 		text += makeFilesList(value_dict, depth + 1)
 	return text
@@ -47,7 +46,7 @@ def makeFilesList(files_dict, depth = 0, prefix = "\t") :
 
 ###
 def formatSizePretty(torrent) :
-	return tools.fmt.formatSize(torrent.size())
+	return fmt.formatSize(torrent.size())
 
 def formatAnnounce(torrent) :
 	return ( torrent.announce() or "" )
@@ -97,22 +96,22 @@ def formatFilesList(torrent) :
 	return makeFilesList(fs.treeListToDict(torrent.files()))
 
 def printPrettyMeta(torrent, client) :
-	print "Path:         ", torrent.path()
-	print "Name:         ", torrent.name()
-	print "Hash:         ", torrent.hash()
-	print "Size:         ", formatSizePretty(torrent)
-	print "Announce:     ", formatAnnounce(torrent)
-	print "Announce list:", formatAnnounceListPretty(torrent)
-	print "Creation date:", formatCreationDatePretty(torrent)
-	print "Created by:   ", formatCreatedBy(torrent)
-	print "Private:      ", formatIsPrivatePretty(torrent)
-	print "Comment:      ", formatComment(torrent)
+	print("Path:         ", torrent.path())
+	print("Name:         ", torrent.name())
+	print("Hash:         ", torrent.hash())
+	print("Size:         ", formatSizePretty(torrent))
+	print("Announce:     ", formatAnnounce(torrent))
+	print("Announce list:", formatAnnounceListPretty(torrent))
+	print("Creation date:", formatCreationDatePretty(torrent))
+	print("Created by:   ", formatCreatedBy(torrent))
+	print("Private:      ", formatIsPrivatePretty(torrent))
+	print("Comment:      ", formatComment(torrent))
 	if not client is None :
-		print "Client path:  ", formatClientPath(torrent, client)
+		print("Client path:  ", formatClientPath(torrent, client))
 	if torrent.isSingleFile() :
-		print "Provides:     ", tuple(torrent.files())[0]
+		print("Provides:     ", tuple(torrent.files())[0])
 	else :
-		print "Provides:\n%s" % (formatFilesList(torrent)),
+		print("Provides:\n%s" % (formatFilesList(torrent)), end=' ')
 
 
 ##### Main #####
@@ -176,11 +175,11 @@ def main() :
 				retval = print_method(torrent)
 				if isinstance(retval, (list, tuple)) :
 					for item in retval :
-						print prefix + item
+						print(prefix + item)
 				else :
-					print prefix + retval
+					print(prefix + retval)
 		if len(torrents_list) > 1 :
-			print
+			print()
 
 
 ###

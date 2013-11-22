@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -20,23 +19,23 @@
 #####
 
 
-from rtlib import tfile
-from rtlib import fetcherlib
-from rtlib import fetchers
-from rtlib import clientlib
-from rtlib import clients
-from rtlib import config
-
-from ulib import tools
-import ulib.tools.cli # pylint: disable=W0611
-import ulib.tools.fmt
-
 import sys
 import os
 import socket
 import operator
 import shutil
 import datetime
+
+from ulib import fmt
+from ulib import ui
+import ulib.ui.cli # pylint: disable=W0611
+
+from rtlib import tfile
+from rtlib import fetcherlib
+from rtlib import fetchers
+from rtlib import clientlib
+from rtlib import clients
+from rtlib import config
 
 
 ##### Public constants #####
@@ -62,7 +61,7 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
 			prefix = client.dataPrefix(torrent)
 			client.removeTorrent(torrent)
 
-		with open(torrent.path(), "w") as torrent_file :
+		with open(torrent.path(), "wb") as torrent_file :
 			torrent_file.write(new_data)
 		torrent.loadData(new_data, torrent.path())
 
@@ -74,18 +73,18 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
 	return diff_tuple
 
 def torrents(src_dir_path, names_filter) :
-	torrents_list = tfile.torrents(src_dir_path, abs_flag=True).items()
+	torrents_list = list(tfile.torrents(src_dir_path, abs_flag=True).items())
 	if not names_filter is None :
 		torrents_list = [ item for item in torrents_list if names_filter in item[0] ]
 	return sorted(torrents_list, key=operator.itemgetter(0))
 
 def readCaptchaCallback(url) :
-	print "# Enter the captcha from [ %s ] ?>" % (url)
-	return raw_input()
+	print("# Enter the captcha from [ %s ] ?>" % (url))
+	return input()
 
 def makeColored(no_colors_flag, force_colors_flag) :
 	if not no_colors_flag :
-		return ( lambda code, text : tools.term.colored(code, text, force_colors_flag) )
+		return ( lambda code, text : ui.term.colored(code, text, force_colors_flag) )
 	else :
 		return ( lambda code, text : text )
 
@@ -121,21 +120,21 @@ def update( # pylint: disable=R0913
 	hashes_list = ( client.hashes() if not client is None else [] )
 
 	for (count, (torrent_file_name, torrent)) in enumerate(torrents_list) :
-		status_line = "[$sign$] %s $fetcher$ %s" % (tools.fmt.formatProgress(count + 1, len(torrents_list)), torrent_file_name)
+		status_line = "[$sign$] %s $fetcher$ %s" % (fmt.formatProgress(count + 1, len(torrents_list)), torrent_file_name)
 		format_fail = ( lambda error, code = (31, 1), sign = "!" : ( status_line
 				.replace("$sign$", colored(code, sign), 1)
 				.replace("$fetcher$", colored(code, error), 1)
 			))
 
 		if torrent is None :
-			tools.cli.newLine(format_fail("INVALID_TORRENT"))
+			ui.cli.newLine(format_fail("INVALID_TORRENT"))
 			invalid_count += 1
 			continue
 
 		status_line += " --- %s" % (torrent.comment() or "")
 
 		if not client is None and not torrent.hash() in hashes_list :
-			tools.cli.newLine(format_fail("NOT_IN_CLIENT"))
+			ui.cli.newLine(format_fail("NOT_IN_CLIENT"))
 			not_in_client_count += 1
 			continue
 
@@ -143,49 +142,49 @@ def update( # pylint: disable=R0913
 		if fetcher is None :
 			unknown_count += 1
 			if not skip_unknown_flag :
-				tools.cli.newLine(format_fail("UNKNOWN", (33, 1), " "))
+				ui.cli.newLine(format_fail("UNKNOWN", (33, 1), " "))
 			continue
 
 		status_line = status_line.replace("$fetcher$", colored((36, 1), fetcher.plugin()), 1)
 		format_sign = ( lambda color, sign : status_line.replace("$sign$", ( colored(color, sign) if not color is None else sign ), 1) )
 		try :
 			if not fetcher.loggedIn() :
-				tools.cli.newLine(format_sign((33, 1), "?"))
+				ui.cli.newLine(format_sign((33, 1), "?"))
 				error_count += 1
 				continue
 
 			if not fetcher.torrentChanged(torrent) :
-				tools.cli.oneLine(format_sign(None, " "), not show_passed_flag)
+				ui.cli.oneLine(format_sign(None, " "), not show_passed_flag)
 				passed_count += 1
 				continue
 
 			diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save_customs_list, real_update_flag)
-			tools.cli.newLine(format_sign((32, 1), "+"))
+			ui.cli.newLine(format_sign((32, 1), "+"))
 			if show_diff_flag :
 				tfile.printDiff(diff_tuple, "\t", use_colors_flag=(not no_colors_flag), force_colors_flag=force_colors_flag)
 			updated_count += 1
 
-		except fetcherlib.CommonFetcherError, err :
-			tools.cli.newLine(format_sign((31, 1), "-") + (" :: %s(%s)" % (type(err).__name__, err)))
+		except fetcherlib.CommonFetcherError as err :
+			ui.cli.newLine(format_sign((31, 1), "-") + (" :: %s(%s)" % (type(err).__name__, err)))
 			error_count += 1
 
-		except Exception, err :
-			tools.cli.newLine(format_sign((31, 1), "-"))
-			tools.cli.printTraceback("\t")
+		except Exception as err :
+			ui.cli.newLine(format_sign((31, 1), "-"))
+			ui.cli.printTraceback("\t")
 			error_count += 1
 
 	if ( (client and not_in_client_count) or (not skip_unknown_flag and unknown_count) or (show_passed_flag and passed_count) or
 		invalid_count or updated_count or error_count ) :
-		tools.cli.newLine("")
-	tools.cli.newLine(DELIMITER)
+		ui.cli.newLine("")
+	ui.cli.newLine(DELIMITER)
 
-	print "Invalid:       %d" % (invalid_count)
+	print("Invalid:       %d" % (invalid_count))
 	if not client is None :
-		print "Not in client: %d" % (not_in_client_count)
-	print "Unknown:       %d" % (unknown_count)
-	print "Passed:        %d" % (passed_count)
-	print "Updated:       %d" % (updated_count)
-	print "Errors:        %d" % (error_count)
+		print("Not in client: %d" % (not_in_client_count))
+	print("Unknown:       %d" % (unknown_count))
+	print("Passed:        %d" % (passed_count))
+	print("Updated:       %d" % (updated_count))
+	print("Errors:        %d" % (error_count))
 
 
 ###
@@ -214,8 +213,8 @@ def initFetchers(
 			config.SECTION_MAIN, config.SECTION_RTFETCH, fetcher_name), option, config_dict, cli_value) )
 
 		fetcher_class = fetchers.FETCHERS_MAP[fetcher_name]
-		if config_dict.has_key(fetcher_name) :
-			tools.cli.oneLine("# Enabling the fetcher \"%s\"..." % (colored((36, 1), fetcher_name)))
+		if fetcher_name in config_dict :
+			ui.cli.oneLine("# Enabling the fetcher \"%s\"..." % (colored((36, 1), fetcher_name)))
 
 			fetcher = fetcher_class(
 				get_fetcher_option(config.OPTION_LOGIN),
@@ -233,15 +232,15 @@ def initFetchers(
 			try :
 				fetcher.ping()
 				fetcher.login()
-				tools.cli.newLine("# Fetcher \"%s\" is %s (user: %s; proxy: %s; interactive: %s)" % (
+				ui.cli.newLine("# Fetcher \"%s\" is %s (user: %s; proxy: %s; interactive: %s)" % (
 						colored((36, 1), fetcher_name),
 						colored((32, 1), "ready"),
 						( fetcher.userName() or "<anonymous>" ),
 						( fetcher.proxyUrl() or "<none>" ),
 						( "yes" if fetcher.isInteractive() else "no" ),
 					))
-			except Exception, err :
-				tools.cli.newLine("# Init error: %s: %s(%s)" % (
+			except Exception as err :
+				ui.cli.newLine("# Init error: %s: %s(%s)" % (
 						colored((36, 1), fetcher_name),
 						colored((31, 1), type(err).__name__),
 						err,
@@ -321,7 +320,7 @@ def main() :
 		cli_options.force_colors_flag,
 	)
 	if len(fetchers_list) == 0 :
-		print >> sys.stderr, "No available fetchers in config"
+		print("No available fetchers in config", file=sys.stderr)
 		sys.exit(1)
 	if (len(cli_options.only_fetchers_list) != 0 or len(cli_options.exclude_fetchers_list) != 0) and raw_options.skip_unknown_flag is None :
 		cli_options.skip_unknown_flag = True
@@ -338,9 +337,9 @@ def main() :
 		)
 
 	if not cli_options.real_update_flag :
-		print "#", colored((31, 1), "WARNING! Running mode NOOP. For a real operation, use the option -e/--real-update")
+		print("#", colored((31, 1), "WARNING! Running mode NOOP. For a real operation, use the option -e/--real-update"))
 
-	print
+	print()
 	update(fetchers_list, client,
 		cli_options.src_dir_path,
 		cli_options.backup_dir_path,
@@ -355,7 +354,7 @@ def main() :
 		cli_options.no_colors_flag,
 		cli_options.force_colors_flag,
 	)
-	print
+	print()
 
 
 ###

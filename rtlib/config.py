@@ -1,15 +1,7 @@
-# -*- coding: utf-8 -*-
-
-
 import os
 import copy
 import argparse
-import ConfigParser
-
-import const
-import fetcherlib
-import fetchers
-import clients
+import configparser
 
 from ulib.validatorlib import notEmptyStrip
 from ulib.validatorlib import ValidatorError
@@ -20,6 +12,11 @@ from ulib.validators.common import validBool
 from ulib.validators.common import validEmpty
 from ulib.validators.common import validMaybeEmpty
 from ulib.validators.fs import validAccessiblePath
+
+from . import const
+from . import fetcherlib
+from . import fetchers
+from . import clients
 
 
 ##### Public constants #####
@@ -41,7 +38,7 @@ def __validMaybeEmptyPath(path) :
 
 def __validFetchers(fetchers_list) :
 	return [
-		validRange(item, fetchers.FETCHERS_MAP.keys())
+		validRange(item, list(fetchers.FETCHERS_MAP.keys()))
 		for item in filter(None, map(str.strip, validStringList(fetchers_list)))
 	]
 
@@ -50,7 +47,7 @@ def __validMaybeEmptyMode(mode) :
 	return validMaybeEmpty(mode, valid_mode)
 
 def __validSaveCustoms(keys_list) :
-	return filter(None, map(str.strip, validStringList(keys_list)))
+	return list(filter(None, map(str.strip, validStringList(keys_list))))
 
 def __validSetCustoms(pairs_list) :
 	if isinstance(pairs_list, dict) :
@@ -71,7 +68,7 @@ def __makeValidNumber(*args_tuple) :
 
 ###
 def __makeOptions() :
-	options_list = [ value for (key, value) in globals().iteritems() if key.startswith("OPTION_") ]
+	options_list = [ value for (key, value) in globals().items() if key.startswith("OPTION_") ]
 	all_options_dict = {}
 	all_dests_dict = {}
 	for option_tuple in options_list :
@@ -95,7 +92,7 @@ OPTION_SOURCE_DIR        = ("source-dir",        "src_dir_path",           ".", 
 OPTION_BACKUP_DIR        = ("backup-dir",        "backup_dir_path",        None,                                __validMaybeEmptyPath)
 OPTION_BACKUP_SUFFIX     = ("backup-suffix",     "backup_suffix",          ".%Y.%m.%d-%H:%M:%S.bak",            str)
 OPTION_NAMES_FILTER      = ("names-filter",      "names_filter",           None,                                validEmpty)
-OPTION_ONLY_FETCHERS     = ("only-fetchers",     "only_fetchers_list",     fetchers.FETCHERS_MAP.keys(),        __validFetchers)
+OPTION_ONLY_FETCHERS     = ("only-fetchers",     "only_fetchers_list",     list(fetchers.FETCHERS_MAP.keys()),  __validFetchers)
 OPTION_EXCLUDE_FETCHERS  = ("exclude-fetchers",  "exclude_fetchers_list",  (),                                  __validFetchers)
 OPTION_TIMEOUT           = ("timeout",           "timeout",                DEFAULT_TIMEOUT,                     __makeValidNumber(0))
 OPTION_LOGIN             = ("login",             None,                     fetcherlib.DEFAULT_LOGIN,            str)
@@ -112,7 +109,7 @@ OPTION_SHOW_PASSED       = ("show-passed",       "show_passed_flag",       False
 OPTION_SHOW_DIFF         = ("show-diff",         "show_diff_flag",         False,                               validBool)
 OPTION_CHECK_VERSIONS    = ("check-versions",    "check_versions_flag",    False,                               validBool)
 OPTION_REAL_UPDATE       = ("real-update",       "real_update_flag",       False,                               validBool)
-OPTION_CLIENT            = ("client",            "client_name",            None,                                __makeValidMaybeEmptyRange(clients.CLIENTS_MAP.keys()))
+OPTION_CLIENT            = ("client",            "client_name",            None,                                __makeValidMaybeEmptyRange(list(clients.CLIENTS_MAP.keys())))
 OPTION_CLIENT_URL        = ("client-url",        "client_url",             None,                                validEmpty)
 OPTION_SAVE_CUSTOMS      = ("save-customs",      "save_customs_list",      (),                                  __validSaveCustoms)
 OPTION_SET_CUSTOMS       = ("set-customs",       "set_customs_dict",       {},                                  __validSetCustoms)
@@ -162,7 +159,7 @@ ARG_NO_FORCE_COLORS      = ((      "no-"+OPTION_FORCE_COLORS[0],),      OPTION_F
 ##### Public methods #####
 def syncParsers(app_section, cli_options, config_dict, ignore_list = ()) :
 	new_options = copy.copy(cli_options)
-	for (dest, option_dict) in ALL_DESTS_MAP.iteritems() :
+	for (dest, option_dict) in ALL_DESTS_MAP.items() :
 		option = option_dict["option"]
 		if option in ignore_list or not hasattr(cli_options, dest) :
 			continue
@@ -214,7 +211,7 @@ def getCommonOption(sections_list, option_tuple, config_dict, cli_value = None) 
 
 ##### Private methods #####
 def __readConfig(file_path) :
-	parser = ConfigParser.ConfigParser()
+	parser = configparser.ConfigParser()
 	parser.read(file_path)
 	config_dict = {}
 	for section in parser.sections() :
@@ -233,13 +230,13 @@ def __lastValue(config_dict, first, requests_list) :
 	assert len(requests_list) > 0
 	last_value = first
 	for (section, option) in requests_list :
-		if config_dict.get(section, {}).has_key(option) :
+		if option in config_dict.get(section, {}) :
 			last_value = config_dict[section][option]
 	return last_value
 
 def __raiseIncorrectValue(option, validator, value) :
 	try :
 		return validator(value)
-	except ValidatorError, err :
+	except ValidatorError as err :
 		raise ValidatorError("Incorrect value for option \"%s\": %s" % (option, err))
 

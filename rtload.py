@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -20,15 +19,15 @@
 #####
 
 
-from rtlib import tfile
-from rtlib import clientlib
-from rtlib import clients
-from rtlib import config
-
 import sys
 import os
 import errno
 import socket
+
+from rtlib import tfile
+from rtlib import clientlib
+from rtlib import clients
+from rtlib import config
 
 
 ##### Public classes #####
@@ -36,7 +35,7 @@ def makeDirsTree(path, last_mode) :
 	try :
 		os.makedirs(path)
 		os.chmod(path, last_mode)
-	except OSError, err :
+	except OSError as err :
 		if err.errno != errno.EEXIST :
 			raise
 
@@ -95,10 +94,10 @@ def main() :
 	cli_options = config.syncParsers(config.SECTION_RTLOAD, cli_parser.parse_args(argv_list), config_dict)
 
 	if len(cli_options.torrents_list) > 1 and not cli_options.link_to_path is None :
-		print >> sys.stderr, "Option -l/--link-to be used with only one torrent"
+		print("Option -l/--link-to be used with only one torrent", file=sys.stderr)
 		sys.exit(1)
 	if cli_options.client_name is None :
-		print >> sys.stderr, "Required client"
+		print("Required client", file=sys.stderr)
 		sys.exit(1)
 
 	socket.setdefaulttimeout(cli_options.timeout)

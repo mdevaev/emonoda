@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Plugin for rutor (http://rutor.org)
 #    Copyright (C) 2013  Devaev Maxim <mdevaev@gmail.com>
@@ -19,9 +19,9 @@
 #####
 
 
-from rtlib import fetcherlib
-
 import re
+
+from .. import fetcherlib
 
 
 ##### Public constants #####
@@ -31,17 +31,18 @@ FETCHER_VERSION = 0
 RUTOR_DOMAIN = "rutor.org"
 RUTOR_URL = "http://%s" % (RUTOR_DOMAIN)
 RUTOR_DL_URL = "http://d.%s/download" % (RUTOR_DOMAIN)
+RUTOR_ENCODING = "utf-8"
 
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
 	def __init__(self, *args_tuple, **kwargs_dict) :
-		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
-
 		self.__comment_regexp = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
 		self.__hash_regexp = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
 
 		self.__opener = None
+
+		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
 
 	### Public ###
@@ -61,7 +62,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
 	def ping(self) :
 		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-		data = self.__readUrlRetry(RUTOR_URL, opener=opener)
+		data = self.__readUrlRetry(RUTOR_URL, opener=opener).decode(RUTOR_ENCODING)
 		self.assertSite("<link rel=\"shortcut icon\" href=\"http://s.%s/favicon.ico\" />" % (RUTOR_DOMAIN) in data)
 
 	def login(self) :
@@ -86,7 +87,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 	### Private ###
 
 	def __fetchHash(self, torrent) :
-		data = self.__readUrlRetry(torrent.comment())
+		data = self.__readUrlRetry(torrent.comment()).decode(RUTOR_ENCODING)
 		hash_match = self.__hash_regexp.search(data)
 		self.assertFetcher(not hash_match is None, "Hash not found")
 		return hash_match.group(1).lower()

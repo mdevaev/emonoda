@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    KTorrent client for rtfetch
 #    Copyright (C) 2013  Devaev Maxim <mdevaev@gmail.com>
@@ -19,13 +19,13 @@
 #####
 
 
-from rtlib import clientlib
-
 import os
 try :
 	import dbus # pylint: disable=F0401
 except ImportError :
 	dbus = None # pylint: disable=C0103
+
+from .. import clientlib
 
 
 ##### Public constants #####
@@ -39,7 +39,6 @@ class Client(clientlib.AbstractClient) :
 			raise RuntimeError("Required module dbus")
 		if not url is None :
 			raise RuntimeError("The argument \"url\" is not used by this module")
-		clientlib.AbstractClient.__init__(self, url)
 
 		self.__bus = dbus.SessionBus()
 		self.__core = self.__bus.get_object("org.ktorrent.ktorrent", "/core")
@@ -47,6 +46,8 @@ class Client(clientlib.AbstractClient) :
 
 		if self.__settings.useSaveDir() :
 			raise RuntimeError("Turn off the path by default in the settings of KTorrent")
+
+		clientlib.AbstractClient.__init__(self, url)
 
 
 	### Public ###
@@ -77,7 +78,7 @@ class Client(clientlib.AbstractClient) :
 			return False
 
 	def hashes(self) :
-		return map(str.lower, self.__core.torrents(utf8_strings=True))
+		return list(map(str.lower, self.__core.torrents(utf8_strings=True)))
 
 	@clientlib.hashOrTorrent
 	def torrentPath(self, torrent_hash) :
@@ -116,7 +117,7 @@ class Client(clientlib.AbstractClient) :
 			files_list = [ (
 					os.path.join(name, str(torrent_obj.filePath(dbus.UInt32(index), utf8_strings=True))),
 					int(torrent_obj.fileSize(dbus.UInt32(index))),
-				) for index in xrange(count) ]
+				) for index in range(count) ]
 		return clientlib.buildFiles(prefix, files_list)
 
 
@@ -129,7 +130,7 @@ class Client(clientlib.AbstractClient) :
 			torrent_obj = self.__bus.get_object("org.ktorrent.ktorrent", "/torrent/" + torrent_hash)
 			assert str(torrent_obj.infoHash()) == torrent_hash
 			return torrent_obj
-		except dbus.exceptions.DBusException, err :
+		except dbus.exceptions.DBusException as err :
 			if err.get_dbus_name() == "org.freedesktop.DBus.Error.UnknownObject" :
 				raise clientlib.NoSuchTorrentError("Unknown torrent hash")
 			raise

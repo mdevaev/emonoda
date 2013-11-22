@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-# -*- coding: UTF-8 -*-
+#!/usr/bin/env python
 #
 #    rtfile -- Show the difference between two torrent files.
 #    Copyright (C) 2013  Devaev Maxim <mdevaev@gmail.com>
@@ -20,14 +19,14 @@
 #####
 
 
-from rtlib import tfile
-from rtlib import clients
-from rtlib import config
-
 import re
 import sys
 import os
 import socket
+
+from rtlib import tfile
+from rtlib import clients
+from rtlib import config
 
 
 ##### Main #####
@@ -53,7 +52,7 @@ def main() :
 		client = client_class(cli_options.client_url)
 
 	hash_regexp = re.compile(r"[\da-fA-F]{40}")
-	for count in xrange(2) :
+	for count in range(2) :
 		item = cli_options.torrents_list[count]
 		if os.path.exists(item) :
 			cli_options.torrents_list[count] = tfile.Torrent(item).files()

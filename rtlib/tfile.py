@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -22,14 +22,14 @@
 import sys
 import os
 import base64
-import bencode
-import bencode.BTL
 import hashlib
-import urllib
+import urllib.parse
 import itertools
 
-from ulib import tools
-import ulib.tools.term # pylint: disable=W0611
+from ulib import ui
+import ulib.ui.term # pylint: disable=W0611
+
+from .thirdparty import bcoding
 
 
 ##### Public constants #####
@@ -47,7 +47,7 @@ def torrents(src_dir_path, extension = ".torrent", abs_flag = False) :
 			if abs_flag :
 				path = os.path.abspath(path)
 			torrent = Torrent(path)
-		except bencode.BTL.BTFailure :
+		except TypeError :
 			torrent = None
 		torrents_dict[name] = torrent
 	return torrents_dict
@@ -63,8 +63,8 @@ def indexed(src_dir_path, prefix = "") :
 
 def isValidTorrentData(data) :
 	try :
-		return isinstance(bencode.bdecode(data), dict) # Must be True
-	except bencode.BTL.BTFailure :
+		return isinstance(bcoding.bdecode(data), dict) # Must be True
+	except TypeError :
 		return False
 
 
@@ -84,7 +84,7 @@ def diff(old_torrent, new_torrent) :
 		old_attrs_dict = old_dict[path]
 		new_attrs_dict = new_dict[path]
 
-		real = len(filter(None, (new_attrs_dict, old_attrs_dict)))
+		real = len(tuple(filter(None, (new_attrs_dict, old_attrs_dict))))
 		if real == 0 :
 			continue
 		elif real == 1 :
@@ -112,13 +112,13 @@ def printDiff(diff_tuple, prefix = "", use_colors_flag = True, force_colors_flag
 		) :
 		for item in sorted(files_set) :
 			if use_colors_flag :
-				sign = tools.term.colored(color, sign, force_colors_flag=force_colors_flag, output=output)
-			print >> output, "%s%s %s" % (prefix, sign, item)
+				sign = ui.term.colored(color, sign, force_colors_flag=force_colors_flag, output=output)
+			print("%s%s %s" % (prefix, sign, item), file=output)
 
 
 ###
 def isSingleFile(bencode_dict) :
-	return not bencode_dict["info"].has_key("files")
+	return ( not "files" in bencode_dict["info"] )
 
 def torrentSize(bencode_dict) :
 	if isSingleFile(bencode_dict) :
@@ -130,31 +130,31 @@ def torrentSize(bencode_dict) :
 		return size
 
 def torrentHash(bencode_dict) :
-	return hashlib.sha1(bencode.bencode(bencode_dict["info"])).hexdigest().lower()
+	return hashlib.sha1(bcoding.bencode(bencode_dict["info"])).hexdigest().lower()
 
 
 ###
 def scrapeHash(torrent_hash) :
 	scrape_hash = ""
-	for index in xrange(0, len(torrent_hash), 2) :
+	for index in range(0, len(torrent_hash), 2) :
 		scrape_hash += "%{0}".format(torrent_hash[index:index + 2])
 	return scrape_hash
 
 def makeMagnet(bencode_dict, extra_list = None) :
 	# XXX: http://stackoverflow.com/questions/12479570/given-a-torrent-file-how-do-i-generate-a-magnet-link-in-python
-	info_sha1 = hashlib.sha1(bencode.bencode(bencode_dict["info"]))
+	info_sha1 = hashlib.sha1(bcoding.bencode(bencode_dict["info"]))
 	info_digest = info_sha1.digest() # pylint: disable=E1121
 	b32_hash = base64.b32encode(info_digest)
 
-	magnet = "magnet:?xt=%s" % (urllib.quote_plus("urn:btih:%s" % (b32_hash)))
+	magnet = "magnet:?xt=%s" % (urllib.parse.quote_plus("urn:btih:%s" % (b32_hash)))
 	if "dn" in extra_list :
-		magnet += "&dn=" + urllib.quote_plus(bencode_dict["info"]["name"])
+		magnet += "&dn=" + urllib.parse.quote_plus(bencode_dict["info"]["name"])
 	if "tr" in extra_list :
 		announce_list = bencode_dict.get("announce-list", [])
-		if bencode_dict.has_key("announce") :
+		if "announce" in bencode_dict :
 			announce_list.append([bencode_dict["announce"]])
 		for announce in set(itertools.chain.from_iterable(announce_list)) :
-			magnet += "&tr=" + urllib.quote_plus(announce)
+			magnet += "&tr=" + urllib.parse.quote_plus(announce)
 	if "xl" in extra_list :
 		magnet += "&xl=%d" % (torrentSize(bencode_dict))
 
@@ -178,7 +178,7 @@ class Torrent(object) :
 	### Public ###
 
 	def loadFile(self, torrent_file_path) :
-		with open(torrent_file_path) as torrent_file :
+		with open(torrent_file_path, "rb") as torrent_file :
 			self.loadData(torrent_file.read(), torrent_file_path)
 		return self
 
@@ -248,7 +248,7 @@ class Torrent(object) :
 			files_dict = { base : None }
 			for f_dict in self.__bencode_dict["info"]["files"] :
 				name = None
-				for index in xrange(len(f_dict["path"])) :
+				for index in range(len(f_dict["path"])) :
 					name = os.path.join(base, os.path.sep.join(f_dict["path"][0:index + 1]))
 					files_dict[name] = None
 				assert not name is None
@@ -262,7 +262,7 @@ class Torrent(object) :
 	### Private ###
 
 	def __initData(self, data) :
-		self.__bencode_dict = bencode.bdecode(data)
+		self.__bencode_dict = bcoding.bdecode(data)
 		self.__hash = None
 		self.__scrape_hash = None
 

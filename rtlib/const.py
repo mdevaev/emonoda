@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -20,7 +20,7 @@
 
 
 ##### Public constants #####
-VERSION_NUMBERS = (0, 8)
+VERSION_NUMBERS = (0, 9)
 VERSION = ".".join(map(str, VERSION_NUMBERS))
 
 UPSTREAM_URL = "https://github.com/mdevaev/rtfetch"

@@ -1,6 +1,10 @@
-#!/usr/bin/env python2
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
+
+import sys
+import socket
+import xmlrpc.client
+import argparse
 
 try :
 	from rtlib.config import DEFAULT_TIMEOUT
@@ -9,17 +13,12 @@ except ImportError :
 	DEFAULT_TIMEOUT = 5
 	DEFAULT_URL = "http://localhost/RPC2"
 
-import sys
-import socket
-import xmlrpclib
-import argparse
-
 
 ##### Public methods #####
 def manageTrackers(client_url, enable_list, disable_list) :
-	server = xmlrpclib.ServerProxy(client_url)
+	server = xmlrpc.client.ServerProxy(client_url)
 
-	multicall = xmlrpclib.MultiCall(server)
+	multicall = xmlrpc.client.MultiCall(server)
 	hashes_list = server.download_list()
 	for t_hash in hashes_list :
 		multicall.t.multicall(t_hash, "", "t.is_enabled=", "t.get_url=")
@@ -28,13 +27,13 @@ def manageTrackers(client_url, enable_list, disable_list) :
 	actions_dict = dict.fromkeys(set(enable_list or ()), 1)
 	actions_dict.update(dict.fromkeys(set(disable_list or ()), 0))
 
-	multicall = xmlrpclib.MultiCall(server)
-	for count in xrange(len(hashes_list)) :
+	multicall = xmlrpc.client.MultiCall(server)
+	for count in range(len(hashes_list)) :
 		for (index, (is_enabled, url)) in enumerate(trackers_list[count]) :
-			for (pattern, action) in actions_dict.iteritems() :
+			for (pattern, action) in actions_dict.items() :
 				if pattern in url and action != is_enabled :
 					multicall.t.set_enabled(hashes_list[count], index, action)
-					print url, pattern, action
+					print(url, pattern, action)
 					continue
 	multicall()
 

@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+#####
 #
 #    rtfetch -- Update rtorrent files from popular trackers
 #    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
@@ -19,13 +19,13 @@
 #####
 
 
-from rtlib import plugin
+from .. import plugin
 
-import fmod_rutor
-import fmod_rutracker
-import fmod_nnmclub
-import fmod_ponytracker
-import fmod_pravtor
+from . import fmod_rutor
+from . import fmod_rutracker
+from . import fmod_nnmclub
+from . import fmod_ponytracker
+from . import fmod_pravtor
 
 
 ##### Public constants #####
