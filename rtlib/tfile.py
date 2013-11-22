@@ -37,8 +37,8 @@ ALL_MAGNET_FIELDS = ("dn", "tr", "xl")
 
 
 ##### Public methods #####
-encodeStruct = bcoding.bencode
-decodeData = bcoding.bdecode
+encodeStruct = bcoding.bencode # pylint: disable=C0103
+decodeData = bcoding.bdecode # pylint: disable=C0103
 
 
 ###
