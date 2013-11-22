@@ -10,17 +10,23 @@ use the exposed functions to encode/decode them.
 """
 
 from io import BytesIO, SEEK_CUR
+from string import digits
 try: #py 3.3
     from collections.abc import Iterable, Mapping
 except ImportError:
     from collections     import Iterable, Mapping
+
+try:
+    str = unicode
+except NameError:
+    pass
 
 _TYPE_INT  = b'i'
 _TYPE_LIST = b'l'
 _TYPE_DICT = b'd'
 _TYPE_END  = b'e'
 _TYPE_SEP  = b':'
-_TYPES_STR = b'0123456789'
+_TYPES_STR = [d.encode() for d in digits]
 
 def assert_btype(byte, typ):
     if not byte == typ:
@@ -97,7 +103,7 @@ TYPES = {
     _TYPE_END:  None,
     #_TYPE_SEP only appears in strings, not here
 }
-TYPES.update(dict([ (bytes([byte]), _decode_buffer) for byte in _TYPES_STR ])) #b'0': str, b'1': str, ...
+TYPES.update({byte: _decode_buffer for byte in _TYPES_STR}) #b'0': _decode_buffer, b'1': _decode_buffer, …
 
 def bdecode(f_or_data):
     """
@@ -113,7 +119,7 @@ def bdecode(f_or_data):
     if isinstance(f_or_data, bytes):
         f_or_data = BytesIO(f_or_data)
 
-    #TODO: the following like is the only one that needs readahead.
+    #TODO: the following line is the only one that needs readahead.
     #peek returns a arbitrary amount of bytes, so we have to slice.
     if f_or_data.seekable():
         first_byte = f_or_data.read(1)
