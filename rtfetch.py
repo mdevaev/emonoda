@@ -145,31 +145,33 @@ def update( # pylint: disable=R0913
                 ui.cli.newLine(format_fail("UNKNOWN", (33, 1), " "))
             continue
 
-        status_line = status_line.replace("$fetcher$", colored((36, 1), fetcher.plugin()), 1)
-        format_sign = ( lambda color, sign : status_line.replace("$sign$", ( colored(color, sign) if not color is None else sign ), 1) )
+        def format_status(color, sign) :
+            local_line = status_line.replace("$fetcher$", colored(color, fetcher.plugin()), 1)
+            return local_line.replace("$sign$", ( colored(color, sign) if not color is None else sign ), 1)
+
         try :
             if not fetcher.loggedIn() :
-                ui.cli.newLine(format_sign((33, 1), "?"))
+                ui.cli.newLine(format_status((33, 1), "?"))
                 error_count += 1
                 continue
 
             if not fetcher.torrentChanged(torrent) :
-                ui.cli.oneLine(format_sign(None, " "), not show_passed_flag)
+                ui.cli.oneLine(format_status((36, 1), " "), not show_passed_flag)
                 passed_count += 1
                 continue
 
             diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save_customs_list, real_update_flag)
-            ui.cli.newLine(format_sign((32, 1), "+"))
+            ui.cli.newLine(format_status((32, 1), "+"))
             if show_diff_flag :
                 tfile.printDiff(diff_tuple, "\t", use_colors_flag=(not no_colors_flag), force_colors_flag=force_colors_flag)
             updated_count += 1
 
         except fetcherlib.CommonFetcherError as err :
-            ui.cli.newLine(format_sign((31, 1), "-") + (" :: %s(%s)" % (type(err).__name__, err)))
+            ui.cli.newLine(format_status((31, 1), "-") + (" :: %s(%s)" % (type(err).__name__, err)))
             error_count += 1
 
         except Exception as err :
-            ui.cli.newLine(format_sign((31, 1), "-"))
+            ui.cli.newLine(format_status((31, 1), "-"))
             ui.cli.printTraceback("\t")
             error_count += 1
 
