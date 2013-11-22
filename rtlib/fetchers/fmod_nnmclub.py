@@ -42,96 +42,96 @@ REPLACE_DOMAINS = ("nnm-club.ru", "nnm-club.me")
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
-	def __init__(self, *args_tuple, **kwargs_dict) :
-		self.__comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
-		self.__torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
+    def __init__(self, *args_tuple, **kwargs_dict) :
+        self.__comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
+        self.__torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
 
-		self.__cookie_jar = None
-		self.__opener = None
+        self.__cookie_jar = None
+        self.__opener = None
 
-		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
-
-
-	### Public ###
-
-	@classmethod
-	def plugin(cls) :
-		return FETCHER_NAME
-
-	@classmethod
-	def version(cls) :
-		return FETCHER_VERSION
-
-	###
-
-	def match(self, torrent) :
-		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
-
-	def ping(self) :
-		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-		data = self.__readUrlRetry(NNMCLUB_URL, opener=opener).decode(NNMCLUB_ENCODING)
-		self.assertSite("<link rel=\"canonical\" href=\"%s/\">" % (NNMCLUB_URL) in data)
-
-	def login(self) :
-		self.assertNonAnonymous()
-		self.__cookie_jar = http.cookiejar.CookieJar()
-		self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.proxyUrl())
-		try :
-			self.__tryLogin()
-		except :
-			self.__cookie_jar = None
-			self.__opener = None
-			raise
-
-	def loggedIn(self) :
-		return ( not self.__opener is None )
-
-	def torrentChanged(self, torrent) :
-		self.assertMatch(torrent)
-		client_agent = self.clientAgent()
-		headers_dict = ( { "User-Agent" : client_agent } if not client_agent is None else None )
-		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict)
-		return ( not "files" in tfile.decodeData(data) )
-
-	def fetchTorrent(self, torrent) :
-		self.assertMatch(torrent)
-		data = self.__readUrlRetry(torrent.comment().replace(*REPLACE_DOMAINS)).decode(NNMCLUB_ENCODING)
-
-		torrent_id_match = self.__torrent_id_regexp.search(data)
-		self.assertFetcher(not torrent_id_match is None, "Unknown torrent_id")
-		torrent_id = torrent_id_match.group(1)
-
-		data = self.__readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
-		self.assertValidTorrentData(data)
-		return data
+        fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
 
-	### Private ###
+    ### Public ###
 
-	def __tryLogin(self) :
-		post_dict = {
-			"username" : self.userName(),
-			"password" : self.passwd(),
-			"redirect" : "",
-			"login"    : "\xc2\xf5\xee\xe4",
-		}
-		post_data = urllib.parse.urlencode(post_dict).encode(NNMCLUB_ENCODING)
-		data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, post_data).decode(NNMCLUB_ENCODING)
-		self.assertLogin("[ %s ]" % (self.userName()) in data, "Invalid login")
+    @classmethod
+    def plugin(cls) :
+        return FETCHER_NAME
 
-	def __readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
-		opener = ( opener or self.__opener )
-		assert not opener is None
+    @classmethod
+    def version(cls) :
+        return FETCHER_VERSION
 
-		headers_dict = ( headers_dict or {} )
-		user_agent = self.userAgent()
-		if not user_agent is None :
-			headers_dict.setdefault("User-Agent", user_agent)
+    ###
 
-		return fetcherlib.readUrlRetry(opener, url, data,
-			headers_dict=headers_dict,
-			timeout=self.timeout(),
-			retries=self.urlRetries(),
-			sleep_time=self.urlSleepTime(),
-		)
+    def match(self, torrent) :
+        return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
+
+    def ping(self) :
+        opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
+        data = self.__readUrlRetry(NNMCLUB_URL, opener=opener).decode(NNMCLUB_ENCODING)
+        self.assertSite("<link rel=\"canonical\" href=\"%s/\">" % (NNMCLUB_URL) in data)
+
+    def login(self) :
+        self.assertNonAnonymous()
+        self.__cookie_jar = http.cookiejar.CookieJar()
+        self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.proxyUrl())
+        try :
+            self.__tryLogin()
+        except :
+            self.__cookie_jar = None
+            self.__opener = None
+            raise
+
+    def loggedIn(self) :
+        return ( not self.__opener is None )
+
+    def torrentChanged(self, torrent) :
+        self.assertMatch(torrent)
+        client_agent = self.clientAgent()
+        headers_dict = ( { "User-Agent" : client_agent } if not client_agent is None else None )
+        data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict)
+        return ( not "files" in tfile.decodeData(data) )
+
+    def fetchTorrent(self, torrent) :
+        self.assertMatch(torrent)
+        data = self.__readUrlRetry(torrent.comment().replace(*REPLACE_DOMAINS)).decode(NNMCLUB_ENCODING)
+
+        torrent_id_match = self.__torrent_id_regexp.search(data)
+        self.assertFetcher(not torrent_id_match is None, "Unknown torrent_id")
+        torrent_id = torrent_id_match.group(1)
+
+        data = self.__readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
+        self.assertValidTorrentData(data)
+        return data
+
+
+    ### Private ###
+
+    def __tryLogin(self) :
+        post_dict = {
+            "username" : self.userName(),
+            "password" : self.passwd(),
+            "redirect" : "",
+            "login"    : "\xc2\xf5\xee\xe4",
+        }
+        post_data = urllib.parse.urlencode(post_dict).encode(NNMCLUB_ENCODING)
+        data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, post_data).decode(NNMCLUB_ENCODING)
+        self.assertLogin("[ %s ]" % (self.userName()) in data, "Invalid login")
+
+    def __readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
+        opener = ( opener or self.__opener )
+        assert not opener is None
+
+        headers_dict = ( headers_dict or {} )
+        user_agent = self.userAgent()
+        if not user_agent is None :
+            headers_dict.setdefault("User-Agent", user_agent)
+
+        return fetcherlib.readUrlRetry(opener, url, data,
+            headers_dict=headers_dict,
+            timeout=self.timeout(),
+            retries=self.urlRetries(),
+            sleep_time=self.urlSleepTime(),
+        )
 

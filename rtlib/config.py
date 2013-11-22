@@ -34,55 +34,55 @@ SECTION_RTLOAD = "rtload"
 
 ###
 def __validMaybeEmptyPath(path) :
-	return validMaybeEmpty(path, validAccessiblePath)
+    return validMaybeEmpty(path, validAccessiblePath)
 
 def __validFetchers(fetchers_list) :
-	return [
-		validRange(item, list(fetchers.FETCHERS_MAP.keys()))
-		for item in filter(None, map(str.strip, validStringList(fetchers_list)))
-	]
+    return [
+        validRange(item, list(fetchers.FETCHERS_MAP.keys()))
+        for item in filter(None, map(str.strip, validStringList(fetchers_list)))
+    ]
 
 def __validMaybeEmptyMode(mode) :
-	valid_mode = ( lambda arg : validNumber(( arg if isinstance(arg, int) else int(str(arg), 8) ), 0) )
-	return validMaybeEmpty(mode, valid_mode)
+    valid_mode = ( lambda arg : validNumber(( arg if isinstance(arg, int) else int(str(arg), 8) ), 0) )
+    return validMaybeEmpty(mode, valid_mode)
 
 def __validSaveCustoms(keys_list) :
-	return list(filter(None, map(str.strip, validStringList(keys_list))))
+    return list(filter(None, map(str.strip, validStringList(keys_list))))
 
 def __validSetCustoms(pairs_list) :
-	if isinstance(pairs_list, dict) :
-		return pairs_list
-	customs_dict = {}
-	for pair in filter(None, map(str.strip, pairs_list)) :
-		(key, value) = map(str.strip, (pair.split("=", 1)+[""])[:2])
-		customs_dict[notEmptyStrip(key, "custom key")] = value
-	return customs_dict
+    if isinstance(pairs_list, dict) :
+        return pairs_list
+    customs_dict = {}
+    for pair in filter(None, map(str.strip, pairs_list)) :
+        (key, value) = map(str.strip, (pair.split("=", 1)+[""])[:2])
+        customs_dict[notEmptyStrip(key, "custom key")] = value
+    return customs_dict
 
 def __makeValidMaybeEmptyRange(valid_list) :
-	valid_range = ( lambda arg : validRange(arg, valid_list) )
-	return ( lambda arg : validMaybeEmpty(arg, valid_range) )
+    valid_range = ( lambda arg : validRange(arg, valid_list) )
+    return ( lambda arg : validMaybeEmpty(arg, valid_range) )
 
 def __makeValidNumber(*args_tuple) :
-	return ( lambda arg : validNumber(arg, *args_tuple) )
+    return ( lambda arg : validNumber(arg, *args_tuple) )
 
 
 ###
 def __makeOptions() :
-	options_list = [ value for (key, value) in globals().items() if key.startswith("OPTION_") ]
-	all_options_dict = {}
-	all_dests_dict = {}
-	for option_tuple in options_list :
-		(option, dest, default, validator) = option_tuple
-		option_dict = {
-			"option"    : option_tuple,
-			"dest"      : dest,
-			"default"   : default,
-			"validator" : validator,
-		}
-		all_options_dict[option] = option_dict
-		if not dest is None :
-			all_dests_dict[dest] = option_dict
-	return all_options_dict, all_dests_dict
+    options_list = [ value for (key, value) in globals().items() if key.startswith("OPTION_") ]
+    all_options_dict = {}
+    all_dests_dict = {}
+    for option_tuple in options_list :
+        (option, dest, default, validator) = option_tuple
+        option_dict = {
+            "option"    : option_tuple,
+            "dest"      : dest,
+            "default"   : default,
+            "validator" : validator,
+        }
+        all_options_dict[option] = option_dict
+        if not dest is None :
+            all_dests_dict[dest] = option_dict
+    return all_options_dict, all_dests_dict
 
 
 ###
@@ -158,85 +158,85 @@ ARG_NO_FORCE_COLORS      = ((      "no-"+OPTION_FORCE_COLORS[0],),      OPTION_F
 
 ##### Public methods #####
 def syncParsers(app_section, cli_options, config_dict, ignore_list = ()) :
-	new_options = copy.copy(cli_options)
-	for (dest, option_dict) in ALL_DESTS_MAP.items() :
-		option = option_dict["option"]
-		if option in ignore_list or not hasattr(cli_options, dest) :
-			continue
-		value = getCommonOption((SECTION_MAIN, app_section), option_dict["option"], config_dict, getattr(cli_options, dest))
-		setattr(new_options, dest, value)
-	return new_options
+    new_options = copy.copy(cli_options)
+    for (dest, option_dict) in ALL_DESTS_MAP.items() :
+        option = option_dict["option"]
+        if option in ignore_list or not hasattr(cli_options, dest) :
+            continue
+        value = getCommonOption((SECTION_MAIN, app_section), option_dict["option"], config_dict, getattr(cli_options, dest))
+        setattr(new_options, dest, value)
+    return new_options
 
 def partialParser(argv_list, **kwargs_dict) :
-	cli_parser = argparse.ArgumentParser(add_help=False)
-	cli_parser.add_argument("-v", "--version", action="version", version=const.VERSION)
-	cli_parser.add_argument("-c", "--config", dest="config_file_path", default=os.path.expanduser(DEFAULT_CONFIG_PATH), metavar="<file>")
-	(cli_options, remaining_list) = cli_parser.parse_known_args()
-	config_dict = ( {} if cli_options.config_file_path is None else __readConfig(cli_options.config_file_path) )
-	kwargs_dict.update({
-			"formatter_class" : argparse.RawDescriptionHelpFormatter,
-			"parents"         : [cli_parser],
-		})
-	new_parser = argparse.ArgumentParser(**kwargs_dict)
-	return (new_parser, config_dict, remaining_list)
+    cli_parser = argparse.ArgumentParser(add_help=False)
+    cli_parser.add_argument("-v", "--version", action="version", version=const.VERSION)
+    cli_parser.add_argument("-c", "--config", dest="config_file_path", default=os.path.expanduser(DEFAULT_CONFIG_PATH), metavar="<file>")
+    (cli_options, remaining_list) = cli_parser.parse_known_args()
+    config_dict = ( {} if cli_options.config_file_path is None else __readConfig(cli_options.config_file_path) )
+    kwargs_dict.update({
+            "formatter_class" : argparse.RawDescriptionHelpFormatter,
+            "parents"         : [cli_parser],
+        })
+    new_parser = argparse.ArgumentParser(**kwargs_dict)
+    return (new_parser, config_dict, remaining_list)
 
 def addArguments(cli_parser, *args_tuple) :
-	for arg_tuple in args_tuple :
-		addArgument(cli_parser, arg_tuple)
+    for arg_tuple in args_tuple :
+        addArgument(cli_parser, arg_tuple)
 
 def addArgument(cli_parser, arg_tuple) :
-	options_list = [
-		( option if option.startswith("-") else "--"+option )
-		for option in arg_tuple[0]
-	]
-	kwargs_dict = arg_tuple[2]
-	kwargs_dict.update({ "dest" : arg_tuple[1][1], "default" : None })
-	cli_parser.add_argument(*options_list, **kwargs_dict)
+    options_list = [
+        ( option if option.startswith("-") else "--"+option )
+        for option in arg_tuple[0]
+    ]
+    kwargs_dict = arg_tuple[2]
+    kwargs_dict.update({ "dest" : arg_tuple[1][1], "default" : None })
+    cli_parser.add_argument(*options_list, **kwargs_dict)
 
 
 ###
 def getOption(section, option_tuple, config_dict) :
-	(option, _, default, validator) = option_tuple
-	return __raiseIncorrectValue(option, validator, config_dict[section].get(option, default))
+    (option, _, default, validator) = option_tuple
+    return __raiseIncorrectValue(option, validator, config_dict[section].get(option, default))
 
 def getCommonOption(sections_list, option_tuple, config_dict, cli_value = None) :
-	(option, _, default, validator) = option_tuple
-	if cli_value is None :
-		requests_list = [ (section, option) for section in sections_list ]
-		value = __lastValue(config_dict, default, requests_list)
-	else :
-		value = cli_value
-	return __raiseIncorrectValue(option, validator, value)
+    (option, _, default, validator) = option_tuple
+    if cli_value is None :
+        requests_list = [ (section, option) for section in sections_list ]
+        value = __lastValue(config_dict, default, requests_list)
+    else :
+        value = cli_value
+    return __raiseIncorrectValue(option, validator, value)
 
 
 ##### Private methods #####
 def __readConfig(file_path) :
-	parser = configparser.ConfigParser()
-	parser.read(file_path)
-	config_dict = {}
-	for section in parser.sections() :
-		config_dict.setdefault(section, {})
-		for option in parser.options(section) :
-			validator = ALL_OPTIONS_MAP.get(option, {}).get("validator")
-			if validator is None :
-				raise ValidatorError("Unknown option: %s::%s" % (section, option))
-			else :
-				value = parser.get(section, option)
-				value = __raiseIncorrectValue("%s::%s" % (section, option), validator, value)
-				config_dict[section][option] = value
-	return config_dict
+    parser = configparser.ConfigParser()
+    parser.read(file_path)
+    config_dict = {}
+    for section in parser.sections() :
+        config_dict.setdefault(section, {})
+        for option in parser.options(section) :
+            validator = ALL_OPTIONS_MAP.get(option, {}).get("validator")
+            if validator is None :
+                raise ValidatorError("Unknown option: %s::%s" % (section, option))
+            else :
+                value = parser.get(section, option)
+                value = __raiseIncorrectValue("%s::%s" % (section, option), validator, value)
+                config_dict[section][option] = value
+    return config_dict
 
 def __lastValue(config_dict, first, requests_list) :
-	assert len(requests_list) > 0
-	last_value = first
-	for (section, option) in requests_list :
-		if option in config_dict.get(section, {}) :
-			last_value = config_dict[section][option]
-	return last_value
+    assert len(requests_list) > 0
+    last_value = first
+    for (section, option) in requests_list :
+        if option in config_dict.get(section, {}) :
+            last_value = config_dict[section][option]
+    return last_value
 
 def __raiseIncorrectValue(option, validator, value) :
-	try :
-		return validator(value)
-	except ValidatorError as err :
-		raise ValidatorError("Incorrect value for option \"%s\": %s" % (option, err))
+    try :
+        return validator(value)
+    except ValidatorError as err :
+        raise ValidatorError("Incorrect value for option \"%s\": %s" % (option, err))
 

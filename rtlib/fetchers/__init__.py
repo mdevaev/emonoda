@@ -30,10 +30,10 @@ from . import fmod_pravtor
 
 ##### Public constants #####
 FETCHERS_MAP = plugin.mapObjects(
-	fmod_rutor.Fetcher,
-	fmod_rutracker.Fetcher,
-	fmod_nnmclub.Fetcher,
-	fmod_ponytracker.Fetcher,
-	fmod_pravtor.Fetcher,
+    fmod_rutor.Fetcher,
+    fmod_rutracker.Fetcher,
+    fmod_nnmclub.Fetcher,
+    fmod_ponytracker.Fetcher,
+    fmod_pravtor.Fetcher,
 )
 

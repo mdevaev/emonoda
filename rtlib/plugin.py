@@ -21,5 +21,5 @@
 
 ##### Public methods #####
 def mapObjects(*cls_list) :
-	return { cls.plugin() : cls for cls in cls_list }
+    return { cls.plugin() : cls for cls in cls_list }
 

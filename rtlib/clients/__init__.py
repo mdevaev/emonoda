@@ -28,8 +28,8 @@ from . import cmod_ktorrent
 
 ##### Public constants #####
 CLIENTS_MAP = plugin.mapObjects(
-	cmod_rtorrent.Client,
-	cmod_transmission.Client,
-	cmod_ktorrent.Client,
+    cmod_rtorrent.Client,
+    cmod_transmission.Client,
+    cmod_ktorrent.Client,
 )
 

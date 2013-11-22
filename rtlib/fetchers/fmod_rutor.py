@@ -36,73 +36,73 @@ RUTOR_ENCODING = "utf-8"
 
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
-	def __init__(self, *args_tuple, **kwargs_dict) :
-		self.__comment_regexp = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
-		self.__hash_regexp = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
+    def __init__(self, *args_tuple, **kwargs_dict) :
+        self.__comment_regexp = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
+        self.__hash_regexp = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
 
-		self.__opener = None
+        self.__opener = None
 
-		fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
-
-
-	### Public ###
-
-	@classmethod
-	def plugin(cls) :
-		return FETCHER_NAME
-
-	@classmethod
-	def version(cls) :
-		return FETCHER_VERSION
-
-	###
-
-	def match(self, torrent) :
-		return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
-
-	def ping(self) :
-		opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-		data = self.__readUrlRetry(RUTOR_URL, opener=opener).decode(RUTOR_ENCODING)
-		self.assertSite("<link rel=\"shortcut icon\" href=\"http://s.%s/favicon.ico\" />" % (RUTOR_DOMAIN) in data)
-
-	def login(self) :
-		self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-
-	def loggedIn(self) :
-		return ( not self.__opener is None )
-
-	def torrentChanged(self, torrent) :
-		self.assertMatch(torrent)
-		return ( torrent.hash() != self.__fetchHash(torrent) )
-
-	def fetchTorrent(self, torrent) :
-		comment_match = self.__comment_regexp.match(torrent.comment() or "")
-		self.assertFetcher(not comment_match is None, "No comment match")
-		topic_id = comment_match.group(1)
-		data = self.__readUrlRetry("%s/%s" % (RUTOR_DL_URL, topic_id))
-		self.assertValidTorrentData(data)
-		return data
+        fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
 
-	### Private ###
+    ### Public ###
 
-	def __fetchHash(self, torrent) :
-		data = self.__readUrlRetry(torrent.comment()).decode(RUTOR_ENCODING)
-		hash_match = self.__hash_regexp.search(data)
-		self.assertFetcher(not hash_match is None, "Hash not found")
-		return hash_match.group(1).lower()
+    @classmethod
+    def plugin(cls) :
+        return FETCHER_NAME
 
-	def __readUrlRetry(self, url, opener = None) :
-		opener = ( opener or self.__opener )
-		assert not opener is None
+    @classmethod
+    def version(cls) :
+        return FETCHER_VERSION
 
-		user_agent = self.userAgent()
-		headers_dict = ( { "User-Agent" : user_agent } if not user_agent is None else None )
+    ###
 
-		return fetcherlib.readUrlRetry(opener, url,
-			headers_dict=headers_dict,
-			timeout=self.timeout(),
-			retries=self.urlRetries(),
-			sleep_time=self.urlSleepTime(),
-		)
+    def match(self, torrent) :
+        return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
+
+    def ping(self) :
+        opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
+        data = self.__readUrlRetry(RUTOR_URL, opener=opener).decode(RUTOR_ENCODING)
+        self.assertSite("<link rel=\"shortcut icon\" href=\"http://s.%s/favicon.ico\" />" % (RUTOR_DOMAIN) in data)
+
+    def login(self) :
+        self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
+
+    def loggedIn(self) :
+        return ( not self.__opener is None )
+
+    def torrentChanged(self, torrent) :
+        self.assertMatch(torrent)
+        return ( torrent.hash() != self.__fetchHash(torrent) )
+
+    def fetchTorrent(self, torrent) :
+        comment_match = self.__comment_regexp.match(torrent.comment() or "")
+        self.assertFetcher(not comment_match is None, "No comment match")
+        topic_id = comment_match.group(1)
+        data = self.__readUrlRetry("%s/%s" % (RUTOR_DL_URL, topic_id))
+        self.assertValidTorrentData(data)
+        return data
+
+
+    ### Private ###
+
+    def __fetchHash(self, torrent) :
+        data = self.__readUrlRetry(torrent.comment()).decode(RUTOR_ENCODING)
+        hash_match = self.__hash_regexp.search(data)
+        self.assertFetcher(not hash_match is None, "Hash not found")
+        return hash_match.group(1).lower()
+
+    def __readUrlRetry(self, url, opener = None) :
+        opener = ( opener or self.__opener )
+        assert not opener is None
+
+        user_agent = self.userAgent()
+        headers_dict = ( { "User-Agent" : user_agent } if not user_agent is None else None )
+
+        return fetcherlib.readUrlRetry(opener, url,
+            headers_dict=headers_dict,
+            timeout=self.timeout(),
+            retries=self.urlRetries(),
+            sleep_time=self.urlSleepTime(),
+        )
 
