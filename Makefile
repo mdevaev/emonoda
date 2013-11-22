@@ -12,7 +12,7 @@ regen-fetchers :
 							"path" : item.__module__.replace(".", "/") + ".py", \
 						} \
 					for item in rtlib.fetchers.FETCHERS_MAP.values() \
-				})) \
+				}, sort_keys=True, indent="    ")) \
 		' > fetchers.json
 
 pylint :

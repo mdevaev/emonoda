@@ -1,1 +1,22 @@
-{"rutor": {"version": 0, "path": "rtlib/fetchers/fmod_rutor.py"}, "ponytracker": {"version": 0, "path": "rtlib/fetchers/fmod_ponytracker.py"}, "pravtor": {"version": 0, "path": "rtlib/fetchers/fmod_pravtor.py"}, "rutracker": {"version": 1, "path": "rtlib/fetchers/fmod_rutracker.py"}, "nnm-club": {"version": 1, "path": "rtlib/fetchers/fmod_nnmclub.py"}}
+{
+    "nnm-club": {
+        "path": "rtlib/fetchers/fmod_nnmclub.py", 
+        "version": 1
+    }, 
+    "ponytracker": {
+        "path": "rtlib/fetchers/fmod_ponytracker.py", 
+        "version": 0
+    }, 
+    "pravtor": {
+        "path": "rtlib/fetchers/fmod_pravtor.py", 
+        "version": 0
+    }, 
+    "rutor": {
+        "path": "rtlib/fetchers/fmod_rutor.py", 
+        "version": 0
+    }, 
+    "rutracker": {
+        "path": "rtlib/fetchers/fmod_rutracker.py", 
+        "version": 1
+    }
+}
