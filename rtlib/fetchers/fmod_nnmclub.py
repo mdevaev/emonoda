@@ -24,6 +24,7 @@ import http.cookiejar
 import re
 
 from .. import fetcherlib
+from .. import tfile
 
 
 ##### Public constants #####
@@ -89,9 +90,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 		self.assertMatch(torrent)
 		client_agent = self.clientAgent()
 		headers_dict = ( { "User-Agent" : client_agent } if not client_agent is None else None )
-		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict).decode(NNMCLUB_ENCODING)
-		self.assertFetcher(data.startswith("d5:"), "Invalid scrape answer")
-		return ( data.strip() == "d5:filesdee" )
+		data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict)
+		return ( not "files" in tfile.decodeData(data) )
 
 	def fetchTorrent(self, torrent) :
 		self.assertMatch(torrent)

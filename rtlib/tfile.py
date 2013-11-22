@@ -37,6 +37,11 @@ ALL_MAGNET_FIELDS = ("dn", "tr", "xl")
 
 
 ##### Public methods #####
+encodeStruct = bcoding.bencode
+decodeData = bcoding.bdecode
+
+
+###
 def torrents(src_dir_path, extension = ".torrent", abs_flag = False) :
 	torrents_dict = {}
 	for name in os.listdir(src_dir_path) :
@@ -63,7 +68,7 @@ def indexed(src_dir_path, prefix = "") :
 
 def isValidTorrentData(data) :
 	try :
-		return isinstance(bcoding.bdecode(data), dict) # Must be True
+		return isinstance(decodeData(data), dict) # Must be True
 	except TypeError :
 		return False
 
@@ -130,7 +135,7 @@ def torrentSize(bencode_dict) :
 		return size
 
 def torrentHash(bencode_dict) :
-	return hashlib.sha1(bcoding.bencode(bencode_dict["info"])).hexdigest().lower()
+	return hashlib.sha1(encodeStruct(bencode_dict["info"])).hexdigest().lower()
 
 
 ###
@@ -142,7 +147,7 @@ def scrapeHash(torrent_hash) :
 
 def makeMagnet(bencode_dict, extra_list = None) :
 	# XXX: http://stackoverflow.com/questions/12479570/given-a-torrent-file-how-do-i-generate-a-magnet-link-in-python
-	info_sha1 = hashlib.sha1(bcoding.bencode(bencode_dict["info"]))
+	info_sha1 = hashlib.sha1(encodeStruct(bencode_dict["info"]))
 	info_digest = info_sha1.digest() # pylint: disable=E1121
 	b32_hash = base64.b32encode(info_digest)
 
@@ -262,7 +267,7 @@ class Torrent(object) :
 	### Private ###
 
 	def __initData(self, data) :
-		self.__bencode_dict = bcoding.bdecode(data)
+		self.__bencode_dict = decodeData(data)
 		self.__hash = None
 		self.__scrape_hash = None
 
