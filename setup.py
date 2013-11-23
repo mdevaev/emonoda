@@ -22,6 +22,7 @@ if __name__ == "__main__" :
             "rtlib",
             "rtlib/fetchers",
             "rtlib/clients",
+            "rtlib/thirdparty",
         ),
 
         scripts=(
