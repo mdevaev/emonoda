@@ -2,14 +2,15 @@
 # Author: Devaev Maxim <mdevaev@gmail.com>
 
 pkgname=rtfetch
-pkgver="0.9"
+pkgver="0.10"
 pkgrel=1
 pkgdesc="The set of tools to organize and management of your torrents"
 arch=('any')
 url="http://github.com/mdevaev/rtfetch.git"
 license="GPL"
-depends=('python' 'python-ulib-git>=0.6')
+depends=('python' 'python-ulib-git>=0.7')
 optdepends=(
+	'python-pysocks-git: SOCKS4/5-proxy support'
 	'python-transmissionrpc: Transmission support'
 	'python-dbus: KTorrent support'
 )
