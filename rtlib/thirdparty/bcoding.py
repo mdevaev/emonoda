@@ -10,14 +10,14 @@ use the exposed functions to encode/decode them.
 """
 
 from io import BytesIO, SEEK_CUR
-from string import digits
+from string import digits # pylint: disable=W0402
 try: #py 3.3
     from collections.abc import Iterable, Mapping
 except ImportError:
     from collections     import Iterable, Mapping
 
 try:
-    str = unicode
+    str = unicode # pylint: disable=E0602,W0622,C0103
 except NameError:
     pass
 
