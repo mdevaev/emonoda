@@ -20,7 +20,7 @@
 
 
 ##### Public constants #####
-VERSION_NUMBERS = (0, 11)
+VERSION_NUMBERS = (0, 12)
 VERSION = ".".join(map(str, VERSION_NUMBERS))
 
 UPSTREAM_URL = "https://github.com/mdevaev/rtfetch"
