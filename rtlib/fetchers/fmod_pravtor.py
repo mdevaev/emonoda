@@ -36,7 +36,9 @@ PRAVTOR_URL = "http://%s" % (PRAVTOR_DOMAIN)
 PRAVTOR_LOGIN_URL = "%s/login.php" % (PRAVTOR_URL)
 PRAVTOR_VIEWTOPIC_URL = "%s/viewtopic.php" % (PRAVTOR_URL)
 PRAVTOR_DL_URL = "%s/download.php" % (PRAVTOR_URL)
+
 PRAVTOR_ENCODING = "cp1251"
+PRAVTOR_FINGERPRINT = b"<img src=\"/images/pravtor_beta1.png\""
 
 
 ##### Public classes #####
@@ -72,8 +74,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-        data = self.__readUrlRetry(PRAVTOR_URL, opener=opener).decode(PRAVTOR_ENCODING)
-        self.assertSite("<img src=\"/images/pravtor_beta1.png\"" in data)
+        data = self.__readUrlRetry(PRAVTOR_URL, opener=opener)
+        self.assertSite(PRAVTOR_FINGERPRINT in data)
 
     def login(self) :
         self.assertNonAnonymous()

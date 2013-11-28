@@ -35,7 +35,9 @@ RUTRACKER_URL = "http://%s" % (RUTRACKER_DOMAIN)
 RUTRACKER_LOGIN_URL = "http://login.%s/forum/login.php" % (RUTRACKER_DOMAIN)
 RUTRACKER_VIEWTOPIC_URL = "%s/forum/viewtopic.php" % (RUTRACKER_URL)
 RUTRACKER_DL_URL = "http://dl.%s/forum/dl.php" % (RUTRACKER_DOMAIN)
+
 RUTRACKER_ENCODING = "cp1251"
+RUTRACKER_FINGERPRINT = b"<link rel=\"shortcut icon\" href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\">"
 
 
 ##### Public classes #####
@@ -72,8 +74,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-        data = self.__readUrlRetry(RUTRACKER_URL, opener=opener).decode(RUTRACKER_ENCODING)
-        self.assertSite("<link rel=\"shortcut icon\" href=\"http://static.%s/favicon.ico\" type=\"image/x-icon\">" % (RUTRACKER_DOMAIN) in data)
+        data = self.__readUrlRetry(RUTRACKER_URL, opener=opener)
+        self.assertSite(RUTRACKER_FINGERPRINT in data)
 
     def login(self) :
         self.assertNonAnonymous()

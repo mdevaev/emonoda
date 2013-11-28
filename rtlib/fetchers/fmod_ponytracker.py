@@ -31,7 +31,9 @@ FETCHER_VERSION = 0
 PONYTRACKER_DOMAIN = "tabun.everypony.ru"
 PONYTRACKER_URL = "http://%s" % (PONYTRACKER_DOMAIN)
 PONYTRACKER_BLOG_URL = "%s/blog/torrents" % (PONYTRACKER_URL)
+
 PONYTRACKER_ENCODING = "utf-8"
+PONYTRACKER_FINGERPRINT = b"<link href=\"http://tabun.everypony.ru/templates/skin/synio/images/favicon.ico?v1\" rel=\"shortcut icon\" />"
 
 
 ##### Public classes #####
@@ -65,8 +67,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-        data = self.__readUrlRetry(PONYTRACKER_BLOG_URL, opener=opener).decode(PONYTRACKER_ENCODING)
-        self.assertSite("<link href=\"%s/templates/skin/synio/images/favicon.ico?v1\" rel=\"shortcut icon\" />" % (PONYTRACKER_URL) in data)
+        data = self.__readUrlRetry(PONYTRACKER_BLOG_URL, opener=opener)
+        self.assertSite(PONYTRACKER_FINGERPRINT in data)
 
     def login(self) :
         self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())

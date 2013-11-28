@@ -31,7 +31,9 @@ FETCHER_VERSION = 0
 RUTOR_DOMAIN = "rutor.org"
 RUTOR_URL = "http://%s" % (RUTOR_DOMAIN)
 RUTOR_DL_URL = "http://d.%s/download" % (RUTOR_DOMAIN)
+
 RUTOR_ENCODING = "utf-8"
+RUTOR_FINGERPRINT = b"<link rel=\"shortcut icon\" href=\"http://s.rutor.org/favicon.ico\" />"
 
 
 ##### Public classes #####
@@ -62,8 +64,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-        data = self.__readUrlRetry(RUTOR_URL, opener=opener).decode(RUTOR_ENCODING)
-        self.assertSite("<link rel=\"shortcut icon\" href=\"http://s.%s/favicon.ico\" />" % (RUTOR_DOMAIN) in data)
+        data = self.__readUrlRetry(RUTOR_URL, opener=opener)
+        self.assertSite(RUTOR_FINGERPRINT in data)
 
     def login(self) :
         self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())

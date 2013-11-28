@@ -36,7 +36,9 @@ NNMCLUB_URL = "http://%s" % (NNMCLUB_DOMAIN)
 NNMCLUB_LOGIN_URL = "%s/forum/login.php" % (NNMCLUB_URL)
 NNMCLUB_DL_URL = "%s/forum/download.php" % (NNMCLUB_URL)
 NNMCLUB_SCRAPE_URL = "http://bt.%s:2710/scrape" % (NNMCLUB_DOMAIN)
+
 NNMCLUB_ENCODING = "cp1251"
+NNMCLUB_FINGERPRINT = b"<link rel=\"canonical\" href=\"%s/\">"
 REPLACE_DOMAINS = ("nnm-club.ru", "nnm-club.me")
 
 
@@ -69,8 +71,8 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-        data = self.__readUrlRetry(NNMCLUB_URL, opener=opener).decode(NNMCLUB_ENCODING)
-        self.assertSite("<link rel=\"canonical\" href=\"%s/\">" % (NNMCLUB_URL) in data)
+        data = self.__readUrlRetry(NNMCLUB_URL, opener=opener)
+        self.assertSite(NNMCLUB_FINGERPRINT in data)
 
     def login(self) :
         self.assertNonAnonymous()
