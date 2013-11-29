@@ -38,7 +38,7 @@ NNMCLUB_DL_URL = "%s/forum/download.php" % (NNMCLUB_URL)
 NNMCLUB_SCRAPE_URL = "http://bt.%s:2710/scrape" % (NNMCLUB_DOMAIN)
 
 NNMCLUB_ENCODING = "cp1251"
-NNMCLUB_FINGERPRINT = b"<link rel=\"canonical\" href=\"%s/\">"
+NNMCLUB_FINGERPRINT = b"<link rel=\"canonical\" href=\"http://nnm-club.me/\">"
 REPLACE_DOMAINS = ("nnm-club.ru", "nnm-club.me")
 
 
