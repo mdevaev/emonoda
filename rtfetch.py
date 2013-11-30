@@ -209,7 +209,7 @@ def initFetchers(
     colored = makeColored(no_colors_flag, force_colors_flag)
 
     fetchers_list = []
-    for fetcher_name in set(fetchers.FETCHERS_MAP.keys()).intersection(only_fetchers_list).difference(exclude_fetchers_list) :
+    for fetcher_name in sorted(set(fetchers.FETCHERS_MAP).intersection(only_fetchers_list).difference(exclude_fetchers_list)) :
         get_fetcher_option = ( lambda option : config.getOption(fetcher_name, option, config_dict) )
         get_common_option = ( lambda option, cli_value : config.getCommonOption((
             config.SECTION_MAIN, config.SECTION_RTFETCH, fetcher_name), option, config_dict, cli_value) )
