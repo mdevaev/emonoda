@@ -14,7 +14,7 @@ optdepends=(
 	'python-transmissionrpc: Transmission support'
 	'python-dbus: KTorrent support'
 )
-makedepends=('git')
+makedepends=('python-setuptools' 'git')
 
 _gitroot="git://github.com/mdevaev/rtfetch.git"
 _gitname="rtfetch"
