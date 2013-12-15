@@ -191,7 +191,7 @@ def update( # pylint: disable=R0913
 
 ###
 def initFetchers(
-        config_dict,
+        parser,
         url_retries,
         url_sleep_time,
         timeout,
@@ -210,12 +210,12 @@ def initFetchers(
 
     fetchers_list = []
     for fetcher_name in sorted(set(fetchers.FETCHERS_MAP).intersection(only_fetchers_list).difference(exclude_fetchers_list)) :
-        get_fetcher_option = ( lambda option : config.getOption(fetcher_name, option, config_dict) )
-        get_common_option = ( lambda option, cli_value : config.getCommonOption((
-            config.SECTION_MAIN, config.SECTION_RTFETCH, fetcher_name), option, config_dict, cli_value) )
+        get_fetcher_option = ( lambda option : parser.configValue(fetcher_name, option) )
+        get_common_option = ( lambda option, cli_value : parser.commonValue((
+            config.SECTION_MAIN, config.SECTION_RTFETCH, fetcher_name), option, cli_value) )
 
         fetcher_class = fetchers.FETCHERS_MAP[fetcher_name]
-        if fetcher_name in config_dict :
+        if fetcher_name in parser.config() :
             ui.cli.oneLine("# Enabling the fetcher \"%s\"..." % (colored((36, 1), fetcher_name)))
 
             fetcher = fetcher_class(
@@ -255,8 +255,8 @@ def initFetchers(
 
 ##### Main #####
 def main() :
-    (cli_parser, config_dict, argv_list) = config.partialParser(sys.argv[1:], description="Update rtorrent files from popular trackers")
-    config.addArguments(cli_parser,
+    parser = config.makeParser(description="Update rtorrent files from popular trackers")
+    parser.addArguments(
         config.ARG_SOURCE_DIR,
         config.ARG_BACKUP_DIR,
         config.ARG_BACKUP_SUFFIX,
@@ -291,8 +291,7 @@ def main() :
         config.ARG_FORCE_COLORS,
         config.ARG_NO_FORCE_COLORS,
     )
-    raw_options = cli_parser.parse_args(argv_list)
-    cli_options = config.syncParsers(config.SECTION_RTFETCH, raw_options, config_dict, (
+    (options, raw_options) = parser.sync((config.SECTION_MAIN, config.SECTION_RTFETCH), (
             # For fetchers: validate this options later
             config.OPTION_LOGIN,
             config.OPTION_PASSWD,
@@ -304,10 +303,10 @@ def main() :
             config.OPTION_INTERACTIVE,
         ))
 
-    colored = makeColored(cli_options.no_colors_flag, cli_options.force_colors_flag)
-    socket.setdefaulttimeout(cli_options.timeout)
+    colored = makeColored(options.no_colors_flag, options.force_colors_flag)
+    socket.setdefaulttimeout(options.timeout)
 
-    fetchers_list = initFetchers(config_dict,
+    fetchers_list = initFetchers(parser,
         raw_options.url_retries,
         raw_options.url_sleep_time,
         raw_options.timeout,
@@ -315,46 +314,46 @@ def main() :
         raw_options.client_agent,
         raw_options.proxy_url,
         raw_options.interactive_flag,
-        cli_options.only_fetchers_list,
-        cli_options.exclude_fetchers_list,
-        cli_options.pass_failed_login_flag,
-        cli_options.no_colors_flag,
-        cli_options.force_colors_flag,
+        options.only_fetchers_list,
+        options.exclude_fetchers_list,
+        options.pass_failed_login_flag,
+        options.no_colors_flag,
+        options.force_colors_flag,
     )
     if len(fetchers_list) == 0 :
         print("No available fetchers in config", file=sys.stderr)
         sys.exit(1)
-    if (len(cli_options.only_fetchers_list) != 0 or len(cli_options.exclude_fetchers_list) != 0) and raw_options.skip_unknown_flag is None :
-        cli_options.skip_unknown_flag = True
+    if (len(options.only_fetchers_list) != 0 or len(options.exclude_fetchers_list) != 0) and raw_options.skip_unknown_flag is None :
+        options.skip_unknown_flag = True
 
-    if cli_options.check_versions_flag and not fetcherlib.checkVersions(fetchers_list) :
+    if options.check_versions_flag and not fetcherlib.checkVersions(fetchers_list) :
         sys.exit(1)
 
     client = None
-    if not cli_options.client_name is None :
+    if not options.client_name is None :
         client = clientlib.initClient(
-            clients.CLIENTS_MAP[cli_options.client_name],
-            cli_options.client_url,
-            save_customs_list=cli_options.save_customs_list,
+            clients.CLIENTS_MAP[options.client_name],
+            options.client_url,
+            save_customs_list=options.save_customs_list,
         )
 
-    if not cli_options.real_update_flag :
+    if not options.real_update_flag :
         print("#", colored((31, 1), "WARNING! Running mode NOOP. For a real operation, use the option -e/--real-update"))
 
     print()
     update(fetchers_list, client,
-        cli_options.src_dir_path,
-        cli_options.backup_dir_path,
-        cli_options.backup_suffix,
-        cli_options.names_filter,
-        cli_options.save_customs_list,
-        cli_options.skip_unknown_flag,
-        cli_options.pass_failed_login_flag,
-        cli_options.show_passed_flag,
-        cli_options.show_diff_flag,
-        cli_options.real_update_flag,
-        cli_options.no_colors_flag,
-        cli_options.force_colors_flag,
+        options.src_dir_path,
+        options.backup_dir_path,
+        options.backup_suffix,
+        options.names_filter,
+        options.save_customs_list,
+        options.skip_unknown_flag,
+        options.pass_failed_login_flag,
+        options.show_passed_flag,
+        options.show_diff_flag,
+        options.real_update_flag,
+        options.no_colors_flag,
+        options.force_colors_flag,
     )
     print()
 

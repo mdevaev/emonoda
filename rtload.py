@@ -79,8 +79,8 @@ def loadTorrent(client, src_dir_path, torrents_list, data_dir_path, link_to_path
 
 ##### Main #####
 def main() :
-    (cli_parser, config_dict, argv_list) = config.partialParser(sys.argv[1:], description="Add torrent to the data model \"t.data\"")
-    config.addArguments(cli_parser,
+    parser = config.makeParser(description="Add torrent to the data model \"t.data\"")
+    parser.addArguments(
         config.ARG_MKDIR_MODE,
         config.ARG_DATA_DIR,
         config.ARG_SOURCE_DIR,
@@ -89,32 +89,32 @@ def main() :
         config.ARG_CLIENT_URL,
         config.ARG_SET_CUSTOMS,
     )
-    cli_parser.add_argument("--link-to", dest="link_to_path", action="store", default=None, metavar="<path>")
-    cli_parser.add_argument("torrents_list", type=str, nargs="+")
-    cli_options = config.syncParsers(config.SECTION_RTLOAD, cli_parser.parse_args(argv_list), config_dict)
+    parser.addRawArgument("--link-to", dest="link_to_path", action="store", default=None, metavar="<path>")
+    parser.addRawArgument("torrents_list", type=str, nargs="+")
+    options = parser.sync((config.SECTION_MAIN, config.SECTION_RTLOAD))[0]
 
-    if len(cli_options.torrents_list) > 1 and not cli_options.link_to_path is None :
+    if len(options.torrents_list) > 1 and not options.link_to_path is None :
         print("Option -l/--link-to be used with only one torrent", file=sys.stderr)
         sys.exit(1)
-    if cli_options.client_name is None :
+    if options.client_name is None :
         print("Required client", file=sys.stderr)
         sys.exit(1)
 
-    socket.setdefaulttimeout(cli_options.timeout)
+    socket.setdefaulttimeout(options.timeout)
 
     client = clientlib.initClient(
-        clients.CLIENTS_MAP[cli_options.client_name],
-        cli_options.client_url,
-        set_customs_dict=cli_options.set_customs_dict
+        clients.CLIENTS_MAP[options.client_name],
+        options.client_url,
+        set_customs_dict=options.set_customs_dict
     )
 
     loadTorrent(client,
-        cli_options.src_dir_path,
-        cli_options.torrents_list,
-        cli_options.data_dir_path,
-        cli_options.link_to_path,
-        cli_options.mkdir_mode,
-        cli_options.set_customs_dict,
+        options.src_dir_path,
+        options.torrents_list,
+        options.data_dir_path,
+        options.link_to_path,
+        options.mkdir_mode,
+        options.set_customs_dict,
     )
 
 

@@ -20,7 +20,6 @@
 
 
 import re
-import sys
 import os
 import socket
 
@@ -31,8 +30,8 @@ from rtlib import config
 
 ##### Main #####
 def main() :
-    (cli_parser, config_dict, argv_list) = config.partialParser(sys.argv[1:], description="Show the difference between two torrent files")
-    config.addArguments(cli_parser,
+    parser = config.makeParser(description="Show the difference between two torrent files")
+    parser.addArguments(
         config.ARG_TIMEOUT,
         config.ARG_CLIENT,
         config.ARG_CLIENT_URL,
@@ -41,31 +40,31 @@ def main() :
         config.ARG_FORCE_COLORS,
         config.ARG_NO_FORCE_COLORS,
     )
-    cli_parser.add_argument("torrents_list", type=str, nargs=2, metavar="<path/hash>")
-    cli_options = config.syncParsers(config.SECTION_RTDIFF, cli_parser.parse_args(argv_list), config_dict)
+    parser.addRawArgument("torrents_list", type=str, nargs=2, metavar="<path/hash>")
+    options = parser.sync((config.SECTION_MAIN, config.SECTION_RTDIFF))[0]
 
-    socket.setdefaulttimeout(cli_options.timeout)
+    socket.setdefaulttimeout(options.timeout)
 
     client = None
-    if not cli_options.client_name is None :
-        client_class = clients.CLIENTS_MAP[cli_options.client_name]
-        client = client_class(cli_options.client_url)
+    if not options.client_name is None :
+        client_class = clients.CLIENTS_MAP[options.client_name]
+        client = client_class(options.client_url)
 
     hash_regexp = re.compile(r"[\da-fA-F]{40}")
     for count in range(2) :
-        item = cli_options.torrents_list[count]
+        item = options.torrents_list[count]
         if os.path.exists(item) :
-            cli_options.torrents_list[count] = tfile.Torrent(item).files()
+            options.torrents_list[count] = tfile.Torrent(item).files()
         elif hash_regexp.match(item) :
             if client is None :
                 raise RuntimeError("Required client for hash: %s" % (item))
-            cli_options.torrents_list[count] = client.files(item)
+            options.torrents_list[count] = client.files(item)
         else :
             raise RuntimeError("Invalid file or hash: %s" % (item))
 
-    tfile.printDiff(tfile.diff(*cli_options.torrents_list), " ",
-        use_colors_flag=(not cli_options.no_colors_flag),
-        force_colors_flag=cli_options.force_colors_flag,
+    tfile.printDiff(tfile.diff(*options.torrents_list), " ",
+        use_colors_flag=(not options.no_colors_flag),
+        force_colors_flag=options.force_colors_flag,
     )
 
 

@@ -19,7 +19,6 @@
 #####
 
 
-import sys
 import socket
 import operator
 import itertools
@@ -116,7 +115,7 @@ def printPrettyMeta(torrent, client) :
 
 ##### Main #####
 def main() :
-    (cli_parser, config_dict, argv_list) = config.partialParser(sys.argv[1:], description="Show torrents metadata")
+    parser = config.makeParser(description="Show torrents metadata")
     print_options_list = []
     for (print_option, print_dest, print_method) in (
             ("--path",                 "print_path_flag",                 lambda torrent : torrent.path()),
@@ -136,42 +135,42 @@ def main() :
             ("--is-private-pretty",    "print_is_private_pretty_flag",    formatIsPrivatePretty),
             ("--client-path",          "print_client_path_flag",          lambda torrent : formatClientPath(torrent, client)),
             ("--client-prefix",        "print_client_prefix_flag",        lambda torrent : formatClientPrefix(torrent, client)),
-            ("--make-magnet",          "print_magnet_flag",               lambda torrent : torrent.magnet(cli_options.magnet_fields_list)),
+            ("--make-magnet",          "print_magnet_flag",               lambda torrent : torrent.magnet(options.magnet_fields_list)),
         ) :
         print_options_list.append((
-                cli_parser.add_argument(print_option, dest=print_dest, action="store_true"),
+                parser.addRawArgument(print_option, dest=print_dest, action="store_true"),
                 print_method,
             ))
-    cli_parser.add_argument("--without-headers", dest="without_headers_flag", action="store_true")
-    cli_parser.add_argument("--magnet-fields",   dest="magnet_fields_list",   nargs="+",  default=None, metavar="<fields>", choices=tfile.ALL_MAGNET_FIELDS)
-    config.addArguments(cli_parser,
+    parser.addRawArgument("--without-headers", dest="without_headers_flag", action="store_true")
+    parser.addRawArgument("--magnet-fields",   dest="magnet_fields_list",   nargs="+",  default=None, metavar="<fields>", choices=tfile.ALL_MAGNET_FIELDS)
+    parser.addArguments(
         config.ARG_TIMEOUT,
         config.ARG_CLIENT,
         config.ARG_CLIENT_URL,
     )
-    cli_parser.add_argument("torrents_list", type=str, nargs="+")
-    cli_options = config.syncParsers(config.SECTION_RTFILE, cli_parser.parse_args(argv_list), config_dict)
+    parser.addRawArgument("torrents_list", type=str, nargs="+")
+    options = parser.sync((config.SECTION_MAIN, config.SECTION_RTFILE))[0]
 
-    socket.setdefaulttimeout(cli_options.timeout)
+    socket.setdefaulttimeout(options.timeout)
 
-    torrents_list = [ tfile.Torrent(item) for item in cli_options.torrents_list ]
+    torrents_list = [ tfile.Torrent(item) for item in options.torrents_list ]
 
     client = None
-    if not cli_options.client_name is None :
-        client_class = clients.CLIENTS_MAP[cli_options.client_name]
-        client = client_class(cli_options.client_url)
+    if not options.client_name is None :
+        client_class = clients.CLIENTS_MAP[options.client_name]
+        client = client_class(options.client_url)
 
     to_print_list = [
         (print_option.option_strings[0][2:], print_method)
         for (print_option, print_method) in print_options_list
-        if getattr(cli_options, print_option.dest)
+        if getattr(options, print_option.dest)
     ]
     for torrent in torrents_list :
         if len(to_print_list) == 0 :
             printPrettyMeta(torrent, client)
         else :
             for (header, print_method) in to_print_list :
-                prefix = ( "" if cli_options.without_headers_flag else header + ": " )
+                prefix = ( "" if options.without_headers_flag else header + ": " )
                 retval = print_method(torrent)
                 if isinstance(retval, (list, tuple)) :
                     for item in retval :
