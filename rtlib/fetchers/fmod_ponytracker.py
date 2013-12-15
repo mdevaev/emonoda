@@ -39,13 +39,13 @@ PONYTRACKER_FINGERPRINT = b"<link href=\"http://tabun.everypony.ru/templates/ski
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
     def __init__(self, *args_tuple, **kwargs_dict) :
-        self.__comment_regexp = re.compile(r"http://tabun\.everypony\.ru/blog/torrents/\d+\.html")
-        self.__hash_regexp = re.compile(r"<blockquote>\s*Hash\s*:\s*([a-fA-F0-9]{40})\s*<br/>")
-        self.__dl_regexp = re.compile(r"Torrent\s*:\s*<a href=\"(http://[^\"]+)\"")
+        self._comment_regexp = re.compile(r"http://tabun\.everypony\.ru/blog/torrents/\d+\.html")
+        self._hash_regexp = re.compile(r"<blockquote>\s*Hash\s*:\s*([a-fA-F0-9]{40})\s*<br/>")
+        self._dl_regexp = re.compile(r"Torrent\s*:\s*<a href=\"(http://[^\"]+)\"")
 
-        self.__opener = None
-        self.__last_hash = None
-        self.__last_page = None
+        self._opener = None
+        self._last_hash = None
+        self._last_page = None
 
         fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
@@ -63,49 +63,49 @@ class Fetcher(fetcherlib.AbstractFetcher) :
     ###
 
     def match(self, torrent) :
-        return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
+        return ( not self._comment_regexp.match(torrent.comment() or "") is None )
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-        data = self.__readUrlRetry(PONYTRACKER_BLOG_URL, opener=opener)
+        data = self._readUrlRetry(PONYTRACKER_BLOG_URL, opener=opener)
         self.assertSite(PONYTRACKER_FINGERPRINT in data)
 
     def login(self) :
-        self.__opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
+        self._opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
 
     def loggedIn(self) :
-        return ( not self.__opener is None )
+        return ( not self._opener is None )
 
     def torrentChanged(self, torrent) :
         self.assertMatch(torrent)
-        return ( torrent.hash() != self.__fetchHash(torrent) )
+        return ( torrent.hash() != self._fetchHash(torrent) )
 
     def fetchTorrent(self, torrent) :
         self.assertMatch(torrent)
-        self.__loadPage(torrent)
-        dl_match = self.__dl_regexp.search(self.__last_page)
+        self._loadPage(torrent)
+        dl_match = self._dl_regexp.search(self._last_page)
         self.assertFetcher(not dl_match is None, "Download not found")
-        data = self.__readUrlRetry(dl_match.group(1))
+        data = self._readUrlRetry(dl_match.group(1))
         self.assertValidTorrentData(data)
         return data
 
 
     ### Private ###
 
-    def __loadPage(self, torrent) :
+    def _loadPage(self, torrent) :
         torrent_hash = torrent.hash()
-        if self.__last_hash != torrent_hash :
-            self.__last_page = self.__readUrlRetry(torrent.comment()).decode(PONYTRACKER_ENCODING)
-            self.__last_hash = torrent_hash
+        if self._last_hash != torrent_hash :
+            self._last_page = self._readUrlRetry(torrent.comment()).decode(PONYTRACKER_ENCODING)
+            self._last_hash = torrent_hash
 
-    def __fetchHash(self, torrent) :
-        self.__loadPage(torrent)
-        hash_match = self.__hash_regexp.search(self.__last_page)
+    def _fetchHash(self, torrent) :
+        self._loadPage(torrent)
+        hash_match = self._hash_regexp.search(self._last_page)
         self.assertFetcher(not hash_match is None, "Hash not found")
         return hash_match.group(1).lower()
 
-    def __readUrlRetry(self, url, opener = None) :
-        opener = ( opener or self.__opener )
+    def _readUrlRetry(self, url, opener = None) :
+        opener = ( opener or self._opener )
         assert not opener is None
 
         user_agent = self.userAgent()

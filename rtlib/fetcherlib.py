@@ -138,18 +138,18 @@ def checkVersions(fetchers_list) :
 ##### Public classes #####
 class AbstractFetcher :
     def __init__(self, user_name, passwd, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url, interactive_flag, captcha_callback) :
-        self.__user_name        = self.__assertIsInstance(user_name,        str)
-        self.__passwd           = self.__assertIsInstance(passwd,           str)
-        self.__url_retries      = self.__assertIsInstance(url_retries,      int)
-        self.__url_sleep_time   = self.__assertIsInstance(url_sleep_time,   (int, float))
-        self.__timeout          = self.__assertIsInstance(timeout,          (int, float))
-        self.__user_agent       = self.__assertIsInstance(user_agent,       (str, type(None)))
-        self.__client_agent     = self.__assertIsInstance(client_agent,     (str, type(None)))
-        self.__proxy_url        = self.__assertIsInstance(proxy_url,        (str, type(None)))
-        self.__interactive_flag = self.__assertIsInstance(interactive_flag, bool)
+        self._user_name        = self._assertIsInstance(user_name,        str)
+        self._passwd           = self._assertIsInstance(passwd,           str)
+        self._url_retries      = self._assertIsInstance(url_retries,      int)
+        self._url_sleep_time   = self._assertIsInstance(url_sleep_time,   (int, float))
+        self._timeout          = self._assertIsInstance(timeout,          (int, float))
+        self._user_agent       = self._assertIsInstance(user_agent,       (str, type(None)))
+        self._client_agent     = self._assertIsInstance(client_agent,     (str, type(None)))
+        self._proxy_url        = self._assertIsInstance(proxy_url,        (str, type(None)))
+        self._interactive_flag = self._assertIsInstance(interactive_flag, bool)
 
         assert callable(captcha_callback)
-        self.__captcha_callback = captcha_callback
+        self._captcha_callback = captcha_callback
 
 
     ### Public ###
@@ -185,48 +185,48 @@ class AbstractFetcher :
     ###
 
     def userName(self) :
-        return self.__user_name
+        return self._user_name
 
     def passwd(self) :
-        return self.__passwd
+        return self._passwd
 
     def urlRetries(self) :
-        return self.__url_retries
+        return self._url_retries
 
     def urlSleepTime(self) :
-        return self.__url_sleep_time
+        return self._url_sleep_time
 
     def timeout(self) :
-        return self.__timeout
+        return self._timeout
 
     def userAgent(self) :
-        return self.__user_agent
+        return self._user_agent
 
     def clientAgent(self) :
-        return self.__client_agent
+        return self._client_agent
 
     def proxyUrl(self) :
-        return self.__proxy_url
+        return self._proxy_url
 
     def isInteractive(self) :
-        return self.__interactive_flag
+        return self._interactive_flag
 
     def decodeCaptcha(self, url) :
-        return self.__captcha_callback(url)
+        return self._captcha_callback(url)
 
     ###
 
     def assertSite(self, arg) :
-        self.__customAssert(SiteError, arg, "Invalid site body, maybe site is blocked")
+        self._customAssert(SiteError, arg, "Invalid site body, maybe site is blocked")
 
     def assertLogin(self, *args_list) :
-        self.__customAssert(LoginError, *args_list)
+        self._customAssert(LoginError, *args_list)
 
     def assertFetcher(self, *args_list) :
-        self.__customAssert(FetcherError, *args_list)
+        self._customAssert(FetcherError, *args_list)
 
     def assertNonAnonymous(self) :
-        self.assertLogin(len(self.__user_name) != 0, "The tracker \"%s\" can not be used anonymously" % (self.plugin()))
+        self.assertLogin(len(self._user_name) != 0, "The tracker \"%s\" can not be used anonymously" % (self.plugin()))
 
     def assertMatch(self, torrent) :
         self.assertFetcher(self.match(torrent), "No comment match")
@@ -238,13 +238,13 @@ class AbstractFetcher :
 
     ### Private ###
 
-    def __customAssert(self, exception, arg, message = "") :
+    def _customAssert(self, exception, arg, message = "") :
         if not arg :
             raise exception(message)
 
     ###
 
-    def __assertIsInstance(self, value, value_type) :
+    def _assertIsInstance(self, value, value_type) :
         assert isinstance(value, value_type)
         return value
 

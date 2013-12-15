@@ -87,7 +87,7 @@ def buildFiles(prefix, files_list) :
 class AbstractClient :
     def __init__(self, url) :
         assert isinstance(url, (str, type(None)))
-        self.__url = url
+        self._url = url
 
 
     ### Public ###
@@ -159,5 +159,5 @@ class AbstractClient :
     ###
 
     def url(self) :
-        return self.__url
+        return self._url
 

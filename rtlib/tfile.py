@@ -171,10 +171,10 @@ class Torrent(object) :
     def __init__(self, torrent_file_path = None) :
         # XXX: File format: https://wiki.theory.org/BitTorrentSpecification
 
-        self.__torrent_file_path = None
-        self.__bencode_dict = None
-        self.__hash = None
-        self.__scrape_hash = None
+        self._torrent_file_path = None
+        self._bencode_dict = None
+        self._hash = None
+        self._scrape_hash = None
 
         if not torrent_file_path is None :
             self.loadFile(torrent_file_path)
@@ -188,89 +188,89 @@ class Torrent(object) :
         return self
 
     def loadData(self, data, torrent_file_path = None) :
-        self.__initData(data)
-        self.__torrent_file_path = torrent_file_path
+        self._initData(data)
+        self._torrent_file_path = torrent_file_path
         return self
 
     ###
 
     def path(self) :
-        return self.__torrent_file_path
+        return self._torrent_file_path
 
     def bencode(self) :
-        return self.__bencode_dict
+        return self._bencode_dict
 
     ###
 
     def name(self) :
-        return self.__bencode_dict["info"]["name"]
+        return self._bencode_dict["info"]["name"]
 
     def comment(self) :
-        return self.__bencode_dict.get("comment")
+        return self._bencode_dict.get("comment")
 
     def creationDate(self) :
-        return self.__bencode_dict.get("creation date")
+        return self._bencode_dict.get("creation date")
 
     def createdBy(self) :
-        return self.__bencode_dict.get("created by")
+        return self._bencode_dict.get("created by")
 
     def announce(self) :
-        return self.__bencode_dict.get("announce")
+        return self._bencode_dict.get("announce")
 
     def announceList(self) :
-        return self.__bencode_dict.get("announce-list", [])
+        return self._bencode_dict.get("announce-list", [])
 
     def isPrivate(self) :
-        return bool(self.__bencode_dict["info"].get("private", 0))
+        return bool(self._bencode_dict["info"].get("private", 0))
 
     ###
 
     def hash(self) :
-        if self.__hash is None :
-            self.__hash = torrentHash(self.__bencode_dict)
-        return self.__hash
+        if self._hash is None :
+            self._hash = torrentHash(self._bencode_dict)
+        return self._hash
 
     def scrapeHash(self) :
-        if self.__scrape_hash is None :
-            self.__scrape_hash = scrapeHash(self.hash())
-        return self.__scrape_hash
+        if self._scrape_hash is None :
+            self._scrape_hash = scrapeHash(self.hash())
+        return self._scrape_hash
 
     ###
 
     def magnet(self, extra_list) :
-        return makeMagnet(self.__bencode_dict, extra_list)
+        return makeMagnet(self._bencode_dict, extra_list)
 
     ###
 
     def isSingleFile(self) :
-        return isSingleFile(self.__bencode_dict)
+        return isSingleFile(self._bencode_dict)
 
     def files(self, prefix = "") :
-        base = os.path.join(prefix, self.__bencode_dict["info"]["name"])
+        base = os.path.join(prefix, self._bencode_dict["info"]["name"])
         if self.isSingleFile() :
-            return { base : self.__fileAttrs(self.__bencode_dict["info"]) }
+            return { base : self._fileAttrs(self._bencode_dict["info"]) }
         else :
             files_dict = { base : None }
-            for f_dict in self.__bencode_dict["info"]["files"] :
+            for f_dict in self._bencode_dict["info"]["files"] :
                 name = None
                 for index in range(len(f_dict["path"])) :
                     name = os.path.join(base, os.path.sep.join(f_dict["path"][0:index + 1]))
                     files_dict[name] = None
                 assert not name is None
-                files_dict[name] = self.__fileAttrs(f_dict)
+                files_dict[name] = self._fileAttrs(f_dict)
             return files_dict
 
     def size(self) :
-        return torrentSize(self.__bencode_dict)
+        return torrentSize(self._bencode_dict)
 
 
     ### Private ###
 
-    def __initData(self, data) :
-        self.__bencode_dict = decodeData(data)
-        self.__hash = None
-        self.__scrape_hash = None
+    def _initData(self, data) :
+        self._bencode_dict = decodeData(data)
+        self._hash = None
+        self._scrape_hash = None
 
-    def __fileAttrs(self, file_dict) :
+    def _fileAttrs(self, file_dict) :
         return { "size" : file_dict["length"] }
 

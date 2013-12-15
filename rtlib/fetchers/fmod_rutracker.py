@@ -43,16 +43,16 @@ RUTRACKER_FINGERPRINT = b"<link rel=\"shortcut icon\" href=\"http://static.rutra
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
     def __init__(self, *args_tuple, **kwargs_dict) :
-        self.__comment_regexp = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
+        self._comment_regexp = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
 
-        self.__cap_static_regexp = re.compile(r"\"(http://static\.rutracker\.org/captcha/[^\"]+)\"")
-        self.__cap_sid_regexp = re.compile(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"")
-        self.__cap_code_regexp = re.compile(r"name=\"(cap_code_[a-zA-Z0-9]+)\"")
+        self._cap_static_regexp = re.compile(r"\"(http://static\.rutracker\.org/captcha/[^\"]+)\"")
+        self._cap_sid_regexp = re.compile(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"")
+        self._cap_code_regexp = re.compile(r"name=\"(cap_code_[a-zA-Z0-9]+)\"")
 
-        self.__hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
+        self._hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
 
-        self.__cookie_jar = None
-        self.__opener = None
+        self._cookie_jar = None
+        self._opener = None
 
         fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
@@ -70,33 +70,33 @@ class Fetcher(fetcherlib.AbstractFetcher) :
     ###
 
     def match(self, torrent) :
-        return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
+        return ( not self._comment_regexp.match(torrent.comment() or "") is None )
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-        data = self.__readUrlRetry(RUTRACKER_URL, opener=opener)
+        data = self._readUrlRetry(RUTRACKER_URL, opener=opener)
         self.assertSite(RUTRACKER_FINGERPRINT in data)
 
     def login(self) :
         self.assertNonAnonymous()
-        self.__cookie_jar = http.cookiejar.CookieJar()
-        self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.proxyUrl())
+        self._cookie_jar = http.cookiejar.CookieJar()
+        self._opener = fetcherlib.buildTypicalOpener(self._cookie_jar, self.proxyUrl())
         try :
-            self.__tryLogin()
+            self._tryLogin()
         except :
-            self.__cookie_jar = None
-            self.__opener = None
+            self._cookie_jar = None
+            self._opener = None
             raise
 
     def loggedIn(self) :
-        return ( not self.__opener is None )
+        return ( not self._opener is None )
 
     def torrentChanged(self, torrent) :
         self.assertMatch(torrent)
-        return ( torrent.hash() != self.__fetchHash(torrent) )
+        return ( torrent.hash() != self._fetchHash(torrent) )
 
     def fetchTorrent(self, torrent) :
-        comment_match = self.__comment_regexp.match(torrent.comment() or "")
+        comment_match = self._comment_regexp.match(torrent.comment() or "")
         self.assertFetcher(not comment_match is None, "No comment match")
         topic_id = comment_match.group(1)
 
@@ -119,9 +119,9 @@ class Fetcher(fetcherlib.AbstractFetcher) :
             rest={ "HttpOnly" : None },
             rfc2109=False,
         )
-        self.__cookie_jar.set_cookie(cookie)
+        self._cookie_jar.set_cookie(cookie)
 
-        data = self.__readUrlRetry(RUTRACKER_DL_URL+("?t=%s" % (topic_id)), b"", {
+        data = self._readUrlRetry(RUTRACKER_DL_URL+("?t=%s" % (topic_id)), b"", {
                 "Referer"    : RUTRACKER_VIEWTOPIC_URL+("?t=%s" % (topic_id)),
                 "Origin"     : "http://%s" % (RUTRACKER_DOMAIN),
             })
@@ -131,38 +131,38 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     ### Private ###
 
-    def __tryLogin(self) :
+    def _tryLogin(self) :
         post_dict = {
             "login_username" : self.userName(),#.decode("utf-8").encode("cp1251"),
             "login_password" : self.passwd(),#.decode("utf-8").encode("cp1251"),
             "login"          : "\xc2\xf5\xee\xe4",
         }
         post_data = urllib.parse.urlencode(post_dict).encode(RUTRACKER_ENCODING)
-        data = self.__readUrlRetry(RUTRACKER_LOGIN_URL, post_data).decode(RUTRACKER_ENCODING)
+        data = self._readUrlRetry(RUTRACKER_LOGIN_URL, post_data).decode(RUTRACKER_ENCODING)
 
-        cap_static_match = self.__cap_static_regexp.search(data)
+        cap_static_match = self._cap_static_regexp.search(data)
         if not cap_static_match is None :
             self.assertLogin(self.isInteractive(), "Required captcha")
 
-            cap_sid_match = self.__cap_sid_regexp.search(data)
-            cap_code_match = self.__cap_code_regexp.search(data)
+            cap_sid_match = self._cap_sid_regexp.search(data)
+            cap_code_match = self._cap_code_regexp.search(data)
             self.assertLogin(not cap_sid_match is None, "Unknown cap_sid")
             self.assertLogin(not cap_code_match is None, "Unknown cap_code")
 
             post_dict[cap_code_match.group(1)] = self.decodeCaptcha(cap_static_match.group(1))
             post_dict["cap_sid"] = cap_sid_match.group(1)
             post_data = urllib.parse.urlencode(post_dict).encode(RUTRACKER_ENCODING)
-            data = self.__readUrlRetry(RUTRACKER_LOGIN_URL, post_data).decode(RUTRACKER_ENCODING)
-            self.assertLogin(self.__cap_static_regexp.search(data) is None, "Invalid captcha or password")
+            data = self._readUrlRetry(RUTRACKER_LOGIN_URL, post_data).decode(RUTRACKER_ENCODING)
+            self.assertLogin(self._cap_static_regexp.search(data) is None, "Invalid captcha or password")
 
-    def __fetchHash(self, torrent) :
-        data = self.__readUrlRetry(torrent.comment()).decode(RUTRACKER_ENCODING)
-        hash_match = self.__hash_regexp.search(data)
+    def _fetchHash(self, torrent) :
+        data = self._readUrlRetry(torrent.comment()).decode(RUTRACKER_ENCODING)
+        hash_match = self._hash_regexp.search(data)
         self.assertFetcher(not hash_match is None, "Hash not found")
         return hash_match.group(1).lower()
 
-    def __readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
-        opener = ( opener or self.__opener )
+    def _readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
+        opener = ( opener or self._opener )
         assert not opener is None
 
         headers_dict = ( headers_dict or {} )

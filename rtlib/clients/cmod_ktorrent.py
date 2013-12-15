@@ -40,11 +40,11 @@ class Client(clientlib.AbstractClient) :
         if not url is None :
             raise RuntimeError("The argument \"url\" is not used by this module")
 
-        self.__bus = dbus.SessionBus()
-        self.__core = self.__bus.get_object("org.ktorrent.ktorrent", "/core")
-        self.__settings = self.__bus.get_object("org.ktorrent.ktorrent", "/settings")
+        self._bus = dbus.SessionBus()
+        self._core = self._bus.get_object("org.ktorrent.ktorrent", "/core")
+        self._settings = self._bus.get_object("org.ktorrent.ktorrent", "/settings")
 
-        if self.__settings.useSaveDir() :
+        if self._settings.useSaveDir() :
             raise RuntimeError("Turn off the path by default in the settings of KTorrent")
 
         clientlib.AbstractClient.__init__(self, url)
@@ -60,25 +60,25 @@ class Client(clientlib.AbstractClient) :
 
     @clientlib.hashOrTorrent
     def removeTorrent(self, torrent_hash) :
-        self.__getTorrent(torrent_hash) # XXX: raise clientlib.NoSuchTorrentError for non-existent torrent
-        self.__core.remove(torrent_hash, False)
+        self._getTorrent(torrent_hash) # XXX: raise clientlib.NoSuchTorrentError for non-existent torrent
+        self._core.remove(torrent_hash, False)
 
     @clientlib.loadTorrentAccessible
     def loadTorrent(self, torrent, prefix = None) :
         if not prefix is None :
-            self.__settings.setLastSaveDir(prefix)
-        self.__core.loadSilently(torrent.path(), "")
+            self._settings.setLastSaveDir(prefix)
+        self._core.loadSilently(torrent.path(), "")
 
     @clientlib.hashOrTorrent
     def hasTorrent(self, torrent_hash) :
         try :
-            self.__getTorrent(torrent_hash)
+            self._getTorrent(torrent_hash)
             return True
         except clientlib.NoSuchTorrentError :
             return False
 
     def hashes(self) :
-        return list(map(str.lower, self.__core.torrents(utf8_strings=True)))
+        return list(map(str.lower, self._core.torrents(utf8_strings=True)))
 
     @clientlib.hashOrTorrent
     def torrentPath(self, torrent_hash) :
@@ -86,7 +86,7 @@ class Client(clientlib.AbstractClient) :
 
     @clientlib.hashOrTorrent
     def dataPrefix(self, torrent_hash) :
-        return str(self.__getTorrent(torrent_hash).dataDir(utf8_strings=True))
+        return str(self._getTorrent(torrent_hash).dataDir(utf8_strings=True))
 
     def defaultDataPrefix(self) :
         raise RuntimeError("KTorrent can not return the default data path")
@@ -95,19 +95,19 @@ class Client(clientlib.AbstractClient) :
 
     @clientlib.hashOrTorrent
     def fullPath(self, torrent_hash) :
-        return str(self.__getTorrent(torrent_hash).pathOnDisk(utf8_strings=True))
+        return str(self._getTorrent(torrent_hash).pathOnDisk(utf8_strings=True))
 
     @clientlib.hashOrTorrent
     def name(self, torrent_hash) :
-        return str(self.__getTorrent(torrent_hash).name(utf8_strings=True))
+        return str(self._getTorrent(torrent_hash).name(utf8_strings=True))
 
     @clientlib.hashOrTorrent
     def isSingleFile(self, torrent_hash) :
-        return ( self.__getTorrent(torrent_hash).numFiles() == 0 )
+        return ( self._getTorrent(torrent_hash).numFiles() == 0 )
 
     @clientlib.hashOrTorrent
     def files(self, torrent_hash, system_path_flag = False) :
-        torrent_obj = self.__getTorrent(torrent_hash)
+        torrent_obj = self._getTorrent(torrent_hash)
         prefix = ( str(torrent_obj.pathOnDisk(utf8_strings=True)) if system_path_flag else "" )
         count = torrent_obj.numFiles()
         name = str(torrent_obj.name(utf8_strings=True))
@@ -123,11 +123,11 @@ class Client(clientlib.AbstractClient) :
 
     ### Private ###
 
-    def __getTorrent(self, torrent_hash) :
+    def _getTorrent(self, torrent_hash) :
         if not torrent_hash in self.hashes() :
             raise clientlib.NoSuchTorrentError("Unknown torrent hash")
         try :
-            torrent_obj = self.__bus.get_object("org.ktorrent.ktorrent", "/torrent/" + torrent_hash)
+            torrent_obj = self._bus.get_object("org.ktorrent.ktorrent", "/torrent/" + torrent_hash)
             assert str(torrent_obj.infoHash()) == torrent_hash
             return torrent_obj
         except dbus.exceptions.DBusException as err :

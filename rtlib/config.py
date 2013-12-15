@@ -30,23 +30,23 @@ SECTION_RTLOAD = "rtload"
 
 
 ###
-def __validMaybeEmptyPath(path) :
+def _validMaybeEmptyPath(path) :
     return validMaybeEmpty(path, validAccessiblePath)
 
-def __validFetchers(fetchers_list) :
+def _validFetchers(fetchers_list) :
     return [
         validRange(item, list(fetchers.FETCHERS_MAP.keys()))
         for item in filter(None, map(str.strip, validStringList(fetchers_list)))
     ]
 
-def __validMaybeEmptyMode(mode) :
+def _validMaybeEmptyMode(mode) :
     valid_mode = ( lambda arg : validNumber(( arg if isinstance(arg, int) else int(str(arg), 8) ), 0) )
     return validMaybeEmpty(mode, valid_mode)
 
-def __validSaveCustoms(keys_list) :
+def _validSaveCustoms(keys_list) :
     return list(filter(None, map(str.strip, validStringList(keys_list))))
 
-def __validSetCustoms(pairs_list) :
+def _validSetCustoms(pairs_list) :
     if isinstance(pairs_list, dict) :
         return pairs_list
     customs_dict = {}
@@ -55,28 +55,28 @@ def __validSetCustoms(pairs_list) :
         customs_dict[notEmptyStrip(key, "custom key")] = value
     return customs_dict
 
-def __makeValidMaybeEmptyRange(valid_list) :
+def _makeValidMaybeEmptyRange(valid_list) :
     valid_range = ( lambda arg : validRange(arg, valid_list) )
     return ( lambda arg : validMaybeEmpty(arg, valid_range) )
 
-def __makeValidNumber(*args_tuple) :
+def _makeValidNumber(*args_tuple) :
     return ( lambda arg : validNumber(arg, *args_tuple) )
 
 
 ###
-OPTION_MKDIR_MODE        = ("mkdir-mode",        "mkdir_mode",             None,                                __validMaybeEmptyMode)
-OPTION_DATA_DIR          = ("data-dir",          "data_dir_path",          None,                                __validMaybeEmptyPath)
+OPTION_MKDIR_MODE        = ("mkdir-mode",        "mkdir_mode",             None,                                _validMaybeEmptyMode)
+OPTION_DATA_DIR          = ("data-dir",          "data_dir_path",          None,                                _validMaybeEmptyPath)
 OPTION_SOURCE_DIR        = ("source-dir",        "src_dir_path",           ".",                                 validAccessiblePath)
-OPTION_BACKUP_DIR        = ("backup-dir",        "backup_dir_path",        None,                                __validMaybeEmptyPath)
+OPTION_BACKUP_DIR        = ("backup-dir",        "backup_dir_path",        None,                                _validMaybeEmptyPath)
 OPTION_BACKUP_SUFFIX     = ("backup-suffix",     "backup_suffix",          ".%Y.%m.%d-%H:%M:%S.bak",            str)
 OPTION_NAMES_FILTER      = ("names-filter",      "names_filter",           None,                                validEmpty)
-OPTION_ONLY_FETCHERS     = ("only-fetchers",     "only_fetchers_list",     list(fetchers.FETCHERS_MAP.keys()),  __validFetchers)
-OPTION_EXCLUDE_FETCHERS  = ("exclude-fetchers",  "exclude_fetchers_list",  (),                                  __validFetchers)
-OPTION_TIMEOUT           = ("timeout",           "timeout",                DEFAULT_TIMEOUT,                     __makeValidNumber(0))
+OPTION_ONLY_FETCHERS     = ("only-fetchers",     "only_fetchers_list",     list(fetchers.FETCHERS_MAP.keys()),  _validFetchers)
+OPTION_EXCLUDE_FETCHERS  = ("exclude-fetchers",  "exclude_fetchers_list",  (),                                  _validFetchers)
+OPTION_TIMEOUT           = ("timeout",           "timeout",                DEFAULT_TIMEOUT,                     _makeValidNumber(0))
 OPTION_LOGIN             = ("login",             None,                     fetcherlib.DEFAULT_LOGIN,            str)
 OPTION_PASSWD            = ("passwd",            None,                     fetcherlib.DEFAULT_PASSWD,           str)
-OPTION_URL_RETRIES       = ("url-retries",       "url_retries",            fetcherlib.DEFAULT_URL_RETRIES,      __makeValidNumber(0))
-OPTION_URL_SLEEP_TIME    = ("url-sleep-time",    "url_sleep_time",         fetcherlib.DEFAULT_URL_SLEEP_TIME,   __makeValidNumber(0))
+OPTION_URL_RETRIES       = ("url-retries",       "url_retries",            fetcherlib.DEFAULT_URL_RETRIES,      _makeValidNumber(0))
+OPTION_URL_SLEEP_TIME    = ("url-sleep-time",    "url_sleep_time",         fetcherlib.DEFAULT_URL_SLEEP_TIME,   _makeValidNumber(0))
 OPTION_USER_AGENT        = ("user-agent",        "user_agent",             fetcherlib.DEFAULT_USER_AGENT,       validEmpty)
 OPTION_CLIENT_AGENT      = ("client-agent",      "client_agent",           fetcherlib.DEFAULT_CLIENT_AGENT,     validEmpty)
 OPTION_PROXY_URL         = ("proxy-url",         "proxy_url",              fetcherlib.DEFAULT_PROXY_URL,        validEmpty)
@@ -87,10 +87,10 @@ OPTION_SHOW_PASSED       = ("show-passed",       "show_passed_flag",       False
 OPTION_SHOW_DIFF         = ("show-diff",         "show_diff_flag",         False,                               validBool)
 OPTION_CHECK_VERSIONS    = ("check-versions",    "check_versions_flag",    False,                               validBool)
 OPTION_REAL_UPDATE       = ("real-update",       "real_update_flag",       False,                               validBool)
-OPTION_CLIENT            = ("client",            "client_name",            None,                                __makeValidMaybeEmptyRange(list(clients.CLIENTS_MAP.keys())))
+OPTION_CLIENT            = ("client",            "client_name",            None,                                _makeValidMaybeEmptyRange(list(clients.CLIENTS_MAP.keys())))
 OPTION_CLIENT_URL        = ("client-url",        "client_url",             None,                                validEmpty)
-OPTION_SAVE_CUSTOMS      = ("save-customs",      "save_customs_list",      (),                                  __validSaveCustoms)
-OPTION_SET_CUSTOMS       = ("set-customs",       "set_customs_dict",       {},                                  __validSetCustoms)
+OPTION_SAVE_CUSTOMS      = ("save-customs",      "save_customs_list",      (),                                  _validSaveCustoms)
+OPTION_SET_CUSTOMS       = ("set-customs",       "set_customs_dict",       {},                                  _validSetCustoms)
 OPTION_NO_COLORS         = ("no-colors",         "no_colors_flag",         False,                               validBool)
 OPTION_FORCE_COLORS      = ("force-colors",      "force_colors_flag",      False,                               validBool)
 

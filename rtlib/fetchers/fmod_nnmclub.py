@@ -45,11 +45,11 @@ REPLACE_DOMAINS = ("nnm-club.ru", "nnm-club.me")
 ##### Public classes #####
 class Fetcher(fetcherlib.AbstractFetcher) :
     def __init__(self, *args_tuple, **kwargs_dict) :
-        self.__comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
-        self.__torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
+        self._comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
+        self._torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
 
-        self.__cookie_jar = None
-        self.__opener = None
+        self._cookie_jar = None
+        self._opener = None
 
         fetcherlib.AbstractFetcher.__init__(self, *args_tuple, **kwargs_dict)
 
@@ -67,50 +67,50 @@ class Fetcher(fetcherlib.AbstractFetcher) :
     ###
 
     def match(self, torrent) :
-        return ( not self.__comment_regexp.match(torrent.comment() or "") is None )
+        return ( not self._comment_regexp.match(torrent.comment() or "") is None )
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
-        data = self.__readUrlRetry(NNMCLUB_URL, opener=opener)
+        data = self._readUrlRetry(NNMCLUB_URL, opener=opener)
         self.assertSite(NNMCLUB_FINGERPRINT in data)
 
     def login(self) :
         self.assertNonAnonymous()
-        self.__cookie_jar = http.cookiejar.CookieJar()
-        self.__opener = fetcherlib.buildTypicalOpener(self.__cookie_jar, self.proxyUrl())
+        self._cookie_jar = http.cookiejar.CookieJar()
+        self._opener = fetcherlib.buildTypicalOpener(self._cookie_jar, self.proxyUrl())
         try :
-            self.__tryLogin()
+            self._tryLogin()
         except :
-            self.__cookie_jar = None
-            self.__opener = None
+            self._cookie_jar = None
+            self._opener = None
             raise
 
     def loggedIn(self) :
-        return ( not self.__opener is None )
+        return ( not self._opener is None )
 
     def torrentChanged(self, torrent) :
         self.assertMatch(torrent)
         client_agent = self.clientAgent()
         headers_dict = ( { "User-Agent" : client_agent } if not client_agent is None else None )
-        data = self.__readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict)
+        data = self._readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict)
         return ( not "files" in tfile.decodeData(data) )
 
     def fetchTorrent(self, torrent) :
         self.assertMatch(torrent)
-        data = self.__readUrlRetry(torrent.comment().replace(*REPLACE_DOMAINS)).decode(NNMCLUB_ENCODING)
+        data = self._readUrlRetry(torrent.comment().replace(*REPLACE_DOMAINS)).decode(NNMCLUB_ENCODING)
 
-        torrent_id_match = self.__torrent_id_regexp.search(data)
+        torrent_id_match = self._torrent_id_regexp.search(data)
         self.assertFetcher(not torrent_id_match is None, "Unknown torrent_id")
         torrent_id = torrent_id_match.group(1)
 
-        data = self.__readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
+        data = self._readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
         self.assertValidTorrentData(data)
         return data
 
 
     ### Private ###
 
-    def __tryLogin(self) :
+    def _tryLogin(self) :
         post_dict = {
             "username" : self.userName(),
             "password" : self.passwd(),
@@ -118,11 +118,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
             "login"    : "\xc2\xf5\xee\xe4",
         }
         post_data = urllib.parse.urlencode(post_dict).encode(NNMCLUB_ENCODING)
-        data = self.__readUrlRetry(NNMCLUB_LOGIN_URL, post_data).decode(NNMCLUB_ENCODING)
+        data = self._readUrlRetry(NNMCLUB_LOGIN_URL, post_data).decode(NNMCLUB_ENCODING)
         self.assertLogin("[ %s ]" % (self.userName()) in data, "Invalid login")
 
-    def __readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
-        opener = ( opener or self.__opener )
+    def _readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
+        opener = ( opener or self._opener )
         assert not opener is None
 
         headers_dict = ( headers_dict or {} )

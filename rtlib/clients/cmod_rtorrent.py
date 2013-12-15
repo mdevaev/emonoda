@@ -57,8 +57,8 @@ class Client(clientlib.AbstractClient) :
     def __init__(self, url = DEFAULT_URL) :
         if url is None :
             url = DEFAULT_URL
-        self.__server = xmlrpc.client.ServerProxy(url)
-        self.__server.set_xmlrpc_size_limit(XMLRPC_SIZE_LIMIT)
+        self._server = xmlrpc.client.ServerProxy(url)
+        self._server.set_xmlrpc_size_limit(XMLRPC_SIZE_LIMIT)
         clientlib.AbstractClient.__init__(self, url)
 
 
@@ -73,7 +73,7 @@ class Client(clientlib.AbstractClient) :
     @clientlib.hashOrTorrent
     @_catchUnknownTorrentFault
     def removeTorrent(self, torrent_hash) :
-        self.__server.d.erase(torrent_hash)
+        self._server.d.erase(torrent_hash)
 
     @clientlib.loadTorrentAccessible
     def loadTorrent(self, torrent, prefix = None) :
@@ -82,11 +82,11 @@ class Client(clientlib.AbstractClient) :
 
         # XXX: https://github.com/rakshasa/rtorrent/issues/22
         # All load_* calls re asynchronous, so we need to wait until the load of torrent files is complete.
-        self.__server.load(torrent_path)
+        self._server.load(torrent_path)
         retries = LOAD_RETRIES
         while True :
             try :
-                assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
+                assert self._server.d.get_hash(torrent_hash).lower() == torrent_hash
                 break
             except xmlrpc.client.Fault as err :
                 if err.faultCode != FAULT_CODE_UNKNOWN_HASH :
@@ -97,13 +97,13 @@ class Client(clientlib.AbstractClient) :
                 time.sleep(LOAD_RETRIES_SLEEP)
 
         if not prefix is None :
-            self.__server.d.set_directory(torrent_hash, prefix)
-        self.__server.d.start(torrent_hash)
+            self._server.d.set_directory(torrent_hash, prefix)
+        self._server.d.start(torrent_hash)
 
     @clientlib.hashOrTorrent
     def hasTorrent(self, torrent_hash) :
         try :
-            assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
+            assert self._server.d.get_hash(torrent_hash).lower() == torrent_hash
             return True
         except xmlrpc.client.Fault as err :
             if err.faultCode != FAULT_CODE_UNKNOWN_HASH :
@@ -111,17 +111,17 @@ class Client(clientlib.AbstractClient) :
         return False
 
     def hashes(self) :
-        return list(map(str.lower, self.__server.download_list()))
+        return list(map(str.lower, self._server.download_list()))
 
     @clientlib.hashOrTorrent
     @_catchUnknownTorrentFault
     def torrentPath(self, torrent_hash) :
-        return self.__server.d.get_loaded_file(torrent_hash)
+        return self._server.d.get_loaded_file(torrent_hash)
 
     @clientlib.hashOrTorrent
     @_catchUnknownTorrentFault
     def dataPrefix(self, torrent_hash) :
-        multicall = xmlrpc.client.MultiCall(self.__server)
+        multicall = xmlrpc.client.MultiCall(self._server)
         multicall.d.get_directory(torrent_hash)
         multicall.d.is_multi_file(torrent_hash)
         (path, is_multi_file) = multicall()
@@ -130,7 +130,7 @@ class Client(clientlib.AbstractClient) :
         return path
 
     def defaultDataPrefix(self) :
-        return self.__server.get_directory()
+        return self._server.get_directory()
 
     ###
 
@@ -142,7 +142,7 @@ class Client(clientlib.AbstractClient) :
     @_catchUnknownTorrentFault
     def setCustoms(self, torrent_hash, customs_dict) :
         assert len(customs_dict) != 0, "Empty customs list"
-        multicall = xmlrpc.client.MultiCall(self.__server)
+        multicall = xmlrpc.client.MultiCall(self._server)
         for (key, value) in customs_dict.items() :
             getattr(multicall.d, "set_custom" + key)(torrent_hash, value)
         multicall()
@@ -152,7 +152,7 @@ class Client(clientlib.AbstractClient) :
     def customs(self, torrent_hash, keys_list) :
         assert len(keys_list) != 0, "Empty customs list"
         keys_list = list(set(keys_list))
-        multicall = xmlrpc.client.MultiCall(self.__server)
+        multicall = xmlrpc.client.MultiCall(self._server)
         for key in keys_list :
             getattr(multicall.d, "get_custom" + key)(torrent_hash)
         results_list = list(multicall())
@@ -163,22 +163,22 @@ class Client(clientlib.AbstractClient) :
     @clientlib.hashOrTorrent
     @_catchUnknownTorrentFault
     def fullPath(self, torrent_hash) :
-        return self.__server.d.get_base_path(torrent_hash)
+        return self._server.d.get_base_path(torrent_hash)
 
     @clientlib.hashOrTorrent
     @_catchUnknownTorrentFault
     def name(self, torrent_hash) :
-        return self.__server.d.get_name(torrent_hash)
+        return self._server.d.get_name(torrent_hash)
 
     @clientlib.hashOrTorrent
     @_catchUnknownTorrentFault
     def isSingleFile(self, torrent_hash) :
-        return not self.__server.d.is_multi_file(torrent_hash)
+        return not self._server.d.is_multi_file(torrent_hash)
 
     @clientlib.hashOrTorrent
     @_catchUnknownTorrentFault
     def files(self, torrent_hash, system_path_flag = False) :
-        multicall = xmlrpc.client.MultiCall(self.__server)
+        multicall = xmlrpc.client.MultiCall(self._server)
         multicall.d.get_base_path(torrent_hash)
         multicall.d.get_base_filename(torrent_hash)
         multicall.d.is_multi_file(torrent_hash)
@@ -190,7 +190,7 @@ class Client(clientlib.AbstractClient) :
         if not is_multi_file :
             return { base : { "size" : first_file_size } }
 
-        multicall = xmlrpc.client.MultiCall(self.__server)
+        multicall = xmlrpc.client.MultiCall(self._server)
         for index in range(count) :
             multicall.f.get_path(torrent_hash, index)
             multicall.f.get_size_bytes(torrent_hash, index)
