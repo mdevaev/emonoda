@@ -37,7 +37,7 @@ class Client(clientlib.AbstractClient) :
     def __init__(self, url = None) :
         if dbus is None :
             raise RuntimeError("Required module dbus")
-        if not url is None :
+        if url is not None :
             raise RuntimeError("The argument \"url\" is not used by this module")
 
         self._bus = dbus.SessionBus()
@@ -65,7 +65,7 @@ class Client(clientlib.AbstractClient) :
 
     @clientlib.loadTorrentAccessible
     def loadTorrent(self, torrent, prefix = None) :
-        if not prefix is None :
+        if prefix is not None :
             self._settings.setLastSaveDir(prefix)
         self._core.loadSilently(torrent.path(), "")
 
@@ -124,7 +124,7 @@ class Client(clientlib.AbstractClient) :
     ### Private ###
 
     def _getTorrent(self, torrent_hash) :
-        if not torrent_hash in self.hashes() :
+        if torrent_hash not in self.hashes() :
             raise clientlib.NoSuchTorrentError("Unknown torrent hash")
         try :
             torrent_obj = self._bus.get_object("org.ktorrent.ktorrent", "/torrent/" + torrent_hash)

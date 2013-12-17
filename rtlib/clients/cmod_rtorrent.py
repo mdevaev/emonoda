@@ -96,7 +96,7 @@ class Client(clientlib.AbstractClient) :
                 retries -= 1
                 time.sleep(LOAD_RETRIES_SLEEP)
 
-        if not prefix is None :
+        if prefix is not None :
             self._server.d.set_directory(torrent_hash, prefix)
         self._server.d.start(torrent_hash)
 

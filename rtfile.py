@@ -60,7 +60,7 @@ def formatCreationDate(torrent) :
     return ( torrent.creationDate() or "" )
 
 def formatCreationDatePretty(torrent) :
-    return str( datetime.datetime.utcfromtimestamp(torrent.creationDate()) if not torrent.creationDate() is None else "" )
+    return str( datetime.datetime.utcfromtimestamp(torrent.creationDate()) if torrent.creationDate() is not None else "" )
 
 def formatCreatedBy(torrent) :
     return ( torrent.createdBy() or "" )
@@ -78,14 +78,14 @@ def formatComment(torrent) :
     return ( torrent.comment() or "" )
 
 def formatClientPath(torrent, client) :
-    assert not client is None, "Required client"
+    assert client is not None, "Required client"
     try :
         return client.fullPath(torrent)
     except clientlib.NoSuchTorrentError :
         return ""
 
 def formatClientPrefix(torrent, client) :
-    assert not client is None, "Required client"
+    assert client is not None, "Required client"
     try :
         return client.dataPrefix(torrent)
     except clientlib.NoSuchTorrentError :
@@ -105,7 +105,7 @@ def printPrettyMeta(torrent, client) :
     print("Created by:   ", formatCreatedBy(torrent))
     print("Private:      ", formatIsPrivatePretty(torrent))
     print("Comment:      ", formatComment(torrent))
-    if not client is None :
+    if client is not None :
         print("Client path:  ", formatClientPath(torrent, client))
     if torrent.isSingleFile() :
         print("Provides:     ", tuple(torrent.files())[0])
@@ -156,7 +156,7 @@ def main() :
     torrents_list = [ tfile.Torrent(item) for item in options.torrents_list ]
 
     client = None
-    if not options.client_name is None :
+    if options.client_name is not None :
         client_class = clients.CLIENTS_MAP[options.client_name]
         client = client_class(options.client_url)
 

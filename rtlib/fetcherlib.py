@@ -72,9 +72,9 @@ def selectFetcher(torrent, fetchers_list) :
 ###
 def buildTypicalOpener(cookie_jar = None, proxy_url = None) :
     handlers_list = []
-    if not cookie_jar is None :
+    if cookie_jar is not None :
         handlers_list.append(urllib.request.HTTPCookieProcessor(cookie_jar))
-    if not proxy_url is None :
+    if proxy_url is not None :
         scheme = ( urllib.parse.urlparse(proxy_url).scheme or "" ).lower()
         if scheme == "http" :
             handlers_list.append(urllib.request.ProxyHandler({
@@ -110,7 +110,7 @@ def readUrlRetry(
                 if not retry_timeout_flag :
                     raise
             elif isinstance(err, urllib.error.HTTPError) :
-                if not err.code in retry_codes_list :
+                if err.code not in retry_codes_list :
                     raise
             retries -= 1
             time.sleep(sleep_time)
@@ -123,7 +123,7 @@ def checkVersions(fetchers_list) :
     for fetcher in fetchers_list :
         plugin_name = fetcher.plugin()
         local_version = fetcher.version()
-        if not plugin_name in versions_dict :
+        if plugin_name not in versions_dict :
             continue
         upstream_version = versions_dict[plugin_name]["version"]
         if local_version < upstream_version :

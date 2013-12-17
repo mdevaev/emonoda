@@ -60,7 +60,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
     ###
 
     def match(self, torrent) :
-        return ( not self._comment_regexp.match(torrent.comment() or "") is None )
+        return ( self._comment_regexp.match(torrent.comment() or "") is not None )
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
@@ -71,7 +71,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
         self._opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
 
     def loggedIn(self) :
-        return ( not self._opener is None )
+        return ( self._opener is not None )
 
     def torrentChanged(self, torrent) :
         self.assertMatch(torrent)
@@ -79,7 +79,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def fetchTorrent(self, torrent) :
         comment_match = self._comment_regexp.match(torrent.comment() or "")
-        self.assertFetcher(not comment_match is None, "No comment match")
+        self.assertFetcher(comment_match is not None, "No comment match")
         topic_id = comment_match.group(1)
         data = self._readUrlRetry("%s/%s" % (RUTOR_DL_URL, topic_id))
         self.assertValidTorrentData(data)
@@ -91,15 +91,15 @@ class Fetcher(fetcherlib.AbstractFetcher) :
     def _fetchHash(self, torrent) :
         data = self._readUrlRetry(torrent.comment()).decode(RUTOR_ENCODING)
         hash_match = self._hash_regexp.search(data)
-        self.assertFetcher(not hash_match is None, "Hash not found")
+        self.assertFetcher(hash_match is not None, "Hash not found")
         return hash_match.group(1).lower()
 
     def _readUrlRetry(self, url, opener = None) :
         opener = ( opener or self._opener )
-        assert not opener is None
+        assert opener is not None
 
         user_agent = self.userAgent()
-        headers_dict = ( { "User-Agent" : user_agent } if not user_agent is None else None )
+        headers_dict = ( { "User-Agent" : user_agent } if user_agent is not None else None )
 
         return fetcherlib.readUrlRetry(opener, url,
             headers_dict=headers_dict,

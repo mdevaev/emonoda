@@ -123,7 +123,7 @@ def printDiff(diff_tuple, prefix = "", use_colors_flag = True, force_colors_flag
 
 ###
 def isSingleFile(bencode_dict) :
-    return ( not "files" in bencode_dict["info"] )
+    return ( "files" not in bencode_dict["info"] )
 
 def torrentSize(bencode_dict) :
     if isSingleFile(bencode_dict) :
@@ -176,7 +176,7 @@ class Torrent(object) :
         self._hash = None
         self._scrape_hash = None
 
-        if not torrent_file_path is None :
+        if torrent_file_path is not None :
             self.loadFile(torrent_file_path)
 
 
@@ -256,7 +256,7 @@ class Torrent(object) :
                 for index in range(len(f_dict["path"])) :
                     name = os.path.join(base, os.path.sep.join(f_dict["path"][0:index + 1]))
                     files_dict[name] = None
-                assert not name is None
+                assert name is not None
                 files_dict[name] = self._fileAttrs(f_dict)
             return files_dict
 

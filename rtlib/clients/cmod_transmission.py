@@ -68,7 +68,7 @@ class Client(clientlib.AbstractClient) :
     def loadTorrent(self, torrent, prefix = None) :
         torrent_path = torrent.path()
         kwargs_dict = { "paused" : False }
-        if not prefix is None :
+        if prefix is not None :
             kwargs_dict["download_dir"] = prefix
         self._server.add_torrent(torrent_path, **kwargs_dict)
 
@@ -93,7 +93,7 @@ class Client(clientlib.AbstractClient) :
 
     def defaultDataPrefix(self) :
         session = self._server.get_session()
-        assert not session is None
+        assert session is not None
         return session.download_dir
 
     ###
@@ -112,7 +112,7 @@ class Client(clientlib.AbstractClient) :
         files_dict = self._getFiles(torrent_hash)
         if len(files_dict) > 1 :
             return False
-        return ( not os.path.sep in list(files_dict.values())[0]["name"] )
+        return ( os.path.sep not in list(files_dict.values())[0]["name"] )
 
     @clientlib.hashOrTorrent
     def files(self, torrent_hash, system_path_flag = False) :

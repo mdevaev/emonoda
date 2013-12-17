@@ -69,7 +69,7 @@ def loadTorrent(client, src_dir_path, torrents_list, data_dir_path, link_to_path
         base_dir_path = os.path.join(data_dir_path, base_dir_name[0], base_dir_name)
         makeDirsTree(base_dir_path, mkdir_mode)
 
-        if not link_to_path is None :
+        if link_to_path is not None :
             linkData(torrent, base_dir_path, link_to_path, mkdir_mode)
 
         client.loadTorrent(torrent, base_dir_path)
@@ -93,7 +93,7 @@ def main() :
     parser.addRawArgument("torrents_list", type=str, nargs="+")
     options = parser.sync((config.SECTION_MAIN, config.SECTION_RTLOAD))[0]
 
-    if len(options.torrents_list) > 1 and not options.link_to_path is None :
+    if len(options.torrents_list) > 1 and options.link_to_path is not None :
         print("Option -l/--link-to be used with only one torrent", file=sys.stderr)
         sys.exit(1)
     if options.client_name is None :

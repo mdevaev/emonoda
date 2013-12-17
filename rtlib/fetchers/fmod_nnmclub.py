@@ -67,7 +67,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
     ###
 
     def match(self, torrent) :
-        return ( not self._comment_regexp.match(torrent.comment() or "") is None )
+        return ( self._comment_regexp.match(torrent.comment() or "") is not None )
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
@@ -86,21 +86,21 @@ class Fetcher(fetcherlib.AbstractFetcher) :
             raise
 
     def loggedIn(self) :
-        return ( not self._opener is None )
+        return ( self._opener is not None )
 
     def torrentChanged(self, torrent) :
         self.assertMatch(torrent)
         client_agent = self.clientAgent()
-        headers_dict = ( { "User-Agent" : client_agent } if not client_agent is None else None )
+        headers_dict = ( { "User-Agent" : client_agent } if client_agent is not None else None )
         data = self._readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict)
-        return ( not "files" in tfile.decodeData(data) )
+        return ( "files" not in tfile.decodeData(data) )
 
     def fetchTorrent(self, torrent) :
         self.assertMatch(torrent)
         data = self._readUrlRetry(torrent.comment().replace(*REPLACE_DOMAINS)).decode(NNMCLUB_ENCODING)
 
         torrent_id_match = self._torrent_id_regexp.search(data)
-        self.assertFetcher(not torrent_id_match is None, "Unknown torrent_id")
+        self.assertFetcher(torrent_id_match is not None, "Unknown torrent_id")
         torrent_id = torrent_id_match.group(1)
 
         data = self._readUrlRetry(NNMCLUB_DL_URL+("?id=%s" % (torrent_id)))
@@ -123,11 +123,11 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def _readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
         opener = ( opener or self._opener )
-        assert not opener is None
+        assert opener is not None
 
         headers_dict = ( headers_dict or {} )
         user_agent = self.userAgent()
-        if not user_agent is None :
+        if user_agent is not None :
             headers_dict.setdefault("User-Agent", user_agent)
 
         return fetcherlib.readUrlRetry(opener, url, data,

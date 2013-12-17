@@ -63,7 +63,7 @@ def loadTorrentAccessible(method) :
     def wrap(self, torrent, prefix = None) :
         torrent_path = torrent.path()
         open(torrent_path, "rb").close() # Check accessible file
-        if not prefix is None :
+        if prefix is not None :
             os.listdir(prefix) # Check accessible prefix
         return method(self, torrent, prefix)
     return wrap
@@ -78,7 +78,7 @@ def buildFiles(prefix, files_list) :
         for index in range(len(path_list)) :
             name = os.path.join(prefix, os.path.sep.join(path_list[0:index+1]))
             files_dict[name] = None
-        assert not name is None
+        assert name is not None
         files_dict[name] = { "size" : size }
     return files_dict
 

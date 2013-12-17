@@ -50,12 +50,12 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
     diff_tuple = tfile.diff(torrent, tmp_torrent)
 
     if real_update_flag :
-        if not backup_dir_path is None :
+        if backup_dir_path is not None :
             backup_suffix = datetime.datetime.now().strftime(backup_suffix)
             backup_file_path = os.path.join(backup_dir_path, os.path.basename(torrent.path()) + backup_suffix)
             shutil.copyfile(torrent.path(), backup_file_path)
 
-        if not client is None :
+        if client is not None :
             if len(save_customs_list) != 0 :
                 customs_dict = client.customs(torrent, save_customs_list)
             prefix = client.dataPrefix(torrent)
@@ -65,7 +65,7 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
             torrent_file.write(new_data)
         torrent.loadData(new_data, torrent.path())
 
-        if not client is None :
+        if client is not None :
             client.loadTorrent(torrent, prefix)
             if len(save_customs_list) != 0 :
                 client.setCustoms(torrent, customs_dict)
@@ -74,7 +74,7 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
 
 def torrents(src_dir_path, names_filter) :
     torrents_list = list(tfile.torrents(src_dir_path, abs_flag=True).items())
-    if not names_filter is None :
+    if names_filter is not None :
         torrents_list = [ item for item in torrents_list if names_filter in item[0] ]
     return sorted(torrents_list, key=operator.itemgetter(0))
 
@@ -117,7 +117,7 @@ def update( # pylint: disable=R0913
     error_count = 0
 
     torrents_list = torrents(src_dir_path, names_filter)
-    hashes_list = ( client.hashes() if not client is None else [] )
+    hashes_list = ( client.hashes() if client is not None else [] )
 
     for (count, (torrent_file_name, torrent)) in enumerate(torrents_list) :
         status_line = "[$sign$] %s $fetcher$ %s" % (fmt.formatProgress(count + 1, len(torrents_list)), torrent_file_name)
@@ -133,7 +133,7 @@ def update( # pylint: disable=R0913
 
         status_line += " --- %s" % (torrent.comment() or "")
 
-        if not client is None and not torrent.hash() in hashes_list :
+        if client is not None and torrent.hash() not in hashes_list :
             ui.cli.newLine(format_fail("NOT_IN_CLIENT"))
             not_in_client_count += 1
             continue
@@ -147,7 +147,7 @@ def update( # pylint: disable=R0913
 
         def format_status(color, sign) :
             local_line = status_line.replace("$fetcher$", colored(color, fetcher.plugin()), 1)
-            return local_line.replace("$sign$", ( colored(color, sign) if not color is None else sign ), 1)
+            return local_line.replace("$sign$", ( colored(color, sign) if color is not None else sign ), 1)
 
         try :
             if not fetcher.loggedIn() :
@@ -181,7 +181,7 @@ def update( # pylint: disable=R0913
     ui.cli.newLine(DELIMITER)
 
     print("Invalid:       %d" % (invalid_count))
-    if not client is None :
+    if client is not None :
         print("Not in client: %d" % (not_in_client_count))
     print("Unknown:       %d" % (unknown_count))
     print("Passed:        %d" % (passed_count))
@@ -330,7 +330,7 @@ def main() :
         sys.exit(1)
 
     client = None
-    if not options.client_name is None :
+    if options.client_name is not None :
         client = clientlib.initClient(
             clients.CLIENTS_MAP[options.client_name],
             options.client_url,

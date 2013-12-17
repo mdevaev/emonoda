@@ -46,7 +46,7 @@ def main() :
     socket.setdefaulttimeout(options.timeout)
 
     client = None
-    if not options.client_name is None :
+    if options.client_name is not None :
         client_class = clients.CLIENTS_MAP[options.client_name]
         client = client_class(options.client_url)
 

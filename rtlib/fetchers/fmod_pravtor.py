@@ -70,7 +70,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
     ###
 
     def match(self, torrent) :
-        return ( not self._comment_regexp.match(torrent.comment() or "") is None )
+        return ( self._comment_regexp.match(torrent.comment() or "") is not None )
 
     def ping(self) :
         opener = fetcherlib.buildTypicalOpener(proxy_url=self.proxyUrl())
@@ -89,7 +89,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
             raise
 
     def loggedIn(self) :
-        return ( not self._opener is None )
+        return ( self._opener is not None )
 
     def torrentChanged(self, torrent) :
         self.assertMatch(torrent)
@@ -98,10 +98,10 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def fetchTorrent(self, torrent) :
         comment_match = self._comment_regexp.match(torrent.comment() or "")
-        self.assertFetcher(not comment_match is None, "No comment match")
+        self.assertFetcher(comment_match is not None, "No comment match")
         topic_id = comment_match.group(1)
 
-        assert not self._torrent_id is None, "Programming error, torrent_id == None"
+        assert self._torrent_id is not None, "Programming error, torrent_id == None"
 
         cookie = http.cookiejar.Cookie(
             version=0,
@@ -148,21 +148,21 @@ class Fetcher(fetcherlib.AbstractFetcher) :
         data = self._readUrlRetry(torrent.comment()).decode(PRAVTOR_ENCODING)
 
         hash_match = self._hash_regexp.search(data)
-        self.assertFetcher(not hash_match is None, "Hash is not found")
+        self.assertFetcher(hash_match is not None, "Hash is not found")
 
         torrent_id = self._torrent_id_regexp.search(data)
-        self.assertFetcher(not torrent_id is None, "Torrent ID is not found")
+        self.assertFetcher(torrent_id is not None, "Torrent ID is not found")
         self._torrent_id = int(torrent_id.group(1))
 
         return hash_match.group(1).lower()
 
     def _readUrlRetry(self, url, data = None, headers_dict = None, opener = None) :
         opener = ( opener or self._opener )
-        assert not opener is None
+        assert opener is not None
 
         headers_dict = ( headers_dict or {} )
         user_agent = self.userAgent()
-        if not user_agent is None :
+        if user_agent is not None :
             headers_dict.setdefault("User-Agent", user_agent)
 
         return fetcherlib.readUrlRetry(opener, url, data,
