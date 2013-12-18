@@ -112,10 +112,10 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def _tryLogin(self) :
         post_dict = {
-            "username" : self.userName(),
-            "password" : self.passwd(),
-            "redirect" : "",
-            "login"    : "\xc2\xf5\xee\xe4",
+            "username" : self.userName().encode(NNMCLUB_ENCODING),
+            "password" : self.passwd().encode(NNMCLUB_ENCODING),
+            "redirect" : b"",
+            "login"    : b"\xc2\xf5\xee\xe4",
         }
         post_data = urllib.parse.urlencode(post_dict).encode(NNMCLUB_ENCODING)
         data = self._readUrlRetry(NNMCLUB_LOGIN_URL, post_data).decode(NNMCLUB_ENCODING)

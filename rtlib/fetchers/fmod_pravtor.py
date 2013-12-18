@@ -136,9 +136,9 @@ class Fetcher(fetcherlib.AbstractFetcher) :
 
     def _tryLogin(self) :
         post_dict = {
-            "login_username" : self.userName(),#.decode("utf-8").encode("cp1251"),
-            "login_password" : self.passwd(),#.decode("utf-8").encode("cp1251"),
-            "login"          : "\xc2\xf5\xee\xe4",
+            "login_username" : self.userName().decode(PRAVTOR_ENCODING),
+            "login_password" : self.passwd().decode(PRAVTOR_ENCODING),
+            "login"          : b"\xc2\xf5\xee\xe4",
         }
         post_data = urllib.parse.urlencode(post_dict).encode(PRAVTOR_ENCODING)
         data = self._readUrlRetry(PRAVTOR_LOGIN_URL, post_data).decode(PRAVTOR_ENCODING)
