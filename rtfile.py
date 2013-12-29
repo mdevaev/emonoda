@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #    rtfile -- Show torrents metadata
 #    Copyright (C) 2013  Devaev Maxim <mdevaev@gmail.com>

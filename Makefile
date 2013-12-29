@@ -4,7 +4,7 @@ all :
 regen : regen-fetchers
 
 regen-fetchers :
-	python -c '\
+	python3 -c '\
 			import json, rtlib.fetchers; \
 			print(json.dumps({ \
 					item.plugin() : { \
@@ -16,7 +16,7 @@ regen-fetchers :
 		' > fetchers.json
 
 pylint :
-	pylint --rcfile=pylint.ini \
+	python3 `which pylint` --rcfile=pylint.ini \
 		rtlib \
 		*.py \
 		--output-format=colorized 2>&1 | less -SR
