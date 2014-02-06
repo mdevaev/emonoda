@@ -93,7 +93,7 @@ class Fetcher(fetcherlib.AbstractFetcher) :
         client_agent = self.clientAgent()
         headers_dict = ( { "User-Agent" : client_agent } if client_agent is not None else None )
         data = self._readUrlRetry(NNMCLUB_SCRAPE_URL+("?info_hash=%s" % (torrent.scrapeHash())), headers_dict=headers_dict)
-        return ( "files" not in tfile.decodeData(data) )
+        return ( len(tfile.decodeData(data).get("files", {})) == 0 )
 
     def fetchTorrent(self, torrent) :
         self.assertMatch(torrent)
