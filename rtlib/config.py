@@ -50,7 +50,7 @@ def _validSetCustoms(pairs_list) :
     if isinstance(pairs_list, dict) :
         return pairs_list
     customs_dict = {}
-    for pair in filter(None, map(str.strip, pairs_list)) :
+    for pair in filter(None, map(str.strip, validStringList(pairs_list))) :
         (key, value) = map(str.strip, (pair.split("=", 1)+[""])[:2])
         customs_dict[notEmptyStrip(key, "custom key")] = value
     return customs_dict

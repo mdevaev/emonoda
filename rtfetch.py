@@ -43,7 +43,7 @@ DELIMITER = "-" * 10
 
 
 ##### Public methods #####
-def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save_customs_list, real_update_flag) :
+def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save_customs_list, set_customs_dict, real_update_flag) :
     new_data = fetcher.fetchTorrent(torrent)
     tmp_torrent = tfile.Torrent()
     tmp_torrent.loadData(new_data)
@@ -57,7 +57,7 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
 
         if client is not None :
             if len(save_customs_list) != 0 :
-                customs_dict = client.customs(torrent, save_customs_list)
+                old_customs_dict = client.customs(torrent, save_customs_list)
             prefix = client.dataPrefix(torrent)
             client.removeTorrent(torrent)
 
@@ -68,7 +68,12 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
         if client is not None :
             client.loadTorrent(torrent, prefix)
             if len(save_customs_list) != 0 :
-                client.setCustoms(torrent, customs_dict)
+                client.setCustoms(torrent, old_customs_dict)
+            if len(set_customs_dict) != 0 :
+                client.setCustoms(torrent, {
+                        key : datetime.datetime.now().strftime(value)
+                        for (key, value) in set_customs_dict.items()
+                    })
 
     return diff_tuple
 
@@ -98,6 +103,7 @@ def update( # pylint: disable=R0913
         backup_suffix,
         names_filter,
         save_customs_list,
+        set_customs_dict,
         skip_unknown_flag,
         pass_failed_login_flag,
         show_passed_flag,
@@ -160,7 +166,16 @@ def update( # pylint: disable=R0913
                 passed_count += 1
                 continue
 
-            diff_tuple = updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save_customs_list, real_update_flag)
+            diff_tuple = updateTorrent(
+                torrent,
+                fetcher,
+                backup_dir_path,
+                backup_suffix,
+                client,
+                save_customs_list,
+                set_customs_dict,
+                real_update_flag,
+            )
             ui.cli.newLine(format_status((32, 1), "+"))
             if show_diff_flag :
                 tfile.printDiff(diff_tuple, "\t", use_colors_flag=(not no_colors_flag), force_colors_flag=force_colors_flag)
@@ -286,6 +301,7 @@ def main() :
         config.ARG_CLIENT,
         config.ARG_CLIENT_URL,
         config.ARG_SAVE_CUSTOMS,
+        config.ARG_SET_CUSTOMS,
         config.ARG_NO_COLORS,
         config.ARG_USE_COLORS,
         config.ARG_FORCE_COLORS,
@@ -335,6 +351,7 @@ def main() :
             clients.CLIENTS_MAP[options.client_name],
             options.client_url,
             save_customs_list=options.save_customs_list,
+            set_customs_dict=options.set_customs_dict,
         )
 
     if not options.real_update_flag :
@@ -347,6 +364,7 @@ def main() :
         options.backup_suffix,
         options.names_filter,
         options.save_customs_list,
+        options.set_customs_dict,
         options.skip_unknown_flag,
         options.pass_failed_login_flag,
         options.show_passed_flag,
