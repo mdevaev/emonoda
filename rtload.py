@@ -52,7 +52,7 @@ def linkData(torrent, data_dir_path, link_to_path, mkdir_mode) :
     makeDirsTree(mkdir_path, mkdir_mode)
     os.symlink(os.path.join(data_dir_path, torrent.name()), link_to_path)
 
-def loadTorrent(client, src_dir_path, torrents_list, data_dir_path, link_to_path, mkdir_mode, customs_dict) :
+def loadTorrent(client, src_dir_path, torrents_list, data_dir_path, link_to_path, pre_mode, mkdir_mode, customs_dict) :
     torrents_list = [
         tfile.Torrent( os.path.abspath(item) if src_dir_path == "." else os.path.join(src_dir_path, item) )
         for item in torrents_list
@@ -60,6 +60,8 @@ def loadTorrent(client, src_dir_path, torrents_list, data_dir_path, link_to_path
     for torrent in torrents_list :
         if client.hasTorrent(torrent) :
             raise RuntimeError("%s: already loaded" % (torrent.path()))
+        elif pre_mode is not None :
+            os.chmod(torrent.path(), pre_mode)
 
     if data_dir_path is None :
         data_dir_path = client.defaultDataPrefix()
@@ -113,6 +115,7 @@ def main() :
         options.torrents_list,
         options.data_dir_path,
         options.link_to_path,
+        options.pre_mode,
         options.mkdir_mode,
         options.set_customs_dict,
     )

@@ -65,6 +65,7 @@ def _makeValidNumber(*args_tuple) :
 
 ###
 OPTION_MKDIR_MODE        = ("mkdir-mode",        "mkdir_mode",             None,                                _validMaybeEmptyMode)
+OPTION_PRE_MODE          = ("pre-mode",          "pre_mode",               None,                                _validMaybeEmptyMode)
 OPTION_DATA_DIR          = ("data-dir",          "data_dir_path",          None,                                _validMaybeEmptyPath)
 OPTION_SOURCE_DIR        = ("source-dir",        "src_dir_path",           ".",                                 validAccessiblePath)
 OPTION_BACKUP_DIR        = ("backup-dir",        "backup_dir_path",        None,                                _validMaybeEmptyPath)
@@ -95,6 +96,7 @@ OPTION_NO_COLORS         = ("no-colors",         "no_colors_flag",         False
 OPTION_FORCE_COLORS      = ("force-colors",      "force_colors_flag",      False,                               validBool)
 
 ARG_MKDIR_MODE           = (("-m", OPTION_MKDIR_MODE[0],),              OPTION_MKDIR_MODE,        { "action" : "store", "metavar" : "<mode>" })
+ARG_PRE_MODE             = ((      OPTION_PRE_MODE[0],),                OPTION_PRE_MODE,          { "action" : "store", "metavar" : "<mode>" })
 ARG_DATA_DIR             = (("-a", OPTION_DATA_DIR[0],),                OPTION_DATA_DIR,          { "action" : "store", "metavar" : "<dir>" })
 ARG_SOURCE_DIR           = (("-s", OPTION_SOURCE_DIR[0],),              OPTION_SOURCE_DIR,        { "action" : "store", "metavar" : "<dir>" })
 ARG_BACKUP_DIR           = (("-b", OPTION_BACKUP_DIR[0],),              OPTION_BACKUP_DIR,        { "action" : "store", "metavar" : "<dir>" })
