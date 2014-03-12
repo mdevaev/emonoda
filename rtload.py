@@ -34,7 +34,8 @@ from rtlib import config
 def makeDirsTree(path, last_mode) :
     try :
         os.makedirs(path)
-        os.chmod(path, last_mode)
+        if last_mode is not None :
+            os.chmod(path, last_mode)
     except OSError as err :
         if err.errno != errno.EEXIST :
             raise
