@@ -85,6 +85,7 @@ def main() :
     parser = config.makeParser(description="Add torrent to the data model \"t.data\"")
     parser.addArguments(
         config.ARG_MKDIR_MODE,
+        config.ARG_PRE_MODE,
         config.ARG_DATA_DIR,
         config.ARG_SOURCE_DIR,
         config.ARG_TIMEOUT,
