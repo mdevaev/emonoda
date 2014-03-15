@@ -24,7 +24,6 @@ import os
 import socket
 import operator
 import shutil
-import datetime
 
 from ulib import fmt
 from ulib import ui
@@ -51,7 +50,7 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
 
     if real_update_flag :
         if backup_dir_path is not None :
-            backup_suffix = datetime.datetime.now().strftime(backup_suffix)
+            backup_suffix = clientlib.datetimeReplace(backup_suffix)
             backup_file_path = os.path.join(backup_dir_path, os.path.basename(torrent.path()) + backup_suffix)
             shutil.copyfile(torrent.path(), backup_file_path)
 
@@ -70,10 +69,7 @@ def updateTorrent(torrent, fetcher, backup_dir_path, backup_suffix, client, save
             if len(save_customs_list) != 0 :
                 client.setCustoms(torrent, old_customs_dict)
             if len(set_customs_dict) != 0 :
-                client.setCustoms(torrent, {
-                        key : datetime.datetime.now().strftime(value)
-                        for (key, value) in set_customs_dict.items()
-                    })
+                client.setCustoms(torrent, clientlib.formatCustomsDict(set_customs_dict))
 
     return diff_tuple
 

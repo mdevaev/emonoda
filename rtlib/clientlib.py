@@ -20,6 +20,7 @@
 
 
 import os
+import datetime
 
 from ulib import validators
 import ulib.validators.common # pylint: disable=W0611
@@ -81,6 +82,17 @@ def buildFiles(prefix, files_list) :
         assert name is not None
         files_dict[name] = { "size" : size }
     return files_dict
+
+
+###
+def datetimeReplace(text) :
+    return datetime.datetime.now().strftime(text)
+
+def formatCustomsDict(customs_dict) :
+    return {
+        key : datetimeReplace(value)
+        for (key, value) in customs_dict.items()
+    }
 
 
 ##### Public classes #####

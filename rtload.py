@@ -77,7 +77,7 @@ def loadTorrent(client, src_dir_path, torrents_list, data_dir_path, link_to_path
 
         client.loadTorrent(torrent, base_dir_path)
         if len(customs_dict) != 0 :
-            client.setCustoms(torrent, customs_dict)
+            client.setCustoms(torrent, clientlib.formatCustomsDict(customs_dict))
 
 
 ##### Main #####
