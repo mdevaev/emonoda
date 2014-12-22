@@ -1,35 +1,7 @@
-#####
-#
-#    rtfetch -- Update rtorrent files from popular trackers
-#    Copyright (C) 2012  Devaev Maxim <mdevaev@gmail.com>
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-#####
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)
 
-
-from .. import plugin
-
-from . import cmod_rtorrent
-from . import cmod_transmission
-from . import cmod_ktorrent
-
-
-##### Public constants #####
-CLIENTS_MAP = plugin.mapObjects(
-    cmod_rtorrent.Client,
-    cmod_transmission.Client,
-    cmod_ktorrent.Client,
-)
-
+# TODO: Bullshit-fix for 3.2
+# Setuptools: __init__.py does not call declare_namespace()! Please fix it.
+# See /usr/lib/python3.4/site-packages/setuptools/command/build_py.py:176 for details
+# ---> declare_namespace <---

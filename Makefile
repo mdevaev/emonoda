@@ -1,28 +1,13 @@
-all :
+all:
 	true
 
-regen : regen-fetchers
+pypi:
+	python setup.py register
+	python setup.py sdist upload
 
-regen-fetchers :
-	python3 -c '\
-			import json, rtlib.fetchers; \
-			print(json.dumps({ \
-					item.plugin() : { \
-							"version" : item.version(), \
-							"path" : item.__module__.replace(".", "/") + ".py", \
-						} \
-					for item in rtlib.fetchers.FETCHERS_MAP.values() \
-				}, sort_keys=True, indent="    ")) \
-		' > fetchers.json
+clean:
+	rm -rf build dist *.egg-info
+	find -name __pycache__ | xargs rm -rf
 
-pylint :
-	python3 `which pylint` --rcfile=pylint.ini \
-		rtlib \
-		*.py \
-		--output-format=colorized 2>&1 | less -SR
-
-clean :
-	find . -type f -name '*.py?' -delete
-	find . -type d -name __pycache__ -delete
-	rm -rf pkg-root.arch pkg src build rtfetch.egg-info
-
+clean-all: clean
+	rm -rf .tox

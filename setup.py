@@ -3,41 +3,44 @@
 
 import setuptools
 
-from rtlib import const
 
-
-##### Main #####
-if __name__ == "__main__" :
+# =====
+if __name__ == "__main__":
     setuptools.setup(
         name="rtfetch",
-        version=const.VERSION,
-        url=const.UPSTREAM_URL,
+        version="1.0",
+        url="https://github.com/mdevaev/rtfetch",
         license="GPLv3",
         author="Devaev Maxim",
         author_email="mdevaev@gmail.com",
-        description="The set of tools to organize and managament of your torrents",
+        description="The set of tools to organize and managament for your torrents",
         platforms="any",
 
-        packages=(
+        namespace_packages=[
             "rtlib",
-            "rtlib/fetchers",
-            "rtlib/clients",
-            "rtlib/thirdparty",
-        ),
+            "rtlib.clients",
+        ],
 
-        scripts=(
-            "rtfetch.py",
-            "rtload.py",
-            "rtfile.py",
-            "rtdiff.py",
-            "rthook-manage-trackers.py",
-        ),
+        packages=[
+            "rtlib.core",
+            "rtlib.clients.rtorrent",
+        ],
 
-        classifiers=(
+        install_requires=[
+            "ulib",
+            "bcoding",
+            "colorama",
+
+            "tabloid",
+            "pygments",
+            "pyyaml",
+            "contextlog",
+        ],
+
+        classifiers=[
             "Topic :: Software Development :: Libraries :: Python Modules",
             "Development Status :: 3 - Alpha",
             "Programming Language :: Python",
             "Operating System :: OS Independent",
-        ),
+        ],
     )
-
