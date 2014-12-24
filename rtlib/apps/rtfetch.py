@@ -104,7 +104,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
     )
     hashes = (client.get_hashes() if client is not None else [])
 
-    say = tools.make_say(use_colors, force_colors, sys.stderr)
+    say = tools.make_say(use_colors, force_colors, sys.stdout)
 
     for (count, (torrent_file_name, torrent)) in enumerate(torrents):
         progress = fmt.format_progress(count + 1, len(torrents))
@@ -161,6 +161,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
             cli.print_traceback("\t")
             error_count += 1
 
+    say = tools.make_say(use_colors, force_colors, sys.stderr)
     say("# " + ("-" * 10))
     say("# Invalid:       {}".format(invalid_count))
     if client is not None:
