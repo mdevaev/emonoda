@@ -1,7 +1,6 @@
 import sys
 import os
 import shutil
-import operator
 import argparse
 
 from ulib import fmt
@@ -61,22 +60,6 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
     return diff
 
 
-def get_torrents(dir_path, name_filter):
-    fan = tools.make_fan()
-
-    def load_torrent(path):
-        cli.one_line("# Caching {}/{} ... [{}]".format(dir_path, name_filter, next(fan)), output=sys.stderr)
-        return tfile.load_torrent_from_path(path)
-
-    torrents = list(sorted(
-        tfile.load_from_dir(dir_path, name_filter, as_abs=True, load_torrent=load_torrent).items(),
-        key=operator.itemgetter(0),
-    ))
-
-    cli.new_line("# Cached {} torrents from {}/{}".format(len(torrents), dir_path, name_filter), output=sys.stderr)
-    return torrents
-
-
 def read_captcha(url):
     print("# Enter the captcha from [ {} ] ?> ".format(url), output=sys.stderr)
     return input()
@@ -112,29 +95,28 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
     updated_count = 0
     error_count = 0
 
-    torrents = get_torrents(torrents_dir_path, name_filter)
+    torrents = tools.load_torrents_from_dir(
+        dir_path=torrents_dir_path,
+        name_filter=name_filter,
+        use_colors=use_colors,
+        force_colors=force_colors,
+        output=sys.stderr,
+    )
     hashes = (client.get_hashes() if client is not None else [])
 
-    get_colored = tools.make_colored(use_colors, force_colors)
-    for (count, (torrent_file_name, torrent)) in enumerate(torrents):
-        status_line = "[{{sign}}] {progress} {{fetcher}} {torrent}".format(
-            progress=fmt.format_progress(count + 1, len(torrents)),
-            torrent=torrent_file_name,
-        )
-        format_fail = (lambda error, color=tools.RED, sign="!": status_line.format(  # pylint: disable=cell-var-from-loop
-            sign=get_colored(color, sign),
-            fetcher=get_colored(color, error),
-        ))
+    say = tools.make_say(use_colors, force_colors, sys.stderr)
 
+    for (count, (torrent_file_name, torrent)) in enumerate(torrents):
+        progress = fmt.format_progress(count + 1, len(torrents))
+        format_fail = (lambda error, color="red", sign="!": "[{%s}%s{reset}] %s {blue}%s {cyan}%s{reset}" % (
+                       color, sign, progress, error, torrent_file_name))  # pylint: disable=cell-var-from-loop
         if torrent is None:
-            cli.new_line(format_fail("INVALID_TIRRENT"))
+            say(format_fail("INVALID_TIRRENT"))
             invalid_count += 1
             continue
-        else:
-            status_line += " --- {}".format(torrent.get_comment() or "")
 
         if client is not None and torrent.get_hash() not in hashes:
-            cli.new_line(format_fail("NOT_IN_CLIENT"))
+            say(format_fail("NOT_IN_CLIENT"))
             not_in_client_count += 1
             continue
 
@@ -142,22 +124,21 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
         if fetcher is None:
             unknown_count += 1
             if not skip_unknown:
-                cli.new_line(format_fail("UNKNOWN", tools.YELLOW, " "))
+                say(format_fail("UNKNOWN", "yellow", " "))
             continue
 
-        format_status = (lambda color, sign: status_line.format(  # pylint: disable=cell-var-from-loop
-            sign=(get_colored(color, sign) if color is not None else sign),
-            fetcher=get_colored(color, fetcher.get_name()),  # pylint: disable=cell-var-from-loop
-        ))
+        format_status = (lambda color, sign: "[{%s}%s{reset}] %s {blue}%s {cyan}%s{reset} -- %s" % (
+                         color, sign, progress, fetcher.get_name(),  # pylint: disable=cell-var-from-loop
+                         torrent_file_name, (torrent.get_comment() or "")))  # pylint: disable=cell-var-from-loop
 
         try:
             if tools.has_extensions(fetcher, F_WithLogin) and not fetcher.is_logged_in():
-                cli.new_line(format_status(tools.YELLOW, "?"))
+                say(format_status("yellow", "?"))
                 error_count += 1
                 continue
 
             if not fetcher.is_torrent_changed(torrent):
-                cli.one_line(format_status(tools.CYAN, " "), not show_passed)
+                say(format_status("blue", " "), one_line=(not show_passed))
                 passed_count += 1
                 continue
 
@@ -165,41 +146,41 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
                 backup_torrent(torrent, backup_dir_path, backup_suffix)
             diff = update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, noop)
 
-            cli.new_line(format_status(tools.GREEN, "+"))
+            say(format_status("green", "+"))
             if show_diff:
-                tools.print_torrents_diff(diff, "\t", use_colors=use_colors, force_colors=force_colors)
+                tools.print_torrents_diff(diff, "\t", use_colors, force_colors)
 
             updated_count += 1
 
         except FetcherError as err:
-            cli.new_line(format_status(tools.RED, "-") + " :: {}({})".format(type(err).__name__, err))
+            say(format_status("red", "-") + " :: {red}%s({reset}%s{red}){reset}" % (type(err).__name__, err))
             error_count += 1
 
         except Exception as err:
-            cli.new_line(format_status(tools.RED, "-"))
+            say(format_status("red", "-"))
             cli.print_traceback("\t")
             error_count += 1
 
-    cli.new_line("# " + ("-" * 10), output=sys.stderr)
-
-    print("# Invalid:       {}".format(invalid_count))
+    say("# " + ("-" * 10))
+    say("# Invalid:       {}".format(invalid_count))
     if client is not None:
-        print("# Not in client: {}".format(not_in_client_count))
-    print("# Unknown:       {}".format(unknown_count))
-    print("# Passed:        {}".format(passed_count))
-    print("# Updated:       {}".format(updated_count))
-    print("# Errors:        {}".format(error_count))
+        say("# Not in client: {}".format(not_in_client_count))
+    say("# Unknown:       {}".format(unknown_count))
+    say("# Passed:        {}".format(passed_count))
+    say("# Updated:       {}".format(updated_count))
+    say("# Errors:        {}".format(error_count))
 
 
 def init_fetchers(fetchers_config, only_fetchers, exclude_fetchers, pass_failed_login, use_colors, force_colors):
-    get_colored = tools.make_colored(use_colors, force_colors)
     to_init = set(fetchers_config).difference(exclude_fetchers)
     if len(only_fetchers) != 0:
         to_init.intersection(only_fetchers)
 
+    say = tools.make_say(use_colors, force_colors, sys.stderr)
+
     fetchers = []
     for fetcher_name in sorted(to_init):
-        cli.one_line("# Enabling the fetcher {} ...".format(get_colored(tools.CYAN, fetcher_name)), output=sys.stderr)
+        say("# Enabling the fetcher {blue}%s{reset} ..." % (fetcher_name), one_line=True)
 
         fetcher_class = get_fetcher_class(fetcher_name)
 
@@ -213,16 +194,9 @@ def init_fetchers(fetchers_config, only_fetchers, exclude_fetchers, pass_failed_
             fetcher.test_site()
             if tools.has_extensions(fetcher_class, F_WithLogin):
                 fetcher.login()
-            cli.new_line("# Fetcher {fetcher} is {ready}".format(
-                fetcher=get_colored(tools.CYAN, fetcher_name),
-                ready=get_colored(tools.GREEN, "ready"),
-            ), output=sys.stderr)
+            say("# Fetcher {blue}%s{reset} is {green}ready{reset}" % (fetcher_name))
         except Exception as err:
-            cli.new_line("# Init error: {fetcher}: {exc}({err})".format(
-                fetcher=get_colored(tools.RED, fetcher_name),
-                exc=type(err).__name__,
-                err=err,
-            ), output=sys.stderr)
+            say("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (fetcher_name, type(err).__name__, err))
             if not pass_failed_login:
                 raise
 

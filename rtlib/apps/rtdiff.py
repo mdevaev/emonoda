@@ -40,7 +40,7 @@ def main():
     tools.print_torrents_diff(
         diff=tfile.get_difference(*options.torrents),
         prefix=" ",
-        use_colors=(not config.core.use_colors),
+        use_colors=config.core.use_colors,
         force_colors=config.core.force_colors,
     )
 
