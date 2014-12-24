@@ -1,16 +1,14 @@
 import sys
 import inspect
+import operator
 from datetime import datetime
+
+from ulib.ui import cli
 
 from colorama import Fore
 from colorama import Style
 
-
-# =====
-RED    = Style.BRIGHT + Fore.RED
-GREEN  = Style.BRIGHT + Fore.GREEN
-YELLOW = Style.BRIGHT + Fore.YELLOW
-CYAN   = Style.BRIGHT + Fore.CYAN
+from . import tfile
 
 
 # =====
@@ -25,30 +23,25 @@ def get_date_by_format(fmt):
     return datetime.now().strftime(fmt)
 
 
-def get_colored(color, text, force_colors, output=sys.stdout):
-    if (output.isatty() or force_colors):
-        return "".join([color] + [text] + [Fore.RESET])
-    return text
+def say(text, one_line=False, use_colors=True, force_colors=False, output=sys.stdout):
+    colors = {
+        "red":     Style.BRIGHT + Fore.RED,
+        "green":   Style.BRIGHT + Fore.GREEN,
+        "yellow":  Style.BRIGHT + Fore.YELLOW,
+        "cyan":    Style.BRIGHT + Fore.CYAN,
+        "magenta": Style.BRIGHT + Fore.MAGENTA,
+        "blue":    Style.BRIGHT + Fore.BLUE,
+        "reset":   Fore.RESET,
+    }
+    if not (use_colors and (output.isatty() or force_colors)):
+        colors = dict.fromkeys(list(colors), "")
+    text = text.format(**colors)
+    handler = (cli.one_line if one_line else cli.new_line)
+    handler(text, output=output)
 
 
-def make_colored(use_colors, force_colors):
-    if use_colors:
-        return (lambda color, text: get_colored(color, text, force_colors))
-    else:
-        return (lambda color, text: text)
-
-
-def print_torrents_diff(diff, prefix="", use_colors=True, force_colors=False, output=sys.stdout):
-    for (sign, color, items) in (
-        ("+", GREEN,  diff.added),
-        ("-", RED,    diff.removed),
-        ("~", CYAN,   diff.modified),
-        ("?", YELLOW, diff.type_modified),
-    ):
-        for item in sorted(items):
-            if use_colors:
-                sign = get_colored(color, sign, force_colors=force_colors, output=output)
-            print("{}{} {}".format(prefix, sign, item), file=output)
+def make_say(use_colors=True, force_colors=False, output=sys.stdout):
+    return (lambda text, one_line=False: say(text, one_line, use_colors, force_colors, output))
 
 
 def make_fan():
@@ -59,3 +52,37 @@ def make_fan():
         else:
             fan = 0
         yield "/-\\|"[fan]
+
+
+# =====
+def print_torrents_diff(diff, prefix="", use_colors=True, force_colors=False, output=sys.stdout):
+    for (sign, color, items) in (
+        ("+", "green",  diff.added),
+        ("-", "red",    diff.removed),
+        ("~", "cyan",   diff.modified),
+        ("?", "yellow", diff.type_modified),
+    ):
+        for item in sorted(items):
+            say(
+                text="%s{%s}%s{reset} %s" % (prefix, color, sign, item),
+                use_colors=use_colors,
+                force_colors=force_colors,
+                output=output,
+            )
+
+
+def load_torrents_from_dir(dir_path, name_filter, use_colors=True, force_colors=False, output=sys.stderr):
+    say = make_say(use_colors, force_colors, output)  # pylint: disable=redefined-outer-name
+    fan = make_fan()
+
+    def load_torrent(path):
+        say("# Caching {cyan}%s/{yellow}%s {magenta}%s{reset}" % (dir_path, name_filter, next(fan)), one_line=True)
+        return tfile.load_torrent_from_path(path)
+
+    torrents = list(sorted(
+        tfile.load_from_dir(dir_path, name_filter, as_abs=True, load_torrent=load_torrent).items(),
+        key=operator.itemgetter(0),
+    ))
+
+    say("# Cached {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}" % (len(torrents), dir_path, name_filter))
+    return torrents
