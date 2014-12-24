@@ -1,3 +1,4 @@
+import sys
 import os
 import re
 import argparse
@@ -40,8 +41,7 @@ def main():
     tools.print_torrents_diff(
         diff=tfile.get_difference(*options.torrents),
         prefix=" ",
-        use_colors=config.core.use_colors,
-        force_colors=config.core.force_colors,
+        log=tools.Log(config.core.use_colors, config.core.force_colors, sys.stdout),
     )
 
 

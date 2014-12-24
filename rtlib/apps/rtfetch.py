@@ -60,11 +60,6 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
     return diff
 
 
-def read_captcha(url):
-    print("# Enter the captcha from [ {} ] ?> ".format(url), output=sys.stderr)
-    return input()
-
-
 def select_fetcher(torrent, fetchers):
     for fetcher in fetchers:
         if fetcher.is_matched_for(torrent):
@@ -84,9 +79,9 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
     skip_unknown,
     show_passed,
     show_diff,
-    use_colors,
-    force_colors,
     noop,
+    log_stdout,
+    log_stderr,
 ):
     invalid_count = 0
     not_in_client_count = 0
@@ -98,25 +93,24 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
     torrents = tools.load_torrents_from_dir(
         dir_path=torrents_dir_path,
         name_filter=name_filter,
-        use_colors=use_colors,
-        force_colors=force_colors,
-        output=sys.stderr,
+        log=log_stderr,
     )
     hashes = (client.get_hashes() if client is not None else [])
 
-    say = tools.make_say(use_colors, force_colors, sys.stdout)
+    log_stdout.print()
 
     for (count, (torrent_file_name, torrent)) in enumerate(torrents):
         progress = fmt.format_progress(count + 1, len(torrents))
         format_fail = (lambda error, color="red", sign="!": "[{%s}%s{reset}] %s {blue}%s {cyan}%s{reset}" % (
                        color, sign, progress, error, torrent_file_name))  # pylint: disable=cell-var-from-loop
+
         if torrent is None:
-            say(format_fail("INVALID_TIRRENT"))
+            log_stdout.print(format_fail("INVALID_TIRRENT"))
             invalid_count += 1
             continue
 
         if client is not None and torrent.get_hash() not in hashes:
-            say(format_fail("NOT_IN_CLIENT"))
+            log_stdout.print(format_fail("NOT_IN_CLIENT"))
             not_in_client_count += 1
             continue
 
@@ -124,7 +118,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
         if fetcher is None:
             unknown_count += 1
             if not skip_unknown:
-                say(format_fail("UNKNOWN", "yellow", " "))
+                log_stdout.print(format_fail("UNKNOWN", "yellow", " "))
             continue
 
         format_status = (lambda color, sign: "[{%s}%s{reset}] %s {blue}%s {cyan}%s{reset} -- %s" % (
@@ -133,12 +127,12 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
 
         try:
             if tools.has_extensions(fetcher, F_WithLogin) and not fetcher.is_logged_in():
-                say(format_status("yellow", "?"))
+                log_stdout.print(format_status("yellow", "?"))
                 error_count += 1
                 continue
 
             if not fetcher.is_torrent_changed(torrent):
-                say(format_status("blue", " "), one_line=(not show_passed))
+                log_stdout.print(format_status("blue", " "), one_line=(not show_passed))
                 passed_count += 1
                 continue
 
@@ -146,42 +140,55 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
                 backup_torrent(torrent, backup_dir_path, backup_suffix)
             diff = update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, noop)
 
-            say(format_status("green", "+"))
+            log_stdout.print(format_status("green", "+"))
             if show_diff:
-                tools.print_torrents_diff(diff, "\t", use_colors, force_colors)
+                tools.print_torrents_diff(diff, "\t", log_stdout)
 
             updated_count += 1
 
         except FetcherError as err:
-            say(format_status("red", "-") + " :: {red}%s({reset}%s{red}){reset}" % (type(err).__name__, err))
+            log_stdout.print(format_status("red", "-") +
+                             " :: {red}%s({reset}%s{red}){reset}" % (type(err).__name__, err))
             error_count += 1
 
         except Exception as err:
-            say(format_status("red", "-"))
+            log_stdout.print(format_status("red", "-"))
             cli.print_traceback("\t")
             error_count += 1
 
-    say = tools.make_say(use_colors, force_colors, sys.stderr)
-    say("# " + ("-" * 10))
-    say("# Invalid:       {}".format(invalid_count))
+    if (
+        (client is not None and not_in_client_count)
+        or (not skip_unknown and unknown_count)
+        or (show_passed and passed_count)
+        or invalid_count
+        or updated_count
+        or error_count
+    ):
+        log_stdout.print()
+
+    log_stderr.print("# " + ("-" * 10))
+    log_stderr.print("# Invalid:       {}".format(invalid_count))
     if client is not None:
-        say("# Not in client: {}".format(not_in_client_count))
-    say("# Unknown:       {}".format(unknown_count))
-    say("# Passed:        {}".format(passed_count))
-    say("# Updated:       {}".format(updated_count))
-    say("# Errors:        {}".format(error_count))
+        log_stderr.print("# Not in client: {}".format(not_in_client_count))
+    log_stderr.print("# Unknown:       {}".format(unknown_count))
+    log_stderr.print("# Passed:        {}".format(passed_count))
+    log_stderr.print("# Updated:       {}".format(updated_count))
+    log_stderr.print("# Errors:        {}".format(error_count))
 
 
-def init_fetchers(fetchers_config, only_fetchers, exclude_fetchers, pass_failed_login, use_colors, force_colors):
+def read_captcha(url):
+    print("# Enter the captcha from [ {} ] ?> ".format(url), output=sys.stderr)
+    return input()
+
+
+def init_fetchers(fetchers_config, only_fetchers, exclude_fetchers, pass_failed_login, log):
     to_init = set(fetchers_config).difference(exclude_fetchers)
     if len(only_fetchers) != 0:
         to_init.intersection(only_fetchers)
 
-    say = tools.make_say(use_colors, force_colors, sys.stderr)
-
     fetchers = []
     for fetcher_name in sorted(to_init):
-        say("# Enabling the fetcher {blue}%s{reset} ..." % (fetcher_name), one_line=True)
+        log.print("# Enabling the fetcher {blue}%s{reset} ..." % (fetcher_name), one_line=True)
 
         fetcher_class = get_fetcher_class(fetcher_name)
 
@@ -195,9 +202,9 @@ def init_fetchers(fetchers_config, only_fetchers, exclude_fetchers, pass_failed_
             fetcher.test_site()
             if tools.has_extensions(fetcher_class, F_WithLogin):
                 fetcher.login()
-            say("# Fetcher {blue}%s{reset} is {green}ready{reset}" % (fetcher_name))
+            log.print("# Fetcher {blue}%s{reset} is {green}ready{reset}" % (fetcher_name))
         except Exception as err:
-            say("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (fetcher_name, type(err).__name__, err))
+            log.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (fetcher_name, type(err).__name__, err))
             if not pass_failed_login:
                 raise
 
@@ -223,13 +230,15 @@ def main():
         print("# No available fetchers in config", file=sys.stderr)
         sys.exit(1)
 
+    log_stdout = tools.Log(config.core.use_colors, config.core.force_colors, sys.stdout)
+    log_stderr = tools.Log(config.core.use_colors, config.core.force_colors, sys.stderr)
+
     fetchers = init_fetchers(
         fetchers_config=config.fetchers,
         only_fetchers=options.only_fetchers,
         exclude_fetchers=options.exclude_fetchers,
         pass_failed_login=config.rtfetch.pass_failed_login,
-        use_colors=config.core.use_colors,
-        force_colors=config.core.force_colors,
+        log=log_stderr,
     )
 
     if config.core.client is not None:
@@ -249,9 +258,9 @@ def main():
         skip_unknown=config.rtfetch.skip_unknown,
         show_passed=config.rtfetch.show_passed,
         show_diff=config.rtfetch.show_diff,
-        use_colors=config.core.use_colors,
-        force_colors=config.core.force_colors,
         noop=options.noop,
+        log_stdout=log_stdout,
+        log_stderr=log_stderr,
     )
 
 
