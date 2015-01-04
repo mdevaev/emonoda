@@ -24,6 +24,8 @@ if __name__ == "__main__":
         packages=[
             "rtlib.core",
             "rtlib.clients.rtorrent",
+            "rtlib.optconf",
+            "rtlib.optconf.loaders",
         ],
 
         install_requires=[
