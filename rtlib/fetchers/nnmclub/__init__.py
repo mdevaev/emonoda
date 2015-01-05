@@ -37,12 +37,9 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-_parents = (fetcher.BaseFetcher, fetcher.WithLogin, fetcher.WithOpener)
-
-
-class Fetcher(*_parents):
-    def __init__(self, **kwargs):
-        for parent in _parents:
+class Fetcher(fetcher.BaseFetcher, fetcher.WithLogin, fetcher.WithOpener):
+    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+        for parent in self.__class__.__bases__:
             parent.__init__(self, **kwargs)
 
         self._comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
@@ -59,7 +56,7 @@ class Fetcher(*_parents):
     @classmethod
     def get_options(cls):
         params = {}
-        for parent in _parents:
+        for parent in cls.__bases__:
             params.update(parent.get_options())
         return params
 
