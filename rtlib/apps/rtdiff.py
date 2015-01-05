@@ -4,9 +4,9 @@ import argparse
 
 from ..core import tfile
 from ..core import tools
-from ..core.clientlib import get_client_class
 
 from . import init
+from . import get_configured_client
 
 
 # ===== Main =====
@@ -20,10 +20,7 @@ def main():
     args_parser.add_argument("torrents", type=str, nargs=2, metavar="<path/hash>")
     options = args_parser.parse_args(argv[1:])
 
-    if config.core.client is not None:
-        client = get_client_class(config.core.client)(**config.client)
-    else:
-        client = None
+    client = get_configured_client(config)
 
     for count in range(2):
         item = options.torrents[count]

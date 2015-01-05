@@ -14,6 +14,10 @@ from bcoding import (
 
 
 # =====
+ALL_MAGNET_FIELDS = ("dn", "tr", "xl")
+
+
+# =====
 def load_torrent_from_path(path):
     try:
         return Torrent(path=path)

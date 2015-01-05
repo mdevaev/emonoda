@@ -50,6 +50,14 @@ def init():
     return (args_parser, remaining, config)
 
 
+def get_configured_client(config):
+    if config.core.client is not None:
+        return get_client_class(config.core.client)(**config.client)
+    else:
+        return None
+
+
+# =====
 def _get_config_scheme():
     return {
         "core": {
