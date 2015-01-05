@@ -1,6 +1,7 @@
 import sys
 import inspect
 import operator
+
 from datetime import datetime
 
 from ulib.ui import cli
@@ -13,10 +14,9 @@ from . import tfile
 
 # =====
 def has_extensions(cls, *exts):
-    exts = set(exts)
     if not inspect.isclass(cls):
         cls = cls.__class__
-    return (set(inspect.getmro(cls)).intersection(exts) == exts)
+    return (set(cls.__bases__).intersection(exts) == set(exts))
 
 
 def get_date_by_format(fmt):
