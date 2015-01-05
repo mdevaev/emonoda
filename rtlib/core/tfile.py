@@ -1,4 +1,5 @@
 import os
+import re
 import fnmatch
 import hashlib
 import base64
@@ -36,6 +37,10 @@ def is_valid_data(data):
         return isinstance(decode_data(data), dict)  # Must be a True
     except TypeError:
         return False
+
+
+def is_hash(text):
+    return (re.match(r"[\da-fA-F]{40}", text) is not None)
 
 
 def get_indexed(path, prefix="", name_filter="*.torrent"):

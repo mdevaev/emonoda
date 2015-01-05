@@ -1,6 +1,5 @@
 import sys
 import os
-import re
 import argparse
 
 from ..core import tfile
@@ -26,12 +25,11 @@ def main():
     else:
         client = None
 
-    hash_regexp = re.compile(r"[\da-fA-F]{40}")
     for count in range(2):
         item = options.torrents[count]
         if os.path.exists(item):
             options.torrents[count] = tfile.Torrent(path=item).get_files()
-        elif hash_regexp.match(item) is not None:
+        elif tfile.is_hash(item):
             if client is None:
                 raise RuntimeError("Required client for hash: {}".format(item))
             options.torrents[count] = client.get_files(item)
