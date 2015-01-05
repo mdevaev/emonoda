@@ -19,13 +19,22 @@ if __name__ == "__main__":
         namespace_packages=[
             "rtlib",
             "rtlib.clients",
+            "rtlib.fetchers",
         ],
 
         packages=[
             "rtlib.core",
-            "rtlib.clients.rtorrent",
             "rtlib.optconf",
             "rtlib.optconf.loaders",
+            "rtlib.apps",
+            "rtlib.apps.hooks",
+
+            "rtlib.clients.rtorrent",
+            "rtlib.clients.ktorrent",
+            "rtlib.clients.transmission",
+
+            "rtlib.fetchers.rutracker",
+            "rtlib.fetchers.nnmclub",
         ],
 
         install_requires=[
