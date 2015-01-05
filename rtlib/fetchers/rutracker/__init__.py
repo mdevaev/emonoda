@@ -23,7 +23,7 @@ import urllib.parse
 import http.cookiejar
 import re
 
-from ...core import fetcher
+from ...core import fetcherlib
 
 
 # =====
@@ -35,7 +35,7 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Fetcher(fetcher.BaseFetcher, fetcher.WithLogin, fetcher.WithCaptcha, fetcher.WithOpener):
+class Fetcher(fetcherlib.BaseFetcher, fetcherlib.WithLogin, fetcherlib.WithCaptcha, fetcherlib.WithOpener):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         for parent in self.__class__.__bases__:
             parent.__init__(self, **kwargs)
@@ -66,7 +66,7 @@ class Fetcher(fetcher.BaseFetcher, fetcher.WithLogin, fetcher.WithCaptcha, fetch
         return params
 
     def test_site(self):
-        opener = fetcher.build_opener(proxy_url=self._proxy_url)
+        opener = fetcherlib.build_opener(proxy_url=self._proxy_url)
         data = self._read_url("http://rutracker.org", opener=opener)
         self._assert_site(
             b"<link rel=\"shortcut icon\" href=\"http://static.rutracker.org"

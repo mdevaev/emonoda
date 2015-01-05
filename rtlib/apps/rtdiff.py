@@ -4,7 +4,7 @@ import argparse
 
 from ..core import tfile
 from ..core import tools
-from ..core.client import get_client_class
+from ..core.clientlib import get_client_class
 
 from . import init
 

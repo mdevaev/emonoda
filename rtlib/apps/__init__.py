@@ -2,8 +2,8 @@ import sys
 import os
 import argparse
 
-from ..core.client import get_client_class
-from ..core.fetcher import get_fetcher_class
+from ..core.clientlib import get_client_class
+from ..core.fetcherlib import get_fetcher_class
 
 from ..optconf import (
     Section,

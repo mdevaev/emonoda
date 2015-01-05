@@ -26,11 +26,11 @@ from ...optconf import (
     Option,
     SecretOption,
 )
-from ...core import client
+from ...core import clientlib
 
 
 # =====
-class Client(client.BaseClient):
+class Client(clientlib.BaseClient):
     # API description:
     #   http://pythonhosted.org/transmissionrpc/
     #   https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
@@ -58,12 +58,12 @@ class Client(client.BaseClient):
 
     # ===
 
-    @client.hash_or_torrent
+    @clientlib.hash_or_torrent
     def remove_torrent(self, torrent_hash):
-        self._get_torrent_obj(torrent_hash)  # XXX: raise client.NoSuchTorrentError if torrent does not exist
+        self._get_torrent_obj(torrent_hash)  # XXX: raise clientlib.NoSuchTorrentError if torrent does not exist
         self._client.remove_torrent(torrent_hash)
 
-    @client.check_torrent_accessible
+    @clientlib.check_torrent_accessible
     def load_torrent(self, torrent, prefix=None):
         torrent_path = torrent.get_path()
         kwargs = {"paused": False}
@@ -71,12 +71,12 @@ class Client(client.BaseClient):
             kwargs["download_dir"] = prefix
         self._client.add_torrent(torrent_path, **kwargs)
 
-    @client.hash_or_torrent
+    @clientlib.hash_or_torrent
     def has_torrent(self, torrent_hash):
         try:
             self._get_torrent_obj(torrent_hash)
             return True
-        except client.NoSuchTorrentError:
+        except clientlib.NoSuchTorrentError:
             return False
 
     def get_hashes(self):
@@ -85,11 +85,11 @@ class Client(client.BaseClient):
             for item in self._client.get_torrents(arguments=("id", "hashString"))
         ]
 
-    @client.hash_or_torrent
+    @clientlib.hash_or_torrent
     def get_torrent_path(self, torrent_hash):
         return self._get_torrent_prop(torrent_hash, "torrentFile")
 
-    @client.hash_or_torrent
+    @clientlib.hash_or_torrent
     def get_data_prefix(self, torrent_hash):
         return self._get_torrent_prop(torrent_hash, "downloadDir")
 
@@ -100,30 +100,30 @@ class Client(client.BaseClient):
 
     # ===
 
-    @client.hash_or_torrent
+    @clientlib.hash_or_torrent
     def get_full_path(self, torrent_hash):
         torrent_obj = self._get_torrent_obj(torrent_hash, ("name", "downloadDir"))
         return os.path.join(torrent_obj.downloadDir, torrent_obj.name)
 
-    @client.hash_or_torrent
+    @clientlib.hash_or_torrent
     def get_file_name(self, torrent_hash):
         return self._get_torrent_prop(torrent_hash, "name")
 
-    @client.hash_or_torrent
+    @clientlib.hash_or_torrent
     def is_single_file(self, torrent_hash):
         files = self._get_files(torrent_hash)
         if len(files) > 1:
             return False
         return (os.path.sep not in list(files.values())[0]["name"])
 
-    @client.hash_or_torrent
+    @clientlib.hash_or_torrent
     def get_files(self, torrent_hash, on_fs=False):
         prefix = (self.get_data_prefix(torrent_hash) if on_fs else "")
         flist = [
             (item["name"], item["size"])
             for item in self._get_files(torrent_hash).values()
         ]
-        return client.build_files(prefix, flist)
+        return clientlib.build_files(prefix, flist)
 
     # ===
 
@@ -136,7 +136,7 @@ class Client(client.BaseClient):
             torrent_obj = self._client.get_torrent(torrent_hash, arguments=tuple(props))
         except KeyError as err:
             if str(err) == "\'Torrent not found in result\'":
-                raise client.NoSuchTorrentError("Unknown torrent hash")
+                raise clientlib.NoSuchTorrentError("Unknown torrent hash")
             raise
         assert str(torrent_obj.hashString).lower() == torrent_hash
         return torrent_obj
@@ -144,7 +144,7 @@ class Client(client.BaseClient):
     def _get_files(self, torrent_hash):
         files = self._client.get_files(torrent_hash)
         if len(files) == 0:
-            raise client.NoSuchTorrentError("Unknown torrent hash")
+            raise clientlib.NoSuchTorrentError("Unknown torrent hash")
         assert len(files) == 1
         files = list(files.values())[0]
         assert len(files) > 0
