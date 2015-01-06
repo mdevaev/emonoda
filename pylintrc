@@ -1,6 +1,5 @@
 [MASTER]
 ignore=.git
-load-plugins=ulib.tools.lintfix
 
 [DESIGN]
 min-public-methods=0

@@ -5,9 +5,8 @@ import urllib.parse
 import http.cookiejar
 import time
 
-from ulib.network.url import SocksHandler
-
 from ...core import tfile
+from ...core.socks import SocksHandler
 
 from ...optconf import Option
 from ...optconf import SecretOption
