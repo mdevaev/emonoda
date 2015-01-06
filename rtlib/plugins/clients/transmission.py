@@ -25,11 +25,15 @@ import transmissionrpc
 from ...optconf import Option
 from ...optconf import SecretOption
 
-from ...core import clientlib
+from . import BaseClient
+from . import NoSuchTorrentError
+from . import hash_or_torrent
+from . import check_torrent_accessible
+from . import build_files
 
 
 # =====
-class Plugin(clientlib.BaseClient):
+class Plugin(BaseClient):
     # API description:
     #   http://pythonhosted.org/transmissionrpc/
     #   https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
@@ -57,12 +61,12 @@ class Plugin(clientlib.BaseClient):
 
     # ===
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     def remove_torrent(self, torrent_hash):
-        self._get_torrent_obj(torrent_hash)  # XXX: raise clientlib.NoSuchTorrentError if torrent does not exist
+        self._get_torrent_obj(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
         self._client.remove_torrent(torrent_hash)
 
-    @clientlib.check_torrent_accessible
+    @check_torrent_accessible
     def load_torrent(self, torrent, prefix=None):
         torrent_path = torrent.get_path()
         kwargs = {"paused": False}
@@ -70,12 +74,12 @@ class Plugin(clientlib.BaseClient):
             kwargs["download_dir"] = prefix
         self._client.add_torrent(torrent_path, **kwargs)
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     def has_torrent(self, torrent_hash):
         try:
             self._get_torrent_obj(torrent_hash)
             return True
-        except clientlib.NoSuchTorrentError:
+        except NoSuchTorrentError:
             return False
 
     def get_hashes(self):
@@ -84,11 +88,11 @@ class Plugin(clientlib.BaseClient):
             for item in self._client.get_torrents(arguments=("id", "hashString"))
         ]
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     def get_torrent_path(self, torrent_hash):
         return self._get_torrent_prop(torrent_hash, "torrentFile")
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     def get_data_prefix(self, torrent_hash):
         return self._get_torrent_prop(torrent_hash, "downloadDir")
 
@@ -99,30 +103,30 @@ class Plugin(clientlib.BaseClient):
 
     # ===
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     def get_full_path(self, torrent_hash):
         torrent_obj = self._get_torrent_obj(torrent_hash, ("name", "downloadDir"))
         return os.path.join(torrent_obj.downloadDir, torrent_obj.name)
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     def get_file_name(self, torrent_hash):
         return self._get_torrent_prop(torrent_hash, "name")
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     def is_single_file(self, torrent_hash):
         files = self._get_files(torrent_hash)
         if len(files) > 1:
             return False
         return (os.path.sep not in list(files.values())[0]["name"])
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     def get_files(self, torrent_hash, on_fs=False):
         prefix = (self.get_data_prefix(torrent_hash) if on_fs else "")
         flist = [
             (item["name"], item["size"])
             for item in self._get_files(torrent_hash).values()
         ]
-        return clientlib.build_files(prefix, flist)
+        return build_files(prefix, flist)
 
     # ===
 
@@ -135,7 +139,7 @@ class Plugin(clientlib.BaseClient):
             torrent_obj = self._client.get_torrent(torrent_hash, arguments=tuple(props))
         except KeyError as err:
             if str(err) == "\'Torrent not found in result\'":
-                raise clientlib.NoSuchTorrentError("Unknown torrent hash")
+                raise NoSuchTorrentError("Unknown torrent hash")
             raise
         assert str(torrent_obj.hashString).lower() == torrent_hash
         return torrent_obj
@@ -143,7 +147,7 @@ class Plugin(clientlib.BaseClient):
     def _get_files(self, torrent_hash):
         files = self._client.get_files(torrent_hash)
         if len(files) == 0:
-            raise clientlib.NoSuchTorrentError("Unknown torrent hash")
+            raise NoSuchTorrentError("Unknown torrent hash")
         assert len(files) == 1
         files = list(files.values())[0]
         assert len(files) > 0

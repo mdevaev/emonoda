@@ -9,7 +9,7 @@ from ulib import fmt
 
 from ..core import tfile
 from ..core import tools
-from ..core.clientlib import NoSuchTorrentError
+from ..plugins.clients import NoSuchTorrentError
 
 from . import init
 from . import get_configured_client

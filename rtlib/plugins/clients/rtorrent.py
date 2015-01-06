@@ -24,7 +24,13 @@ import time
 import xmlrpc.client
 
 from ...optconf import Option
-from ...core import clientlib
+
+from . import BaseClient
+from . import WithCustoms
+from . import NoSuchTorrentError
+from . import hash_or_torrent
+from . import check_torrent_accessible
+from . import build_files
 
 
 # =====
@@ -38,12 +44,12 @@ def _catch_unknown_torrent(method):
             return method(self, *args, **kwargs)
         except xmlrpc.client.Fault as err:
             if err.faultCode == _XMLRPC_UNKNOWN_HASH:
-                raise clientlib.NoSuchTorrentError("Unknown torrent hash")
+                raise NoSuchTorrentError("Unknown torrent hash")
             raise
     return wrap
 
 
-class Plugin(clientlib.BaseClient, clientlib.WithCustoms):
+class Plugin(BaseClient, WithCustoms):
     # API description: http://code.google.com/p/gi-torrent/wiki/rTorrent_XMLRPC_reference
 
     def __init__(self, url, load_retries, retries_sleep, xmlrpc_size_limit):
@@ -67,12 +73,12 @@ class Plugin(clientlib.BaseClient, clientlib.WithCustoms):
 
     # ===
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     @_catch_unknown_torrent
     def remove_torrent(self, torrent_hash):
         self._server.d.erase(torrent_hash)
 
-    @clientlib.check_torrent_accessible
+    @check_torrent_accessible
     def load_torrent(self, torrent, prefix=None):
         torrent_hash = torrent.get_hash()
         # XXX: https://github.com/rakshasa/rtorrent/issues/22
@@ -96,7 +102,7 @@ class Plugin(clientlib.BaseClient, clientlib.WithCustoms):
             self._server.d.set_directory(torrent_hash, prefix)
         self._server.d.start(torrent_hash)
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     def has_torrent(self, torrent_hash):
         try:
             assert self._server.d.get_hash(torrent_hash).lower() == torrent_hash
@@ -109,12 +115,12 @@ class Plugin(clientlib.BaseClient, clientlib.WithCustoms):
     def get_hashes(self):
         return list(map(str.lower, self._server.download_list()))
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     @_catch_unknown_torrent
     def get_torrent_path(self, torrent_hash):
         return self._server.d.get_loaded_file(torrent_hash)
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     @_catch_unknown_torrent
     def get_data_prefix(self, torrent_hash):
         mc = xmlrpc.client.MultiCall(self._server)
@@ -130,22 +136,22 @@ class Plugin(clientlib.BaseClient, clientlib.WithCustoms):
 
     # ===
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     @_catch_unknown_torrent
     def get_full_path(self, torrent_hash):
         return self._server.d.get_base_path(torrent_hash)
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     @_catch_unknown_torrent
     def get_file_name(self, torrent_hash):
         return self._server.d.get_name(torrent_hash)
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     @_catch_unknown_torrent
     def is_single_file(self, torrent_hash):
         return (not self._server.d.is_multi_file(torrent_hash))
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     @_catch_unknown_torrent
     def get_files(self, torrent_hash, on_fs=False):
         mc = xmlrpc.client.MultiCall(self._server)
@@ -167,7 +173,7 @@ class Plugin(clientlib.BaseClient, clientlib.WithCustoms):
         flist = tuple(mc())
         flist = tuple(zip(flist[::2], flist[1::2]))
 
-        files = clientlib.build_files(base, flist)
+        files = build_files(base, flist)
         files.update({base: None})
         return files
 
@@ -177,7 +183,7 @@ class Plugin(clientlib.BaseClient, clientlib.WithCustoms):
     def get_custom_keys(cls):
         return ("1", "2", "3", "4", "5")
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     @_catch_unknown_torrent
     def set_customs(self, torrent_hash, customs):
         assert len(customs) != 0, "Empty customs dict"
@@ -186,7 +192,7 @@ class Plugin(clientlib.BaseClient, clientlib.WithCustoms):
             getattr(mc.d, "set_custom{}".format(key))(torrent_hash, value)
         mc()
 
-    @clientlib.hash_or_torrent
+    @hash_or_torrent
     @_catch_unknown_torrent
     def get_customs(self, torrent_hash, keys):
         assert len(keys) != 0, "Empty customs keys list"

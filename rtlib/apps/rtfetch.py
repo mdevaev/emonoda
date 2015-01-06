@@ -13,10 +13,10 @@ from ..core.fetcherlib import FetcherError
 from ..core.fetcherlib import WithLogin as F_WithLogin
 from ..core.fetcherlib import WithCaptcha as F_WithCaptcha
 
-from ..core.clientlib import WithCustoms as C_WithCustoms
-
 from ..plugins import get_bases
 from ..plugins import get_fetcher_class
+
+from ..plugins.clients import WithCustoms as C_WithCustoms
 
 from . import init
 from . import get_configured_client
