@@ -16,7 +16,7 @@ def get_fetcher_class(name):
     return get_plugin_class("fetchers", name)
 
 
-def has_extensions(cls, *exts):
+def get_bases(cls):
     if not inspect.isclass(cls):
         cls = cls.__class__
-    return (set(cls.__bases__).intersection(exts) == set(exts))
+    return cls.__bases__
