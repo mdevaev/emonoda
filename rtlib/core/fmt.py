@@ -33,6 +33,20 @@ def format_now(text):
     return datetime.datetime.now().strftime(text)
 
 
+def format_torrents_diff(diff, prefix):
+    lines = []
+    for (sign, color, items) in (
+        ("+", "green",  diff.added),
+        ("-", "red",    diff.removed),
+        ("~", "cyan",   diff.modified),
+        ("?", "yellow", diff.type_modified),
+    ):
+        for item in sorted(items):
+            lines.append("%s{%s}%s{reset} %s" % (prefix, color, sign, item))
+    return "\n".join(lines)
+
+
+# =====
 def make_fan():
     fan = 0
     while True:

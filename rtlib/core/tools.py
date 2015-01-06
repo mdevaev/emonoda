@@ -1,13 +1,9 @@
 import sys
-import operator
 
 from ulib.ui import cli
 
 from colorama import Fore
 from colorama import Style
-
-from . import tfile
-from . import fmt
 
 
 # =====
@@ -43,33 +39,3 @@ class Log:
 
     def _select(self, first, second):
         return (first if first is not None else second)
-
-
-# =====
-def print_torrents_diff(diff, prefix, log):
-    for (sign, color, items) in (
-        ("+", "green",  diff.added),
-        ("-", "red",    diff.removed),
-        ("~", "cyan",   diff.modified),
-        ("?", "yellow", diff.type_modified),
-    ):
-        for item in sorted(items):
-            log.print("%s{%s}%s{reset} %s" % (prefix, color, sign, item))
-
-
-def load_torrents_from_dir(dir_path, name_filter, log):
-    fan = fmt.make_fan()
-
-    def load_torrent(path):
-        log.print("# Caching {cyan}%s/{yellow}%s {magenta}%s{reset}" % (
-                  dir_path, name_filter, next(fan)), one_line=True)
-        return tfile.load_torrent_from_path(path)
-
-    torrents = list(sorted(
-        tfile.load_from_dir(dir_path, name_filter, as_abs=True, load_torrent=load_torrent).items(),
-        key=operator.itemgetter(0),
-    ))
-
-    log.print("# Cached {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}" % (
-              len(torrents), dir_path, name_filter))
-    return torrents

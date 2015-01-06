@@ -4,6 +4,7 @@ import argparse
 
 from ..core import tfile
 from ..core import tools
+from ..core import fmt
 
 from . import init
 from . import get_configured_client
@@ -33,10 +34,8 @@ def main():
         else:
             raise RuntimeError("Invalid file or hash: {}".format(item))
 
-    tools.print_torrents_diff(
-        diff=tfile.get_difference(*options.torrents),
-        prefix=" ",
-        log=tools.Log(config.core.use_colors, config.core.force_colors, sys.stdout),
+    tools.Log(config.core.use_colors, config.core.force_colors, sys.stdout).print(
+        fmt.format_torrents_diff(tfile.get_difference(*options.torrents), " "),
     )
 
 
