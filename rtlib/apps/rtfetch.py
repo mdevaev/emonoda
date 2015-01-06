@@ -4,8 +4,6 @@ import shutil
 import operator
 import argparse
 
-from ulib.ui import cli
-
 from ..core import tfile
 from ..core import tools
 from ..core import fmt
@@ -169,7 +167,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
 
         except Exception as err:
             log_stdout.print(format_status("red", "-"))
-            cli.print_traceback("\t")
+            log_stdout.print(fmt.format_traceback("\t"))
             error_count += 1
 
     if (
