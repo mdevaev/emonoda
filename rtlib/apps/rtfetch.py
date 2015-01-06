@@ -3,11 +3,11 @@ import os
 import shutil
 import argparse
 
-from ulib import fmt
 from ulib.ui import cli
 
 from ..core import tfile
 from ..core import tools
+from ..core import fmt
 
 from ..plugins import get_fetcher_class
 
@@ -23,7 +23,7 @@ from . import get_configured_client
 
 # =====
 def backup_torrent(torrent, backup_dir_path, backup_suffix):
-    backup_suffix = tools.get_date_by_format(backup_suffix)
+    backup_suffix = fmt.format_now(backup_suffix)
     backup_file_path = os.path.join(backup_dir_path, os.path.basename(torrent.get_path()) + backup_suffix)
     shutil.copyfile(torrent.get_path(), backup_file_path)
 
@@ -50,7 +50,7 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
                     client.set_customs(torrent, old_customs)
                 if len(to_set_customs) != 0:
                     client.set_customs(torrent, {
-                        key: tools.get_date_by_format(value)
+                        key: fmt.format_now(value)
                         for (key, value) in to_set_customs.items()
                     })
 

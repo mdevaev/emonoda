@@ -5,10 +5,10 @@ import operator
 import argparse
 import datetime
 
-from ulib import fmt
-
 from ..core import tfile
 from ..core import tools
+from ..core import fmt
+
 from ..plugins.clients import NoSuchTorrentError
 
 from . import init

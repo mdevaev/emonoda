@@ -1,29 +1,13 @@
 import sys
 import operator
 
-from datetime import datetime
-
 from ulib.ui import cli
 
 from colorama import Fore
 from colorama import Style
 
 from . import tfile
-
-
-# =====
-def get_date_by_format(fmt):
-    return datetime.now().strftime(fmt)
-
-
-def make_fan():
-    fan = 0
-    while True:
-        if fan < 3:
-            fan += 1
-        else:
-            fan = 0
-        yield "/-\\|"[fan]
+from . import fmt
 
 
 # =====
@@ -74,7 +58,7 @@ def print_torrents_diff(diff, prefix, log):
 
 
 def load_torrents_from_dir(dir_path, name_filter, log):
-    fan = make_fan()
+    fan = fmt.make_fan()
 
     def load_torrent(path):
         log.print("# Caching {cyan}%s/{yellow}%s {magenta}%s{reset}" % (
