@@ -13,26 +13,23 @@ if __name__ == "__main__":
         license="GPLv3",
         author="Devaev Maxim",
         author_email="mdevaev@gmail.com",
-        description="The set of tools to organize and managament for your torrents",
+        description="The set of tools to organize and manage your torrents",
         platforms="any",
 
-        namespace_packages=[
-            "rtlib",
-            "rtlib.clients",
-            "rtlib.fetchers",
-        ],
-
         packages=[
+            "rtlib",
             "rtlib.core",
             "rtlib.optconf",
             "rtlib.optconf.loaders",
             "rtlib.apps",
             "rtlib.apps.hooks",
 
+            "rtlib.clients",
             "rtlib.clients.rtorrent",
             "rtlib.clients.ktorrent",
             "rtlib.clients.transmission",
 
+            "rtlib.fetchers",
             "rtlib.fetchers.rutracker",
             "rtlib.fetchers.nnmclub",
         ],
