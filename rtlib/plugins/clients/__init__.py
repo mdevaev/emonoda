@@ -2,6 +2,8 @@ import os
 
 from ...core import tfile
 
+from .. import BasePlugin
+
 
 # =====
 class NoSuchTorrentError(Exception):
@@ -41,17 +43,7 @@ def check_torrent_accessible(method):
 
 
 # =====
-class BaseClient:
-    @classmethod
-    def get_name(cls):
-        raise NotImplementedError
-
-    @classmethod
-    def get_options(cls):
-        return {}
-
-    # ===
-
+class BaseClient(BasePlugin):
     @hash_or_torrent
     def remove_torrent(self, torrent_hash):
         raise NotImplementedError

@@ -9,7 +9,6 @@ from ulib.ui import cli
 from ..core import tfile
 from ..core import tools
 
-from ..plugins import get_bases
 from ..plugins import get_fetcher_class
 
 from ..plugins.clients import WithCustoms as C_WithCustoms
@@ -35,7 +34,7 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
 
     if not noop:
         if client is not None:
-            if C_WithCustoms in get_bases(client) and len(to_save_customs) != 0:
+            if C_WithCustoms in client.get_bases() and len(to_save_customs) != 0:
                 old_customs = client.get_customs(torrent, to_save_customs)
             prefix = client.get_data_prefix(torrent)
             client.remove_torrent(torrent)
@@ -46,7 +45,7 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
 
         if client is not None:
             client.load_torrent(torrent, prefix)
-            if C_WithCustoms in get_bases(client):
+            if C_WithCustoms in client.get_bases():
                 if len(to_save_customs) != 0:
                     client.set_customs(torrent, old_customs)
                 if len(to_set_customs) != 0:
@@ -124,7 +123,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
                          torrent_file_name, (torrent.get_comment() or "")))  # pylint: disable=cell-var-from-loop
 
         try:
-            if F_WithLogin in get_bases(fetcher) and not fetcher.is_logged_in():
+            if F_WithLogin in fetcher.get_bases() and not fetcher.is_logged_in():
                 log_stdout.print(format_status("yellow", "?"))
                 error_count += 1
                 continue
@@ -191,14 +190,14 @@ def init_fetchers(fetchers_config, only_fetchers, exclude_fetchers, pass_failed_
         fetcher_class = get_fetcher_class(fetcher_name)
 
         fetcher_kwargs = dict(fetchers_config[fetcher_name])
-        if F_WithCaptcha in get_bases(fetcher_class):
+        if F_WithCaptcha in fetcher_class.get_bases():
             fetcher_kwargs["decode_captcha"] = read_captcha
 
         fetcher = fetcher_class(**fetcher_kwargs)
 
         try:
             fetcher.test_site()
-            if F_WithLogin in get_bases(fetcher_class):
+            if F_WithLogin in fetcher_class.get_bases():
                 fetcher.login()
             log.print("# Fetcher {blue}%s{reset} is {green}ready{reset}" % (fetcher_name))
         except Exception as err:

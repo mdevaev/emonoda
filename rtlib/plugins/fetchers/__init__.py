@@ -12,6 +12,8 @@ from ...core import tfile
 from ...optconf import Option
 from ...optconf import SecretOption
 
+from .. import BasePlugin
+
 
 # =====
 class FetcherError(Exception):
@@ -86,7 +88,7 @@ def _assert(exception, arg, msg=""):
         raise exception(msg)
 
 
-class BaseFetcher:
+class BaseFetcher(BasePlugin):
     def __init__(self, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url, **_):  # +stub
         self._url_retries = url_retries
         self._url_sleep_time = url_sleep_time
@@ -94,10 +96,6 @@ class BaseFetcher:
         self._user_agent = user_agent
         self._client_agent = client_agent
         self._proxy_url = proxy_url
-
-    @classmethod
-    def get_name(cls):
-        raise NotImplementedError
 
     @classmethod
     def get_version(cls):
