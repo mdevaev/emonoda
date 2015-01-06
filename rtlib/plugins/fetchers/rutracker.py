@@ -56,7 +56,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithOpener):
 
     @classmethod
     def get_name(cls):
-        return "rutracker"
+        return "rutracker.org"
 
     @classmethod
     def get_version(cls):

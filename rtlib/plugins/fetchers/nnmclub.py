@@ -49,7 +49,7 @@ class Plugin(BaseFetcher, WithLogin, WithOpener):
 
     @classmethod
     def get_name(cls):
-        return "nnmclub"
+        return "nnm-club.me"
 
     @classmethod
     def get_version(cls):
