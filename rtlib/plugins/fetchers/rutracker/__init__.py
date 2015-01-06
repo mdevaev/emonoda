@@ -23,7 +23,7 @@ import urllib.parse
 import http.cookiejar
 import re
 
-from ...core import fetcherlib
+from ....core import fetcherlib
 
 
 # =====
@@ -35,7 +35,7 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Fetcher(fetcherlib.BaseFetcher, fetcherlib.WithLogin, fetcherlib.WithCaptcha, fetcherlib.WithOpener):
+class Plugin(fetcherlib.BaseFetcher, fetcherlib.WithLogin, fetcherlib.WithCaptcha, fetcherlib.WithOpener):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         for parent in self.__class__.__bases__:
             parent.__init__(self, **kwargs)

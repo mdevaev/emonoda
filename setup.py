@@ -23,15 +23,16 @@ if __name__ == "__main__":
             "rtlib.optconf.loaders",
             "rtlib.apps",
             "rtlib.apps.hooks",
+            "rtlib.plugins",
 
-            "rtlib.clients",
-            "rtlib.clients.rtorrent",
-            "rtlib.clients.ktorrent",
-            "rtlib.clients.transmission",
+            "rtlib.plugins.clients",
+            "rtlib.plugins.clients.rtorrent",
+            "rtlib.plugins.clients.ktorrent",
+            "rtlib.plugins.clients.transmission",
 
-            "rtlib.fetchers",
-            "rtlib.fetchers.rutracker",
-            "rtlib.fetchers.nnmclub",
+            "rtlib.plugins.fetchers",
+            "rtlib.plugins.fetchers.rutracker",
+            "rtlib.plugins.fetchers.nnmclub",
         ],
 
         install_requires=[

@@ -23,8 +23,8 @@ import os
 import time
 import xmlrpc.client
 
-from ...optconf import Option
-from ...core import clientlib
+from ....optconf import Option
+from ....core import clientlib
 
 
 # =====
@@ -43,7 +43,7 @@ def _catch_unknown_torrent(method):
     return wrap
 
 
-class Client(clientlib.BaseClient, clientlib.WithCustoms):
+class Plugin(clientlib.BaseClient, clientlib.WithCustoms):
     # API description: http://code.google.com/p/gi-torrent/wiki/rTorrent_XMLRPC_reference
 
     def __init__(self, url, load_retries, retries_sleep, xmlrpc_size_limit):

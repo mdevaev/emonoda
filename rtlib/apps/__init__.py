@@ -2,14 +2,13 @@ import sys
 import os
 import argparse
 
-from ..core.clientlib import get_client_class
-from ..core.fetcherlib import get_fetcher_class
+from ..plugins import get_client_class
+from ..plugins import get_fetcher_class
 
-from ..optconf import (
-    Section,
-    Option,
-    make_config,
-)
+from ..optconf import make_config
+from ..optconf import Section
+from ..optconf import Option
+
 from ..optconf.dumper import make_config_dump
 from ..optconf.loaders.yaml import load_file as load_yaml_file
 

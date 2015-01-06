@@ -1,5 +1,4 @@
 import sys
-import inspect
 import operator
 
 from datetime import datetime
@@ -13,12 +12,6 @@ from . import tfile
 
 
 # =====
-def has_extensions(cls, *exts):
-    if not inspect.isclass(cls):
-        cls = cls.__class__
-    return (set(cls.__bases__).intersection(exts) == set(exts))
-
-
 def get_date_by_format(fmt):
     return datetime.now().strftime(fmt)
 
