@@ -1,5 +1,6 @@
 import math
 import datetime
+import traceback
 
 
 # =====
@@ -31,6 +32,13 @@ def format_progress(value, limit):
 
 def format_now(text):
     return datetime.datetime.now().strftime(text)
+
+
+def format_traceback(prefix):
+    lines = []
+    for row in traceback.format_exc().strip().split("\n") :
+        lines.append(prefix + row)
+    return "\n".join(lines)
 
 
 def format_torrents_diff(diff, prefix):
