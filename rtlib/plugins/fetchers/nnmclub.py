@@ -22,8 +22,12 @@
 import urllib.parse
 import re
 
-from ...core import fetcherlib
 from ...core import tfile
+
+from . import BaseFetcher
+from . import WithLogin
+from . import WithOpener
+from . import build_opener
 
 
 # =====
@@ -35,7 +39,7 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Plugin(fetcherlib.BaseFetcher, fetcherlib.WithLogin, fetcherlib.WithOpener):
+class Plugin(BaseFetcher, WithLogin, WithOpener):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         for parent in self.__class__.__bases__:
             parent.__init__(self, **kwargs)
@@ -59,7 +63,7 @@ class Plugin(fetcherlib.BaseFetcher, fetcherlib.WithLogin, fetcherlib.WithOpener
         return params
 
     def test_site(self):
-        opener = fetcherlib.build_opener(proxy_url=self._proxy_url)
+        opener = build_opener(proxy_url=self._proxy_url)
         data = self._read_url("http://nnm-club.me", opener=opener)
         self._assert_site(b"<link rel=\"canonical\" href=\"http://nnm-club.me/\">" in data)
 

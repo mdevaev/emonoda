@@ -9,14 +9,14 @@ from ulib.ui import cli
 from ..core import tfile
 from ..core import tools
 
-from ..core.fetcherlib import FetcherError
-from ..core.fetcherlib import WithLogin as F_WithLogin
-from ..core.fetcherlib import WithCaptcha as F_WithCaptcha
-
 from ..plugins import get_bases
 from ..plugins import get_fetcher_class
 
 from ..plugins.clients import WithCustoms as C_WithCustoms
+
+from ..plugins.fetchers import FetcherError
+from ..plugins.fetchers import WithLogin as F_WithLogin
+from ..plugins.fetchers import WithCaptcha as F_WithCaptcha
 
 from . import init
 from . import get_configured_client
