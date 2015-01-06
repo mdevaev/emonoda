@@ -7,10 +7,8 @@ import urllib.parse
 import collections
 import itertools
 
-from bcoding import (
-    bdecode as decode_data,
-    bencode as encode_struct,
-)
+from bcoding import bdecode as decode_data
+from bcoding import bencode as encode_struct
 
 
 # =====

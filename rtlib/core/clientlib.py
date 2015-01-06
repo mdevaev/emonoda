@@ -1,5 +1,4 @@
 import os
-import importlib
 
 from . import tfile
 
@@ -7,11 +6,6 @@ from . import tfile
 # =====
 class NoSuchTorrentError(Exception):
     pass
-
-
-def get_client_class(name):
-    module = importlib.import_module("rtlib.clients." + name)
-    return getattr(module, "Client")
 
 
 # =====

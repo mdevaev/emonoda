@@ -1,4 +1,3 @@
-import importlib
 import socket
 import contextlib
 import urllib.request
@@ -10,10 +9,8 @@ from ulib.network.url import SocksHandler
 
 from . import tfile
 
-from ..optconf import (
-    Option,
-    SecretOption,
-)
+from ..optconf import Option
+from ..optconf import SecretOption
 
 
 # =====
@@ -31,11 +28,6 @@ class AuthError(FetcherError):
 
 class LogicError(FetcherError):
     pass
-
-
-def get_fetcher_class(name):
-    module = importlib.import_module("rtlib.fetchers." + name)
-    return getattr(module, "Fetcher")
 
 
 # =====

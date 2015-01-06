@@ -22,15 +22,14 @@
 import os
 import transmissionrpc
 
-from ...optconf import (
-    Option,
-    SecretOption,
-)
-from ...core import clientlib
+from ....optconf import Option
+from ....optconf import SecretOption
+
+from ....core import clientlib
 
 
 # =====
-class Client(clientlib.BaseClient):
+class Plugin(clientlib.BaseClient):
     # API description:
     #   http://pythonhosted.org/transmissionrpc/
     #   https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt

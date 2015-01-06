@@ -22,11 +22,11 @@
 import os
 import dbus  # pylint: disable=import-error
 
-from ...core import clientlib
+from ....core import clientlib
 
 
 # =====
-class Client(clientlib.BaseClient):
+class Plugin(clientlib.BaseClient):
     def __init__(self):
         self._bus = dbus.SessionBus()
         self._core = self._bus.get_object("org.ktorrent.ktorrent", "/core")

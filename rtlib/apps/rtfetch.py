@@ -9,19 +9,17 @@ from ulib.ui import cli
 from ..core import tfile
 from ..core import tools
 
-from ..core.fetcherlib import (
-    FetcherError,
-    WithLogin as F_WithLogin,
-    WithCaptcha as F_WithCaptcha,
-    get_fetcher_class,
-)
+from ..core.fetcherlib import FetcherError
+from ..core.fetcherlib import WithLogin as F_WithLogin
+from ..core.fetcherlib import WithCaptcha as F_WithCaptcha
 
-from ..core.clientlib import (
-    WithCustoms as C_WithCustoms,
-    get_client_class,
-)
+from ..core.clientlib import WithCustoms as C_WithCustoms
+
+from ..plugins import has_extensions
+from ..plugins import get_fetcher_class
 
 from . import init
+from . import get_configured_client
 
 
 # =====
@@ -37,7 +35,7 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
 
     if not noop:
         if client is not None:
-            if tools.has_extensions(client, C_WithCustoms) and len(to_save_customs) != 0:
+            if has_extensions(client, C_WithCustoms) and len(to_save_customs) != 0:
                 old_customs = client.get_customs(torrent, to_save_customs)
             prefix = client.get_data_prefix(torrent)
             client.remove_torrent(torrent)
@@ -48,7 +46,7 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
 
         if client is not None:
             client.load_torrent(torrent, prefix)
-            if tools.has_extensions(client, C_WithCustoms):
+            if has_extensions(client, C_WithCustoms):
                 if len(to_save_customs) != 0:
                     client.set_customs(torrent, old_customs)
                 if len(to_set_customs) != 0:
@@ -126,7 +124,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
                          torrent_file_name, (torrent.get_comment() or "")))  # pylint: disable=cell-var-from-loop
 
         try:
-            if tools.has_extensions(fetcher, F_WithLogin) and not fetcher.is_logged_in():
+            if has_extensions(fetcher, F_WithLogin) and not fetcher.is_logged_in():
                 log_stdout.print(format_status("yellow", "?"))
                 error_count += 1
                 continue
@@ -193,14 +191,14 @@ def init_fetchers(fetchers_config, only_fetchers, exclude_fetchers, pass_failed_
         fetcher_class = get_fetcher_class(fetcher_name)
 
         fetcher_kwargs = dict(fetchers_config[fetcher_name])
-        if tools.has_extensions(fetcher_class, F_WithCaptcha):
+        if has_extensions(fetcher_class, F_WithCaptcha):
             fetcher_kwargs["decode_captcha"] = read_captcha
 
         fetcher = fetcher_class(**fetcher_kwargs)
 
         try:
             fetcher.test_site()
-            if tools.has_extensions(fetcher_class, F_WithLogin):
+            if has_extensions(fetcher_class, F_WithLogin):
                 fetcher.login()
             log.print("# Fetcher {blue}%s{reset} is {green}ready{reset}" % (fetcher_name))
         except Exception as err:
@@ -233,6 +231,8 @@ def main():
     log_stdout = tools.Log(config.core.use_colors, config.core.force_colors, sys.stdout)
     log_stderr = tools.Log(config.core.use_colors, config.core.force_colors, sys.stderr)
 
+    client = get_configured_client(config)
+
     fetchers = init_fetchers(
         fetchers_config=config.fetchers,
         only_fetchers=options.only_fetchers,
@@ -240,11 +240,6 @@ def main():
         pass_failed_login=config.rtfetch.pass_failed_login,
         log=log_stderr,
     )
-
-    if config.core.client is not None:
-        client = get_client_class(config.core.client)(**config.client)
-    else:
-        client = None
 
     update(
         client=client,
