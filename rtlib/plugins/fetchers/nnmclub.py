@@ -22,8 +22,8 @@
 import urllib.parse
 import re
 
-from ....core import fetcherlib
-from ....core import tfile
+from ...core import fetcherlib
+from ...core import tfile
 
 
 # =====
