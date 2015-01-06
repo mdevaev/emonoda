@@ -36,7 +36,7 @@ def format_now(text):
 
 def format_traceback(prefix):
     lines = []
-    for row in traceback.format_exc().strip().split("\n") :
+    for row in traceback.format_exc().strip().split("\n"):
         lines.append(prefix + row)
     return "\n".join(lines)
 

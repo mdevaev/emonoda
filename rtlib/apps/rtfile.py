@@ -6,7 +6,7 @@ import argparse
 import datetime
 
 from ..core import tfile
-from ..core import tools
+from ..core import cli
 from ..core import fmt
 
 from ..plugins.clients import NoSuchTorrentError
@@ -157,7 +157,7 @@ def main():  # pylint: disable=too-many-locals
     options = args_parser.parse_args(argv[1:])
 
     client = get_configured_client(config)
-    log = tools.Log(config.core.use_colors, config.core.force_colors, sys.stdout)
+    log = cli.Log(config.core.use_colors, config.core.force_colors, sys.stdout)
 
     to_print = [
         (option[2:], method)
