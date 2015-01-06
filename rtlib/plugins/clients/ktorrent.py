@@ -22,7 +22,7 @@
 import os
 import dbus  # pylint: disable=import-error
 
-from ....core import clientlib
+from ...core import clientlib
 
 
 # =====

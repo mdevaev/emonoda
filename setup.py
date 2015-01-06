@@ -24,15 +24,8 @@ if __name__ == "__main__":
             "rtlib.apps",
             "rtlib.apps.hooks",
             "rtlib.plugins",
-
             "rtlib.plugins.clients",
-            "rtlib.plugins.clients.rtorrent",
-            "rtlib.plugins.clients.ktorrent",
-            "rtlib.plugins.clients.transmission",
-
             "rtlib.plugins.fetchers",
-            "rtlib.plugins.fetchers.rutracker",
-            "rtlib.plugins.fetchers.nnmclub",
         ],
 
         install_requires=[

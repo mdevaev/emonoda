@@ -22,10 +22,10 @@
 import os
 import transmissionrpc
 
-from ....optconf import Option
-from ....optconf import SecretOption
+from ...optconf import Option
+from ...optconf import SecretOption
 
-from ....core import clientlib
+from ...core import clientlib
 
 
 # =====

@@ -23,7 +23,7 @@ import urllib.parse
 import http.cookiejar
 import re
 
-from ....core import fetcherlib
+from ...core import fetcherlib
 
 
 # =====

@@ -23,8 +23,8 @@ import os
 import time
 import xmlrpc.client
 
-from ....optconf import Option
-from ....core import clientlib
+from ...optconf import Option
+from ...core import clientlib
 
 
 # =====
