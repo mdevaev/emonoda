@@ -5,7 +5,6 @@ import operator
 import argparse
 
 from ..core import tfile
-from ..core import cli
 from ..core import fmt
 
 from ..plugins.clients import WithCustoms as C_WithCustoms
@@ -13,6 +12,7 @@ from ..plugins.fetchers import WithLogin as F_WithLogin
 from ..plugins.fetchers import FetcherError
 
 from . import init
+from . import get_configured_log
 from . import get_configured_client
 from . import get_configured_fetchers
 
@@ -209,8 +209,8 @@ def main():
         print("# No available fetchers in config", file=sys.stderr)
         sys.exit(1)
 
-    log_stdout = cli.Log(config.core.use_colors, config.core.force_colors, sys.stdout)
-    log_stderr = cli.Log(config.core.use_colors, config.core.force_colors, sys.stderr)
+    log_stdout = get_configured_log(config, sys.stdout)
+    log_stderr = get_configured_log(config, sys.stderr)
 
     client = get_configured_client(config, log_stderr)
 

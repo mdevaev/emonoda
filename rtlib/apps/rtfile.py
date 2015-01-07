@@ -6,12 +6,12 @@ import argparse
 import datetime
 
 from ..core import tfile
-from ..core import cli
 from ..core import fmt
 
 from ..plugins.clients import NoSuchTorrentError
 
 from . import init
+from . import get_configured_log
 from . import get_configured_client
 
 
@@ -156,9 +156,10 @@ def main():  # pylint: disable=too-many-locals
     args_parser.add_argument("torrents", type=(lambda path: tfile.Torrent(path=path)), nargs="+", metavar="<path>")
     options = args_parser.parse_args(argv[1:])
 
-    log = cli.Log(config.core.use_colors, config.core.force_colors, sys.stdout)
+    log_stdout = get_configured_log(config, sys.stdout)
+    log_stderr = get_configured_log(config, sys.stderr)
 
-    client = get_configured_client(config, log)
+    client = get_configured_client(config, log_stderr)
 
     to_print = [
         (option[2:], method)
@@ -168,18 +169,18 @@ def main():  # pylint: disable=too-many-locals
 
     for torrent in options.torrents:
         if len(to_print) == 0:
-            print_pretty_meta(torrent, client, log)
+            print_pretty_meta(torrent, client, log_stdout)
         else:
             for (header, method) in to_print:
                 prefix = ("" if options.without_headers else "{blue}%s:{reset} " % (header))
                 retval = method(torrent)
                 if isinstance(retval, (list, tuple)):
                     for item in retval:
-                        log.print(prefix + str(item))
+                        log_stdout.print(prefix + str(item))
                 else:
-                    log.print(prefix + str(retval))
+                    log_stdout.print(prefix + str(retval))
         if len(options.torrents) > 1:
-            log.print()
+            log_stdout.print()
 
 
 if __name__ == "__main__":

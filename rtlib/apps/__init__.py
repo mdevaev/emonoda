@@ -9,6 +9,8 @@ from ..optconf import Option
 from ..optconf.dumper import make_config_dump
 from ..optconf.loaders.yaml import load_file as load_yaml_file
 
+from ..core import cli
+
 from ..plugins import get_client_class
 from ..plugins import get_fetcher_class
 
@@ -50,6 +52,10 @@ def init():
     config.setdefault("fetchers", Section())
 
     return (args_parser, remaining, config)
+
+
+def get_configured_log(config, output):
+    return cli.Log(config.core.use_colors, config.core.force_colors, output)
 
 
 def get_configured_client(config, log):
