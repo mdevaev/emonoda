@@ -50,10 +50,6 @@ class Plugin(BaseClient):
     def get_name(cls):
         return "ktorrent"
 
-    @classmethod
-    def get_options(cls):
-        return {}
-
     # ===
 
     @hash_or_torrent

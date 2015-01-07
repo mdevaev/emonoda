@@ -12,6 +12,7 @@ from ...optconf import Option
 from ...optconf import SecretOption
 
 from .. import BasePlugin
+from .. import BaseExtension
 
 
 # =====
@@ -139,7 +140,7 @@ class BaseFetcher(BasePlugin):
         self._assert_logic(tfile.is_valid_data(data), msg)
 
 
-class WithLogin:
+class WithLogin(BaseExtension):
     def __init__(self, user, passwd, **_):
         self._user = user
         self._passwd = passwd
@@ -161,24 +162,16 @@ class WithLogin:
         _assert(AuthError, *args)
 
 
-class WithCaptcha:
+class WithCaptcha(BaseExtension):
     def __init__(self, captcha_decoder, **_):
         self._captcha_decoder = captcha_decoder
 
-    @classmethod
-    def get_options(cls):
-        return {}
 
-
-class WithOpener:
+class WithOpener(BaseExtension):
     def __init__(self, **_):
         self._retry_codes = (500, 502, 503)
         self._cookie_jar = None
         self._opener = None
-
-    @classmethod
-    def get_options(cls):
-        return {}
 
     @contextlib.contextmanager
     def _make_opener(self):
