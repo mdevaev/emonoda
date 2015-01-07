@@ -22,23 +22,23 @@ def main():
     args_parser.add_argument("torrents", type=str, nargs=2, metavar="<path/hash>")
     options = args_parser.parse_args(argv[1:])
 
-    log_stdout = get_configured_log(config, False, sys.stdout)
-    log_stderr = get_configured_log(config, (not options.verbose), sys.stderr)
+    with get_configured_log(config, False, sys.stdout) as log_stdout:
+        with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
 
-    client = get_configured_client(config, log_stderr)
+            client = get_configured_client(config, log_stderr)
 
-    for count in range(2):
-        item = options.torrents[count]
-        if os.path.exists(item):
-            options.torrents[count] = tfile.Torrent(path=item).get_files()
-        elif tfile.is_hash(item):
-            if client is None:
-                raise RuntimeError("Required client for hash: {}".format(item))
-            options.torrents[count] = client.get_files(item)
-        else:
-            raise RuntimeError("Invalid file or hash: {}".format(item))
+            for count in range(2):
+                item = options.torrents[count]
+                if os.path.exists(item):
+                    options.torrents[count] = tfile.Torrent(path=item).get_files()
+                elif tfile.is_hash(item):
+                    if client is None:
+                        raise RuntimeError("Required client for hash: {}".format(item))
+                    options.torrents[count] = client.get_files(item)
+                else:
+                    raise RuntimeError("Invalid file or hash: {}".format(item))
 
-    log_stdout.print(fmt.format_torrents_diff(tfile.get_difference(*options.torrents), " "))
+            log_stdout.print(fmt.format_torrents_diff(tfile.get_difference(*options.torrents), " "))
 
 
 if __name__ == "__main__":
