@@ -141,7 +141,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithOpener):
                 self._assert_auth(cap_sid_match is not None, "Unknown cap_sid")
                 self._assert_auth(cap_code_match is not None, "Unknown cap_code")
 
-                post[cap_code_match.group(1)] = self._decode_captcha(cap_static_match.group(1))
+                post[cap_code_match.group(1)] = self._captcha_decoder(cap_static_match.group(1))
                 post["cap_sid"] = cap_sid_match.group(1)
                 text = self._read_login(post)
                 self._assert_auth(self._cap_static_regexp.search(text) is None, "Invalid captcha or password")

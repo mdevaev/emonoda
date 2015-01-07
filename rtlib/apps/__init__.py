@@ -2,15 +2,18 @@ import sys
 import os
 import argparse
 
-from ..plugins import get_client_class
-from ..plugins import get_fetcher_class
-
 from ..optconf import make_config
 from ..optconf import Section
 from ..optconf import Option
 
 from ..optconf.dumper import make_config_dump
 from ..optconf.loaders.yaml import load_file as load_yaml_file
+
+from ..plugins import get_client_class
+from ..plugins import get_fetcher_class
+
+from ..plugins.fetchers import WithLogin as F_WithLogin
+from ..plugins.fetchers import WithCaptcha as F_WithCaptcha
 
 
 # =====
@@ -56,6 +59,34 @@ def get_configured_client(config):
         return None
 
 
+def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
+    to_init = set(config.fetchers).difference(exclude)
+    if len(only) != 0:
+        to_init.intersection(only)
+
+    fetchers = []
+    for fetcher_name in sorted(to_init):
+        log.print("# Enabling the fetcher {blue}%s{reset} ..." % (fetcher_name), one_line=True)
+
+        fetcher_class = get_fetcher_class(fetcher_name)
+        fetcher_kwargs = dict(config.fetchers[fetcher_name])
+        if F_WithCaptcha in fetcher_class.get_bases():
+            fetcher_kwargs["captcha_decoder"] = captcha_decoder
+        fetcher = fetcher_class(**fetcher_kwargs)
+
+        try:
+            fetcher.test_site()
+            if F_WithLogin in fetcher_class.get_bases():
+                fetcher.login()
+            log.print("# Fetcher {blue}%s{reset} is {green}ready{reset}" % (fetcher_name))
+        except Exception as err:
+            log.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (fetcher_name, type(err).__name__, err))
+            raise
+
+        fetchers.append(fetcher)
+    return fetchers
+
+
 # =====
 def _get_config_scheme():
     return {
@@ -69,7 +100,6 @@ def _get_config_scheme():
         "rtfetch": {
             "backup_dir":        Option(default=None, type=str, help="Backup old torrent files after update here"),
             "backup_suffix":     Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
-            "pass_failed_login": Option(default=False, help="Don't crash when login error accured"),
             "show_unknown":      Option(default=False, help="Show the torrents with unknown tracker in the log"),
             "show_passed":       Option(default=False, help="Show the torrents without changes"),
             "show_diff":         Option(default=True, help="Show diff between old and updated torrent files"),

@@ -8,16 +8,13 @@ from ..core import tfile
 from ..core import cli
 from ..core import fmt
 
-from ..plugins import get_fetcher_class
-
 from ..plugins.clients import WithCustoms as C_WithCustoms
-
-from ..plugins.fetchers import FetcherError
 from ..plugins.fetchers import WithLogin as F_WithLogin
-from ..plugins.fetchers import WithCaptcha as F_WithCaptcha
+from ..plugins.fetchers import FetcherError
 
 from . import init
 from . import get_configured_client
+from . import get_configured_fetchers
 
 
 # =====
@@ -194,37 +191,6 @@ def read_captcha(url):
     return input()
 
 
-def init_fetchers(fetchers_config, only_fetchers, exclude_fetchers, pass_failed_login, log):
-    to_init = set(fetchers_config).difference(exclude_fetchers)
-    if len(only_fetchers) != 0:
-        to_init.intersection(only_fetchers)
-
-    fetchers = []
-    for fetcher_name in sorted(to_init):
-        log.print("# Enabling the fetcher {blue}%s{reset} ..." % (fetcher_name), one_line=True)
-
-        fetcher_class = get_fetcher_class(fetcher_name)
-
-        fetcher_kwargs = dict(fetchers_config[fetcher_name])
-        if F_WithCaptcha in fetcher_class.get_bases():
-            fetcher_kwargs["decode_captcha"] = read_captcha
-
-        fetcher = fetcher_class(**fetcher_kwargs)
-
-        try:
-            fetcher.test_site()
-            if F_WithLogin in fetcher_class.get_bases():
-                fetcher.login()
-            log.print("# Fetcher {blue}%s{reset} is {green}ready{reset}" % (fetcher_name))
-        except Exception as err:
-            log.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (fetcher_name, type(err).__name__, err))
-            if not pass_failed_login:
-                raise
-
-        fetchers.append(fetcher)
-    return fetchers
-
-
 # ===== Main =====
 def main():
     (parent_parser, argv, config) = init()
@@ -248,11 +214,11 @@ def main():
 
     client = get_configured_client(config)
 
-    fetchers = init_fetchers(
-        fetchers_config=config.fetchers,
-        only_fetchers=options.only_fetchers,
-        exclude_fetchers=options.exclude_fetchers,
-        pass_failed_login=config.rtfetch.pass_failed_login,
+    fetchers = get_configured_fetchers(
+        config=config,
+        captcha_decoder=read_captcha,
+        only=options.only_fetchers,
+        exclude=options.exclude_fetchers,
         log=log_stderr,
     )
 
