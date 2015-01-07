@@ -29,7 +29,6 @@ if __name__ == "__main__":
         ],
 
         install_requires=[
-            "bcoding",
             "colorama",
 
             "tabloid",
