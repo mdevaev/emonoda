@@ -20,7 +20,6 @@
 
 
 import os
-import transmissionrpc
 
 from ...optconf import Option
 from ...optconf import SecretOption
@@ -31,6 +30,11 @@ from . import hash_or_torrent
 from . import check_torrent_accessible
 from . import build_files
 
+try:
+    import transmissionrpc
+except ImportError:
+    transmissionrpc = None
+
 
 # =====
 class Plugin(BaseClient):
@@ -39,6 +43,9 @@ class Plugin(BaseClient):
     #   https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
 
     def __init__(self, url, user, passwd, timeout):
+        if transmissionrpc is None:
+            raise RuntimeError("Required module transmissionrpc")
+
         self._client = transmissionrpc.Client(
             address=url,
             user=user,
