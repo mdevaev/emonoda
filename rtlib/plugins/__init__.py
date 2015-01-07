@@ -44,3 +44,9 @@ class BasePlugin:
     @classmethod
     def get_bases(cls):
         return cls.__bases__
+
+
+class BaseExtension:
+    @classmethod
+    def get_options(cls):
+        return {}

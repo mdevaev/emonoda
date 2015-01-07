@@ -3,6 +3,7 @@ import os
 from ...core import tfile
 
 from .. import BasePlugin
+from .. import BaseExtension
 
 
 # =====
@@ -89,7 +90,7 @@ class BaseClient(BasePlugin):
         raise NotImplementedError
 
 
-class WithCustoms:
+class WithCustoms(BaseExtension):
     @classmethod
     def get_custom_keys(cls):
         raise NotImplementedError
