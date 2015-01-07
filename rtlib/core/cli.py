@@ -43,19 +43,11 @@ class Log:
 
 
 # =====
-_last_text = ""
+_next_ctl = ""
 
 
 def _inner_print(text, one_line, output):
-    global _last_text  # pylint: disable=global-statement
-    if one_line:
-        to_print = " " * len(_last_text) + "\r" + text + "\r"
-        _last_text = text
-    else:
-        if len(_last_text) != 0:
-            to_print = " " * len(_last_text) + "\r" + text + "\n"
-        else:
-            to_print = text + "\n"
-        _last_text = ""
-    output.write(to_print)
+    global _next_ctl  # pylint: disable=global-statement
+    output.write(_next_ctl + text)
     output.flush()
+    _next_ctl = ("\r" + " " * len(text) + "\r" if one_line else "\n")
