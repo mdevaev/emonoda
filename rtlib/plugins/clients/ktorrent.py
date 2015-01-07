@@ -20,7 +20,6 @@
 
 
 import os
-import dbus  # pylint: disable=import-error
 
 from . import BaseClient
 from . import NoSuchTorrentError
@@ -28,10 +27,18 @@ from . import hash_or_torrent
 from . import check_torrent_accessible
 from . import build_files
 
+try:
+    import dbus  # pylint: disable=import-error
+except ImportError:
+    dbus = None
+
 
 # =====
 class Plugin(BaseClient):
     def __init__(self):
+        if dbus is None:
+            raise RuntimeError("Required module dbus")
+
         self._bus = dbus.SessionBus()
         self._core = self._bus.get_object("org.ktorrent.ktorrent", "/core")
         self._settings = self._bus.get_object("org.ktorrent.ktorrent", "/settings")
