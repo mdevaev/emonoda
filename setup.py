@@ -29,11 +29,9 @@ if __name__ == "__main__":
         ],
 
         install_requires=[
-            "colorama",
-
-            "tabloid",
-            "pygments",
             "pyyaml",
+            "colorama",
+            "pygments",
         ],
 
         classifiers=[

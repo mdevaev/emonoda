@@ -1,15 +1,16 @@
-import tabloid
 import colorama
 import pygments
 import pygments.lexers
 import pygments.formatters
+
+from ..thirdparty.tabloid import FormattedTable
 
 from . import Section
 
 
 # =====
 def make_config_dump(config, split_by, width=None):
-    table = tabloid.FormattedTable(width=width, header_background=colorama.Back.BLUE)
+    table = FormattedTable(width=width, header_background=colorama.Back.BLUE)
     table.add_column("Option", _format_option)
     table.add_column("Value", _format_value)
     table.add_column("Default", _format_default_value)
