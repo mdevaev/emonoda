@@ -67,7 +67,11 @@ def get_configured_log(config, quiet, output):
 def get_configured_client(config, log):
     if config.core.client is not None:
         log.print("# Enabling the client {blue}%s{reset} ..." % (config.core.client), one_line=True)
-        client = get_client_class(config.core.client)(**config.client)
+        try:
+            client = get_client_class(config.core.client)(**config.client)
+        except Exception as err:
+            log.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (config.core.client, type(err).__name__, err))
+            raise
         log.print("# Client {blue}%s{reset} is {green}ready{reset}" % (config.core.client))
         return client
     else:
