@@ -18,11 +18,12 @@ def main():
         description="Show the difference between two torrent files",
         parents=[parent_parser],
     )
+    args_parser.add_argument("-v", "--verbose", action="store_true")
     args_parser.add_argument("torrents", type=str, nargs=2, metavar="<path/hash>")
     options = args_parser.parse_args(argv[1:])
 
-    log_stderr = get_configured_log(config, sys.stderr)
-    log_stdout = get_configured_log(config, sys.stdout)
+    log_stdout = get_configured_log(config, False, sys.stdout)
+    log_stderr = get_configured_log(config, (not options.verbose), sys.stderr)
 
     client = get_configured_client(config, log_stderr)
 
