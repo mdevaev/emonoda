@@ -35,7 +35,6 @@ if __name__ == "__main__":
             "tabloid",
             "pygments",
             "pyyaml",
-            "contextlog",
         ],
 
         classifiers=[
