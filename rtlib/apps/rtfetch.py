@@ -212,7 +212,7 @@ def main():
     log_stdout = cli.Log(config.core.use_colors, config.core.force_colors, sys.stdout)
     log_stderr = cli.Log(config.core.use_colors, config.core.force_colors, sys.stderr)
 
-    client = get_configured_client(config)
+    client = get_configured_client(config, log_stderr)
 
     fetchers = get_configured_fetchers(
         config=config,

@@ -21,7 +21,7 @@ def main():
     args_parser.add_argument("torrents", type=str, nargs=2, metavar="<path/hash>")
     options = args_parser.parse_args(argv[1:])
 
-    client = get_configured_client(config)
+    client = get_configured_client(config, cli.Log(config.core.use_colors, config.core.force_colors, sys.stderr))
 
     for count in range(2):
         item = options.torrents[count]
