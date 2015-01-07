@@ -3,10 +3,10 @@ import os
 import argparse
 
 from ..core import tfile
-from ..core import cli
 from ..core import fmt
 
 from . import init
+from . import get_configured_log
 from . import get_configured_client
 
 
@@ -21,7 +21,10 @@ def main():
     args_parser.add_argument("torrents", type=str, nargs=2, metavar="<path/hash>")
     options = args_parser.parse_args(argv[1:])
 
-    client = get_configured_client(config, cli.Log(config.core.use_colors, config.core.force_colors, sys.stderr))
+    log_stderr = get_configured_log(config, sys.stderr)
+    log_stdout = get_configured_log(config, sys.stdout)
+
+    client = get_configured_client(config, log_stderr)
 
     for count in range(2):
         item = options.torrents[count]
@@ -34,9 +37,7 @@ def main():
         else:
             raise RuntimeError("Invalid file or hash: {}".format(item))
 
-    cli.Log(config.core.use_colors, config.core.force_colors, sys.stdout).print(
-        fmt.format_torrents_diff(tfile.get_difference(*options.torrents), " "),
-    )
+    log_stdout.print(fmt.format_torrents_diff(tfile.get_difference(*options.torrents), " "))
 
 
 if __name__ == "__main__":
