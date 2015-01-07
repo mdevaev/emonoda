@@ -1,5 +1,6 @@
 import sys
 import os
+import contextlib
 import argparse
 
 from ..optconf import make_config
@@ -54,8 +55,13 @@ def init():
     return (args_parser, remaining, config)
 
 
+@contextlib.contextmanager
 def get_configured_log(config, quiet, output):
-    return cli.Log(config.core.use_colors, config.core.force_colors, quiet, output)
+    log = cli.Log(config.core.use_colors, config.core.force_colors, quiet, output)
+    try:
+        yield log
+    finally:
+        log.finish()
 
 
 def get_configured_client(config, log):
@@ -72,6 +78,9 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
     to_init = set(config.fetchers).difference(exclude)
     if len(only) != 0:
         to_init.intersection(only)
+
+    if len(to_init) == 0:
+        raise RuntimeError("No fetchers to init")
 
     fetchers = []
     for fetcher_name in sorted(to_init):
@@ -93,6 +102,7 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
             raise
 
         fetchers.append(fetcher)
+
     return fetchers
 
 

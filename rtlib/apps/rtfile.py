@@ -157,31 +157,31 @@ def main():  # pylint: disable=too-many-locals
     args_parser.add_argument("torrents", type=(lambda path: tfile.Torrent(path=path)), nargs="+", metavar="<path>")
     options = args_parser.parse_args(argv[1:])
 
-    log_stdout = get_configured_log(config, False, sys.stdout)
-    log_stderr = get_configured_log(config, (not options.verbose), sys.stderr)
+    with get_configured_log(config, False, sys.stdout) as log_stdout:
+        with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
 
-    client = get_configured_client(config, log_stderr)
+            client = get_configured_client(config, log_stderr)
 
-    to_print = [
-        (option[2:], method)
-        for (option, dest, method) in actions
-        if getattr(options, dest)
-    ]
+            to_print = [
+                (option[2:], method)
+                for (option, dest, method) in actions
+                if getattr(options, dest)
+            ]
 
-    for torrent in options.torrents:
-        if len(to_print) == 0:
-            print_pretty_meta(torrent, client, log_stdout)
-        else:
-            for (header, method) in to_print:
-                prefix = ("" if options.without_headers else "{blue}%s:{reset} " % (header))
-                retval = method(torrent)
-                if isinstance(retval, (list, tuple)):
-                    for item in retval:
-                        log_stdout.print(prefix + str(item))
+            for torrent in options.torrents:
+                if len(to_print) == 0:
+                    print_pretty_meta(torrent, client, log_stdout)
                 else:
-                    log_stdout.print(prefix + str(retval))
-        if len(options.torrents) > 1:
-            log_stdout.print()
+                    for (header, method) in to_print:
+                        prefix = ("" if options.without_headers else "{blue}%s:{reset} " % (header))
+                        retval = method(torrent)
+                        if isinstance(retval, (list, tuple)):
+                            for item in retval:
+                                log_stdout.print(prefix + str(item))
+                        else:
+                            log_stdout.print(prefix + str(retval))
+                if len(options.torrents) > 1:
+                    log_stdout.print()
 
 
 if __name__ == "__main__":

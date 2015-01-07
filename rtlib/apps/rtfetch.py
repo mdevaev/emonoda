@@ -205,39 +205,35 @@ def main():
     args_parser.add_argument("--noop", action="store_true")
     options = args_parser.parse_args(argv[1:])
 
-    if len(config.fetchers) == 0:
-        print("# No available fetchers in config", file=sys.stderr)
-        sys.exit(1)
+    with get_configured_log(config, False, sys.stdout) as log_stdout:
+        with get_configured_log(config, False, sys.stderr) as log_stderr:
 
-    log_stdout = get_configured_log(config, False, sys.stdout)
-    log_stderr = get_configured_log(config, False, sys.stderr)
+            client = get_configured_client(config, log_stderr)
 
-    client = get_configured_client(config, log_stderr)
+            fetchers = get_configured_fetchers(
+                config=config,
+                captcha_decoder=read_captcha,
+                only=options.only_fetchers,
+                exclude=options.exclude_fetchers,
+                log=log_stderr,
+            )
 
-    fetchers = get_configured_fetchers(
-        config=config,
-        captcha_decoder=read_captcha,
-        only=options.only_fetchers,
-        exclude=options.exclude_fetchers,
-        log=log_stderr,
-    )
-
-    update(
-        client=client,
-        fetchers=fetchers,
-        torrents_dir_path=config.core.torrents_dir,
-        name_filter=options.name_filter,
-        backup_dir_path=config.rtfetch.backup_dir,
-        backup_suffix=config.rtfetch.backup_suffix,
-        to_save_customs=config.rtfetch.save_customs,
-        to_set_customs=config.rtfetch.set_customs,
-        show_unknown=config.rtfetch.show_unknown,
-        show_passed=config.rtfetch.show_passed,
-        show_diff=config.rtfetch.show_diff,
-        noop=options.noop,
-        log_stdout=log_stdout,
-        log_stderr=log_stderr,
-    )
+            update(
+                client=client,
+                fetchers=fetchers,
+                torrents_dir_path=config.core.torrents_dir,
+                name_filter=options.name_filter,
+                backup_dir_path=config.rtfetch.backup_dir,
+                backup_suffix=config.rtfetch.backup_suffix,
+                to_save_customs=config.rtfetch.save_customs,
+                to_set_customs=config.rtfetch.set_customs,
+                show_unknown=config.rtfetch.show_unknown,
+                show_passed=config.rtfetch.show_passed,
+                show_diff=config.rtfetch.show_diff,
+                noop=options.noop,
+                log_stdout=log_stdout,
+                log_stderr=log_stderr,
+            )
 
 
 if __name__ == "__main__":

@@ -24,22 +24,18 @@ class Log:
         self._quiet = quiet
         self._output = output
 
-    def print(self, text="", use_colors=None, force_colors=None, output=None, one_line=False):
-        use_colors = self._select(use_colors, self._use_colors)
-        force_colors = self._select(force_colors, self._force_colors)
-        output = self._select(output, self._output)
-
-        if use_colors and (output.isatty() or force_colors):
+    def print(self, text="", one_line=False):
+        if self._use_colors and (self._output.isatty() or self._force_colors):
             colors = _COLORS
         else:
             colors = dict.fromkeys(list(_COLORS), "")
 
         text = text.format(**colors)
         if not self._quiet:
-            _inner_print(text, one_line, output)
+            _inner_print(text, one_line, self._output)
 
-    def _select(self, first, second):
-        return (first if first is not None else second)
+    def finish(self):
+        _inner_finish(self._output)
 
 
 # =====
@@ -51,3 +47,11 @@ def _inner_print(text, one_line, output):
     output.write(_next_ctl + text)
     output.flush()
     _next_ctl = ("\r" + " " * len(text) + "\r" if one_line else "\n")
+
+
+def _inner_finish(output):
+    global _next_ctl  # pylint: disable=global-statement
+    if len(_next_ctl) != 0:
+        output.write("\n")
+        output.flush()
+        _next_ctl = ""
