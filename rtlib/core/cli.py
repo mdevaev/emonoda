@@ -18,9 +18,10 @@ _COLORS = {
 
 # =====
 class Log:
-    def __init__(self, use_colors=True, force_colors=False, output=sys.stdout):
+    def __init__(self, use_colors=True, force_colors=False, quiet=False, output=sys.stdout):
         self._use_colors = use_colors
         self._force_colors = force_colors
+        self._quiet = quiet
         self._output = output
 
     def print(self, text="", use_colors=None, force_colors=None, output=None, one_line=False):
@@ -34,7 +35,8 @@ class Log:
             colors = dict.fromkeys(list(_COLORS), "")
 
         text = text.format(**colors)
-        _inner_print(text, one_line, output)
+        if not self._quiet:
+            _inner_print(text, one_line, output)
 
     def _select(self, first, second):
         return (first if first is not None else second)

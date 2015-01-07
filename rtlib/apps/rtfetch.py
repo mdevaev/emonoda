@@ -209,8 +209,8 @@ def main():
         print("# No available fetchers in config", file=sys.stderr)
         sys.exit(1)
 
-    log_stdout = get_configured_log(config, sys.stdout)
-    log_stderr = get_configured_log(config, sys.stderr)
+    log_stdout = get_configured_log(config, False, sys.stdout)
+    log_stderr = get_configured_log(config, False, sys.stderr)
 
     client = get_configured_client(config, log_stderr)
 

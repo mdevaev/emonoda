@@ -54,8 +54,8 @@ def init():
     return (args_parser, remaining, config)
 
 
-def get_configured_log(config, output):
-    return cli.Log(config.core.use_colors, config.core.force_colors, output)
+def get_configured_log(config, quiet, output):
+    return cli.Log(config.core.use_colors, config.core.force_colors, quiet, output)
 
 
 def get_configured_client(config, log):
