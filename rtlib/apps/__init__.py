@@ -52,9 +52,12 @@ def init():
     return (args_parser, remaining, config)
 
 
-def get_configured_client(config):
+def get_configured_client(config, log):
     if config.core.client is not None:
-        return get_client_class(config.core.client)(**config.client)
+        log.print("# Enabling the client {blue}%s{reset} ..." % (config.core.client), one_line=True)
+        client = get_client_class(config.core.client)(**config.client)
+        log.print("# Client {blue}%s{reset} is {green}ready{reset}" % (config.core.client))
+        return client
     else:
         return None
 

@@ -156,8 +156,9 @@ def main():  # pylint: disable=too-many-locals
     args_parser.add_argument("torrents", type=(lambda path: tfile.Torrent(path=path)), nargs="+", metavar="<path>")
     options = args_parser.parse_args(argv[1:])
 
-    client = get_configured_client(config)
     log = cli.Log(config.core.use_colors, config.core.force_colors, sys.stdout)
+
+    client = get_configured_client(config, log)
 
     to_print = [
         (option[2:], method)
