@@ -90,7 +90,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
     backup_suffix,
     to_save_customs,
     to_set_customs,
-    skip_unknown,
+    show_unknown,
     show_passed,
     show_diff,
     noop,
@@ -115,8 +115,8 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
 
     for (count, (torrent_file_name, torrent)) in enumerate(torrents):
         progress = fmt.format_progress(count + 1, len(torrents))
-        format_fail = (lambda error, color="red", sign="!": "[{%s}%s{reset}] %s {blue}%s {cyan}%s{reset}" % (
-                       color, sign, progress, error, torrent_file_name))  # pylint: disable=cell-var-from-loop
+        format_fail = (lambda error, color="red", sign="!": "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset}" % (
+                       color, sign, progress, color, error, torrent_file_name))  # pylint: disable=cell-var-from-loop
 
         if torrent is None:
             log_stdout.print(format_fail("INVALID_TIRRENT"))
@@ -131,12 +131,11 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
         fetcher = select_fetcher(torrent, fetchers)
         if fetcher is None:
             unknown_count += 1
-            if not skip_unknown:
-                log_stdout.print(format_fail("UNKNOWN", "yellow", " "))
+            log_stdout.print(format_fail("UNKNOWN", "yellow", " "), one_line=show_unknown)
             continue
 
-        format_status = (lambda color, sign: "[{%s}%s{reset}] %s {blue}%s {cyan}%s{reset} -- %s" % (
-                         color, sign, progress, fetcher.get_name(),  # pylint: disable=cell-var-from-loop
+        format_status = (lambda color, sign: "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset} -- %s" % (
+                         color, sign, progress, color, fetcher.get_name(),  # pylint: disable=cell-var-from-loop
                          torrent_file_name, (torrent.get_comment() or "")))  # pylint: disable=cell-var-from-loop
 
         try:
@@ -172,7 +171,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
 
     if (
         (client is not None and not_in_client_count)
-        or (not skip_unknown and unknown_count)
+        or (show_unknown and unknown_count)
         or (show_passed and passed_count)
         or invalid_count
         or updated_count
@@ -266,7 +265,7 @@ def main():
         backup_suffix=config.rtfetch.backup_suffix,
         to_save_customs=config.rtfetch.save_customs,
         to_set_customs=config.rtfetch.set_customs,
-        skip_unknown=config.rtfetch.skip_unknown,
+        show_unknown=config.rtfetch.show_unknown,
         show_passed=config.rtfetch.show_passed,
         show_diff=config.rtfetch.show_diff,
         noop=options.noop,

@@ -70,7 +70,7 @@ def _get_config_scheme():
             "backup_dir":        Option(default=None, type=str, help="Backup old torrent files after update here"),
             "backup_suffix":     Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
             "pass_failed_login": Option(default=False, help="Don't crash when login error accured"),
-            "skip_unknown":      Option(default=True, help="Don't show the torrents with unknown tracker in the log"),
+            "show_unknown":      Option(default=False, help="Show the torrents with unknown tracker in the log"),
             "show_passed":       Option(default=False, help="Show the torrents without changes"),
             "show_diff":         Option(default=True, help="Show diff between old and updated torrent files"),
             "save_customs":      Option(default=[], type=(lambda items: list(map(str, items))),
