@@ -162,8 +162,8 @@ class WithLogin:
 
 
 class WithCaptcha:
-    def __init__(self, decode_captcha, **_):
-        self._decode_captcha = decode_captcha
+    def __init__(self, captcha_decoder, **_):
+        self._captcha_decoder = captcha_decoder
 
     @classmethod
     def get_options(cls):
