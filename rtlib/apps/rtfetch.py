@@ -6,6 +6,7 @@ import argparse
 from ..plugins.clients import WithCustoms as C_WithCustoms
 from ..plugins.fetchers import WithLogin as F_WithLogin
 from ..plugins.fetchers import FetcherError
+from ..plugins.fetchers import select_fetcher
 
 from .. import tfile
 from .. import fmt
@@ -51,13 +52,6 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
                     })
 
     return diff
-
-
-def select_fetcher(torrent, fetchers):
-    for fetcher in fetchers:
-        if fetcher.is_matched_for(torrent):
-            return fetcher
-    return None
 
 
 def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
