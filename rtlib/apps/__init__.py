@@ -11,8 +11,10 @@ from ..optconf.dumper import make_config_dump
 from ..optconf.loaders.yaml import load_file as load_yaml_file
 
 from ..plugins import get_client_class
+from ..plugins import get_conveyor_class
 from ..plugins import get_fetcher_class
 
+from ..plugins.conveyors import WithLogs as O_WithLogs
 from ..plugins.fetchers import WithLogin as F_WithLogin
 from ..plugins.fetchers import WithCaptcha as F_WithCaptcha
 
@@ -45,6 +47,10 @@ def init():
         scheme["fetchers"][fetcher_name] = fetcher_scheme
     config = make_config(raw_config, scheme)
 
+    conveyor_scheme = get_conveyor_class(config.rtfetch.conveyor).get_options()
+    scheme["conveyor"] = conveyor_scheme
+    config = make_config(raw_config, scheme)
+
     if options.dump_config:
         print(make_config_dump(config, split_by=((), ("fetchers",))))
         sys.exit(0)
@@ -62,6 +68,24 @@ def get_configured_log(config, quiet, output):
         yield log
     finally:
         log.finish()
+
+
+def get_configured_conveyor(config, log_stdout, log_stderr):
+    log_stderr.print("# Enabling the conveyor {blue}%s{reset} ..." % (config.rtfetch.conveyor), one_line=True)
+    try:
+        kwargs = dict(config.conveyor)
+        conveyor_class = get_conveyor_class(config.rtfetch.conveyor)
+        if O_WithLogs in conveyor_class.get_bases():
+            kwargs.update({
+                "log_stdout": log_stdout,
+                "log_stderr": log_stderr,
+            })
+        conveyor = conveyor_class(**kwargs)
+    except Exception as err:
+        log_stderr.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (config.rtfetch.conveyor, type(err).__name__, err))
+        raise
+    log_stderr.print("# Conveyor {blue}%s{reset} is {green}ready{reset}" % (config.rtfetch.conveyor))
+    return conveyor
 
 
 def get_configured_client(config, log):
@@ -121,14 +145,12 @@ def _get_config_scheme():
         },
 
         "rtfetch": {
-            "backup_dir":        Option(default=None, type=str, help="Backup old torrent files after update here"),
-            "backup_suffix":     Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
-            "show_unknown":      Option(default=False, help="Show the torrents with unknown tracker in the log"),
-            "show_passed":       Option(default=False, help="Show the torrents without changes"),
-            "show_diff":         Option(default=True, help="Show diff between old and updated torrent files"),
-            "save_customs":      Option(default=[], type=(lambda items: list(map(str, items))),
-                                        help="Save client custom fields after update (if supports)"),
-            "set_customs":       Option(default=[], type=(lambda items: list(map(str, items))),
-                                        help="Set client custom fileds after update (if supports)"),
+            "conveyor":      Option(default="term", help="Logger and captcha decoder"),
+            "backup_dir":    Option(default=None, type=str, help="Backup old torrent files after update here"),
+            "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
+            "save_customs":  Option(default=[], type=(lambda items: list(map(str, items))),
+                                    help="Save client custom fields after update (if supports)"),
+            "set_customs":   Option(default=[], type=(lambda items: list(map(str, items))),
+                                    help="Set client custom fileds after update (if supports)"),
         },
     }

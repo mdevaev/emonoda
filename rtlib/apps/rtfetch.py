@@ -4,7 +4,6 @@ import shutil
 import argparse
 
 from ..plugins.clients import WithCustoms as C_WithCustoms
-from ..plugins.fetchers import WithLogin as F_WithLogin
 from ..plugins.fetchers import FetcherError
 from ..plugins.fetchers import select_fetcher
 
@@ -14,6 +13,7 @@ from .. import helpers
 
 from . import init
 from . import get_configured_log
+from . import get_configured_conveyor
 from . import get_configured_client
 from . import get_configured_fetchers
 
@@ -54,114 +54,74 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
     return diff
 
 
-def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branches,too-many-statements
+def update(  # pylint: disable=too-many-arguments,too-many-locals
+    conveyor,
     client,
     fetchers,
-    torrents_dir_path,
-    name_filter,
     backup_dir_path,
     backup_suffix,
     to_save_customs,
     to_set_customs,
-    show_unknown,
-    show_passed,
-    show_diff,
     noop,
     log_stdout,
     log_stderr,
 ):
-    invalid_count = 0
-    not_in_client_count = 0
-    unknown_count = 0
-    passed_count = 0
-    updated_count = 0
-    error_count = 0
-
-    torrents = helpers.load_torrents_from_dir(
-        dir_path=torrents_dir_path,
-        name_filter=name_filter,
-        log=log_stderr,
-    )
     hashes = (client.get_hashes() if client is not None else [])
 
-    log_stdout.print()
+#    log_stdout.print()
 
-    for (count, (torrent_file_name, torrent)) in enumerate(torrents):
-        progress = fmt.format_progress(count + 1, len(torrents))
-        format_fail = (lambda error, color="red", sign="!": "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset}" % (
-                       color, sign, progress, color, error, torrent_file_name))  # pylint: disable=cell-var-from-loop
-
+    for torrent in conveyor.get_torrents():
         if torrent is None:
-            log_stdout.print(format_fail("INVALID_TIRRENT"))
-            invalid_count += 1
+            conveyor.mark_invalid()
             continue
 
         if client is not None and torrent.get_hash() not in hashes:
-            log_stdout.print(format_fail("NOT_IN_CLIENT"))
-            not_in_client_count += 1
+            conveyor.mark_not_in_client()
             continue
 
         fetcher = select_fetcher(torrent, fetchers)
         if fetcher is None:
-            unknown_count += 1
-            log_stdout.print(format_fail("UNKNOWN", "yellow", " "), one_line=(not show_unknown))
+            conveyor.mark_unknown()
             continue
 
-        format_status = (lambda color, sign: "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset} -- %s" % (
-                         color, sign, progress, color, fetcher.get_name(),  # pylint: disable=cell-var-from-loop
-                         torrent_file_name, (torrent.get_comment() or "")))  # pylint: disable=cell-var-from-loop
+        conveyor.mark_in_progress(fetcher)
 
         try:
-            if F_WithLogin in fetcher.get_bases() and not fetcher.is_logged_in():
-                log_stdout.print(format_status("yellow", "?"))
-                error_count += 1
-                continue
-
-            log_stdout.print(format_status("magenta", " "), one_line=True)
-
             if not fetcher.is_torrent_changed(torrent):
-                log_stdout.print(format_status("blue", " "), one_line=(not show_passed))
-                passed_count += 1
+                conveyor.mark_passed(fetcher)
                 continue
 
             if not noop and backup_dir_path is not None:
                 backup_torrent(torrent, backup_dir_path, backup_suffix)
             diff = update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, noop)
 
-            log_stdout.print(format_status("green", "+"))
-            if show_diff:
-                log_stdout.print(fmt.format_torrents_diff(diff, "\t"))
-
-            updated_count += 1
+            conveyor.mark_updated(fetcher, diff)
 
         except FetcherError as err:
-            log_stdout.print(format_status("red", "-") +
-                             " :: {red}%s({reset}%s{red}){reset}" % (type(err).__name__, err))
-            error_count += 1
+            conveyor.mark_fetcher_error(fetcher, err)
 
-        except Exception as err:
-            log_stdout.print(format_status("red", "-"))
+        except Exception:
+            conveyor.mark_common_error(fetcher)
             log_stdout.print(fmt.format_traceback("\t"))
-            error_count += 1
 
-    if (
-        (client is not None and not_in_client_count)
-        or (show_unknown and unknown_count)
-        or (show_passed and passed_count)
-        or invalid_count
-        or updated_count
-        or error_count
-    ):
-        log_stdout.print()
+#    if (
+#        (client is not None and conveyor.not_in_client_count)
+#        or (show_unknown and conveyor.unknown_count)
+#        or (show_passed and conveyor.passed_count)
+#        or conveyor.invalid_count
+#        or conveyor.updated_count
+#        or conveyor.error_count
+#    ):
+#        log_stdout.print()
 
     log_stderr.print("# " + ("-" * 10))
-    log_stderr.print("# Invalid:       {}".format(invalid_count))
+    log_stderr.print("# Invalid:       {}".format(conveyor.invalid_count))
     if client is not None:
-        log_stderr.print("# Not in client: {}".format(not_in_client_count))
-    log_stderr.print("# Unknown:       {}".format(unknown_count))
-    log_stderr.print("# Passed:        {}".format(passed_count))
-    log_stderr.print("# Updated:       {}".format(updated_count))
-    log_stderr.print("# Errors:        {}".format(error_count))
+        log_stderr.print("# Not in client: {}".format(conveyor.not_in_client_count))
+    log_stderr.print("# Unknown:       {}".format(conveyor.unknown_count))
+    log_stderr.print("# Passed:        {}".format(conveyor.passed_count))
+    log_stderr.print("# Updated:       {}".format(conveyor.updated_count))
+    log_stderr.print("# Errors:        {}".format(conveyor.error_count))
 
 
 # ===== Main =====
@@ -181,28 +141,32 @@ def main():
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, False, sys.stderr) as log_stderr:
 
+            conveyor = get_configured_conveyor(config, log_stdout, log_stderr)
+
             client = get_configured_client(config, log_stderr)
 
             fetchers = get_configured_fetchers(
                 config=config,
-                captcha_decoder=helpers.make_captcha_reader(log_stderr),
+                captcha_decoder=conveyor.read_captcha,
                 only=options.only_fetchers,
                 exclude=options.exclude_fetchers,
                 log=log_stderr,
             )
 
+            conveyor.set_torrents(helpers.load_torrents_from_dir(
+                dir_path=config.core.torrents_dir,
+                name_filter=options.name_filter,
+                log=log_stderr,
+            ))
+
             update(
+                conveyor=conveyor,
                 client=client,
                 fetchers=fetchers,
-                torrents_dir_path=config.core.torrents_dir,
-                name_filter=options.name_filter,
                 backup_dir_path=config.rtfetch.backup_dir,
                 backup_suffix=config.rtfetch.backup_suffix,
                 to_save_customs=config.rtfetch.save_customs,
                 to_set_customs=config.rtfetch.set_customs,
-                show_unknown=config.rtfetch.show_unknown,
-                show_passed=config.rtfetch.show_passed,
-                show_diff=config.rtfetch.show_diff,
                 noop=options.noop,
                 log_stdout=log_stdout,
                 log_stderr=log_stderr,
