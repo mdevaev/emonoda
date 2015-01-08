@@ -3,10 +3,7 @@ import urllib.parse
 import http.client
 import socket
 
-try:
-    import socks
-except ImportError:
-    socks = None
+from .thirdparty import socks
 
 
 # =====
@@ -47,8 +44,6 @@ class _SocksConnection(http.client.HTTPConnection):
         *args,
         **kwargs
     ):
-        if socks is None:
-            raise RuntimeError("Required module SocksiPy (the recommended is https://github.com/Anorov/PySocks)")
         kwargs.pop("strict", None)  # XXX: Fix for "TypeError: __init__() got an unexpected keyword argument 'strict'"
         super().__init__(*args, **kwargs)
 
