@@ -33,6 +33,14 @@ class LogicError(FetcherError):
 
 
 # =====
+def select_fetcher(torrent, fetchers):
+    for fetcher in fetchers:
+        if fetcher.is_matched_for(torrent):
+            return fetcher
+    return None
+
+
+# =====
 def build_opener(cookie_jar=None, proxy_url=None):
     handlers = []
 
