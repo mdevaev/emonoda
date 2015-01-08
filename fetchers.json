@@ -1,0 +1,10 @@
+{
+    "nnm-club.me": {
+        "path": "rtlib/plugins/fetchers/nnmclub.py",
+        "version": 1
+    },
+    "rutracker.org": {
+        "path": "rtlib/plugins/fetchers/rutracker.py",
+        "version": 1
+    }
+}
