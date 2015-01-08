@@ -43,11 +43,18 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
             self._current_torrent = torrent
             yield torrent
 
-    # ===
-
     def read_captcha(self, url):
         self._log_stderr.print("# {yellow}Enter the captcha{reset} from [{blue}%s{reset}]: " % (url), no_nl=True)
         return input()
+
+    def print_summary(self):
+        self._log_stderr.print("# " + ("-" * 10))
+        self._log_stderr.print("# Invalid:       {}".format(self.invalid_count))
+        self._log_stderr.print("# Not in client: {}".format(self.not_in_client_count))
+        self._log_stderr.print("# Unknown:       {}".format(self.unknown_count))
+        self._log_stderr.print("# Passed:        {}".format(self.passed_count))
+        self._log_stderr.print("# Updated:       {}".format(self.updated_count))
+        self._log_stderr.print("# Errors:        {}".format(self.error_count))
 
     # ===
 
@@ -81,9 +88,12 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
                                " :: {red}%s({reset}%s{red}){reset}" % (type(err).__name__, err))
         self.error_count += 1
 
-    def mark_common_error(self, fetcher):
+    def mark_exception(self, fetcher):
         self._log_stdout.print(self._format_status("red", "-", fetcher))
-        self.error_count += 1
+        self._log_stdout.print(fmt.format_traceback("\t"))
+        self.exception_count += 1
+
+    # ===
 
     def _format_fail(self, color, sign, error):
         return "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset}" % (

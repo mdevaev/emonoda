@@ -3,7 +3,7 @@ from .. import BaseExtension
 
 
 # =====
-class BaseConveyor(BasePlugin):
+class BaseConveyor(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def __init__(self, **_):  # +stub
         self._torrents = None
 
@@ -13,6 +13,7 @@ class BaseConveyor(BasePlugin):
         self.passed_count = 0
         self.updated_count = 0
         self.error_count = 0
+        self.exception_count = 0
 
     # ===
 
@@ -22,9 +23,10 @@ class BaseConveyor(BasePlugin):
     def get_torrents(self):
         raise NotImplementedError
 
-    # ===
-
     def read_captcha(self, url):
+        raise NotImplementedError
+
+    def print_summary(self):
         raise NotImplementedError
 
     # ===
@@ -50,7 +52,7 @@ class BaseConveyor(BasePlugin):
     def mark_fetcher_error(self, fetcher, err):
         raise NotImplementedError
 
-    def mark_common_error(self, fetcher):
+    def mark_exception(self, fetcher):
         raise NotImplementedError
 
 

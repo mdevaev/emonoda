@@ -54,7 +54,7 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
     return diff
 
 
-def update(  # pylint: disable=too-many-arguments,too-many-locals
+def update(
     conveyor,
     client,
     fetchers,
@@ -63,12 +63,8 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals
     to_save_customs,
     to_set_customs,
     noop,
-    log_stdout,
-    log_stderr,
 ):
     hashes = (client.get_hashes() if client is not None else [])
-
-#    log_stdout.print()
 
     for torrent in conveyor.get_torrents():
         if torrent is None:
@@ -101,27 +97,9 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals
             conveyor.mark_fetcher_error(fetcher, err)
 
         except Exception:
-            conveyor.mark_common_error(fetcher)
-            log_stdout.print(fmt.format_traceback("\t"))
+            conveyor.mark_exception(fetcher)
 
-#    if (
-#        (client is not None and conveyor.not_in_client_count)
-#        or (show_unknown and conveyor.unknown_count)
-#        or (show_passed and conveyor.passed_count)
-#        or conveyor.invalid_count
-#        or conveyor.updated_count
-#        or conveyor.error_count
-#    ):
-#        log_stdout.print()
-
-    log_stderr.print("# " + ("-" * 10))
-    log_stderr.print("# Invalid:       {}".format(conveyor.invalid_count))
-    if client is not None:
-        log_stderr.print("# Not in client: {}".format(conveyor.not_in_client_count))
-    log_stderr.print("# Unknown:       {}".format(conveyor.unknown_count))
-    log_stderr.print("# Passed:        {}".format(conveyor.passed_count))
-    log_stderr.print("# Updated:       {}".format(conveyor.updated_count))
-    log_stderr.print("# Errors:        {}".format(conveyor.error_count))
+    conveyor.print_summary()
 
 
 # ===== Main =====
@@ -168,8 +146,6 @@ def main():
                 to_save_customs=config.rtfetch.save_customs,
                 to_set_customs=config.rtfetch.set_customs,
                 noop=options.noop,
-                log_stdout=log_stdout,
-                log_stderr=log_stderr,
             )
 
 
