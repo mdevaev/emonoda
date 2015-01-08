@@ -18,7 +18,6 @@ if __name__ == "__main__":
 
         packages=[
             "rtlib",
-            "rtlib.core",
             "rtlib.optconf",
             "rtlib.optconf.loaders",
             "rtlib.apps",

@@ -4,12 +4,12 @@ import shutil
 import operator
 import argparse
 
-from ..core import tfile
-from ..core import fmt
-
 from ..plugins.clients import WithCustoms as C_WithCustoms
 from ..plugins.fetchers import WithLogin as F_WithLogin
 from ..plugins.fetchers import FetcherError
+
+from .. import tfile
+from .. import fmt
 
 from . import init
 from . import get_configured_log
