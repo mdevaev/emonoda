@@ -110,7 +110,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
         fetcher = select_fetcher(torrent, fetchers)
         if fetcher is None:
             unknown_count += 1
-            log_stdout.print(format_fail("UNKNOWN", "yellow", " "), one_line=show_unknown)
+            log_stdout.print(format_fail("UNKNOWN", "yellow", " "), one_line=(not show_unknown))
             continue
 
         format_status = (lambda color, sign: "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset} -- %s" % (
@@ -122,6 +122,8 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
                 log_stdout.print(format_status("yellow", "?"))
                 error_count += 1
                 continue
+
+            log_stdout.print(format_status("magenta", " "), one_line=True)
 
             if not fetcher.is_torrent_changed(torrent):
                 log_stdout.print(format_status("blue", " "), one_line=(not show_passed))
