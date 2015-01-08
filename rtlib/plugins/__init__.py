@@ -34,10 +34,6 @@ class BasePlugin:
         raise NotImplementedError
 
     @classmethod
-    def get_version(cls):
-        return None
-
-    @classmethod
     def get_options(cls):
         return {}
 
