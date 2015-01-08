@@ -23,6 +23,7 @@ if __name__ == "__main__":
             "rtlib.apps",
             "rtlib.apps.hooks",
             "rtlib.plugins",
+            "rtlib.plugins.conveyors",
             "rtlib.plugins.clients",
             "rtlib.plugins.fetchers",
         ],
