@@ -10,8 +10,8 @@ from ..optconf import Option
 from ..optconf.dumper import make_config_dump
 from ..optconf.loaders.yaml import load_file as load_yaml_file
 
-from ..plugins import get_client_class
 from ..plugins import get_conveyor_class
+from ..plugins import get_client_class
 from ..plugins import get_fetcher_class
 
 from ..plugins.conveyors import WithLogs as O_WithLogs
@@ -71,10 +71,11 @@ def get_configured_log(config, quiet, output):
 
 
 def get_configured_conveyor(config, log_stdout, log_stderr):
-    log_stderr.print("# Enabling the conveyor {blue}%s{reset} ..." % (config.rtfetch.conveyor), one_line=True)
+    name = config.rtfetch.conveyor
+    log_stderr.print("# Enabling the conveyor {blue}%s{reset} ..." % (name), one_line=True)
     try:
         kwargs = dict(config.conveyor)
-        conveyor_class = get_conveyor_class(config.rtfetch.conveyor)
+        conveyor_class = get_conveyor_class(name)
         if O_WithLogs in conveyor_class.get_bases():
             kwargs.update({
                 "log_stdout": log_stdout,
@@ -82,21 +83,22 @@ def get_configured_conveyor(config, log_stdout, log_stderr):
             })
         conveyor = conveyor_class(**kwargs)
     except Exception as err:
-        log_stderr.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (config.rtfetch.conveyor, type(err).__name__, err))
+        log_stderr.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (name, type(err).__name__, err))
         raise
-    log_stderr.print("# Conveyor {blue}%s{reset} is {green}ready{reset}" % (config.rtfetch.conveyor))
+    log_stderr.print("# Conveyor {blue}%s{reset} is {green}ready{reset}" % (name))
     return conveyor
 
 
 def get_configured_client(config, log):
-    if config.core.client is not None:
-        log.print("# Enabling the client {blue}%s{reset} ..." % (config.core.client), one_line=True)
+    name = config.core.client
+    if name is not None:
+        log.print("# Enabling the client {blue}%s{reset} ..." % (name), one_line=True)
         try:
-            client = get_client_class(config.core.client)(**config.client)
+            client = get_client_class(name)(**config.client)
         except Exception as err:
-            log.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (config.core.client, type(err).__name__, err))
+            log.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (name, type(err).__name__, err))
             raise
-        log.print("# Client {blue}%s{reset} is {green}ready{reset}" % (config.core.client))
+        log.print("# Client {blue}%s{reset} is {green}ready{reset}" % (name))
         return client
     else:
         return None
