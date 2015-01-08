@@ -28,6 +28,15 @@ if __name__ == "__main__":
             "rtlib.plugins.fetchers",
         ],
 
+        entry_points={
+            "console_scripts": [
+                "rtdiff = rtlib.apps.rtdiff:main",
+                "rtfetch = rtlib.apps.rtfetch:main",
+                "rtfile = rtlib.apps.rtfile:main",
+                "rthook-manage-trackers = rtlib.apps.hooks.manage_trackers:main",
+            ],
+        },
+
         install_requires=[
             "pyyaml",
             "colorama",
