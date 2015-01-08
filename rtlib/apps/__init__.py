@@ -10,13 +10,13 @@ from ..optconf import Option
 from ..optconf.dumper import make_config_dump
 from ..optconf.loaders.yaml import load_file as load_yaml_file
 
-from ..core import cli
-
 from ..plugins import get_client_class
 from ..plugins import get_fetcher_class
 
 from ..plugins.fetchers import WithLogin as F_WithLogin
 from ..plugins.fetchers import WithCaptcha as F_WithCaptcha
+
+from .. import cli
 
 
 # =====

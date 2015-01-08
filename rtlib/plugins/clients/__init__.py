@@ -1,6 +1,6 @@
 import os
 
-from ...core import tfile
+from ... import tfile
 
 from .. import BasePlugin
 from .. import BaseExtension

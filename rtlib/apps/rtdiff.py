@@ -2,8 +2,8 @@ import sys
 import os
 import argparse
 
-from ..core import tfile
-from ..core import fmt
+from .. import tfile
+from .. import fmt
 
 from . import init
 from . import get_configured_log

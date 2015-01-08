@@ -22,7 +22,7 @@
 import urllib.parse
 import re
 
-from ...core import tfile
+from ... import tfile
 
 from . import BaseFetcher
 from . import WithLogin

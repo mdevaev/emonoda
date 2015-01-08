@@ -5,11 +5,11 @@ import urllib.parse
 import http.cookiejar
 import time
 
-from ...core import tfile
-from ...core.socks import SocksHandler
-
 from ...optconf import Option
 from ...optconf import SecretOption
+
+from ... import tfile
+from ... import socks
 
 from .. import BasePlugin
 from .. import BaseExtension
@@ -45,7 +45,7 @@ def build_opener(cookie_jar=None, proxy_url=None):
             proxies = dict.fromkeys(("http", "https"), proxy_url)
             handlers.append(urllib.request.ProxyHandler(proxies))
         elif scheme in ("socks4", "socks5"):
-            handlers.append(SocksHandler(proxy_url=proxy_url))
+            handlers.append(socks.SocksHandler(proxy_url=proxy_url))
         else:
             raise RuntimeError("Invalid proxy protocol: {}".format(scheme))
 
