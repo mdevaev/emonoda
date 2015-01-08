@@ -23,14 +23,14 @@ def load_torrent_from_path(path):
         return None
 
 
-def load_from_dir(dir_path, name_filter="*.torrent", as_abs=False, load_torrent=load_torrent_from_path):
+def load_from_dir(dir_path, name_filter="*.torrent", as_abs=False, loader=load_torrent_from_path):
     torrents = {}
     for name in os.listdir(dir_path):
         if fnmatch.fnmatch(name, name_filter):
             path = os.path.join(dir_path, name)
             if as_abs:
                 path = os.path.abspath(path)
-            torrents[name] = load_torrent(path)
+            torrents[name] = loader(path)
     return torrents
 
 

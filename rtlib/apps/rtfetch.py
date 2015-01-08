@@ -1,7 +1,6 @@
 import sys
 import os
 import shutil
-import operator
 import argparse
 
 from ..plugins.clients import WithCustoms as C_WithCustoms
@@ -10,6 +9,7 @@ from ..plugins.fetchers import FetcherError
 
 from .. import tfile
 from .. import fmt
+from .. import helpers
 
 from . import init
 from . import get_configured_log
@@ -18,24 +18,6 @@ from . import get_configured_fetchers
 
 
 # =====
-def load_torrents_from_dir(dir_path, name_filter, log):
-    fan = fmt.make_fan()
-
-    def load_torrent(path):
-        log.print("# Caching {cyan}%s/{yellow}%s {magenta}%s{reset}" % (
-                  dir_path, name_filter, next(fan)), one_line=True)
-        return tfile.load_torrent_from_path(path)
-
-    torrents = list(sorted(
-        tfile.load_from_dir(dir_path, name_filter, as_abs=True, load_torrent=load_torrent).items(),
-        key=operator.itemgetter(0),
-    ))
-
-    log.print("# Cached {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}" % (
-              len(torrents), dir_path, name_filter))
-    return torrents
-
-
 def backup_torrent(torrent, backup_dir_path, backup_suffix):
     backup_suffix = fmt.format_now(backup_suffix)
     backup_file_path = os.path.join(backup_dir_path, os.path.basename(torrent.get_path()) + backup_suffix)
@@ -101,7 +83,7 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
     updated_count = 0
     error_count = 0
 
-    torrents = load_torrents_from_dir(
+    torrents = helpers.load_torrents_from_dir(
         dir_path=torrents_dir_path,
         name_filter=name_filter,
         log=log_stderr,
@@ -186,11 +168,6 @@ def update(  # pylint: disable=too-many-arguments,too-many-locals,too-many-branc
     log_stderr.print("# Errors:        {}".format(error_count))
 
 
-def read_captcha(url):
-    print("# Enter the captcha from [ {} ] ?> ".format(url), output=sys.stderr)
-    return input()
-
-
 # ===== Main =====
 def main():
     (parent_parser, argv, config) = init()
@@ -212,7 +189,7 @@ def main():
 
             fetchers = get_configured_fetchers(
                 config=config,
-                captcha_decoder=read_captcha,
+                captcha_decoder=helpers.make_captcha_reader(log_stderr),
                 only=options.only_fetchers,
                 exclude=options.exclude_fetchers,
                 log=log_stderr,
