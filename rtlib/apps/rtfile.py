@@ -185,4 +185,4 @@ def main():  # pylint: disable=too-many-locals
 
 
 if __name__ == "__main__":
-    main()
+    main()  # Do the thing!
