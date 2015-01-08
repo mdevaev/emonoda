@@ -10,6 +10,7 @@ ignored-classes=pytest,pygments.lexers,pygments.formatters,AnsiCodes
 
 [MESSAGES CONTROL]
 disable =
+	file-ignored,
 	locally-disabled,
 	fixme,
 	missing-docstring,
