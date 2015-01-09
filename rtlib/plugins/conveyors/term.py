@@ -55,6 +55,7 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
         self._log_stderr.print("# Passed:        {}".format(self.passed_count))
         self._log_stderr.print("# Updated:       {}".format(self.updated_count))
         self._log_stderr.print("# Errors:        {}".format(self.error_count))
+        self._log_stderr.print("# Exceptions:    {}".format(self.exception_count))
 
     # ===
 
