@@ -1,3 +1,4 @@
+import threading
 import operator
 
 from ...optconf import Option
@@ -22,6 +23,10 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
         self._current_file_name = None
         self._current_torrent = None
 
+        self._fan = fmt.make_fan()
+        self._fan_thread = None
+        self._stop_fan = threading.Event()
+
     @classmethod
     def get_name(cls):
         return "term"
@@ -41,13 +46,17 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
             self._current_count = count
             self._current_file_name = file_name
             self._current_torrent = torrent
+            self._kill_thread()
             yield torrent
+        self._kill_thread()
 
     def read_captcha(self, url):
+        self._kill_thread()
         self._log_stderr.print("# {yellow}Enter the captcha{reset} from [{blue}%s{reset}]: " % (url), no_nl=True)
         return input()
 
     def print_summary(self):
+        self._kill_thread()
         self._log_stderr.print("# " + ("-" * 10))
         self._log_stderr.print("# Invalid:       {}".format(self.invalid_count))
         self._log_stderr.print("# Not in client: {}".format(self.not_in_client_count))
@@ -60,41 +69,63 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
     # ===
 
     def mark_invalid(self):
+        self._kill_thread()
         self._log_stdout.print(self._format_fail("red", "!", "INVALID_TORRENT"))
         self.invalid_count += 1
 
     def mark_not_in_client(self):
+        self._kill_thread()
         self._log_stdout.print(self._format_fail("red", "!", "NOT_IN_CLIENT"))
         self.not_in_client_count += 1
 
     def mark_unknown(self):
+        self._kill_thread()
         self._log_stdout.print(self._format_fail("yellow", " ", "UNKNOWN"), one_line=(not self._show_unknown))
         self.unknown_count += 1
 
     def mark_in_progress(self, fetcher):
-        self._log_stdout.print(self._format_status("magenta", " ", fetcher), one_line=True)
+        self._kill_thread()
+        if self._log_stdout.isatty():
+            def loop():
+                while not self._stop_fan.wait(timeout=0.1):
+                    self._log_stdout.print(self._format_status("magenta", next(self._fan), fetcher), one_line=True)
+            self._fan_thread = threading.Thread(target=loop, daemon=True)
+            self._fan_thread.start()
+        else:
+            self._log_stdout.print(self._format_status("magenta", " ", fetcher), one_line=True)
 
     def mark_passed(self, fetcher):
+        self._kill_thread()
         self._log_stdout.print(self._format_status("blue", " ", fetcher), one_line=(not self._show_passed))
         self.passed_count += 1
 
     def mark_updated(self, fetcher, diff):
+        self._kill_thread()
         self._log_stdout.print(self._format_status("green", "+", fetcher))
         if self._show_diff:
             self._log_stdout.print(fmt.format_torrents_diff(diff, "\t"))
         self.updated_count += 1
 
     def mark_fetcher_error(self, fetcher, err):
+        self._kill_thread()
         self._log_stdout.print(self._format_status("red", "-", fetcher) +
                                " :: {red}%s({reset}%s{red}){reset}" % (type(err).__name__, err))
         self.error_count += 1
 
     def mark_exception(self, fetcher):
+        self._kill_thread()
         self._log_stdout.print(self._format_status("red", "-", fetcher))
         self._log_stdout.print(fmt.format_traceback("\t"))
         self.exception_count += 1
 
     # ===
+
+    def _kill_thread(self):
+        if self._fan_thread is not None:
+            self._stop_fan.set()
+            self._fan_thread.join()
+            self._fan_thread = None
+            self._stop_fan.clear()
 
     def _format_fail(self, color, sign, error):
         return "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset}" % (

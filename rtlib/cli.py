@@ -15,6 +15,8 @@ _COLORS = {
     "reset":   Fore.RESET,
 }
 
+_NO_COLORS = dict.fromkeys(list(_COLORS), "")
+
 
 # =====
 class Log:
@@ -24,15 +26,13 @@ class Log:
         self._quiet = quiet
         self._output = output
 
-    def print(self, text="", one_line=False, no_nl=False):
-        if self._use_colors and (self._output.isatty() or self._force_colors):
-            colors = _COLORS
-        else:
-            colors = dict.fromkeys(list(_COLORS), "")
+    def isatty(self):
+        return self._output.isatty()
 
-        text = text.format(**colors)
+    def print(self, text="", one_line=False, no_nl=False):
         if not self._quiet:
-            _inner_print(text, one_line, no_nl, self._output)
+            colored = (self._use_colors and (self.isatty() or self._force_colors))
+            _inner_print(text, colored, one_line, no_nl, self._output)
 
     def finish(self):
         _inner_finish(self._output)
@@ -42,14 +42,14 @@ class Log:
 _next_ctl = ""
 
 
-def _inner_print(text, one_line, no_nl, output):
+def _inner_print(text, colored, one_line, no_nl, output):
     global _next_ctl  # pylint: disable=global-statement
-    output.write(_next_ctl + text)
+    output.write(_next_ctl + text.format(**(_COLORS if colored else _NO_COLORS)))
     output.flush()
     if no_nl:
         _next_ctl = ""
     else:
-        _next_ctl = ("\r" + " " * len(text) + "\r" if one_line else "\n")
+        _next_ctl = ("\r" + " " * len(text.format(**_NO_COLORS)) + "\r" if one_line else "\n")
 
 
 def _inner_finish(output):
