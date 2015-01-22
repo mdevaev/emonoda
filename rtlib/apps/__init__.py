@@ -107,7 +107,7 @@ def get_configured_client(config, log):
 def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
     to_init = set(config.fetchers).difference(exclude)
     if len(only) != 0:
-        to_init.intersection(only)
+        to_init = to_init.intersection(only)
 
     if len(to_init) == 0:
         raise RuntimeError("No fetchers to init")
