@@ -17,6 +17,7 @@ from ..plugins import get_fetcher_class
 from ..plugins.conveyors import WithLogs as O_WithLogs
 from ..plugins.fetchers import WithLogin as F_WithLogin
 from ..plugins.fetchers import WithCaptcha as F_WithCaptcha
+from ..plugins.clients import WithCustoms as C_WithCustoms
 
 from .. import cli
 
@@ -89,12 +90,14 @@ def get_configured_conveyor(config, log_stdout, log_stderr):
     return conveyor
 
 
-def get_configured_client(config, log):
+def get_configured_client(config, log, with_customs):
     name = config.core.client
     if name is not None:
         log.print("# Enabling the client {blue}%s{reset} ..." % (name), one_line=True)
         try:
             client = get_client_class(name)(**config.client)
+            if with_customs and C_WithCustoms not in client.get_bases():
+                raise RuntimeError("Your client does not support customs")
         except Exception as err:
             log.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (name, type(err).__name__, err))
             raise
