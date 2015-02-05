@@ -3,7 +3,6 @@ import os
 import shutil
 import argparse
 
-from ..plugins.clients import WithCustoms as C_WithCustoms
 from ..plugins.fetchers import FetcherError
 from ..plugins.fetchers import select_fetcher
 
@@ -31,7 +30,7 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
 
     if not noop:
         if client is not None:
-            if C_WithCustoms in client.get_bases() and len(to_save_customs) != 0:
+            if len(to_save_customs) != 0:
                 old_customs = client.get_customs(torrent, to_save_customs)
             prefix = client.get_data_prefix(torrent)
             client.remove_torrent(torrent)
@@ -42,14 +41,13 @@ def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, no
 
         if client is not None:
             client.load_torrent(torrent, prefix)
-            if C_WithCustoms in client.get_bases():
-                if len(to_save_customs) != 0:
-                    client.set_customs(torrent, old_customs)
-                if len(to_set_customs) != 0:
-                    client.set_customs(torrent, {
-                        key: fmt.format_now(value)
-                        for (key, value) in to_set_customs.items()
-                    })
+            if len(to_save_customs) != 0:
+                client.set_customs(torrent, old_customs)
+            if len(to_set_customs) != 0:
+                client.set_customs(torrent, {
+                    key: fmt.format_now(value)
+                    for (key, value) in to_set_customs.items()
+                })
 
     return diff
 
@@ -121,7 +119,11 @@ def main():
 
             conveyor = get_configured_conveyor(config, log_stdout, log_stderr)
 
-            client = get_configured_client(config, log_stderr)
+            client = get_configured_client(
+                config=config,
+                log=log_stderr,
+                with_customs=(len(config.rtfetch.save_customs) or len(config.rtfetch.set_customs)),
+            )
 
             fetchers = get_configured_fetchers(
                 config=config,
