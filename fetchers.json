@@ -3,6 +3,10 @@
         "path": "rtlib/plugins/fetchers/nnmclub.py",
         "version": 1
     },
+    "pravtor.ru": {
+        "path": "rtlib/plugins/fetchers/pravtor.py",
+        "version": 0
+    },
     "rutracker.org": {
         "path": "rtlib/plugins/fetchers/rutracker.py",
         "version": 1

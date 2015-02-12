@@ -1,0 +1,147 @@
+"""
+    rtfetch -- The set of tools to organize and manage your torrents
+    Copyright (C) 2015  Devaev Maxim <mdevaev@gmail.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
+
+import urllib.parse
+import http.cookiejar
+import re
+
+from . import BaseFetcher
+from . import WithLogin
+from . import WithOpener
+from . import build_opener
+
+
+# =====
+def _encode(arg):
+    return arg.encode("cp1251")
+
+
+def _decode(arg):
+    return arg.decode("cp1251")
+
+
+class Plugin(BaseFetcher, WithLogin, WithOpener):
+    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+        for parent in self.__class__.__bases__:
+            parent.__init__(self, **kwargs)
+
+        self._comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
+        self._hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
+        self._loginform_regexp = re.compile(r"<!--login form-->")
+        self._torrent_id_regexp = re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">")
+
+        self._torrent_id = None
+
+    @classmethod
+    def get_name(cls):
+        return "pravtor.ru"
+
+    @classmethod
+    def get_version(cls):
+        return 0
+
+    @classmethod
+    def get_options(cls):
+        params = {}
+        for parent in cls.__bases__:
+            params.update(parent.get_options())
+        return params
+
+    def test_site(self):
+        opener = build_opener(proxy_url=self._proxy_url)
+        data = self._read_url("http://pravtor.ru", opener=opener)
+        self._assert_site(b"<img src=\"/images/pravtor_beta1.png\"" in data)
+
+    def is_matched_for(self, torrent):
+        return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
+
+    def is_torrent_changed(self, torrent):
+        self._assert_match(torrent)
+        return (torrent.get_hash() != self._fetch_hash(torrent))
+
+    def fetch_new_data(self, torrent):
+        assert self._torrent_id is not None
+        self._assert_match(torrent)
+        comment_match = self._comment_regexp.match(torrent.get_comment() or "")
+        topic_id = comment_match.group(1)
+
+        cookie = http.cookiejar.Cookie(
+            version=0,
+            name="bb_dl",
+            value=topic_id,
+            port=None,
+            port_specified=False,
+            domain="",
+            domain_specified=False,
+            domain_initial_dot=False,
+            path="/",
+            path_specified=True,
+            secure=False,
+            expires=None,
+            discard=True,
+            comment=None,
+            comment_url=None,
+            rest={"HttpOnly": None},
+            rfc2109=False,
+        )
+        self._cookie_jar.set_cookie(cookie)
+
+        data = self._read_url(
+            url="http://pravtor.ru/download.php?id={}".format(self._torrent_id),
+            data=b"",
+            headers={
+                "Referer": "http://pravtor.ru/viewtopic.php?t={}".format(topic_id),
+                "Origin":  "http://pravtor.ru",
+            }
+        )
+        self._assert_valid_data(data)
+        return data
+
+    # ===
+
+    def login(self):
+        self._assert_auth(self._user is not None, "Required user for pravtor.ru")
+        self._assert_auth(self._passwd is not None, "Required passwd for pravtor.ru")
+        with self._make_opener():
+            post = {
+                "login_username": _encode(self._user),
+                "login_password": _encode(self._passwd),
+                "login":          b"\xc2\xf5\xee\xe4",
+            }
+            text = _decode(self._read_url(
+                url="http://pravtor.ru/login.php",
+                data=_encode(urllib.parse.urlencode(post)),
+            ))
+            self._assert_auth(self._loginform_regexp.search(text) is None, "Invalid user or password")
+
+    def is_logged_in(self):
+        return (self._opener is not None)
+
+    # ===
+
+    def _fetch_hash(self, torrent):
+        text = _decode(self._read_url(torrent.get_comment()))
+        hash_match = self._hash_regexp.search(text)
+        self._assert_logic(hash_match is not None, "Hash not found")
+
+        torrent_id = self._torrent_id_regexp.search(text)
+        self._assert_logic(torrent_id is not None, "Torrent-ID not found")
+        self._torrent_id = int(torrent_id.group(1))
+
+        return hash_match.group(1).lower()
