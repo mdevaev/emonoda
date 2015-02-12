@@ -33,6 +33,7 @@ if __name__ == "__main__":
                 "rtdiff = rtlib.apps.rtdiff:main",
                 "rtfetch = rtlib.apps.rtfetch:main",
                 "rtfile = rtlib.apps.rtfile:main",
+                "rtload = rtlib.apps.rtload:main",
                 "rthook-manage-trackers = rtlib.apps.hooks.manage_trackers:main",
             ],
         },

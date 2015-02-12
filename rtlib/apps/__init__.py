@@ -145,6 +145,7 @@ def _get_config_scheme():
         "core": {
             "client":       Option(default=None, type=str, help="The name of plugin for torrent client"),
             "torrents_dir": Option(default=".", type=str, help="Path to directory with torrent files"),
+            "data_dir":     Option(default=None, type=str, help="Path to directory with torrent data"),
             "use_colors":   Option(default=True, help="Enable colored output"),
             "force_colors": Option(default=False, help="Always use the coloring"),
         },
@@ -157,5 +158,10 @@ def _get_config_scheme():
                                     help="Save client custom fields after update (if supports)"),
             "set_customs":   Option(default=[], type=(lambda items: list(map(str, items))),
                                     help="Set client custom fileds after update (if supports)"),
+        },
+
+        "rtload": {
+            "torrent_mode": Option(default=None, help="Change permission for torrent file before load"),
+            "mkdir_mode": Option(default=None, help="Permission for new directories"),
         },
     }
