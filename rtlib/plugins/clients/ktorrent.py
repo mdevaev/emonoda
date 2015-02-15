@@ -33,7 +33,9 @@ except ImportError:
 
 # =====
 class Plugin(BaseClient):
-    def __init__(self):
+    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+        self._init_bases(**kwargs)
+
         if dbus is None:
             raise RuntimeError("Required module dbus")
 
@@ -47,6 +49,10 @@ class Plugin(BaseClient):
     @classmethod
     def get_name(cls):
         return "ktorrent"
+
+    @classmethod
+    def get_options(cls):
+        return cls._get_merged_options()
 
     # ===
 

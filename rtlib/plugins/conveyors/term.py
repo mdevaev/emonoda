@@ -31,8 +31,7 @@ from . import WithLogs
 # =====
 class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attributes
     def __init__(self, show_unknown, show_passed, show_diff, **kwargs):  # pylint: disable=super-init-not-called
-        for parent in self.__class__.__bases__:
-            parent.__init__(self, **kwargs)
+        self._init_bases(**kwargs)
 
         self._show_unknown = show_unknown
         self._show_passed = show_passed
@@ -52,11 +51,11 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
 
     @classmethod
     def get_options(cls):
-        return {
+        return cls._get_merged_options({
             "show_unknown": Option(default=False, help="Show the torrents with unknown tracker in the log"),
             "show_passed":  Option(default=False, help="Show the torrents without changes"),
             "show_diff":    Option(default=True, help="Show diff between old and updated torrent files"),
-        }
+        })
 
     # ===
 

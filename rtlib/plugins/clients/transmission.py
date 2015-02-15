@@ -40,7 +40,9 @@ class Plugin(BaseClient):
     #   http://pythonhosted.org/transmissionrpc/
     #   https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
 
-    def __init__(self, url, user, passwd, timeout):
+    def __init__(self, url, user, passwd, timeout, **kwargs):  # pylint: disable=super-init-not-called
+        self._init_bases(**kwargs)
+
         if transmissionrpc is None:
             raise RuntimeError("Required module transmissionrpc")
 
@@ -57,12 +59,12 @@ class Plugin(BaseClient):
 
     @classmethod
     def get_options(cls):
-        return {
+        return cls._get_merged_options({
             "url":     Option(default="http://localhost:9091/transmission/rpc", help="Transmission HTTP-RPC URL"),
             "timeout": Option(default=10.0, type=float, help="Timeout for HTTP-RPC"),
             "user":    Option(default=None, type=str, help="HTTP login"),
             "passwd":  SecretOption(default=None, type=str, help="HTTP password"),
-        }
+        })
 
     # ===
 

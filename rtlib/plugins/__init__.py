@@ -64,6 +64,19 @@ class BasePlugin:
     def get_bases(cls):
         return cls.__bases__
 
+    # ===
+
+    def _init_bases(self, **kwargs):
+        for parent in self.__class__.__bases__:
+            parent.__init__(self, **kwargs)
+
+    @classmethod
+    def _get_merged_options(cls, params=None):
+        params = (params or {})
+        for parent in cls.__bases__:
+            params.update(parent.get_options())
+        return params
+
 
 class BaseExtension:
     @classmethod
