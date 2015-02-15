@@ -64,6 +64,9 @@ def check_torrent_accessible(method):
 
 # =====
 class BaseClient(BasePlugin):
+    def __init__(self, **_):
+        pass
+
     @hash_or_torrent
     def remove_torrent(self, torrent_hash):
         raise NotImplementedError
@@ -110,6 +113,9 @@ class BaseClient(BasePlugin):
 
 
 class WithCustoms(BaseExtension):
+    def __init__(self, **_):
+        pass
+
     @classmethod
     def get_custom_keys(cls):
         raise NotImplementedError

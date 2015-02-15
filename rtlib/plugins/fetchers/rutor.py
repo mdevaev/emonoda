@@ -33,8 +33,7 @@ def _decode(arg):
 
 class Plugin(BaseFetcher, WithOpener):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
-        for parent in self.__class__.__bases__:
-            parent.__init__(self, **kwargs)
+        self._init_bases(**kwargs)
 
         self._comment_regexp = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
         self._hash_regexp = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
@@ -49,11 +48,11 @@ class Plugin(BaseFetcher, WithOpener):
 
     @classmethod
     def get_options(cls):
-        params = {}
-        for parent in cls.__bases__:
-            params.update(parent.get_options())
-        params["user_agent"] = Option(default="Googlebot/2.1", help="User-agent for site")
-        return params
+        return cls._get_merged_options({
+            "user_agent": Option(default="Googlebot/2.1", help="User-agent for site"),
+        })
+
+    # ===
 
     def test_site(self):
         opener = build_opener(proxy_url=self._proxy_url)
