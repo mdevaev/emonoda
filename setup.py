@@ -43,6 +43,7 @@ if __name__ == "__main__":
             "rtlib.plugins.conveyors",
             "rtlib.plugins.clients",
             "rtlib.plugins.fetchers",
+            "rtlib.thirdparty",
         ],
 
         entry_points={
