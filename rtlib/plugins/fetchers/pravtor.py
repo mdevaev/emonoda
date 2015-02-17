@@ -24,7 +24,6 @@ import re
 from . import BaseFetcher
 from . import WithLogin
 from . import WithOpener
-from . import build_opener
 
 
 # =====
@@ -39,6 +38,7 @@ def _decode(arg):
 class Plugin(BaseFetcher, WithLogin, WithOpener):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
+        self._init_opener(with_cookies=True)
 
         self._comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
         self._hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
@@ -62,9 +62,10 @@ class Plugin(BaseFetcher, WithLogin, WithOpener):
     # ===
 
     def test_site(self):
-        opener = build_opener(proxy_url=self._proxy_url)
-        data = self._read_url("http://pravtor.ru", opener=opener)
-        self._assert_site(b"<img src=\"/images/pravtor_beta1.png\"" in data)
+        self._test_site_fingerprint(
+            url="http://pravtor.ru",
+            fingerprint=b"<img src=\"/images/pravtor_beta1.png\"",
+        )
 
     def is_matched_for(self, torrent):
         return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
@@ -116,20 +117,16 @@ class Plugin(BaseFetcher, WithLogin, WithOpener):
     def login(self):
         self._assert_auth(self._user is not None, "Required user for pravtor.ru")
         self._assert_auth(self._passwd is not None, "Required passwd for pravtor.ru")
-        with self._make_opener():
-            post = {
-                "login_username": _encode(self._user),
-                "login_password": _encode(self._passwd),
-                "login":          b"\xc2\xf5\xee\xe4",
-            }
-            text = _decode(self._read_url(
-                url="http://pravtor.ru/login.php",
-                data=_encode(urllib.parse.urlencode(post)),
-            ))
-            self._assert_auth(self._loginform_regexp.search(text) is None, "Invalid user or password")
-
-    def is_logged_in(self):
-        return (self._opener is not None)
+        post = {
+            "login_username": _encode(self._user),
+            "login_password": _encode(self._passwd),
+            "login":          b"\xc2\xf5\xee\xe4",
+        }
+        text = _decode(self._read_url(
+            url="http://pravtor.ru/login.php",
+            data=_encode(urllib.parse.urlencode(post)),
+        ))
+        self._assert_auth(self._loginform_regexp.search(text) is None, "Invalid user or password")
 
     # ===
 

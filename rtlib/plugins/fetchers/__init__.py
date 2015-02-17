@@ -18,7 +18,6 @@
 
 
 import socket
-import contextlib
 import urllib.request
 import urllib.parse
 import http.cookiejar
@@ -182,9 +181,6 @@ class WithLogin(BaseExtension):
     def login(self):
         raise NotImplementedError
 
-    def is_logged_in(self):
-        raise NotImplementedError
-
     def _assert_auth(self, *args):
         _assert(AuthError, *args)
 
@@ -200,16 +196,17 @@ class WithOpener(BaseExtension):
         self._cookie_jar = None
         self._opener = None
 
-    @contextlib.contextmanager
-    def _make_opener(self):
-        self._cookie_jar = http.cookiejar.CookieJar()
-        self._opener = build_opener(self._cookie_jar, self._proxy_url)  # pylint: disable=no-member
-        try:
-            yield
-        except Exception:
-            self._cookie_jar = None
-            self._opener = None
-            raise
+    def _init_opener(self, with_cookies):
+        if with_cookies:
+            self._cookie_jar = http.cookiejar.CookieJar()
+            self._opener = build_opener(self._cookie_jar, self._proxy_url)  # pylint: disable=no-member
+        else:
+            self._opener = build_opener(proxy_url=self._proxy_url)  # pylint: disable=no-member
+
+    def _test_site_fingerprint(self, url, fingerprint):
+        opener = build_opener(proxy_url=self._proxy_url)  # pylint: disable=no-member
+        data = self._read_url(url, opener=opener)
+        self._assert_site(fingerprint in data)  # pylint: disable=no-member
 
     def _read_url(self, url, data=None, headers=None, opener=None):
         opener = (opener or self._opener)

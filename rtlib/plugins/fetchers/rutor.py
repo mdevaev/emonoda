@@ -23,7 +23,6 @@ from ...optconf import Option
 
 from . import BaseFetcher
 from . import WithOpener
-from . import build_opener
 
 
 # =====
@@ -34,6 +33,7 @@ def _decode(arg):
 class Plugin(BaseFetcher, WithOpener):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
+        self._init_opener(with_cookies=False)
 
         self._comment_regexp = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
         self._hash_regexp = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
@@ -55,10 +55,11 @@ class Plugin(BaseFetcher, WithOpener):
     # ===
 
     def test_site(self):
-        with self._make_opener():
-            data = self._read_url("http://rutor.org")
-            self._assert_site(b"<a href=\"/\"><img src=\"http://s.rutor.org/logo.jpg\""
-                              b" alt=\"rutor.org logo\" /></a>" in data)
+        self._test_site_fingerprint(
+            url="http://rutor.org",
+            fingerprint=b"<a href=\"/\"><img src=\"http://s.rutor.org/logo.jpg\""
+                        b" alt=\"rutor.org logo\" /></a>",
+        )
 
     def is_matched_for(self, torrent):
         return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
