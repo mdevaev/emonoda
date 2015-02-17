@@ -24,6 +24,7 @@ disable =
 	bad-whitespace,
 	star-args,
 	broad-except,
+	redundant-keyword-arg
 
 [REPORTS]
 msg-template={symbol} -- {path}:{line}({obj}): {msg}
