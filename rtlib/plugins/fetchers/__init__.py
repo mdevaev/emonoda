@@ -59,11 +59,8 @@ def select_fetcher(torrent, fetchers):
 
 
 # =====
-def build_opener(cookie_jar=None, proxy_url=None):
+def build_opener(proxy_url=None, cookie_jar=None):
     handlers = []
-
-    if cookie_jar is not None:
-        handlers.append(urllib.request.HTTPCookieProcessor(cookie_jar))
 
     if proxy_url is not None:
         scheme = (urllib.parse.urlparse(proxy_url).scheme or "").lower()
@@ -74,6 +71,9 @@ def build_opener(cookie_jar=None, proxy_url=None):
             handlers.append(sockshandler.SocksHandler(proxy_url=proxy_url))
         else:
             raise RuntimeError("Invalid proxy protocol: {}".format(scheme))
+
+    if cookie_jar is not None:
+        handlers.append(urllib.request.HTTPCookieProcessor(cookie_jar))
 
     return urllib.request.build_opener(*handlers)
 
@@ -157,17 +157,23 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     # ===
 
-    def test_site(self):
-        pass
+    def test_site(self, fingerprint=None):
+        if fingerprint is None:
+            fingerprint = self.get_fingerprint()
+        text = self._read_url(
+            url=fingerprint["url"],
+            opener=build_opener(self._proxy_url),
+        ).decode(fingerprint["encoding"])
+        _assert(SiteError, fingerprint["text"] in text, "Invalid site body, maybe tracker is blocked")
 
     # ===
 
     def _init_opener(self, with_cookies):
         if with_cookies:
             self._cookie_jar = http.cookiejar.CookieJar()
-            self._opener = build_opener(self._cookie_jar, self._proxy_url)
+            self._opener = build_opener(self._proxy_url, self._cookie_jar)
         else:
-            self._opener = build_opener(proxy_url=self._proxy_url)
+            self._opener = build_opener(self._proxy_url)
 
     def _read_url(self, url, data=None, headers=None, opener=None):
         opener = (opener or self._opener)
@@ -189,11 +195,11 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     # ===
 
-    def _assert_match(self, torrent):
-        self._assert_logic(self.is_matched_for(torrent), "No match with torrent")
-
     def _assert_logic(self, arg, *args):
         _assert(LogicError, arg, *args)
+
+    def _assert_match(self, torrent):
+        self._assert_logic(self.is_matched_for(torrent), "No match with torrent")
 
     def _assert_valid_data(self, data):
         msg = "Received an invalid torrent data: {} ...".format(repr(data[:20]))
