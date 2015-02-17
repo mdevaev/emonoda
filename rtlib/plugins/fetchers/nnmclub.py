@@ -53,16 +53,18 @@ class Plugin(BaseFetcher, WithLogin, WithOpener):
         return 1
 
     @classmethod
+    def get_fingerprint(cls):
+        return {
+            "url":      "http://nnm-club.me",
+            "encoding": "cp1251",
+            "text":     "<link rel=\"canonical\" href=\"http://nnm-club.me/\">",
+        }
+
+    @classmethod
     def get_options(cls):
         return cls._get_merged_options()
 
     # ===
-
-    def test_site(self):
-        self._test_site_fingerprint(
-            url="http://nnm-club.me",
-            fingerprint=b"<link rel=\"canonical\" href=\"http://nnm-club.me/\">",
-        )
 
     def is_matched_for(self, torrent):
         return (self._comment_regexp.match(torrent.get_comment() or "") is not None)

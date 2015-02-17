@@ -38,10 +38,6 @@ class FetcherError(Exception):
     pass
 
 
-class SiteError(FetcherError):
-    pass
-
-
 class AuthError(FetcherError):
     pass
 
@@ -128,6 +124,10 @@ class BaseFetcher(BasePlugin):
         raise NotImplementedError
 
     @classmethod
+    def get_fingerprint(cls):
+        raise NotImplementedError
+
+    @classmethod
     def get_options(cls):
         return {
             "url_retries":    Option(default=10, help="The number of retries to handle tracker-specific HTTP errors"),
@@ -137,9 +137,6 @@ class BaseFetcher(BasePlugin):
             "client_agent":   Option(default="rtorrent/0.9.2/0.13.2", help="User-agent for tracker"),
             "proxy_url":      Option(default=None, type=str, help="The URL of the HTTP proxy"),
         }
-
-    def test_site(self):
-        raise NotImplementedError
 
     def is_matched_for(self, torrent):
         raise NotImplementedError
@@ -151,9 +148,6 @@ class BaseFetcher(BasePlugin):
         raise NotImplementedError
 
     # ===
-
-    def _assert_site(self, arg):
-        _assert(SiteError, arg, "Invalid site body, maybe site is blocked")
 
     def _assert_match(self, torrent):
         self._assert_logic(self.is_matched_for(torrent), "No match with torrent")
@@ -202,11 +196,6 @@ class WithOpener(BaseExtension):
             self._opener = build_opener(self._cookie_jar, self._proxy_url)  # pylint: disable=no-member
         else:
             self._opener = build_opener(proxy_url=self._proxy_url)  # pylint: disable=no-member
-
-    def _test_site_fingerprint(self, url, fingerprint):
-        opener = build_opener(proxy_url=self._proxy_url)  # pylint: disable=no-member
-        data = self._read_url(url, opener=opener)
-        self._assert_site(fingerprint in data)  # pylint: disable=no-member
 
     def _read_url(self, url, data=None, headers=None, opener=None):
         opener = (opener or self._opener)

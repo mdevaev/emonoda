@@ -47,19 +47,20 @@ class Plugin(BaseFetcher, WithOpener):
         return 1
 
     @classmethod
+    def get_fingerprint(cls):
+        return {
+            "url":      "http://rutor.org",
+            "encoding": "utf-8",
+            "text":     "<a href=\"/\"><img src=\"http://s.rutor.org/logo.jpg\" alt=\"rutor.org logo\" /></a>",
+        }
+
+    @classmethod
     def get_options(cls):
         return cls._get_merged_options({
             "user_agent": Option(default="Googlebot/2.1", help="User-agent for site"),
         })
 
     # ===
-
-    def test_site(self):
-        self._test_site_fingerprint(
-            url="http://rutor.org",
-            fingerprint=b"<a href=\"/\"><img src=\"http://s.rutor.org/logo.jpg\""
-                        b" alt=\"rutor.org logo\" /></a>",
-        )
 
     def is_matched_for(self, torrent):
         return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
