@@ -1,18 +1,34 @@
 {
     "nnm-club.me": {
-        "path": "rtlib/plugins/fetchers/nnmclub.py",
+        "fingerprint": {
+            "encoding": "cp1251",
+            "text": "<link rel=\"canonical\" href=\"http://nnm-club.me/\">",
+            "url": "http://nnm-club.me"
+        },
         "version": 1
     },
     "pravtor.ru": {
-        "path": "rtlib/plugins/fetchers/pravtor.py",
+        "fingerprint": {
+            "encoding": "cp1251",
+            "text": "<img src=\"/images/pravtor_beta1.png\"",
+            "url": "http://pravtor.ru"
+        },
         "version": 0
     },
     "rutor.org": {
-        "path": "rtlib/plugins/fetchers/rutor.py",
+        "fingerprint": {
+            "encoding": "utf-8",
+            "text": "<a href=\"/\"><img src=\"http://s.rutor.org/logo.jpg\" alt=\"rutor.org logo\" /></a>",
+            "url": "http://rutor.org"
+        },
         "version": 1
     },
     "rutracker.org": {
-        "path": "rtlib/plugins/fetchers/rutracker.py",
+        "fingerprint": {
+            "encoding": "cp1251",
+            "text": "<link rel=\"shortcut icon\" href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\">",
+            "url": "http://rutracker.org"
+        },
         "version": 1
     }
 }

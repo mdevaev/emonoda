@@ -9,7 +9,7 @@ regen-fetchers:
 			print(json.dumps({ \
 				item.get_name(): { \
 					"version": item.get_version(), \
-					"path": item.__module__.replace(".", "/") + ".py", \
+					"fingerprint": item.get_fingerprint(), \
 				} \
 				for item in rtlib.plugins._get_classes()["fetchers"].values() \
 			}, sort_keys=True, indent=" " * 4)) \
