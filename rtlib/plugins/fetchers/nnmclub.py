@@ -25,7 +25,6 @@ from ... import tfile
 from . import BaseFetcher
 from . import WithLogin
 from . import WithOpener
-from . import build_opener
 
 
 # =====
@@ -40,6 +39,7 @@ def _decode(arg):
 class Plugin(BaseFetcher, WithLogin, WithOpener):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
+        self._init_opener(with_cookies=True)
 
         self._comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
         self._torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
@@ -59,9 +59,10 @@ class Plugin(BaseFetcher, WithLogin, WithOpener):
     # ===
 
     def test_site(self):
-        opener = build_opener(proxy_url=self._proxy_url)
-        data = self._read_url("http://nnm-club.me", opener=opener)
-        self._assert_site(b"<link rel=\"canonical\" href=\"http://nnm-club.me/\">" in data)
+        self._test_site_fingerprint(
+            url="http://nnm-club.me",
+            fingerprint=b"<link rel=\"canonical\" href=\"http://nnm-club.me/\">",
+        )
 
     def is_matched_for(self, torrent):
         return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
@@ -90,17 +91,13 @@ class Plugin(BaseFetcher, WithLogin, WithOpener):
     def login(self):
         self._assert_auth(self._user is not None, "Required user nnmclub")
         self._assert_auth(self._passwd is not None, "Required passwd nnmclub")
-        with self._make_opener():
-            post = {
-                "username": _encode(self._user),
-                "password": _encode(self._passwd),
-                "redirect": b"",
-                "login":    b"\xc2\xf5\xee\xe4",
-            }
-            url = "http://nnm-club.me/forum/login.php"
-            data = _encode(urllib.parse.urlencode(post))
-            text = _decode(self._read_url(url, data=data))
-            self._assert_auth("[ {} ]".format(self._user) in text, "Invalid login")
-
-    def is_logged_in(self):
-        return (self._opener is not None)
+        post = {
+            "username": _encode(self._user),
+            "password": _encode(self._passwd),
+            "redirect": b"",
+            "login":    b"\xc2\xf5\xee\xe4",
+        }
+        url = "http://nnm-club.me/forum/login.php"
+        data = _encode(urllib.parse.urlencode(post))
+        text = _decode(self._read_url(url, data=data))
+        self._assert_auth("[ {} ]".format(self._user) in text, "Invalid login")

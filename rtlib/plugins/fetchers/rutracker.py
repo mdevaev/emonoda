@@ -25,7 +25,6 @@ from . import BaseFetcher
 from . import WithLogin
 from . import WithCaptcha
 from . import WithOpener
-from . import build_opener
 
 
 # =====
@@ -40,6 +39,7 @@ def _decode(arg):
 class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithOpener):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
+        self._init_opener(with_cookies=True)
 
         self._comment_regexp = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
 
@@ -66,11 +66,10 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithOpener):
     # ===
 
     def test_site(self):
-        opener = build_opener(proxy_url=self._proxy_url)
-        data = self._read_url("http://rutracker.org", opener=opener)
-        self._assert_site(
-            b"<link rel=\"shortcut icon\" href=\"http://static.rutracker.org"
-            b"/favicon.ico\" type=\"image/x-icon\">" in data
+        self._test_site_fingerprint(
+            url="http://rutracker.org",
+            fingerprint=b"<link rel=\"shortcut icon\" href=\"http://static.rutracker.org"
+                        b"/favicon.ico\" type=\"image/x-icon\">",
         )
 
     def is_matched_for(self, torrent):
@@ -122,28 +121,25 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithOpener):
     def login(self):
         self._assert_auth(self._user is not None, "Required user for rutracker")
         self._assert_auth(self._passwd is not None, "Required passwd for rutracker")
-        with self._make_opener():
-            post = {
-                "login_username": _encode(self._user),
-                "login_password": _encode(self._passwd),
-                "login":          b"\xc2\xf5\xee\xe4",
-            }
+
+        post = {
+            "login_username": _encode(self._user),
+            "login_password": _encode(self._passwd),
+            "login":          b"\xc2\xf5\xee\xe4",
+        }
+        text = self._read_login(post)
+
+        cap_static_match = self._cap_static_regexp.search(text)
+        if cap_static_match is not None:
+            cap_sid_match = self._cap_sid_regexp.search(text)
+            cap_code_match = self._cap_code_regexp.search(text)
+            self._assert_auth(cap_sid_match is not None, "Unknown cap_sid")
+            self._assert_auth(cap_code_match is not None, "Unknown cap_code")
+
+            post[cap_code_match.group(1)] = self._captcha_decoder(cap_static_match.group(1))
+            post["cap_sid"] = cap_sid_match.group(1)
             text = self._read_login(post)
-
-            cap_static_match = self._cap_static_regexp.search(text)
-            if cap_static_match is not None:
-                cap_sid_match = self._cap_sid_regexp.search(text)
-                cap_code_match = self._cap_code_regexp.search(text)
-                self._assert_auth(cap_sid_match is not None, "Unknown cap_sid")
-                self._assert_auth(cap_code_match is not None, "Unknown cap_code")
-
-                post[cap_code_match.group(1)] = self._captcha_decoder(cap_static_match.group(1))
-                post["cap_sid"] = cap_sid_match.group(1)
-                text = self._read_login(post)
-                self._assert_auth(self._cap_static_regexp.search(text) is None, "Invalid captcha or password")
-
-    def is_logged_in(self):
-        return (self._opener is not None)
+            self._assert_auth(self._cap_static_regexp.search(text) is None, "Invalid captcha or password")
 
     # ===
 
