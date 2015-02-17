@@ -17,6 +17,7 @@
 """
 
 
+import json
 import socket
 import urllib.request
 import urllib.parse
@@ -157,13 +158,18 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     # ===
 
-    def test_site(self, fingerprint=None):
-        if fingerprint is None:
+    def test_site(self, use_upstream_fingerprint=True):
+        opener = build_opener(self._proxy_url)
+
+        if use_upstream_fingerprint:
+            fingerprint = json.loads(self._read_url(
+                url="https://raw.githubusercontent.com/mdevaev/rtfetch/ng/fetchers.json",
+                opener=opener,
+            ).decode("utf-8"))[self.get_name()]["fingerprint"]
+        else:
             fingerprint = self.get_fingerprint()
-        text = self._read_url(
-            url=fingerprint["url"],
-            opener=build_opener(self._proxy_url),
-        ).decode(fingerprint["encoding"])
+
+        text = self._read_url(fingerprint["url"], opener=opener).decode(fingerprint["encoding"])
         _assert(SiteError, fingerprint["text"] in text, "Invalid site body, maybe tracker is blocked")
 
     # ===
