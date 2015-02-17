@@ -72,10 +72,11 @@ class BasePlugin:
 
     @classmethod
     def _get_merged_options(cls, params=None):
-        params = (params or {})
+        merged = {}
         for parent in cls.__bases__:
-            params.update(parent.get_options())
-        return params
+            merged.update(parent.get_options())
+        merged.update(params or {})
+        return merged
 
 
 class BaseExtension:
