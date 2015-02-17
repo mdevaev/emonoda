@@ -7,6 +7,10 @@
         "path": "rtlib/plugins/fetchers/pravtor.py",
         "version": 0
     },
+    "rutor.org": {
+        "path": "rtlib/plugins/fetchers/rutor.py",
+        "version": 1
+    },
     "rutracker.org": {
         "path": "rtlib/plugins/fetchers/rutracker.py",
         "version": 1

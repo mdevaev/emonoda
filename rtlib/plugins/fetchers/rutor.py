@@ -55,9 +55,10 @@ class Plugin(BaseFetcher, WithOpener):
     # ===
 
     def test_site(self):
-        opener = build_opener(proxy_url=self._proxy_url)
-        data = self._read_url("http://rutor.org", opener=opener)
-        self._assert_site(b"<link rel=\"shortcut icon\" href=\"http://s.rutor.org/favicon.ico\" />" in data)
+        with self._make_opener():
+            data = self._read_url("http://rutor.org")
+            self._assert_site(b"<a href=\"/\"><img src=\"http://s.rutor.org/logo.jpg\""
+                              b" alt=\"rutor.org logo\" /></a>" in data)
 
     def is_matched_for(self, torrent):
         return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
