@@ -38,6 +38,10 @@ class FetcherError(Exception):
     pass
 
 
+class SiteError(FetcherError):
+    pass
+
+
 class AuthError(FetcherError):
     pass
 
@@ -110,14 +114,18 @@ def _assert(exception, arg, msg=""):
         raise exception(msg)
 
 
-class BaseFetcher(BasePlugin):
-    def __init__(self, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url, **_):  # +stub
+class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
+    def __init__(self, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url, **_):
         self._url_retries = url_retries
         self._url_sleep_time = url_sleep_time
         self._timeout = timeout
         self._user_agent = user_agent
         self._client_agent = client_agent
         self._proxy_url = proxy_url
+
+        self._retry_codes = (500, 502, 503)
+        self._cookie_jar = None
+        self._opener = None
 
     @classmethod
     def get_version(cls):
@@ -146,6 +154,38 @@ class BaseFetcher(BasePlugin):
 
     def fetch_new_data(self, torrent):
         raise NotImplementedError
+
+    # ===
+
+    def test_site(self):
+        pass
+
+    # ===
+
+    def _init_opener(self, with_cookies):
+        if with_cookies:
+            self._cookie_jar = http.cookiejar.CookieJar()
+            self._opener = build_opener(self._cookie_jar, self._proxy_url)
+        else:
+            self._opener = build_opener(proxy_url=self._proxy_url)
+
+    def _read_url(self, url, data=None, headers=None, opener=None):
+        opener = (opener or self._opener)
+        assert opener is not None
+
+        headers = (headers or {})
+        headers.setdefault("User-Agent", self._user_agent)
+
+        return read_url(
+            opener=opener,
+            url=url,
+            data=data,
+            headers=headers,
+            timeout=self._timeout,
+            retries=self._url_retries,
+            sleep_time=self._url_sleep_time,
+            retry_codes=self._retry_codes,
+        )
 
     # ===
 
@@ -182,35 +222,3 @@ class WithLogin(BaseExtension):
 class WithCaptcha(BaseExtension):
     def __init__(self, captcha_decoder, **_):
         self._captcha_decoder = captcha_decoder
-
-
-class WithOpener(BaseExtension):
-    def __init__(self, **_):
-        self._retry_codes = (500, 502, 503)
-        self._cookie_jar = None
-        self._opener = None
-
-    def _init_opener(self, with_cookies):
-        if with_cookies:
-            self._cookie_jar = http.cookiejar.CookieJar()
-            self._opener = build_opener(self._cookie_jar, self._proxy_url)  # pylint: disable=no-member
-        else:
-            self._opener = build_opener(proxy_url=self._proxy_url)  # pylint: disable=no-member
-
-    def _read_url(self, url, data=None, headers=None, opener=None):
-        opener = (opener or self._opener)
-        assert opener is not None
-
-        headers = (headers or {})
-        headers.setdefault("User-Agent", self._user_agent)  # pylint: disable=no-member
-
-        return read_url(
-            opener=opener,
-            url=url,
-            data=data,
-            headers=headers,
-            timeout=self._timeout,  # pylint: disable=no-member
-            retries=self._url_retries,  # pylint: disable=no-member
-            sleep_time=self._url_sleep_time,  # pylint: disable=no-member
-            retry_codes=self._retry_codes,
-        )

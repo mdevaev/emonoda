@@ -22,7 +22,6 @@ import re
 from ...optconf import Option
 
 from . import BaseFetcher
-from . import WithOpener
 
 
 # =====
@@ -30,7 +29,7 @@ def _decode(arg):
     return arg.decode("utf-8")
 
 
-class Plugin(BaseFetcher, WithOpener):
+class Plugin(BaseFetcher):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=False)

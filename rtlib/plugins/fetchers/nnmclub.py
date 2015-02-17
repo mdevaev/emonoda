@@ -24,7 +24,6 @@ from ... import tfile
 
 from . import BaseFetcher
 from . import WithLogin
-from . import WithOpener
 
 
 # =====
@@ -36,7 +35,7 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Plugin(BaseFetcher, WithLogin, WithOpener):
+class Plugin(BaseFetcher, WithLogin):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
