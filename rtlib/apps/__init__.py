@@ -146,7 +146,7 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
 
         try:
             log.print("# Enabling the fetcher {blue}%s{reset}: {yellow}testing{reset} ..." % (fetcher_name), one_line=True)
-            fetcher.test_site()
+            fetcher.test()
             if F_WithLogin in fetcher_class.get_bases():
                 log.print("# Enabling the fetcher {blue}%s{reset}: {yellow}logging in{reset} ..." % (fetcher_name), one_line=True)
                 fetcher.login()
