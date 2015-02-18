@@ -39,10 +39,6 @@ class FetcherError(Exception):
     pass
 
 
-class SiteError(FetcherError):
-    pass
-
-
 class AuthError(FetcherError):
     pass
 
@@ -116,13 +112,14 @@ def _assert(exception, arg, msg=""):
 
 
 class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
-    def __init__(self, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url, **_):
+    def __init__(self, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url, check_version, **_):
         self._url_retries = url_retries
         self._url_sleep_time = url_sleep_time
         self._timeout = timeout
         self._user_agent = user_agent
         self._client_agent = client_agent
         self._proxy_url = proxy_url
+        self._check_version = check_version
 
         self._retry_codes = (500, 502, 503)
         self._cookie_jar = None
@@ -145,6 +142,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "user_agent":     Option(default="Mozilla/5.0", help="User-agent for site"),
             "client_agent":   Option(default="rtorrent/0.9.2/0.13.2", help="User-agent for tracker"),
             "proxy_url":      Option(default=None, type=str, help="The URL of the HTTP proxy"),
+            "check_version":  Option(default=True, help="Check the fetcher version from GitHub")
         }
 
     def is_matched_for(self, torrent):
@@ -155,22 +153,6 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     def fetch_new_data(self, torrent):
         raise NotImplementedError
-
-    # ===
-
-    def test_site(self, use_upstream_fingerprint=True):
-        opener = build_opener(self._proxy_url)
-
-        if use_upstream_fingerprint:
-            fingerprint = json.loads(self._read_url(
-                url="https://raw.githubusercontent.com/mdevaev/rtfetch/ng/fetchers.json",
-                opener=opener,
-            ).decode("utf-8"))[self.get_name()]["fingerprint"]
-        else:
-            fingerprint = self.get_fingerprint()
-
-        text = self._read_url(fingerprint["url"], opener=opener).decode(fingerprint["encoding"])
-        _assert(SiteError, fingerprint["text"] in text, "Invalid site body, maybe tracker is blocked")
 
     # ===
 
@@ -210,6 +192,30 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def _assert_valid_data(self, data):
         msg = "Received an invalid torrent data: {} ...".format(repr(data[:20]))
         self._assert_logic(tfile.is_valid_data(data), msg)
+
+    # ===
+
+    def test(self):
+        opener = build_opener(self._proxy_url)
+        info = self._get_upstream_info(opener)
+        self._test_fingerprint(info["fingerprint"], opener)
+        if self._check_version:
+            self._test_version(info["version"])
+
+    def _get_upstream_info(self, opener):
+        return json.loads(self._read_url(
+            url="https://raw.githubusercontent.com/mdevaev/rtfetch/ng/fetchers.json",
+            opener=opener,
+        ).decode("utf-8"))[self.get_name()]
+
+    def _test_fingerprint(self, fingerprint, opener):
+        text = self._read_url(fingerprint["url"], opener=opener).decode(fingerprint["encoding"])
+        _assert(FetcherError, fingerprint["text"] in text, "Invalid site body, maybe tracker is blocked")
+
+    def _test_version(self, upstream):
+        local = self.get_version()
+        _assert(FetcherError, local >= upstream, "Fetcher is outdated (ver. local:{}, upstream:{})."
+                                                 " I recommend to update the program".format(local, upstream))
 
 
 class WithLogin(BaseExtension):
