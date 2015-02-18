@@ -26,6 +26,7 @@ from ..optconf import make_config
 from ..optconf import Section
 from ..optconf import Option
 
+from ..optconf import build_raw_from_options
 from ..optconf.dumper import make_config_dump
 from ..optconf.loaders.yaml import load_file as load_yaml_file
 
@@ -45,6 +46,7 @@ from .. import cli
 def init():
     args_parser = argparse.ArgumentParser(add_help=False)
     args_parser.add_argument("-c", "--config", dest="config_file_path", default="~/.config/rt.yaml", metavar="<file>")
+    args_parser.add_argument("-o", "--set-options", dest="set_options", default=[], nargs="+")
     args_parser.add_argument("-m", "--dump-config", dest="dump_config", action="store_true")
     (options, remaining) = args_parser.parse_known_args(sys.argv)
 
@@ -53,6 +55,7 @@ def init():
         raw_config = load_yaml_file(options.config_file_path)
     else:
         raw_config = {}
+    _merge_dicts(raw_config, build_raw_from_options(options.set_options))
     scheme = _get_config_scheme()
     config = make_config(raw_config, scheme)
 
@@ -81,6 +84,18 @@ def init():
     return (args_parser, remaining, config)
 
 
+def _merge_dicts(dest, src, path=None):
+    if path is None:
+        path = []
+    for key in src:
+        if key in dest:
+            if isinstance(dest[key], dict) and isinstance(src[key], dict):
+                _merge_dicts(dest[key], src[key], list(path) + [str(key)])
+                continue
+        dest[key] = src[key]
+
+
+# =====
 @contextlib.contextmanager
 def get_configured_log(config, quiet, output):
     log = cli.Log(config.core.use_colors, config.core.force_colors, quiet, output)
