@@ -77,7 +77,7 @@ def _make_plain_dump(config, split_by=(), path=()):
         else:
             default = config._get_default(key)  # pylint: disable=protected-access
             plain.append((
-                ".".join(path + (key,)),
+                "/".join(path + (key,)),
                 json.dumps(value),
                 json.dumps(default),
                 config._get_help(key),  # pylint: disable=protected-access
