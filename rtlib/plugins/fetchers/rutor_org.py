@@ -66,20 +66,14 @@ class Plugin(BaseFetcher):
 
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
-        return (torrent.get_hash() != self._fetch_hash(torrent))
+        page = _decode(self._read_url(torrent.get_comment()))
+        hash_match = self._hash_regexp.search(page)
+        self._assert_logic(hash_match is not None, "Hash not found")
+        return (torrent.get_hash() != hash_match.group(1).lower())
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        comment_match = self._comment_regexp.match(torrent.get_comment() or "")
-        topic_id = comment_match.group(1)
+        topic_id = self._comment_regexp.match(torrent.get_comment()).group(1)
         data = self._read_url("http://d.rutor.org/download/{}".format(topic_id))
         self._assert_valid_data(data)
         return data
-
-    # ===
-
-    def _fetch_hash(self, torrent):
-        text = _decode(self._read_url(torrent.get_comment()))
-        hash_match = self._hash_regexp.search(text)
-        self._assert_logic(hash_match is not None, "Hash not found")
-        return hash_match.group(1).lower()

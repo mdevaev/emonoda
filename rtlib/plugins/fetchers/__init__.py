@@ -163,6 +163,9 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         else:
             self._opener = build_opener(self._proxy_url)
 
+    def _build_opener(self):
+        return build_opener(self._proxy_url)
+
     def _read_url(self, url, data=None, headers=None, opener=None):
         opener = (opener or self._opener)
         assert opener is not None
