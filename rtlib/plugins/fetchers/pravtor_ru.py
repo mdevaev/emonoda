@@ -40,6 +40,7 @@ class Plugin(BaseFetcher, WithLogin):
         self._init_opener(with_cookies=True)
 
         self._comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
+
         self._hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
         self._loginform_regexp = re.compile(r"<!--login form-->")
         self._torrent_id_regexp = re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">")
@@ -65,9 +66,6 @@ class Plugin(BaseFetcher, WithLogin):
         return cls._get_merged_options()
 
     # ===
-
-    def is_matched_for(self, torrent):
-        return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
 
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
