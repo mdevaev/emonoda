@@ -176,6 +176,14 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
 
 
 # =====
+def _as_string_list(items):
+    return list(map(str, items))
+
+
+def _as_8base_int(value):
+    return int(str(value), 8)
+
+
 def _get_config_scheme():
     return {
         "core": {
@@ -190,14 +198,12 @@ def _get_config_scheme():
             "conveyor":      Option(default="term", help="Logger and captcha decoder"),
             "backup_dir":    Option(default=None, type=str, help="Backup old torrent files after update here"),
             "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
-            "save_customs":  Option(default=[], type=(lambda items: list(map(str, items))),
-                                    help="Save client custom fields after update (if supports)"),
-            "set_customs":   Option(default=[], type=(lambda items: list(map(str, items))),
-                                    help="Set client custom fileds after update (if supports)"),
+            "save_customs":  Option(default=[], type=_as_string_list, help="Save client custom fields after update (if supports)"),
+            "set_customs":   Option(default=[], type=_as_string_list, help="Set client custom fileds after update (if supports)")
         },
 
         "rtload": {
-            "torrent_mode": Option(default=None, help="Change permission for torrent file before load"),
-            "mkdir_mode": Option(default=None, help="Permission for new directories"),
+            "torrent_mode": Option(default=None, type=_as_8base_int, help="Change permissions of torrent file before load"),
+            "mkdir_mode": Option(default=None, type=_as_8base_int, help="Permission for new directories"),
         },
     }
