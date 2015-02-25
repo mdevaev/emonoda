@@ -23,7 +23,6 @@ import re
 
 from . import BaseFetcher
 from . import WithLogin
-from . import WithCaptcha
 
 
 # =====
@@ -35,35 +34,30 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Plugin(BaseFetcher, WithLogin, WithCaptcha):
+class Plugin(BaseFetcher, WithLogin):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
-        self._comment_regexp = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
-
-        self._cap_static_regexp = re.compile(r"\"(http://static\.rutracker\.org/captcha/[^\"]+)\"")
-        self._cap_sid_regexp = re.compile(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"")
-        self._cap_code_regexp = re.compile(r"name=\"(cap_code_[a-zA-Z0-9]+)\"")
-
+        self._comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
         self._hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
-
-        self._retry_codes = (503, 404)
+        self._loginform_regexp = re.compile(r"<!--login form-->")
+        self._torrent_id_regexp = re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">")
 
     @classmethod
     def get_name(cls):
-        return "rutracker.org"
+        return "pravtor.ru"
 
     @classmethod
     def get_version(cls):
-        return 1
+        return 0
 
     @classmethod
     def get_fingerprint(cls):
         return {
-            "url":      "http://rutracker.org",
+            "url":      "http://pravtor.ru",
             "encoding": "cp1251",
-            "text":     "<link rel=\"shortcut icon\" href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\">",
+            "text":     "<img src=\"/images/pravtor_beta1.png\"",
         }
 
     @classmethod
@@ -77,12 +71,20 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
 
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
-        return (torrent.get_hash() != self._fetch_hash(torrent))
+        page = _decode(self._read_url(torrent.get_comment()))
+        hash_match = self._hash_regexp.search(page)
+        self._assert_logic(hash_match is not None, "Hash not found")
+        return (torrent.get_hash() != hash_match.group(1).lower())
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        comment_match = self._comment_regexp.match(torrent.get_comment() or "")
-        topic_id = comment_match.group(1)
+
+        topic_id = self._comment_regexp.match(torrent.get_comment()).group(1)
+
+        page = _decode(self._read_url(torrent.get_comment()))
+        torrent_id_match = self._torrent_id_regexp.search(page)
+        self._assert_logic(torrent_id_match is not None, "Torrent-ID not found")
+        torrent_id = int(torrent_id_match.group(1))
 
         cookie = http.cookiejar.Cookie(
             version=0,
@@ -93,7 +95,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
             domain="",
             domain_specified=False,
             domain_initial_dot=False,
-            path="/forum/",
+            path="/",
             path_specified=True,
             secure=False,
             expires=None,
@@ -106,51 +108,29 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
         self._cookie_jar.set_cookie(cookie)
 
         data = self._read_url(
-            url="http://dl.rutracker.org/forum/dl.php?t={}".format(topic_id),
+            url="http://pravtor.ru/download.php?id={}".format(torrent_id),
             data=b"",
             headers={
-                "Referer": "http://rutracker.org/forum/viewtopic.php?t={}".format(topic_id),
-                "Origin":  "http://rutracker.org",
+                "Referer": "http://pravtor.ru/viewtopic.php?t={}".format(topic_id),
+                "Origin":  "http://pravtor.ru",
             }
         )
+
         self._assert_valid_data(data)
         return data
 
     # ===
 
     def login(self):
-        self._assert_auth(self._user is not None, "Required user for rutracker")
-        self._assert_auth(self._passwd is not None, "Required passwd for rutracker")
-
+        self._assert_auth(self._user is not None, "Required user for pravtor.ru")
+        self._assert_auth(self._passwd is not None, "Required passwd for pravtor.ru")
         post = {
             "login_username": _encode(self._user),
             "login_password": _encode(self._passwd),
             "login":          b"\xc2\xf5\xee\xe4",
         }
-        text = self._read_login(post)
-
-        cap_static_match = self._cap_static_regexp.search(text)
-        if cap_static_match is not None:
-            cap_sid_match = self._cap_sid_regexp.search(text)
-            cap_code_match = self._cap_code_regexp.search(text)
-            self._assert_auth(cap_sid_match is not None, "Unknown cap_sid")
-            self._assert_auth(cap_code_match is not None, "Unknown cap_code")
-
-            post[cap_code_match.group(1)] = self._captcha_decoder(cap_static_match.group(1))
-            post["cap_sid"] = cap_sid_match.group(1)
-            text = self._read_login(post)
-            self._assert_auth(self._cap_static_regexp.search(text) is None, "Invalid captcha or password")
-
-    # ===
-
-    def _read_login(self, post):
-        return _decode(self._read_url(
-            url="http://login.rutracker.org/forum/login.php",
+        page = _decode(self._read_url(
+            url="http://pravtor.ru/login.php",
             data=_encode(urllib.parse.urlencode(post)),
         ))
-
-    def _fetch_hash(self, torrent):
-        text = _decode(self._read_url(torrent.get_comment()))
-        hash_match = self._hash_regexp.search(text)
-        self._assert_logic(hash_match is not None, "Hash not found")
-        return hash_match.group(1).lower()
+        self._assert_auth(self._loginform_regexp.search(page) is None, "Invalid login or password")

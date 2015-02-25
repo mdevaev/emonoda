@@ -70,16 +70,17 @@ class Plugin(BaseFetcher, WithLogin):
 
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
-        url = "http://bt.nnm-club.me:2710/scrape?info_hash={}".format(torrent.get_scrape_hash())
-        headers = {"User-Agent": self._client_agent}
-        data = self._read_url(url, headers=headers)
+        data = self._read_url(
+            url="http://bt.nnm-club.me:2710/scrape?info_hash={}".format(torrent.get_scrape_hash()),
+            headers={"User-Agent": self._client_agent},
+        )
         return (len(tfile.decode_data(data).get("files", {})) == 0)
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        data = _decode(self._read_url(torrent.get_comment().replace("nnm-club.ru", "nnm-club.me")))
+        page = _decode(self._read_url(torrent.get_comment().replace("nnm-club.ru", "nnm-club.me")))
 
-        torrent_id_match = self._torrent_id_regexp.search(data)
+        torrent_id_match = self._torrent_id_regexp.search(page)
         self._assert_logic(torrent_id_match is not None, "Unknown torrent_id")
         torrent_id = torrent_id_match.group(1)
 
@@ -98,7 +99,8 @@ class Plugin(BaseFetcher, WithLogin):
             "redirect": b"",
             "login":    b"\xc2\xf5\xee\xe4",
         }
-        url = "http://nnm-club.me/forum/login.php"
-        data = _encode(urllib.parse.urlencode(post))
-        text = _decode(self._read_url(url, data=data))
-        self._assert_auth("[ {} ]".format(self._user) in text, "Invalid login")
+        page = _decode(self._read_url(
+            url="http://nnm-club.me/forum/login.php",
+            data=_encode(urllib.parse.urlencode(post)),
+        ))
+        self._assert_auth("[ {} ]".format(self._user) in page, "Invalid login or password")

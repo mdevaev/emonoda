@@ -198,8 +198,8 @@ def _get_config_scheme():
             "conveyor":      Option(default="term", help="Logger and captcha decoder"),
             "backup_dir":    Option(default=None, type=str, help="Backup old torrent files after update here"),
             "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
-            "save_customs":  Option(default=[], type=_as_string_list, help="Save client custom fields after update (if supports)"),
-            "set_customs":   Option(default=[], type=_as_string_list, help="Set client custom fileds after update (if supports)")
+            "save_customs":  Option(default=[], type=_as_string_list, help="Save client custom fields after update if supports"),
+            "set_customs":   Option(default=[], type=_as_string_list, help="Set client custom fileds after update if supports")
         },
 
         "rtload": {
