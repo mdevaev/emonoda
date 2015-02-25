@@ -41,14 +41,13 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
         self._init_opener(with_cookies=True)
 
         self._comment_regexp = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
+        self._retry_codes = (503, 404)
 
         self._cap_static_regexp = re.compile(r"\"(http://static\.rutracker\.org/captcha/[^\"]+)\"")
         self._cap_sid_regexp = re.compile(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"")
         self._cap_code_regexp = re.compile(r"name=\"(cap_code_[a-zA-Z0-9]+)\"")
 
         self._hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
-
-        self._retry_codes = (503, 404)
 
     @classmethod
     def get_name(cls):
@@ -71,9 +70,6 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
         return cls._get_merged_options()
 
     # ===
-
-    def is_matched_for(self, torrent):
-        return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
 
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)

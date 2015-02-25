@@ -35,6 +35,7 @@ class Plugin(BaseFetcher):
         self._init_opener(with_cookies=False)
 
         self._comment_regexp = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
+
         self._hash_regexp = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
 
     @classmethod
@@ -60,9 +61,6 @@ class Plugin(BaseFetcher):
         })
 
     # ===
-
-    def is_matched_for(self, torrent):
-        return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
 
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)

@@ -121,6 +121,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         self._proxy_url = proxy_url
         self._check_version = check_version
 
+        self._comment_regexp = None
         self._retry_codes = (500, 502, 503)
         self._cookie_jar = None
         self._opener = None
@@ -144,9 +145,6 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "proxy_url":      Option(default=None, type=str, help="The URL of the HTTP proxy"),
             "check_version":  Option(default=True, help="Check the fetcher version from GitHub")
         }
-
-    def is_matched_for(self, torrent):
-        raise NotImplementedError
 
     def is_torrent_changed(self, torrent):
         raise NotImplementedError
@@ -185,6 +183,10 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         )
 
     # ===
+
+    def is_matched_for(self, torrent):
+        assert self._comment_regexp is not None
+        return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
 
     def _assert_logic(self, arg, *args):
         _assert(LogicError, arg, *args)

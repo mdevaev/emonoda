@@ -41,6 +41,7 @@ class Plugin(BaseFetcher, WithLogin):
         self._init_opener(with_cookies=True)
 
         self._comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
+
         self._torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
 
     @classmethod
@@ -64,9 +65,6 @@ class Plugin(BaseFetcher, WithLogin):
         return cls._get_merged_options()
 
     # ===
-
-    def is_matched_for(self, torrent):
-        return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
 
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
