@@ -176,8 +176,12 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
 
 
 # =====
-def _as_string_list(items):
-    return list(map(str, items))
+def _as_path(value):
+    return os.path.expanduser(str(value))
+
+
+def _as_string_list(values):
+    return list(map(str, values))
 
 
 def _as_8base_int(value):
@@ -188,15 +192,15 @@ def _get_config_scheme():
     return {
         "core": {
             "client":       Option(default=None, type=str, help="The name of plugin for torrent client"),
-            "torrents_dir": Option(default=".", type=str, help="Path to directory with torrent files"),
-            "data_dir":     Option(default=None, type=str, help="Path to directory with torrent data"),
+            "torrents_dir": Option(default=".", type=_as_path, help="Path to directory with torrent files"),
+            "data_dir":     Option(default=None, type=_as_path, help="Path to directory with torrent data"),
             "use_colors":   Option(default=True, help="Enable colored output"),
             "force_colors": Option(default=False, help="Always use the coloring"),
         },
 
         "rtfetch": {
             "conveyor":      Option(default="term", help="Logger and captcha decoder"),
-            "backup_dir":    Option(default=None, type=str, help="Backup old torrent files after update here"),
+            "backup_dir":    Option(default=None, type=_as_path, help="Backup old torrent files after update here"),
             "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
             "save_customs":  Option(default=[], type=_as_string_list, help="Save client custom fields after update if supports"),
             "set_customs":   Option(default=[], type=_as_string_list, help="Set client custom fileds after update if supports")
