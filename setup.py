@@ -57,6 +57,7 @@ if __name__ == "__main__":
         },
 
         install_requires=[
+            "chardet",
             "pyyaml",
             "colorama",
             "pygments",
