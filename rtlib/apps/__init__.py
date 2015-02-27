@@ -177,7 +177,7 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
 
 # =====
 def _as_path(value):
-    return os.path.expanduser(str(value))
+    return os.path.abspath(os.path.expanduser(str(value)))
 
 
 def _as_string_list(values):
@@ -210,4 +210,8 @@ def _get_config_scheme():
             "torrent_mode": Option(default=None, type=_as_8base_int, help="Change permissions of torrent file before load"),
             "mkdir_mode": Option(default=None, type=_as_8base_int, help="Permission for new directories"),
         },
+
+        "rtquery": {
+            "cache_file": Option(default=_as_path("~/.cache/rt.json"), type=_as_path, help="Torrents cache"),
+        }
     }
