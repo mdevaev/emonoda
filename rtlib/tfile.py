@@ -46,7 +46,7 @@ def load_torrent_from_path(path):
 
 def load_from_dir(dir_path, name_filter="*.torrent", as_abs=False, loader=load_torrent_from_path):
     torrents = {}
-    for name in os.listdir(dir_path):
+    for name in sorted(os.listdir(dir_path)):
         if fnmatch.fnmatch(name, name_filter):
             path = os.path.join(dir_path, name)
             if as_abs:
