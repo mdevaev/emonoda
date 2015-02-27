@@ -26,6 +26,8 @@ import urllib.parse
 import collections
 import itertools
 
+import chardet
+
 from .thirdparty.bcoding import bdecode as decode_data
 from .thirdparty.bcoding import bencode as encode_struct
 
@@ -149,10 +151,13 @@ class Torrent:
     # ===
 
     def get_name(self):
-        return self._bencode["info"]["name"]
+        return self._decode(self._bencode["info"]["name"])
 
     def get_comment(self):
-        return self._bencode.get("comment")
+        return self._decode(self._bencode.get("comment"))
+
+    def get_encoding(self):
+        return self._bencode.get("encoding")
 
     def get_creation_date(self):
         return self._bencode.get("creation date")
@@ -226,8 +231,23 @@ class Torrent:
             for fstruct in self._bencode["info"]["files"]:
                 name = None
                 for index in range(len(fstruct["path"])):
-                    name = os.path.join(base, os.path.sep.join(fstruct["path"][0:index + 1]))
+                    name = os.path.join(base, os.path.sep.join(map(self._decode, fstruct["path"][0:index + 1])))
                     files[name] = None
                 assert name is not None
                 files[name] = make_file_attrs(fstruct)
             return files
+
+    # ===
+
+    def _decode(self, value):
+        if isinstance(value, bytes):
+            for encoding in (self._bencode.get("encoding", "utf-8"), "cp1251"):
+                try:
+                    return value.decode(encoding)
+                except UnicodeDecodeError:
+                    pass
+            encoding = chardet.detect(value)["encoding"]
+            assert encoding is not None, "Can't determine encoding for bytes string: '{}'".format(repr(value))
+            return value.decode(encoding)
+        else:
+            return value
