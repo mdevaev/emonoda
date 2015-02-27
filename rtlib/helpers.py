@@ -17,25 +17,99 @@
 """
 
 
+import os
+import json
+
 from . import tfile
-from . import fmt
 
 
 # =====
-def load_torrents_from_dir(dir_path, name_filter, log):
+def load_torrents_from_dir(path, name_filter, log):
     if log.isatty():
-        fan = fmt.make_fan()
-
-        def load_torrent(path):
-            log.print("# Caching {cyan}%s/{yellow}%s {magenta}%s{reset}" % (
-                      dir_path, name_filter, next(fan)), one_line=True)
-            return tfile.load_torrent_from_path(path)
+        def load_torrent(file_path):
+            log.print("# Loading torrents from {cyan}%s/{yellow}%s{reset} -- {yellow}%s{reset} ..." % (
+                      path, name_filter, os.path.basename(file_path)), one_line=True)
+            return tfile.load_torrent_from_path(file_path)
     else:
-        log.print("# Caching {cyan}%s/{yellow}%s{reset} ..." % (dir_path, name_filter))
+        log.print("# Loading torrents from {cyan}%s/{yellow}%s{reset} ..." % (path, name_filter))
         load_torrent = tfile.load_torrent_from_path
 
-    torrents = tfile.load_from_dir(dir_path, name_filter, as_abs=True, loader=load_torrent)
+    torrents = tfile.load_from_dir(path, name_filter, as_abs=True, loader=load_torrent)
 
-    log.print("# Cached {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}" % (
-              len(torrents), dir_path, name_filter))
+    log.print("# Loaded {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}" % (
+              len(torrents), path, name_filter))
     return torrents
+
+
+# =====
+def read_torrents_cache(path, log):
+    fallback = {
+        "version":  0,
+        "torrents": {},
+    }
+    if os.path.exists(path):
+        log.print("# Reading the cache from {cyan}%s{reset} ..." % (path))
+        with open(path) as cache_file:
+            try:
+                cache = json.loads(cache_file.read())
+                if cache["version"] != fallback["version"]:
+                    return fallback
+                else:
+                    return cache
+            except (KeyError, ValueError):
+                log.print("# The cache is damaged; ignored: {red}%s{reset}" % (path))
+                return fallback
+    else:
+        return fallback
+
+
+def write_torrents_cache(path, cache, log):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    log.print("# Writing the cache to {cyan}%s{reset} ..." % (path))
+    with open(path, "w") as cache_file:
+        cache_file.write(json.dumps(cache))
+
+
+def rebuild_torrents_cache(client, torrents, cache, log):
+    log.print("# Fetching all hashes from client ...")
+    hashes = client.get_hashes()
+
+    log.print("# Validating the cache ...")
+    torrents = {
+        torrent.get_hash(): torrent
+        for torrent in filter(None, torrents.values())
+    }
+
+    # --- Old ---
+    to_remove = tuple(sorted(set(cache["torrents"]).difference(hashes)))
+    if len(to_remove) != 0:
+        for torrent_hash in to_remove:
+            cache["torrents"].pop(torrent_hash)
+        log.print("# Removed {magenta}%d{reset} obsolete hashes from cache" % (len(to_remove)))
+
+    # --- New ---
+    to_add = tuple(sorted(set(hashes).difference(cache["torrents"])))
+    if len(to_add) != 0:
+        if not log.isatty():
+            log.print("# Adding files for the new {yellow}%d{reset} hashes ..." % (len(to_add)))
+        added = 0
+        for torrent_hash in to_add:
+            torrent = torrents.get(torrent_hash)
+            if torrent is not None:
+                name = os.path.basename(torrent.get_path())
+                if log.isatty():
+                    log.print("# Adding files for {yellow}%s{reset} ..." % (name), one_line=True)
+                cache["torrents"][torrent_hash] = {
+                    "name":      name,
+                    "is_single": torrent.is_single_file(),
+                    "files":     torrent.get_files(),
+                    "prefix":    client.get_data_prefix(torrent),
+                }
+                added += 1
+            else:
+                log.print("# Not cached: missing torrent for: {red}%s{reset} -- %s" % (
+                          torrent_hash, client.get_file_name(torrent_hash)))
+        if added != 0:
+            log.print("# Added {magenta}%d{reset} new hashes from client" % (added))
+
+    return bool(len(to_remove) or added)

@@ -66,16 +66,6 @@ def is_hash(text):
     return (re.match(r"[\da-fA-F]{40}", text) is not None)
 
 
-def get_indexed(path, prefix="", name_filter="*.torrent"):
-    files = {}
-    for torrent in filter(None, load_from_dir(path, name_filter).values()):
-        for path in torrent.get_files():
-            full_path = os.path.join(prefix, path)
-            files.setdefault(full_path, set())
-            files[full_path].add(torrent)
-    return files
-
-
 def get_difference(old, new):
     assert isinstance(old, (Torrent, dict))
     assert isinstance(new, (Torrent, dict))

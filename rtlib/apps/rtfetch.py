@@ -153,7 +153,7 @@ def main():
             )
 
             conveyor.set_torrents(helpers.load_torrents_from_dir(
-                dir_path=config.core.torrents_dir,
+                path=config.core.torrents_dir,
                 name_filter=options.name_filter,
                 log=log_stderr,
             ))
