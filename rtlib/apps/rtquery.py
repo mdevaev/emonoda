@@ -85,16 +85,16 @@ def print_orphaned_files(cache, data_dir_path, log_stdout, log_stderr):
     used_files = build_used_files(cache, data_dir_path)
     files = set(all_files).difference(used_files)
     if len(files) != 0:
-        log_stderr.print("# Orhpaned files:")
+        log_stderr.info("Orhpaned files:")
         size = 0
         for path in sorted(files):
             size += (all_files[path] or 0)
             path_type = ("{blue}D" if all_files[path] is None else "{magenta}F") + "{reset}"
             log_stdout.print("%s %s" % (path_type, path))
-        log_stderr.print("# Found {red}%d{reset} orphaned files = {red}%s{reset}" % (
-                         len(files), fmt.format_size(size)))
+        log_stderr.info("Found {red}%d{reset} orphaned files = {red}%s{reset}" % (
+                        len(files), fmt.format_size(size)))
     else:
-        log_stderr.print("# No orphaned files founded")
+        log_stderr.info("No orphaned files founded")
 
 
 # ===== Main =====
@@ -124,7 +124,7 @@ def main():
                 log=log_stderr,
             )
 
-            log_stderr.print("# Processing...")
+            log_stderr.info("Processing...")
 
             print_orphaned_files(cache, config.core.data_dir, log_stdout, log_stderr)
 

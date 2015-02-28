@@ -107,7 +107,7 @@ def get_configured_log(config, quiet, output):
 
 def get_configured_conveyor(config, log_stdout, log_stderr):
     name = config.rtfetch.conveyor
-    log_stderr.print("# Enabling the conveyor {blue}%s{reset} ..." % (name), one_line=True)
+    log_stderr.info("Enabling the conveyor {blue}%s{reset} ..." % (name), one_line=True)
     try:
         kwargs = dict(config.conveyor)
         conveyor_class = get_conveyor_class(name)
@@ -118,24 +118,24 @@ def get_configured_conveyor(config, log_stdout, log_stderr):
             })
         conveyor = conveyor_class(**kwargs)
     except Exception as err:
-        log_stderr.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (name, type(err).__name__, err))
+        log_stderr.error("Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (name, type(err).__name__, err))
         raise
-    log_stderr.print("# Conveyor {blue}%s{reset} is {green}ready{reset}" % (name))
+    log_stderr.info("Conveyor {blue}%s{reset} is {green}ready{reset}" % (name))
     return conveyor
 
 
 def get_configured_client(config, log, with_customs):
     name = config.core.client
     if name is not None:
-        log.print("# Enabling the client {blue}%s{reset} ..." % (name), one_line=True)
+        log.info("Enabling the client {blue}%s{reset} ..." % (name), one_line=True)
         try:
             client = get_client_class(name)(**config.client)
             if with_customs and C_WithCustoms not in client.get_bases():
                 raise RuntimeError("Your client does not support customs")
         except Exception as err:
-            log.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (name, type(err).__name__, err))
+            log.error("Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (name, type(err).__name__, err))
             raise
-        log.print("# Client {blue}%s{reset} is {green}ready{reset}" % (name))
+        log.info("Client {blue}%s{reset} is {green}ready{reset}" % (name))
         return client
     else:
         return None
@@ -151,7 +151,7 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
 
     fetchers = []
     for fetcher_name in sorted(to_init):
-        log.print("# Enabling the fetcher {blue}%s{reset} ..." % (fetcher_name), one_line=True)
+        log.info("Enabling the fetcher {blue}%s{reset} ..." % (fetcher_name), one_line=True)
 
         fetcher_class = get_fetcher_class(fetcher_name)
         fetcher_kwargs = dict(config.fetchers[fetcher_name])
@@ -160,14 +160,14 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
         fetcher = fetcher_class(**fetcher_kwargs)
 
         try:
-            log.print("# Enabling the fetcher {blue}%s{reset}: {yellow}testing{reset} ..." % (fetcher_name), one_line=True)
+            log.info("Enabling the fetcher {blue}%s{reset}: {yellow}testing{reset} ..." % (fetcher_name), one_line=True)
             fetcher.test()
             if F_WithLogin in fetcher_class.get_bases():
-                log.print("# Enabling the fetcher {blue}%s{reset}: {yellow}logging in{reset} ..." % (fetcher_name), one_line=True)
+                log.info("Enabling the fetcher {blue}%s{reset}: {yellow}logging in{reset} ..." % (fetcher_name), one_line=True)
                 fetcher.login()
-            log.print("# Fetcher {blue}%s{reset} is {green}ready{reset}" % (fetcher_name))
+            log.info("Fetcher {blue}%s{reset} is {green}ready{reset}" % (fetcher_name))
         except Exception as err:
-            log.print("# Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (fetcher_name, type(err).__name__, err))
+            log.error("Init error: {red}%s{reset}: {red}%s{reset}(%s)" % (fetcher_name, type(err).__name__, err))
             raise
 
         fetchers.append(fetcher)
