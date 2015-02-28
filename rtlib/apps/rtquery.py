@@ -80,7 +80,7 @@ def get_decoded(path):
             return path_bytes.decode(encoding)
 
 
-def print_orphaned_files(cache, data_dir_path, log_stdout, log_stderr):
+def print_orphaned_files(cache, data_dir_path, dirs_only, log_stdout, log_stderr):
     all_files = build_all_files(data_dir_path)
     used_files = build_used_files(cache, data_dir_path)
     files = set(all_files).difference(used_files)
@@ -88,9 +88,11 @@ def print_orphaned_files(cache, data_dir_path, log_stdout, log_stderr):
         log_stderr.info("Orhpaned files:")
         size = 0
         for path in sorted(files):
+            is_dir = (all_files[path] is None)
             size += (all_files[path] or 0)
-            path_type = ("{blue}D" if all_files[path] is None else "{magenta}F") + "{reset}"
-            log_stdout.print("%s %s" % (path_type, path))
+            path_type = ("{blue}D" if is_dir else "{magenta}F") + "{reset}"
+            if dirs_only and is_dir or not dirs_only:
+                log_stdout.print("%s %s" % (path_type, path))
         log_stderr.info("Found {red}%d{reset} orphaned files = {red}%s{reset}" % (
                         len(files), fmt.format_size(size)))
     else:
@@ -105,12 +107,10 @@ def main():
         description="Querying the client",
         parents=[parent_parser],
     )
-    args_parser.add_argument("-f", "--name-filter", default="*.torrent", metavar="<wildcard_pattern>")
-    args_parser.add_argument("-v", "--verbose", action="store_true")
     options = args_parser.parse_args(argv[1:])
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
-        with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
+        with get_configured_log(config, False, sys.stderr) as log_stderr:
 
             client = get_configured_client(config, log_stderr, with_customs=False)
             if client is None:
@@ -120,13 +120,13 @@ def main():
                 cache_path=config.rtquery.cache_file,
                 client=client,
                 torrents_dir_path=config.core.torrents_dir,
-                name_filter=options.name_filter,
+                name_filter=config.rtquery.name_filter,
                 log=log_stderr,
             )
 
             log_stderr.info("Processing...")
 
-            print_orphaned_files(cache, config.core.data_dir, log_stdout, log_stderr)
+            print_orphaned_files(cache, config.core.data_dir, True, log_stdout, log_stderr)
 
 
 if __name__ == "__main__":
