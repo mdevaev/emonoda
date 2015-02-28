@@ -62,25 +62,25 @@ def get_abs_torrents(path, file_names):
     ]
 
 
-def load_torrents(torrents, client, data_dir_path, link_to_path, torrent_mode, mkdir_mode, customs):
+def load_torrents(torrents, client, data_root_path, link_to_path, torrent_mode, mkdir_mode, customs):
     for torrent in torrents:
         if client.has_torrent(torrent):
             raise RuntimeError("{}: already loaded".format(torrent.get_path()))
         elif torrent_mode is not None:
             os.chmod(torrent.get_path(), torrent_mode)
 
-    if data_dir_path is None:
-        data_dir_path = client.get_data_prefix_default()
+    if data_root_path is None:
+        data_root_path = client.get_data_prefix_default()
 
     for torrent in torrents:
-        base_dir_name = os.path.basename(torrent.get_path()) + ".data"
-        base_dir_path = os.path.join(data_dir_path, base_dir_name[0], base_dir_name)
-        make_path(base_dir_path, mkdir_mode)
+        dir_name = os.path.basename(torrent.get_path()) + ".data"
+        data_dir_path = os.path.join(data_root_path, dir_name[0], dir_name)
+        make_path(data_dir_path, mkdir_mode)
 
         if link_to_path is not None:
-            link_data(torrent, base_dir_path, link_to_path, mkdir_mode)
+            link_data(torrent, data_dir_path, link_to_path, mkdir_mode)
 
-        client.load_torrent(torrent, base_dir_path)
+        client.load_torrent(torrent, data_dir_path)
         if len(customs) != 0:
             client.set_customs(torrent, {
                 key: fmt.format_now(value)
@@ -129,7 +129,7 @@ def main():
         load_torrents(
             torrents=torrents,
             client=client,
-            data_dir_path=config.core.data_dir,
+            data_root_path=config.core.data_root_dir,
             link_to_path=options.link_to,
             torrent_mode=config.rtload.torrent_mode,
             mkdir_mode=config.rtload.mkdir_mode,

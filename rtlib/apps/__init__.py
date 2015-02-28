@@ -191,11 +191,11 @@ def _as_8base_int(value):
 def _get_config_scheme():
     return {
         "core": {
-            "client":       Option(default=None, type=str, help="The name of plugin for torrent client"),
-            "torrents_dir": Option(default=".", type=_as_path, help="Path to directory with torrent files"),
-            "data_dir":     Option(default=None, type=_as_path, help="Path to directory with torrent data"),
-            "use_colors":   Option(default=True, help="Enable colored output"),
-            "force_colors": Option(default=False, help="Always use the coloring"),
+            "client":        Option(default=None, type=str, help="The name of plugin for torrent client"),
+            "torrents_dir":  Option(default=".", type=_as_path, help="Path to directory with torrent files"),
+            "data_root_dir": Option(default=None, type=_as_path, help="Path to root directory with data of torrents"),
+            "use_colors":    Option(default=True, help="Enable colored output"),
+            "force_colors":  Option(default=False, help="Always use the coloring"),
         },
 
         "rtfetch": {
