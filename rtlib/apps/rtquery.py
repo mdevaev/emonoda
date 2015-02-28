@@ -40,25 +40,25 @@ def build_cache(cache_path, client, torrents_dir_path, name_filter, log):
     return cache
 
 
-def build_used_files(cache, data_dir_path):
-    files = {data_dir_path: None}
+def build_used_files(cache, data_root_path):
+    files = {data_root_path: None}
     for info in cache["torrents"].values():
         prefix = os.path.normpath(info["prefix"])
 
         for (path, meta) in info["files"].items():
             files[os.path.join(prefix, path)] = (meta or {}).get("size")
 
-        if prefix.startswith(data_dir_path):
-            parts = list(filter(None, prefix[len(data_dir_path):].split(os.path.sep)))
+        if prefix.startswith(data_root_path):
+            parts = list(filter(None, prefix[len(data_root_path):].split(os.path.sep)))
             for index in range(len(parts)):
-                path = os.path.join(*([data_dir_path] + parts[:index + 1]))
+                path = os.path.join(*([data_root_path] + parts[:index + 1]))
                 files[path] = None
     return files
 
 
-def build_all_files(data_dir_path):
+def build_all_files(data_root_path):
     files = {}
-    for (prefix, _, local_files) in os.walk(data_dir_path):
+    for (prefix, _, local_files) in os.walk(data_root_path):
         files[get_decoded(prefix)] = None
         for name in local_files:
             path = os.path.join(prefix, name)
@@ -80,9 +80,9 @@ def get_decoded(path):
             return path_bytes.decode(encoding)
 
 
-def print_orphaned_files(cache, data_dir_path, dirs_only, log_stdout, log_stderr):
-    all_files = build_all_files(data_dir_path)
-    used_files = build_used_files(cache, data_dir_path)
+def print_orphaned_files(cache, data_root_path, dirs_only, log_stdout, log_stderr):
+    all_files = build_all_files(data_root_path)
+    used_files = build_used_files(cache, data_root_path)
     files = set(all_files).difference(used_files)
     if len(files) != 0:
         log_stderr.info("Orhpaned files:")
@@ -126,7 +126,7 @@ def main():
 
             log_stderr.info("Processing...")
 
-            print_orphaned_files(cache, config.core.data_dir, True, log_stdout, log_stderr)
+            print_orphaned_files(cache, config.core.data_root_dir, True, log_stdout, log_stderr)
 
 
 if __name__ == "__main__":
