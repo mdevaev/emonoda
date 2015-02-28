@@ -78,7 +78,7 @@ def load_torrents(torrents, client, data_dir_path, link_to_path, torrent_mode, m
         make_path(base_dir_path, mkdir_mode)
 
         if link_to_path is not None:
-            link_data(torrent, data_dir_path, link_to_path, mkdir_mode)
+            link_data(torrent, base_dir_path, link_to_path, mkdir_mode)
 
         client.load_torrent(torrent, base_dir_path)
         if len(customs) != 0:
