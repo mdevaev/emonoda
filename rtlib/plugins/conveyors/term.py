@@ -70,19 +70,18 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
 
     def read_captcha(self, url):
         self._kill_thread()
-        self._log_stderr.print("# {yellow}Enter the captcha{reset} from [{blue}%s{reset}]: " % (url), no_nl=True)
+        self._log_stderr.info("{yellow}Enter the captcha{reset} from [{blue}%s{reset}]: " % (url), no_nl=True)
         return input()
 
     def print_summary(self):
         self._kill_thread()
-        self._log_stderr.print("# " + ("-" * 10))
-        self._log_stderr.print("# Invalid:       {}".format(self.invalid_count))
-        self._log_stderr.print("# Not in client: {}".format(self.not_in_client_count))
-        self._log_stderr.print("# Unknown:       {}".format(self.unknown_count))
-        self._log_stderr.print("# Passed:        {}".format(self.passed_count))
-        self._log_stderr.print("# Updated:       {}".format(self.updated_count))
-        self._log_stderr.print("# Errors:        {}".format(self.error_count))
-        self._log_stderr.print("# Exceptions:    {}".format(self.exception_count))
+        self._log_stderr.info("Invalid:       {}".format(self.invalid_count))
+        self._log_stderr.info("Not in client: {}".format(self.not_in_client_count))
+        self._log_stderr.info("Unknown:       {}".format(self.unknown_count))
+        self._log_stderr.info("Passed:        {}".format(self.passed_count))
+        self._log_stderr.info("Updated:       {}".format(self.updated_count))
+        self._log_stderr.info("Errors:        {}".format(self.error_count))
+        self._log_stderr.info("Exceptions:    {}".format(self.exception_count))
 
     # ===
 

@@ -48,6 +48,12 @@ class Log:
     def isatty(self):
         return self._output.isatty()
 
+    def info(self, text, *args, **kwargs):
+        self.print("# {green}I{reset}: " + text, *args, **kwargs)
+
+    def error(self, text, *args, **kwargs):
+        self.print("# {red}E{reset}: " + text, *args, **kwargs)
+
     def print(self, text="", one_line=False, no_nl=False):
         if not self._quiet:
             colored = (self._use_colors and (self.isatty() or self._force_colors))
