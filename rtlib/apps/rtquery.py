@@ -81,8 +81,12 @@ def get_decoded_path(path):
 
 # =====
 def print_orphaned_files(cache, data_root_path, dirs_only, log_stdout, log_stderr):
+    log_stderr.info("Scanning directory {cyan}%s{reset} ... " % (data_root_path))
     all_files = build_all_files(data_root_path)
+
+    log_stderr.info("Transposing the cache: by-hashes -> files ...")
     used_files = build_used_files(cache, data_root_path)
+
     files = set(all_files).difference(used_files)
     if len(files) != 0:
         log_stderr.info("Orhpaned files:")
@@ -110,7 +114,7 @@ def main():
     args_parser.add_argument("--rebuild-cache", action="store_true")
     queries = args_parser.add_subparsers(dest="query")
 
-    find_orphans_parser = queries.add_parser("find-orphans")
+    find_orphans_parser = queries.add_parser("find-orphans", help="Find files that do not belong to the client")
     find_orphans_parser.add_argument("--dirs-only", action="store_true")
 
     options = args_parser.parse_args(argv[1:])
@@ -134,7 +138,6 @@ def main():
                 log=log_stderr,
             )
 
-            log_stderr.info("Processing...")
             if options.query == "find-orphans":
                 print_orphaned_files(
                     cache=cache,
