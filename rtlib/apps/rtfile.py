@@ -179,7 +179,12 @@ def main():  # pylint: disable=too-many-locals
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
 
-            client = get_configured_client(config, log_stderr, with_customs=False)
+            client = get_configured_client(
+                config=config,
+                required=False,
+                with_customs=False,
+                log=log_stderr,
+            )
 
             to_print = [
                 (option[2:], method)

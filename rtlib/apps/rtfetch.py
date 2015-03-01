@@ -140,8 +140,9 @@ def main():
 
             client = get_configured_client(
                 config=config,
-                log=log_stderr,
+                required=False,
                 with_customs=(len(config.rtfetch.save_customs) or len(config.rtfetch.set_customs)),
+                log=log_stderr,
             )
 
             fetchers = get_configured_fetchers(

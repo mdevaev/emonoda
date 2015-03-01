@@ -117,9 +117,12 @@ def main():
 
     with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
 
-        client = get_configured_client(config, log_stderr, with_customs=bool(customs))
-        if client is None:
-            raise RuntimeError("Required client")
+        client = get_configured_client(
+            config=config,
+            required=True,
+            with_customs=bool(customs),
+            log=log_stderr,
+        )
 
         torrents = get_abs_torrents(
             path=config.core.torrents_dir,

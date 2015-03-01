@@ -118,9 +118,12 @@ def main():
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, False, sys.stderr) as log_stderr:
 
-            client = get_configured_client(config, log_stderr, with_customs=False)
-            if client is None:
-                raise RuntimeError("Required client")
+            client = get_configured_client(
+                config=config,
+                required=True,
+                with_customs=False,
+                log=log_stderr,
+            )
 
             cache = build_cache(
                 cache_path=config.rtquery.cache_file,
