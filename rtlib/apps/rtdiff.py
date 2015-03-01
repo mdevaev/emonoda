@@ -44,16 +44,23 @@ def main():
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
 
-            client = get_configured_client(config, log_stderr, with_customs=False)
+            client = None
 
             for count in range(2):
                 item = options.torrents[count]
                 if os.path.exists(item):
                     options.torrents[count] = tfile.Torrent(path=item).get_files()
+
                 elif tfile.is_hash(item):
                     if client is None:
-                        raise RuntimeError("Required client for hash: {}".format(item))
+                        client = get_configured_client(
+                            config=config,
+                            required=True,
+                            with_customs=False,
+                            log=log_stderr,
+                        )
                     options.torrents[count] = client.get_files(item)
+
                 else:
                     raise RuntimeError("Invalid file or hash: {}".format(item))
 

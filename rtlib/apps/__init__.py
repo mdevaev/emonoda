@@ -124,7 +124,7 @@ def get_configured_conveyor(config, log_stdout, log_stderr):
     return conveyor
 
 
-def get_configured_client(config, log, with_customs):
+def get_configured_client(config, required, with_customs, log):
     name = config.core.client
     if name is not None:
         log.info("Enabling the client {blue}%s{reset} ..." % (name), one_line=True)
@@ -137,6 +137,8 @@ def get_configured_client(config, log, with_customs):
             raise
         log.info("Client {blue}%s{reset} is {green}ready{reset}" % (name))
         return client
+    elif required:
+        RuntimeError("No configured client found")
     else:
         return None
 
