@@ -42,43 +42,38 @@ def load_torrents_from_dir(path, name_filter, log):
 
 
 # =====
-def read_torrents_cache(path, log):
+def read_torrents_cache(path, rebuild, log):
     fallback = {
         "version":  0,
         "torrents": {},
     }
-    if os.path.exists(path):
-        log.info("Reading the cache from {cyan}%s{reset} ..." % (path))
-        with open(path) as cache_file:
-            try:
-                cache = json.loads(cache_file.read())
-                if cache["version"] != fallback["version"]:
-                    return fallback
-                else:
-                    return cache
-            except (KeyError, ValueError):
-                log.error("The cache was damaged - ingoring: {red}%s{reset}" % (path))
-                return fallback
-    else:
+    if rebuild or not os.path.exists(path):
         return fallback
 
+    log.info("Reading the cache from {cyan}%s{reset} ..." % (path))
+    with open(path) as cache_file:
+        try:
+            cache = json.loads(cache_file.read())
+            if cache["version"] != fallback["version"]:
+                return fallback
+            else:
+                return cache
+        except (KeyError, ValueError):
+            log.error("The cache was damaged - ingored: {red}%s{reset}" % (path))
+            return fallback
 
-def write_torrents_cache(path, cache, log):
+
+def write_torrents_cache(cache, path, log):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     log.info("Writing the cache to {cyan}%s{reset} ..." % (path))
     with open(path, "w") as cache_file:
         cache_file.write(json.dumps(cache))
 
 
-def rebuild_torrents_cache(client, torrents, cache, log):
+def build_torrents_cache(cache, client, torrents_dir_path, name_filter, log):
     log.info("Fetching all hashes from client ...")
     hashes = client.get_hashes()
-
     log.info("Validating the cache ...")
-    torrents = {
-        torrent.get_hash(): torrent
-        for torrent in filter(None, torrents.values())
-    }
 
     # --- Old ---
     to_remove = tuple(sorted(set(cache["torrents"]).difference(hashes)))
@@ -89,10 +84,16 @@ def rebuild_torrents_cache(client, torrents, cache, log):
 
     # --- New ---
     to_add = tuple(sorted(set(hashes).difference(cache["torrents"])))
+    added = 0
     if len(to_add) != 0:
+        torrents = load_torrents_from_dir(torrents_dir_path, name_filter, log)
+        torrents = {
+            torrent.get_hash(): torrent
+            for torrent in filter(None, torrents.values())
+        }
+
         if not log.isatty():
             log.info("Adding files for the new {yellow}%d{reset} hashes ..." % (len(to_add)))
-        added = 0
         for torrent_hash in to_add:
             torrent = torrents.get(torrent_hash)
             if torrent is not None:
@@ -100,8 +101,8 @@ def rebuild_torrents_cache(client, torrents, cache, log):
                 if log.isatty():
                     log.info("Adding files for {yellow}%s{reset} ..." % (name), one_line=True)
                 cache["torrents"][torrent_hash] = {
-                    "name":      name,
-                    "is_single": torrent.is_single_file(),
+                    # "name":      name,
+                    # "is_single": torrent.is_single_file(),
                     "files":     torrent.get_files(),
                     "prefix":    client.get_data_prefix(torrent),
                 }
