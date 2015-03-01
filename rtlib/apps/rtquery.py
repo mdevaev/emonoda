@@ -32,11 +32,10 @@ from . import get_configured_client
 
 
 # =====
-def build_cache(cache_path, client, torrents_dir_path, name_filter, log):
-    torrents = helpers.load_torrents_from_dir(torrents_dir_path, name_filter, log)
-    cache = helpers.read_torrents_cache(cache_path, log)
-    if helpers.rebuild_torrents_cache(client, torrents, cache, log):
-        helpers.write_torrents_cache(cache_path, cache, log)
+def build_cache(cache_path, rebuild, client, torrents_dir_path, name_filter, log):
+    cache = helpers.read_torrents_cache(cache_path, rebuild, log)
+    if helpers.build_torrents_cache(cache, client, torrents_dir_path, name_filter, log):
+        helpers.write_torrents_cache(cache, cache_path, log)
     return cache
 
 
@@ -59,14 +58,14 @@ def build_used_files(cache, data_root_path):
 def build_all_files(data_root_path):
     files = {}
     for (prefix, _, local_files) in os.walk(data_root_path):
-        files[get_decoded(prefix)] = None
+        files[get_decoded_path(prefix)] = None
         for name in local_files:
             path = os.path.join(prefix, name)
-            files[get_decoded(path)] = os.path.getsize(path)
+            files[get_decoded_path(path)] = os.path.getsize(path)
     return files
 
 
-def get_decoded(path):
+def get_decoded_path(path):
     try:
         path.encode()
         return path
@@ -80,6 +79,7 @@ def get_decoded(path):
             return path_bytes.decode(encoding)
 
 
+# =====
 def print_orphaned_files(cache, data_root_path, dirs_only, log_stdout, log_stderr):
     all_files = build_all_files(data_root_path)
     used_files = build_used_files(cache, data_root_path)
@@ -107,6 +107,12 @@ def main():
         description="Querying the client",
         parents=[parent_parser],
     )
+    args_parser.add_argument("--rebuild-cache", action="store_true")
+    queries = args_parser.add_subparsers(dest="query")
+
+    find_orphans_parser = queries.add_parser("find-orphans")
+    find_orphans_parser.add_argument("--dirs-only", action="store_true")
+
     options = args_parser.parse_args(argv[1:])
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
@@ -118,6 +124,7 @@ def main():
 
             cache = build_cache(
                 cache_path=config.rtquery.cache_file,
+                rebuild=options.rebuild_cache,
                 client=client,
                 torrents_dir_path=config.core.torrents_dir,
                 name_filter=config.rtquery.name_filter,
@@ -125,8 +132,14 @@ def main():
             )
 
             log_stderr.info("Processing...")
-
-            print_orphaned_files(cache, config.core.data_root_dir, True, log_stdout, log_stderr)
+            if options.query == "find-orphans":
+                print_orphaned_files(
+                    cache=cache,
+                    data_root_path=config.core.data_root_dir,
+                    dirs_only=options.dirs_only,
+                    log_stdout=log_stdout,
+                    log_stderr=log_stderr,
+                )
 
 
 if __name__ == "__main__":
