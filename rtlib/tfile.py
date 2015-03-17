@@ -132,6 +132,10 @@ class Torrent:
     def get_path(self):
         return self._path
 
+    def get_mtime(self):
+        assert self._path is not None, "Can't get mtime for None-path"
+        return int(os.stat(self._path).st_mtime)
+
     def get_data(self):
         return self._data
 
