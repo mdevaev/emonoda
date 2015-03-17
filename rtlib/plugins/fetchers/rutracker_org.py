@@ -39,15 +39,8 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-
         self._comment_regexp = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
         self._retry_codes = (503, 404)
-
-        self._cap_static_regexp = re.compile(r"\"(http://static\.rutracker\.org/captcha/[^\"]+)\"")
-        self._cap_sid_regexp = re.compile(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"")
-        self._cap_code_regexp = re.compile(r"name=\"(cap_code_[a-zA-Z0-9]+)\"")
-
-        self._hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
 
     @classmethod
     def get_name(cls):
@@ -74,7 +67,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
         page = _decode(self._read_url(torrent.get_comment()))
-        hash_match = self._hash_regexp.search(page)
+        hash_match = re.search(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>", page)
         self._assert_logic(hash_match is not None, "Hash not found")
         return (torrent.get_hash() != hash_match.group(1).lower())
 
@@ -129,17 +122,18 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
         }
         page = self._read_login(post)
 
-        cap_static_match = self._cap_static_regexp.search(page)
+        cap_static_regexp = re.compile(r"\"(http://static\.rutracker\.org/captcha/[^\"]+)\"")
+        cap_static_match = cap_static_regexp.search(page)
         if cap_static_match is not None:
-            cap_sid_match = self._cap_sid_regexp.search(page)
-            cap_code_match = self._cap_code_regexp.search(page)
+            cap_sid_match = re.search(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"", page)
+            cap_code_match = re.search(r"name=\"(cap_code_[a-zA-Z0-9]+)\"", page)
             self._assert_auth(cap_sid_match is not None, "Unknown cap_sid")
             self._assert_auth(cap_code_match is not None, "Unknown cap_code")
 
             post[cap_code_match.group(1)] = self._captcha_decoder(cap_static_match.group(1))
             post["cap_sid"] = cap_sid_match.group(1)
             page = self._read_login(post)
-            self._assert_auth(self._cap_static_regexp.search(page) is None, "Invalid login, password or captcha")
+            self._assert_auth(cap_static_regexp.search(page) is None, "Invalid login, password or captcha")
 
     def _read_login(self, post):
         return _decode(self._read_url(

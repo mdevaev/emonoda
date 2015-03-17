@@ -33,10 +33,7 @@ class Plugin(BaseFetcher):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=False)
-
         self._comment_regexp = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
-
-        self._hash_regexp = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
 
     @classmethod
     def get_name(cls):
@@ -65,7 +62,7 @@ class Plugin(BaseFetcher):
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
         page = _decode(self._read_url(torrent.get_comment()))
-        hash_match = self._hash_regexp.search(page)
+        hash_match = re.search(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})", page)
         self._assert_logic(hash_match is not None, "Hash not found")
         return (torrent.get_hash() != hash_match.group(1).lower())
 
