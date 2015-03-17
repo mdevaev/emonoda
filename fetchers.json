@@ -30,5 +30,13 @@
             "url": "http://rutracker.org"
         },
         "version": 1
+    },
+    "tfile.me": {
+        "fingerprint": {
+            "encoding": "cp1251",
+            "text": "href=\"http://tfile.me/opensearch.xml\"",
+            "url": "http://tfile.me"
+        },
+        "version": 0
     }
 }
