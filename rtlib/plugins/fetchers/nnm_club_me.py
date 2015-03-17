@@ -39,10 +39,7 @@ class Plugin(BaseFetcher, WithLogin):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-
         self._comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
-
-        self._torrent_id_regexp = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
 
     @classmethod
     def get_name(cls):
@@ -78,7 +75,7 @@ class Plugin(BaseFetcher, WithLogin):
         self._assert_match(torrent)
         page = _decode(self._read_url(torrent.get_comment().replace("nnm-club.ru", "nnm-club.me")))
 
-        torrent_id_match = self._torrent_id_regexp.search(page)
+        torrent_id_match = re.search(r"filelst.php\?attach_id=([a-zA-Z0-9]+)", page)
         self._assert_logic(torrent_id_match is not None, "Unknown torrent_id")
         torrent_id = torrent_id_match.group(1)
 

@@ -38,12 +38,7 @@ class Plugin(BaseFetcher, WithLogin):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-
         self._comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
-
-        self._hash_regexp = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
-        self._loginform_regexp = re.compile(r"<!--login form-->")
-        self._torrent_id_regexp = re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">")
 
     @classmethod
     def get_name(cls):
@@ -70,7 +65,7 @@ class Plugin(BaseFetcher, WithLogin):
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
         page = _decode(self._read_url(torrent.get_comment()))
-        hash_match = self._hash_regexp.search(page)
+        hash_match = re.search(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>", page)
         self._assert_logic(hash_match is not None, "Hash not found")
         return (torrent.get_hash() != hash_match.group(1).lower())
 
@@ -80,7 +75,7 @@ class Plugin(BaseFetcher, WithLogin):
         topic_id = self._comment_regexp.match(torrent.get_comment()).group(1)
 
         page = _decode(self._read_url(torrent.get_comment()))
-        torrent_id_match = self._torrent_id_regexp.search(page)
+        torrent_id_match = re.search(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">", page)
         self._assert_logic(torrent_id_match is not None, "Torrent-ID not found")
         torrent_id = int(torrent_id_match.group(1))
 
@@ -131,4 +126,4 @@ class Plugin(BaseFetcher, WithLogin):
             url="http://pravtor.ru/login.php",
             data=_encode(urllib.parse.urlencode(post)),
         ))
-        self._assert_auth(self._loginform_regexp.search(page) is None, "Invalid login or password")
+        self._assert_auth(re.search(r"<!--login form-->", page) is None, "Invalid login or password")
