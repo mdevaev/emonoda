@@ -214,7 +214,7 @@ def _get_config_scheme():
         },
 
         "emquery": {
-            "cache_file": Option(default=_as_path("~/.cache/rt.json"), type=_as_path, help="Torrents cache"),
+            "cache_file": Option(default=_as_path("~/.cache/emquery.json"), type=_as_path, help="Torrents cache"),
             "name_filter": Option(default="*.torrent", type=str, help="Cache only filtered torrent files"),
         }
     }
