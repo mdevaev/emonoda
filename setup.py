@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-    rtfetch -- The set of tools to organize and manage your torrents
+    Emonoda -- The set of tools to organize and manage of your torrents
     Copyright (C) 2015  Devaev Maxim <mdevaev@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
@@ -24,36 +24,36 @@ import setuptools
 # =====
 if __name__ == "__main__":
     setuptools.setup(
-        name="rtfetch",
+        name="emonoda",
         version="1.0",
-        url="https://github.com/mdevaev/rtfetch",
+        url="https://github.com/mdevaev/emonoda",
         license="GPLv3",
         author="Devaev Maxim",
         author_email="mdevaev@gmail.com",
-        description="The set of tools to organize and manage your torrents",
+        description="The set of tools to organize and manage of your torrents",
         platforms="any",
 
         packages=[
-            "rtlib",
-            "rtlib.optconf",
-            "rtlib.optconf.loaders",
-            "rtlib.apps",
-            "rtlib.apps.hooks",
-            "rtlib.plugins",
-            "rtlib.plugins.conveyors",
-            "rtlib.plugins.clients",
-            "rtlib.plugins.fetchers",
-            "rtlib.thirdparty",
+            "emlib",
+            "emlib.optconf",
+            "emlib.optconf.loaders",
+            "emlib.apps",
+            "emlib.apps.hooks",
+            "emlib.plugins",
+            "emlib.plugins.conveyors",
+            "emlib.plugins.clients",
+            "emlib.plugins.fetchers",
+            "emlib.thirdparty",
         ],
 
         entry_points={
             "console_scripts": [
-                "rtdiff = rtlib.apps.rtdiff:main",
-                "rtfetch = rtlib.apps.rtfetch:main",
-                "rtfile = rtlib.apps.rtfile:main",
-                "rtload = rtlib.apps.rtload:main",
-                "rtquery = rtlib.apps.rtquery:main",
-                "rthook-manage-trackers = rtlib.apps.hooks.manage_trackers:main",
+                "emdiff = emlib.apps.emdiff:main",
+                "emfetch = emlib.apps.emfetch:main",
+                "emfile = emlib.apps.emfile:main",
+                "emload = emlib.apps.emload:main",
+                "emquery = emlib.apps.emquery:main",
+                "emhook-manage-trackers = emlib.apps.hooks.manage_trackers:main",
             ],
         },
 

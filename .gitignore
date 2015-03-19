@@ -3,6 +3,6 @@
 /src
 /build
 /dist
-/rtfetch.egg-info
+/emonoda.egg-info
 /.tox
 *.pyc
