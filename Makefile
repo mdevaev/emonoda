@@ -5,13 +5,13 @@ regen: regen-fetchers
 
 regen-fetchers:
 	python3 -c '\
-			import json, rtlib.plugins; \
+			import json, emlib.plugins; \
 			print(json.dumps({ \
 				item.get_name(): { \
 					"version": item.get_version(), \
 					"fingerprint": item.get_fingerprint(), \
 				} \
-				for item in rtlib.plugins._get_classes()["fetchers"].values() \
+				for item in emlib.plugins._get_classes()["fetchers"].values() \
 			}, sort_keys=True, indent=" " * 4)) \
 		' > fetchers.json
 
