@@ -22,6 +22,7 @@ import socket
 import urllib.request
 import urllib.parse
 import http.cookiejar
+import http.client
 import time
 
 from ...optconf import Option
@@ -90,19 +91,20 @@ def read_url(
         try:
             request = urllib.request.Request(url, data, (headers or {}))
             return opener.open(request, timeout=timeout).read()
-        except (urllib.error.URLError, urllib.error.HTTPError, socket.timeout) as err:
+        except socket.timeout:
+            if retries == 0 or not retry_timeout:
+                raise
+        except urllib.error.HTTPError as err:
+            if retries == 0 or err.code not in retry_codes:
+                raise
+        except urllib.error.URLError as err:
+            if retries == 0 or not retry_timeout or err.reason != "timed out":
+                raise
+        except (http.client.IncompleteRead, http.client.BadStatusLine, ConnectionResetError):
             if retries == 0:
                 raise
-            if (
-                isinstance(err, urllib.error.URLError) and err.reason == "timed out"
-                or isinstance(err, socket.timeout)
-            ):
-                if not retry_timeout:
-                    raise
-            elif isinstance(err, urllib.error.HTTPError):
-                if err.code not in retry_codes:
-                    raise
-            time.sleep(sleep_time)
+        time.sleep(sleep_time)
+        retries -= 1
 
 
 # =====
