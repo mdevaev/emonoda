@@ -44,7 +44,7 @@ def _get_classes():
         for file_name in os.listdir(sub_path):
             if not file_name.startswith("__") and file_name.endswith(".py"):
                 module_name = file_name[:-3]
-                module = importlib.import_module("emlib.plugins.{}.{}".format(sub, module_name))
+                module = importlib.import_module("emonoda.plugins.{}.{}".format(sub, module_name))
                 plugin_class = getattr(module, "Plugin")
                 classes[sub][plugin_class.get_name()] = plugin_class
     return classes
