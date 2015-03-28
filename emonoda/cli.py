@@ -54,10 +54,10 @@ class Log:
     def error(self, text, *args, **kwargs):
         self.print("# {red}E{reset}: " + text, *args, **kwargs)
 
-    def print(self, text="", one_line=False, no_nl=False):
+    def print(self, text="", one_line=False, no_format=False, no_nl=False):
         if not self._quiet:
             colored = (self._use_colors and (self.isatty() or self._force_colors))
-            _inner_print(text, colored, one_line, no_nl, self._output)
+            _inner_print(text, colored, one_line, no_format, no_nl, self._output)
 
     def finish(self):
         _inner_finish(self._output)
@@ -67,12 +67,17 @@ class Log:
 _next_ctl = ""
 
 
-def _inner_print(text, colored, one_line, no_nl, output):
+def _inner_print(text, colored, one_line, no_format, no_nl, output):
     global _next_ctl  # pylint: disable=global-statement
-    output.write(_next_ctl + text.format(**(_COLORS if colored else _NO_COLORS)))
+    if no_format:
+        output.write(_next_ctl + text)
+    else:
+        output.write(_next_ctl + text.format(**(_COLORS if colored else _NO_COLORS)))
     output.flush()
     if no_nl:
         _next_ctl = ""
+    elif no_format:
+        _next_ctl = ("\r" + " " * len(text) + "\r" if one_line else "\n")
     else:
         _next_ctl = ("\r" + " " * len(text.format(**_NO_COLORS)) + "\r" if one_line else "\n")
 
