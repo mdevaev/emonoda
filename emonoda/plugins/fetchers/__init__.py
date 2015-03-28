@@ -139,7 +139,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
     @classmethod
     def get_options(cls):
         return {
-            "url_retries":    Option(default=10, help="The number of retries to handle tracker-specific HTTP errors"),
+            "url_retries":    Option(default=20, help="The number of retries to handle tracker-specific HTTP errors"),
             "url_sleep_time": Option(default=1.0, help="Sleep interval between the retries"),
             "timeout":        Option(default=10.0, type=float, help="Timeout for HTTP client"),
             "user_agent":     Option(default="Mozilla/5.0", help="User-agent for site"),
