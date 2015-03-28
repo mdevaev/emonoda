@@ -55,7 +55,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
         return {
             "url":      "http://rutracker.org",
             "encoding": "cp1251",
-            "text":     "<link rel=\"shortcut icon\" href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\">",
+            "text":     "<link rel=\"icon\" href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\">",
         }
 
     @classmethod
