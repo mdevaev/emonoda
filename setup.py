@@ -25,7 +25,7 @@ import setuptools
 if __name__ == "__main__":
     setuptools.setup(
         name="emonoda",
-        version="1.0",
+        version="1.0.0",
         url="https://github.com/mdevaev/emonoda",
         license="GPLv3",
         author="Devaev Maxim",
@@ -65,9 +65,11 @@ if __name__ == "__main__":
         ],
 
         classifiers=[
+            "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+            "Development Status :: 5 - Production/Stable",
+            "Programming Language :: Python :: 3.4",
             "Topic :: Software Development :: Libraries :: Python Modules",
-            "Development Status :: 3 - Alpha",
-            "Programming Language :: Python",
+            "Topic :: Utilities",
             "Operating System :: OS Independent",
         ],
     )
