@@ -132,7 +132,7 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
     def mark_exception(self, fetcher):
         self._kill_thread()
         self._log_stdout.print(self._format_status("red", "-", fetcher))
-        self._log_stdout.print(fmt.format_traceback("\t"))
+        self._log_stdout.print(fmt.format_traceback("\t"), no_format=True)
         self.exception_count += 1
 
     # ===
