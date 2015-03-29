@@ -41,6 +41,19 @@ def load_torrents_from_dir(path, name_filter, log):
     return torrents
 
 
+def get_torrents_by_hash(torrents):
+    return {
+        torrent.get_hash(): torrent
+        for torrent in filter(None, torrents.values())
+    }
+
+
+# =====
+def get_client_hashes(client, log):
+    log.info("Fetching all hashes from client ...")
+    return client.get_hashes()
+
+
 # =====
 def read_torrents_cache(path, rebuild, log):
     fallback = {
@@ -71,8 +84,8 @@ def write_torrents_cache(cache, path, log):
 
 
 def build_torrents_cache(cache, client, torrents_dir_path, name_filter, log):
-    log.info("Fetching all hashes from client ...")
-    hashes = client.get_hashes()
+    hashes = get_client_hashes(client, log)
+
     log.info("Validating the cache ...")
 
     # --- Old ---
@@ -87,10 +100,7 @@ def build_torrents_cache(cache, client, torrents_dir_path, name_filter, log):
     added = 0
     if len(to_add) != 0:
         torrents = load_torrents_from_dir(torrents_dir_path, name_filter, log)
-        torrents = {
-            torrent.get_hash(): torrent
-            for torrent in filter(None, torrents.values())
-        }
+        torrents = get_torrents_by_hash(torrents)
 
         if not log.isatty():
             log.info("Adding files for the new {yellow}%d{reset} hashes ...", (len(to_add),))
