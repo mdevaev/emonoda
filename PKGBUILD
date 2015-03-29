@@ -3,7 +3,7 @@
 
 
 pkgname=emonoda
-pkgver="1.1.0"
+pkgver="1.2.0"
 pkgrel=1
 pkgdesc="The set of tools to organize and management of your torrents"
 arch=('any')
