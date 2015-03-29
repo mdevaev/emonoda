@@ -5,7 +5,7 @@
 pkgname=emonoda
 pkgver="1.2.0"
 pkgrel=1
-pkgdesc="The set of tools to organize and management of your torrents"
+pkgdesc="The set of tools to organize and manage your torrents"
 arch=('any')
 url="https://github.com/mdevaev/emonoda"
 license="GPL"
@@ -38,9 +38,7 @@ build() {
 	python setup.py build
 }
 
-
 package() {
 	cd $srcdir/emonoda-$pkgver
 	python setup.py install --root=$pkgdir
 }
-

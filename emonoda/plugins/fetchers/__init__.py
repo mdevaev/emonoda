@@ -1,5 +1,5 @@
 """
-    Emonoda -- The set of tools to organize and manage of your torrents
+    Emonoda -- The set of tools to organize and manage your torrents
     Copyright (C) 2015  Devaev Maxim <mdevaev@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
