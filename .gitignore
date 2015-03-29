@@ -5,4 +5,5 @@
 /dist
 /emonoda.egg-info
 /.tox
+/emonoda-*.tar.gz
 *.pyc
