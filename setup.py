@@ -52,7 +52,7 @@ if __name__ == "__main__":
                 "emfetch = emonoda.apps.emfetch:main",
                 "emfile = emonoda.apps.emfile:main",
                 "emload = emonoda.apps.emload:main",
-                "emquery = emonoda.apps.emquery:main",
+                "emfind = emonoda.apps.emfind:main",
                 "emhook-manage-trackers = emonoda.apps.hooks.manage_trackers:main",
             ],
         },
