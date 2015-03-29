@@ -81,7 +81,7 @@ def get_decoded_path(path):
 
 # =====
 def print_orphaned_files(cache, data_root_path, dirs_only, log_stdout, log_stderr):
-    log_stderr.info("Scanning directory {cyan}%s{reset} ... " % (data_root_path))
+    log_stderr.info("Scanning directory {cyan}%s{reset} ... ", (data_root_path,))
     all_files = build_all_files(data_root_path)
 
     log_stderr.info("Transposing the cache: by-hashes -> files ...")
@@ -94,11 +94,11 @@ def print_orphaned_files(cache, data_root_path, dirs_only, log_stdout, log_stder
         for path in sorted(files):
             is_dir = (all_files[path] is None)
             size += (all_files[path] or 0)
-            path_type = ("{blue}D" if is_dir else "{magenta}F") + "{reset}"
+            line = ("{blue}D" if is_dir else "{magenta}F") + "{reset} %s"
             if dirs_only and is_dir or not dirs_only:
-                log_stdout.print("%s %s" % (path_type, path))
-        log_stderr.info("Found {red}%d{reset} orphaned files = {red}%s{reset}" % (
-                        len(files), fmt.format_size(size)))
+                log_stdout.print(line, (path,))
+        log_stderr.info("Found {red}%d{reset} orphaned files = {red}%s{reset}",
+                        (len(files), fmt.format_size(size)))
     else:
         log_stderr.info("No orphaned files founded")
 

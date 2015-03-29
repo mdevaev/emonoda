@@ -70,34 +70,34 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
 
     def read_captcha(self, url):
         self._kill_thread()
-        self._log_stderr.info("{yellow}Enter the captcha{reset} from [{blue}%s{reset}]: " % (url), no_nl=True)
+        self._log_stderr.info("{yellow}Enter the captcha{reset} from [{blue}%s{reset}]: ", (url,), no_nl=True)
         return input()
 
     def print_summary(self):
         self._kill_thread()
-        self._log_stderr.info("Invalid:       {}".format(self.invalid_count))
-        self._log_stderr.info("Not in client: {}".format(self.not_in_client_count))
-        self._log_stderr.info("Unknown:       {}".format(self.unknown_count))
-        self._log_stderr.info("Passed:        {}".format(self.passed_count))
-        self._log_stderr.info("Updated:       {}".format(self.updated_count))
-        self._log_stderr.info("Errors:        {}".format(self.error_count))
-        self._log_stderr.info("Exceptions:    {}".format(self.exception_count))
+        self._log_stderr.info("Invalid:       %d", (self.invalid_count,))
+        self._log_stderr.info("Not in client: %d", (self.not_in_client_count,))
+        self._log_stderr.info("Unknown:       %d", (self.unknown_count,))
+        self._log_stderr.info("Passed:        %d", (self.passed_count,))
+        self._log_stderr.info("Updated:       %d", (self.updated_count,))
+        self._log_stderr.info("Errors:        %d", (self.error_count,))
+        self._log_stderr.info("Exceptions:    %d", (self.exception_count,))
 
     # ===
 
     def mark_invalid(self):
         self._kill_thread()
-        self._log_stdout.print(self._format_fail("red", "!", "INVALID_TORRENT"))
+        self._log_stdout.print(*self._format_fail("red", "!", "INVALID_TORRENT"))
         self.invalid_count += 1
 
     def mark_not_in_client(self):
         self._kill_thread()
-        self._log_stdout.print(self._format_fail("red", "!", "NOT_IN_CLIENT"))
+        self._log_stdout.print(*self._format_fail("red", "!", "NOT_IN_CLIENT"))
         self.not_in_client_count += 1
 
     def mark_unknown(self):
         self._kill_thread()
-        self._log_stdout.print(self._format_fail("yellow", " ", "UNKNOWN"), one_line=(not self._show_unknown))
+        self._log_stdout.print(*self._format_fail("yellow", " ", "UNKNOWN"), one_line=(not self._show_unknown))
         self.unknown_count += 1
 
     def mark_in_progress(self, fetcher):
@@ -105,34 +105,36 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
         if self._log_stdout.isatty():
             def loop():
                 while not self._stop_fan.wait(timeout=0.1):
-                    self._log_stdout.print(self._format_status("magenta", next(self._fan), fetcher), one_line=True)
+                    self._log_stdout.print(*self._format_status("magenta", next(self._fan), fetcher), one_line=True)
             self._fan_thread = threading.Thread(target=loop, daemon=True)
             self._fan_thread.start()
         else:
-            self._log_stdout.print(self._format_status("magenta", " ", fetcher), one_line=True)
+            self._log_stdout.print(*self._format_status("magenta", " ", fetcher), one_line=True)
 
     def mark_passed(self, fetcher):
         self._kill_thread()
-        self._log_stdout.print(self._format_status("blue", " ", fetcher), one_line=(not self._show_passed))
+        self._log_stdout.print(*self._format_status("blue", " ", fetcher), one_line=(not self._show_passed))
         self.passed_count += 1
 
     def mark_updated(self, fetcher, diff):
         self._kill_thread()
-        self._log_stdout.print(self._format_status("green", "+", fetcher))
+        self._log_stdout.print(*self._format_status("green", "+", fetcher))
         if self._show_diff:
-            self._log_stdout.print(fmt.format_torrents_diff(diff, "\t"))
+            self._log_stdout.print(*fmt.format_torrents_diff(diff, "\t"))
         self.updated_count += 1
 
     def mark_fetcher_error(self, fetcher, err):
         self._kill_thread()
-        self._log_stdout.print(self._format_status("red", "-", fetcher) +
-                               " :: {red}%s({reset}%s{red}){reset}" % (type(err).__name__, err))
+        (line, placeholders) = self._format_status("red", "-", fetcher)
+        line += " :: {red}%s({reset}%s{red}){reset}"
+        placeholders += (type(err).__name__, err)
+        self._log_stdout.print(line, placeholders)
         self.error_count += 1
 
     def mark_exception(self, fetcher):
         self._kill_thread()
-        self._log_stdout.print(self._format_status("red", "-", fetcher))
-        self._log_stdout.print(fmt.format_traceback("\t"), no_format=True)
+        self._log_stdout.print(*self._format_status("red", "-", fetcher))
+        self._log_stdout.print("%s", (fmt.format_traceback("\t"),))
         self.exception_count += 1
 
     # ===
@@ -145,14 +147,18 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
             self._stop_fan.clear()
 
     def _format_fail(self, color, sign, error):
-        return "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset}" % (
-            color, sign, self._format_progress(), color, error, self._current_file_name,
+        return (
+            "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset}",
+            (color, sign, self._format_progress(), color, error, self._current_file_name),
         )
 
     def _format_status(self, color, sign, fetcher):
-        return "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset} -- %s" % (
-            color, sign, self._format_progress(), color, fetcher.get_name(),
-            self._current_file_name, (self._current_torrent.get_comment() or ""),
+        return (
+            "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset} -- %s",
+            (
+                color, sign, self._format_progress(), color, fetcher.get_name(),
+                self._current_file_name, (self._current_torrent.get_comment() or ""),
+            ),
         )
 
     def _format_progress(self):

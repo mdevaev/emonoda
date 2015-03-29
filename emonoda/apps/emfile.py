@@ -118,22 +118,22 @@ def format_files_tree(torrent):
 
 
 def print_pretty_meta(torrent, client, log):
-    log.print("{blue}Path:{reset}          %s" % (torrent.get_path()))
-    log.print("{blue}Name:{reset}          %s" % (torrent.get_name()))
-    log.print("{blue}Hash:{reset}          %s" % (torrent.get_hash()))
-    log.print("{blue}Size:{reset}          %s" % (format_size_pretty(torrent)))
-    log.print("{blue}Announce:{reset}      %s" % (format_announce(torrent)))
-    log.print("{blue}Announce list:{reset} %s" % (format_announce_list_pretty(torrent)))
-    log.print("{blue}Creation date:{reset} %s" % (format_creation_date_pretty(torrent)))
-    log.print("{blue}Created by:{reset}    %s" % (format_created_by(torrent)))
-    log.print("{blue}Private:{reset}       %s" % (format_is_private_pretty(torrent)))
-    log.print("{blue}Comment:{reset}       %s" % (format_comment(torrent)))
+    log.print("{blue}Path:{reset}          %s", (torrent.get_path(),))
+    log.print("{blue}Name:{reset}          %s", (torrent.get_name(),))
+    log.print("{blue}Hash:{reset}          %s", (torrent.get_hash(),))
+    log.print("{blue}Size:{reset}          %s", (format_size_pretty(torrent),))
+    log.print("{blue}Announce:{reset}      %s", (format_announce(torrent),))
+    log.print("{blue}Announce list:{reset} %s", (format_announce_list_pretty(torrent),))
+    log.print("{blue}Creation date:{reset} %s", (format_creation_date_pretty(torrent),))
+    log.print("{blue}Created by:{reset}    %s", (format_created_by(torrent),))
+    log.print("{blue}Private:{reset}       %s", (format_is_private_pretty(torrent),))
+    log.print("{blue}Comment:{reset}       %s", (format_comment(torrent),))
     if client is not None:
-        log.print("{blue}Client path:{reset}   %s" % (format_client_path(torrent, client)))
+        log.print("{blue}Client path:{reset}   %s", (format_client_path(torrent, client),))
     if torrent.is_single_file():
-        log.print("{blue}Provides:{reset}      %s" % (tuple(torrent.get_files())[0]))
+        log.print("{blue}Provides:{reset}      %s", (tuple(torrent.get_files())[0],))
     else:
-        log.print("{blue}Provides:{reset}\n%s" % (format_files_tree(torrent)))
+        log.print("{blue}Provides:{reset}\n%s", (format_files_tree(torrent),))
 
 
 # ===== Main =====
@@ -197,13 +197,13 @@ def main():  # pylint: disable=too-many-locals
                     print_pretty_meta(torrent, client, log_stdout)
                 else:
                     for (header, method) in to_print:
-                        prefix = ("" if options.without_headers else "{blue}%s:{reset} " % (header))
+                        line = ("%s" if options.without_headers else "{blue}%s:{reset} %s")
                         retval = method(torrent)
                         if isinstance(retval, (list, tuple)):
                             for item in retval:
-                                log_stdout.print(prefix + str(item))
+                                log_stdout.print(line, (header, str(item)))
                         else:
-                            log_stdout.print(prefix + str(retval))
+                            log_stdout.print(line, (header, str(retval)))
                 if len(options.torrents) > 1:
                     log_stdout.print()
 
