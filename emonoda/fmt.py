@@ -62,6 +62,7 @@ def format_traceback(prefix):
 
 def format_torrents_diff(diff, prefix):
     lines = []
+    placeholders = ()
     for (sign, color, items) in (
         ("+", "green",  diff.added),
         ("-", "red",    diff.removed),
@@ -69,8 +70,9 @@ def format_torrents_diff(diff, prefix):
         ("?", "yellow", diff.type_modified),
     ):
         for item in sorted(items):
-            lines.append("%s{%s}%s{reset} %s" % (prefix, color, sign, item))
-    return "\n".join(lines)
+            lines.append("%s{%s}%s{reset} %s")
+            placeholders += (prefix, color, sign, item)
+    return ("\n".join(lines), placeholders)
 
 
 # =====

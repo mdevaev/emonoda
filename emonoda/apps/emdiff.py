@@ -64,7 +64,7 @@ def main():
                 else:
                     raise RuntimeError("Invalid file or hash: {}".format(item))
 
-            log_stdout.print(fmt.format_torrents_diff(tfile.get_difference(*options.torrents), " "))
+            log_stdout.print(*fmt.format_torrents_diff(tfile.get_difference(*options.torrents), " "))
 
 
 if __name__ == "__main__":
