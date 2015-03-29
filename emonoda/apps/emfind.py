@@ -137,26 +137,25 @@ def print_missing_torrents(client, torrents_dir_path, name_filter, log_stdout, l
 def main():
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
-        prog="emquery",
+        prog="emfind",
         description="Querying the client",
         parents=[parent_parser],
     )
     args_parser.add_argument("--rebuild-cache", action="store_true")
-    queries = args_parser.add_subparsers(dest="query")
+    commands = args_parser.add_subparsers(dest="cmd")
 
-    find_orphans_parser = queries.add_parser(
-        name="find-orphans",
+    commands.add_parser(
+        name="orphans",
         help="Find files that do not belong to the client",
-    )
-    find_orphans_parser.add_argument("--dirs-only", action="store_true")
+    ).add_argument("--dirs-only", action="store_true")
 
-    queries.add_parser(
-        name="find-not-in-client",
+    commands.add_parser(
+        name="not-in-client",
         help="Find torrent files, which are not registered in the client",
     )
 
-    queries.add_parser(
-        name="find-missing-torrents",
+    commands.add_parser(
+        name="missing-torrents",
         help="Find torrents registered in the client for which there is no torrent files",
     )
 
@@ -175,15 +174,15 @@ def main():
 
             def get_cache():
                 return build_cache(
-                    cache_path=config.emquery.cache_file,
+                    cache_path=config.emfind.cache_file,
                     rebuild=options.rebuild_cache,
                     client=get_client(),
                     torrents_dir_path=config.core.torrents_dir,
-                    name_filter=config.emquery.name_filter,
+                    name_filter=config.emfind.name_filter,
                     log=log_stderr,
                 )
 
-            if options.query == "find-orphans":
+            if options.cmd == "orphans":
                 print_orphaned_files(
                     cache=get_cache(),
                     data_root_path=config.core.data_root_dir,
@@ -192,14 +191,14 @@ def main():
                     log_stderr=log_stderr,
                 )
 
-            elif options.query in ("find-not-in-client", "find-missing-torrents"):
+            elif options.cmd in ("not-in-client", "missing-torrents"):
                 {
-                    "find-not-in-client":    print_not_in_client,
-                    "find-missing-torrents": print_missing_torrents,
-                }[options.query](
+                    "not-in-client":    print_not_in_client,
+                    "missing-torrents": print_missing_torrents,
+                }[options.cmd](
                     client=get_client(),
                     torrents_dir_path=config.core.torrents_dir,
-                    name_filter=config.emquery.name_filter,
+                    name_filter=config.emfind.name_filter,
                     log_stdout=log_stdout,
                     log_stderr=log_stderr,
                 )

@@ -213,8 +213,8 @@ def _get_config_scheme():
             "mkdir_mode": Option(default=None, type=_as_8base_int, help="Permission for new directories"),
         },
 
-        "emquery": {
-            "cache_file": Option(default=_as_path("~/.cache/emquery.json"), type=_as_path, help="Torrents cache"),
+        "emfind": {
+            "cache_file": Option(default=_as_path("~/.cache/emfind.json"), type=_as_path, help="Torrents cache"),
             "name_filter": Option(default="*.torrent", type=str, help="Cache only filtered torrent files"),
         }
     }
