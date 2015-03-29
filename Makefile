@@ -4,7 +4,7 @@ all:
 regen: regen-fetchers
 
 regen-fetchers:
-	python3 -c '\
+	python -c '\
 			import json, emonoda.plugins; \
 			print(json.dumps({ \
 				item.get_name(): { \
@@ -15,12 +15,29 @@ regen-fetchers:
 			}, sort_keys=True, indent=" " * 4)) \
 		' > fetchers.json
 
+release: tox bump push pypi aur clean
+
+tox:
+	tox
+
+bump:
+	bumpversion minor
+
+push:
+	git push
+	git push --tags
+
 pypi:
 	python setup.py register
 	python setup.py sdist upload
 
+aur:
+	updpkgsums
+	mkaurball -f
+	burp -c network emonoda-*.src.tar.gz
+
 clean:
-	rm -rf build dist *.egg-info
+	rm -rf build dist pkg src *.egg-info emonoda-*.tar.gz
 	find -name __pycache__ | xargs rm -rf
 
 clean-all: clean
