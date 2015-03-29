@@ -103,6 +103,36 @@ def print_orphaned_files(cache, data_root_path, dirs_only, log_stdout, log_stder
         log_stderr.info("No orphaned files founded")
 
 
+def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
+    torrents = helpers.load_torrents_from_dir(torrents_dir_path, name_filter, log_stderr)
+    torrents = helpers.get_torrents_by_hash(torrents)
+    client_hashes = helpers.get_client_hashes(client, log_stderr)
+
+    not_in_client = set(torrents).difference(client_hashes)
+    if len(not_in_client) != 0:
+        log_stderr.info("Not in client:")
+        for torrent_hash in not_in_client:
+            log_stdout.print("%s", torrents[torrent_hash].get_path())
+        log_stderr.info("Found {red}%d{reset} unregistered torrents", (len(not_in_client),))
+    else:
+        log_stderr.info("No unregistered files founded")
+
+
+def print_missing_torrents(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
+    torrents = helpers.load_torrents_from_dir(torrents_dir_path, name_filter, log_stderr)
+    torrents = helpers.get_torrents_by_hash(torrents)
+    client_hashes = helpers.get_client_hashes(client, log_stderr)
+
+    missing_torrents = set(client_hashes).difference(torrents)
+    if len(missing_torrents) != 0:
+        log_stderr.info("Missing torrents for:")
+        for torrent_hash in missing_torrents:
+            log_stdout.print("%s -- %s", (torrent_hash, client.get_file_name(torrent_hash)))
+        log_stderr.info("Found {red}%d{reset} torrents without torrent-files", (len(missing_torrents),))
+    else:
+        log_stderr.info("No torrents without torrent-files founded")
+
+
 # ===== Main =====
 def main():
     (parent_parser, argv, config) = init()
@@ -114,35 +144,62 @@ def main():
     args_parser.add_argument("--rebuild-cache", action="store_true")
     queries = args_parser.add_subparsers(dest="query")
 
-    find_orphans_parser = queries.add_parser("find-orphans", help="Find files that do not belong to the client")
+    find_orphans_parser = queries.add_parser(
+        name="find-orphans",
+        help="Find files that do not belong to the client",
+    )
     find_orphans_parser.add_argument("--dirs-only", action="store_true")
+
+    queries.add_parser(
+        name="find-not-in-client",
+        help="Find torrent files, which are not registered in the client",
+    )
+
+    queries.add_parser(
+        name="find-missing-torrents",
+        help="Find torrents registered in the client for which there is no torrent files",
+    )
 
     options = args_parser.parse_args(argv[1:])
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, False, sys.stderr) as log_stderr:
 
-            client = get_configured_client(
-                config=config,
-                required=True,
-                with_customs=False,
-                log=log_stderr,
-            )
+            def get_client():
+                return get_configured_client(
+                    config=config,
+                    required=True,
+                    with_customs=False,
+                    log=log_stderr,
+                )
 
-            cache = build_cache(
-                cache_path=config.emquery.cache_file,
-                rebuild=options.rebuild_cache,
-                client=client,
-                torrents_dir_path=config.core.torrents_dir,
-                name_filter=config.emquery.name_filter,
-                log=log_stderr,
-            )
+            def get_cache():
+                return build_cache(
+                    cache_path=config.emquery.cache_file,
+                    rebuild=options.rebuild_cache,
+                    client=get_client(),
+                    torrents_dir_path=config.core.torrents_dir,
+                    name_filter=config.emquery.name_filter,
+                    log=log_stderr,
+                )
 
             if options.query == "find-orphans":
                 print_orphaned_files(
-                    cache=cache,
+                    cache=get_cache(),
                     data_root_path=config.core.data_root_dir,
                     dirs_only=options.dirs_only,
+                    log_stdout=log_stdout,
+                    log_stderr=log_stderr,
+                )
+
+            elif options.query in ("find-not-in-client", "find-missing-torrents"):
+                {
+                    "find-not-in-client":    print_not_in_client,
+                    "find-missing-torrents": print_missing_torrents,
+                }[options.query](
+                    client=get_client(),
+                    torrents_dir_path=config.core.torrents_dir,
+                    name_filter=config.emquery.name_filter,
                     log_stdout=log_stdout,
                     log_stderr=log_stderr,
                 )
