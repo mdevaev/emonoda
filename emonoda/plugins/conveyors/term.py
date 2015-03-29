@@ -148,15 +148,15 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
 
     def _format_fail(self, color, sign, error):
         return (
-            "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset}",
-            (color, sign, self._format_progress(), color, error, self._current_file_name),
+            "[{" + color + "}%s{reset}] %s {" + color + "}%s {cyan}%s{reset}",
+            (sign, self._format_progress(), error, self._current_file_name),
         )
 
     def _format_status(self, color, sign, fetcher):
         return (
-            "[{%s}%s{reset}] %s {%s}%s {cyan}%s{reset} -- %s",
+            "[{" + color + "}%s{reset}] %s {" + color + "}%s {cyan}%s{reset} -- %s",
             (
-                color, sign, self._format_progress(), color, fetcher.get_name(),
+                sign, self._format_progress(), fetcher.get_name(),
                 self._current_file_name, (self._current_torrent.get_comment() or ""),
             ),
         )
