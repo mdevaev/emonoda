@@ -43,3 +43,4 @@ package() {
 	cd $srcdir/emonoda-$pkgver
 	python setup.py install --root=$pkgdir
 }
+
