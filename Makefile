@@ -32,7 +32,6 @@ pypi:
 	python setup.py sdist upload
 
 aur:
-	updpkgsums
 	mkaurball -f
 	burp -c network emonoda-*.src.tar.gz
 
