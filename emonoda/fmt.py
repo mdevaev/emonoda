@@ -70,8 +70,8 @@ def format_torrents_diff(diff, prefix):
         ("?", "yellow", diff.type_modified),
     ):
         for item in sorted(items):
-            lines.append("%s{%s}%s{reset} %s")
-            placeholders += (prefix, color, sign, item)
+            lines.append("%s{" + color + "}%s{reset} %s")
+            placeholders += (prefix, sign, item)
     return ("\n".join(lines), placeholders)
 
 
