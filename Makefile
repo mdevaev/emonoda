@@ -15,7 +15,14 @@ regen-fetchers:
 			}, sort_keys=True, indent=" " * 4)) \
 		' > fetchers.json
 
-release: tox push bump push pypi aur clean
+release:
+	make tox
+	make push
+	make bump
+	make push
+	make pypi
+	make aur
+	make clean
 
 tox:
 	tox
