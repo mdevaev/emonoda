@@ -48,6 +48,15 @@ class LogicError(FetcherError):
     pass
 
 
+class TypicalNetworkError(FetcherError):
+    def __init__(self, err):
+        super().__init__()
+        self.err = err
+
+    def __str__(self):
+        return "{}: {}".format(type(self.err).__name__, str(self.err))
+
+
 # =====
 def select_fetcher(torrent, fetchers):
     for fetcher in fetchers:
@@ -91,18 +100,21 @@ def read_url(
         try:
             request = urllib.request.Request(url, data, (headers or {}))
             return opener.open(request, timeout=timeout).read()
-        except socket.timeout:
+        except socket.timeout as err:
             if retries == 0 or not retry_timeout:
-                raise
+                raise TypicalNetworkError(err)
         except urllib.error.HTTPError as err:
             if retries == 0 or err.code not in retry_codes:
-                raise
+                raise TypicalNetworkError(err)
         except urllib.error.URLError as err:
-            if retries == 0 or not retry_timeout or err.reason != "timed out":
+            if err.reason == "timed out":
+                if retries == 0 or not retry_timeout:
+                    raise TypicalNetworkError(err)
+            else:
                 raise
-        except (http.client.IncompleteRead, http.client.BadStatusLine, ConnectionResetError):
+        except (http.client.IncompleteRead, http.client.BadStatusLine, ConnectionResetError) as err:
             if retries == 0:
-                raise
+                raise TypicalNetworkError(err)
         time.sleep(sleep_time)
         retries -= 1
 
