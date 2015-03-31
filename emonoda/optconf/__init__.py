@@ -31,7 +31,7 @@ def build_raw_from_options(options):
             raise ValueError("No value for key '{}'".format(key))
 
         section = raw
-        subs = list(map(str.strip, key.split(".")))
+        subs = list(map(str.strip, key.split("/")))
         for sub in subs[:-1]:
             section.setdefault(sub, {})
             section = section[sub]
