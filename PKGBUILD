@@ -2,25 +2,25 @@
 # Author: Devaev Maxim <mdevaev@gmail.com>
 
 
-pkgname=emonoda
+pkgname="emonoda"
 pkgver="1.6.0"
-pkgrel=1
+pkgrel="1"
 pkgdesc="The set of tools to organize and manage your torrents"
-arch=('any')
+arch=("any")
 url="https://github.com/mdevaev/emonoda"
 license="GPL"
 depends=(
-	'python'
-	'python-chardet'
-	'python-pyyaml'
-	'python-colorama'
-	'python-pygments'
+	"python"
+	"python-chardet"
+	"python-pyyaml"
+	"python-colorama"
+	"python-pygments"
 )
 optdepends=(
-	'python-transmissionrpc: Transmission support'
-	'python-dbus: KTorrent support'
+	"python-transmissionrpc: Transmission support"
+	"python-dbus: KTorrent support"
 )
-makedepends=('python-setuptools' 'wget')
+makedepends=("python-setuptools" "wget")
 
 
 build() {
