@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-    Emonoda -- The set of tools to organize and manage your torrents
+    Emonoda -- A set of tools to organize and manage your torrents
     Copyright (C) 2015  Devaev Maxim <mdevaev@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,7 @@ if __name__ == "__main__":
         license="GPLv3",
         author="Devaev Maxim",
         author_email="mdevaev@gmail.com",
-        description="The set of tools to organize and manage your torrents",
+        description="A set of tools to organize and manage your torrents",
         platforms="any",
 
         packages=[
