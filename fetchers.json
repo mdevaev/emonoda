@@ -1,22 +1,42 @@
 {
-    "nnm-club": {
-        "path": "rtlib/fetchers/fmod_nnmclub.py", 
+    "nnm-club.me": {
+        "fingerprint": {
+            "encoding": "cp1251",
+            "text": "<link rel=\"canonical\" href=\"http://nnm-club.me/\">",
+            "url": "http://nnm-club.me"
+        },
         "version": 1
-    }, 
-    "ponytracker": {
-        "path": "rtlib/fetchers/fmod_ponytracker.py", 
+    },
+    "pravtor.ru": {
+        "fingerprint": {
+            "encoding": "cp1251",
+            "text": "<img src=\"/images/pravtor_beta1.png\"",
+            "url": "http://pravtor.ru"
+        },
         "version": 0
-    }, 
-    "pravtor": {
-        "path": "rtlib/fetchers/fmod_pravtor.py", 
-        "version": 0
-    }, 
-    "rutor": {
-        "path": "rtlib/fetchers/fmod_rutor.py", 
-        "version": 0
-    }, 
-    "rutracker": {
-        "path": "rtlib/fetchers/fmod_rutracker.py", 
+    },
+    "rutor.org": {
+        "fingerprint": {
+            "encoding": "utf-8",
+            "text": "<a href=\"/\"><img src=\"http://s.rutor.org/logo.jpg\" alt=\"rutor.org logo\" /></a>",
+            "url": "http://rutor.org"
+        },
         "version": 1
+    },
+    "rutracker.org": {
+        "fingerprint": {
+            "encoding": "cp1251",
+            "text": "<link rel=\"icon\" href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\">",
+            "url": "http://rutracker.org"
+        },
+        "version": 1
+    },
+    "tfile.me": {
+        "fingerprint": {
+            "encoding": "cp1251",
+            "text": "href=\"http://tfile.me/opensearch.xml\"",
+            "url": "http://tfile.me"
+        },
+        "version": 0
     }
 }

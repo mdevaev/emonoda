@@ -1,28 +1,50 @@
-all :
+all:
 	true
 
-regen : regen-fetchers
+regen: regen-fetchers
 
-regen-fetchers :
-	python3 -c '\
-			import json, rtlib.fetchers; \
+regen-fetchers:
+	python -c '\
+			import json, emonoda.plugins; \
 			print(json.dumps({ \
-					item.plugin() : { \
-							"version" : item.version(), \
-							"path" : item.__module__.replace(".", "/") + ".py", \
-						} \
-					for item in rtlib.fetchers.FETCHERS_MAP.values() \
-				}, sort_keys=True, indent="    ")) \
+				item.get_name(): { \
+					"version": item.get_version(), \
+					"fingerprint": item.get_fingerprint(), \
+				} \
+				for item in emonoda.plugins._get_classes()["fetchers"].values() \
+			}, sort_keys=True, indent=" " * 4)) \
 		' > fetchers.json
 
-pylint :
-	python3 `which pylint` --rcfile=pylint.ini \
-		rtlib \
-		*.py \
-		--output-format=colorized 2>&1 | less -SR
+release:
+	make tox
+	make push
+	make bump
+	make push
+	make pypi
+	make aur
+	make clean
 
-clean :
-	find . -type f -name '*.py?' -delete
-	find . -type d -name __pycache__ -delete
-	rm -rf pkg-root.arch pkg src build rtfetch.egg-info
+tox:
+	tox
 
+bump:
+	bumpversion minor
+
+push:
+	git push
+	git push --tags
+
+pypi:
+	python setup.py register
+	python setup.py sdist upload
+
+aur:
+	mkaurball -f
+	burp -c network emonoda-*.src.tar.gz
+
+clean:
+	rm -rf build dist pkg src *.egg-info emonoda-*.tar.gz
+	find -name __pycache__ | xargs rm -rf
+
+clean-all: clean
+	rm -rf .tox

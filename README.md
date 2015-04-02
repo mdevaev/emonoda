@@ -1,20 +1,12 @@
-Torrent tools
+![Chi](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/chi.png) Emonoda -- 得物だ
 =======
 
-Set of tools to organize and manage your torrents.
+Emonoda (moon. 得物だ, рус. это добыча) -- набор программ для организации и управления коллекцией торрентов. Он поможет вам следить за актуальностью раздач и автоматически обновлять торрент-файлы, а так же вычищать старые данные, просматривать мета-информацию и делать множество других вещей.  
 
-* `rtfetch` -- Update torrent files from popular trackers;
-* `rtquery` -- Tool for querying torrents;
-* `rtload` -- Add torrent to the data model "t.data";
-* `rtfile` -- Show the metadata of the torrent;
-* `rtdiff` -- Show the difference between two torrent files;
-* ... And some client-specific hooks.
+* `emfetch` -- Следит за раздачами, используя плагины для популярных трекеров; имеет интеграцию с основными линуксовыми клиентами.
+* `emfile` -- Позволяет читать метаданные торрент-файлов и выдает их в человекочитаемом, либо удобном для скриптов формате.
+* `emdiff` -- Показывает разницу в содержимом для двух торрент-файлов.
+* `emfind` -- Служит для выполнения различных поисковых запросов, например - найти в каталоге с данными файлы, не принадлежащими ни одному торренту, зарегистрированному в клиенте.
+* `emload` -- Загружает торрент, используя модель "t.data" для хранения данных (см. документацию).
 
-See wiki for details: https://github.com/mdevaev/rtfetch/wiki  
-Required: https://github.com/mdevaev/ulib  
-
-Actual builds for Arch Linux are available here:  
-* https://aur.archlinux.org/packages/rtfetch/
-* https://aur.archlinux.org/packages/python-ulib-git/
-
-The program uses the library bcoding, taken from here: https://github.com/flying-sheep/bcode/
+За подробностями обращайтесь на вики: https://github.com/mdevaev/emonoda/wiki  

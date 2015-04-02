@@ -2,5 +2,8 @@
 /pkg
 /src
 /build
-/rtfetch.egg-info
+/dist
+/emonoda.egg-info
+/.tox
+/emonoda-*.tar.gz
 *.pyc
