@@ -5,7 +5,7 @@
 pkgname="emonoda"
 pkgver="1.7.0"
 pkgrel="1"
-pkgdesc="The set of tools to organize and manage your torrents"
+pkgdesc="A set of tools to organize and manage your torrents"
 arch=("any")
 url="https://github.com/mdevaev/emonoda"
 license="GPL"
