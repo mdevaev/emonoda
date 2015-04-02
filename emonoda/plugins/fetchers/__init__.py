@@ -223,7 +223,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     def _get_upstream_info(self, opener):
         return json.loads(self._read_url(
-            url="https://raw.githubusercontent.com/mdevaev/emonoda/ng/fetchers.json",
+            url="https://raw.githubusercontent.com/mdevaev/emonoda/master/fetchers.json",
             opener=opener,
         ).decode("utf-8"))[self.get_name()]
 
