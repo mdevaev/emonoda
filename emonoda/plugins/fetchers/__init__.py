@@ -107,7 +107,7 @@ def read_url(
             if retries == 0 or err.code not in retry_codes:
                 raise TypicalNetworkError(err)
         except urllib.error.URLError as err:
-            if "timed out" in err.reason:
+            if isinstance(err.reason, str) and "timed out" in err.reason:
                 if retries == 0 or not retry_timeout:
                     raise TypicalNetworkError(err)
             else:
