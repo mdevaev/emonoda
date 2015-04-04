@@ -53,9 +53,9 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
     @classmethod
     def get_fingerprint(cls):
         return {
-            "url":      "http://rutracker.org",
+            "url":      "http://rutracker.org/forum/index.php",
             "encoding": "cp1251",
-            "text":     "<link rel=\"icon\" href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\">",
+            "text":     "<link rel=\"shortcut icon\" href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\">",
         }
 
     @classmethod
