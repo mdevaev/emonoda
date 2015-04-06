@@ -7,10 +7,7 @@ regen-fetchers:
 	python -c '\
 			import json, emonoda.plugins; \
 			print(json.dumps({ \
-				item.get_name(): { \
-					"version": item.get_version(), \
-					"fingerprint": item.get_fingerprint(), \
-				} \
+				item.get_name(): item._get_local_info() \
 				for item in emonoda.plugins._get_classes()["fetchers"].values() \
 			}, sort_keys=True, indent=" " * 4)) \
 		' > fetchers.json

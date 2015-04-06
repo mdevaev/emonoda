@@ -225,7 +225,14 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         return json.loads(self._read_url(
             url="https://raw.githubusercontent.com/mdevaev/emonoda/master/fetchers.json",
             opener=opener,
-        ).decode("utf-8"))[self.get_name()]
+        ).decode("utf-8")).get(self.get_name(), self._get_local_info())
+
+    @classmethod
+    def _get_local_info(self):
+        return {
+            "fingerprint": self.get_fingerprint(),
+            "version":     self.get_version(),
+        }
 
     def _test_fingerprint(self, fingerprint, opener):
         text = self._read_url(fingerprint["url"], opener=opener).decode(fingerprint["encoding"])
