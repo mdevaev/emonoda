@@ -235,8 +235,13 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         }
 
     def _test_fingerprint(self, fingerprint, opener):
-        text = self._read_url(fingerprint["url"], opener=opener).decode(fingerprint["encoding"])
-        _assert(FetcherError, fingerprint["text"] in text, "Invalid site body, maybe tracker is blocked")
+        data = self._read_url(fingerprint["url"], opener=opener)
+        err_msg = "Invalid site body, maybe tracker is blocked"
+        try:
+            page = data.decode(fingerprint["encoding"])
+        except UnicodeDecodeError:
+            raise FetcherError(err_msg)
+        _assert(FetcherError, fingerprint["text"] in page, err_msg)
 
     def _test_version(self, upstream):
         local = self.get_version()
