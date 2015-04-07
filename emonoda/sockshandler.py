@@ -84,3 +84,4 @@ class _SocksConnection(http.client.HTTPConnection):
         self.sock.setproxy(*self._proxy_args)
         if self.timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:  # pylint: disable=protected-access
             self.sock.settimeout(self.timeout)
+        self.sock.connect((self.host, self.port))
