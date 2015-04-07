@@ -228,10 +228,10 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         ).decode("utf-8")).get(self.get_name(), self._get_local_info())
 
     @classmethod
-    def _get_local_info(self):
+    def _get_local_info(cls):
         return {
-            "fingerprint": self.get_fingerprint(),
-            "version":     self.get_version(),
+            "fingerprint": cls.get_fingerprint(),
+            "version":     cls.get_version(),
         }
 
     def _test_fingerprint(self, fingerprint, opener):
