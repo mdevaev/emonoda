@@ -15,6 +15,8 @@ depends=(
 	"python-pyyaml"
 	"python-colorama"
 	"python-pygments"
+	"python-pytz"
+	"python-dateutil"
 )
 optdepends=(
 	"python-transmissionrpc: Transmission support"

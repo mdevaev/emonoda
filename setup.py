@@ -62,6 +62,8 @@ if __name__ == "__main__":
             "pyyaml",
             "colorama",
             "pygments",
+            "pytz",
+            "python-dateutil",
         ],
 
         classifiers=[

@@ -38,5 +38,13 @@
             "url": "http://tfile.me"
         },
         "version": 0
+    },
+    "tr.anidub.com": {
+        "fingerprint": {
+            "encoding": "utf-8",
+            "text": "<link rel=\"search\" type=\"application/opensearchdescription+xml\" href=\"http://tr.anidub.com/engine/opensearch.php\" title=\"AniDUB Tracker\" />",
+            "url": "http://tr.anidub.com"
+        },
+        "version": 0
     }
 }
