@@ -4,7 +4,7 @@
     License: BSD
 
 SocksiPy - Python SOCKS module.
-Version 1.5.1
+Version 1.5.3
 
 Copyright 2006 Dan-Haim. All rights reserved.
 
@@ -60,19 +60,21 @@ Modifications made by Anorov (https://github.com/Anorov)
 # pylint: skip-file
 
 
-__version__ = "1.5.1"
+__version__ = "1.5.3"
 
 import socket
 import struct
 from errno import EOPNOTSUPP, EINVAL, EAGAIN
-from io import BytesIO, SEEK_CUR
+from io import BytesIO
+from os import SEEK_CUR
 from collections import Callable
 
 PROXY_TYPE_SOCKS4 = SOCKS4 = 1
 PROXY_TYPE_SOCKS5 = SOCKS5 = 2
 PROXY_TYPE_HTTP = HTTP = 3
 
-PRINTABLE_PROXY_TYPES = {SOCKS4: "SOCKS4", SOCKS5: "SOCKS5", HTTP: "HTTP"}
+PROXY_TYPES = {"SOCKS4": SOCKS4, "SOCKS5": SOCKS5, "HTTP": HTTP}
+PRINTABLE_PROXY_TYPES = dict(zip(PROXY_TYPES.values(), PROXY_TYPES.keys()))
 
 _orgsocket = _orig_socket = socket.socket
 
@@ -154,21 +156,25 @@ wrapmodule = wrap_module
 
 def create_connection(dest_pair, proxy_type=None, proxy_addr=None,
                       proxy_port=None, proxy_username=None,
-                      proxy_password=None, timeout=None):
+                      proxy_password=None, timeout=None,
+                      source_address=None):
     """create_connection(dest_pair, *[, timeout], **proxy_args) -> socket object
 
     Like socket.create_connection(), but connects to proxy
     before returning the socket object.
 
     dest_pair - 2-tuple of (IP/hostname, port).
-    **proxy_args - Same args passed to socksocket.set_proxy().
+    **proxy_args - Same args passed to socksocket.set_proxy() if present.
     timeout - Optional socket timeout value, in seconds.
+    source_address - tuple (host, port) for the socket to bind to as its source
+    address before connecting (only for compatibility)
     """
     sock = socksocket()
     if isinstance(timeout, (int, float)):
         sock.settimeout(timeout)
-    sock.set_proxy(proxy_type, proxy_addr, proxy_port,
-                   proxy_username, proxy_password)
+    if proxy_type is not None:
+        sock.set_proxy(proxy_type, proxy_addr, proxy_port,
+                       proxy_username, proxy_password)
     sock.connect(dest_pair)
     return sock
 
@@ -210,7 +216,7 @@ class socksocket(_BaseSocket):
     default_proxy = None
 
     def __init__(self, family=socket.AF_INET, type=socket.SOCK_STREAM, proto=0, _sock=None):
-        if type not in {socket.SOCK_STREAM, socket.SOCK_DGRAM}:
+        if type not in (socket.SOCK_STREAM, socket.SOCK_DGRAM):
             msg = "Socket type must be stream or datagram, not {!r}"
             raise ValueError(msg.format(type))
 
@@ -633,7 +639,7 @@ class socksocket(_BaseSocket):
             if not self._proxyconn:
                 self.bind(("", 0))
             dest_addr = socket.gethostbyname(dest_addr)
-            
+
             # If the host address is INADDR_ANY or similar, reset the peer
             # address so that packets are received from any peer
             if dest_addr == "0.0.0.0" and not dest_port:
@@ -654,6 +660,7 @@ class socksocket(_BaseSocket):
 
         if proxy_type is None:
             # Treat like regular socket object
+            self.proxy_peername = dest_pair
             _BaseSocket.connect(self, (dest_addr, dest_port))
             return
 
