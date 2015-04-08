@@ -25,6 +25,8 @@ import http.cookiejar
 import http.client
 import time
 
+import pytz
+
 from ...optconf import Option
 from ...optconf import SecretOption
 
@@ -236,12 +238,12 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     def _test_fingerprint(self, fingerprint, opener):
         data = self._read_url(fingerprint["url"], opener=opener)
-        err_msg = "Invalid site body, maybe tracker is blocked"
+        msg = "Invalid site body, maybe tracker is blocked"
         try:
             page = data.decode(fingerprint["encoding"])
         except UnicodeDecodeError:
-            raise FetcherError(err_msg)
-        _assert(FetcherError, fingerprint["text"] in page, err_msg)
+            raise FetcherError(msg)
+        _assert(FetcherError, fingerprint["text"] in page, msg)
 
     def _test_version(self, upstream):
         local = self.get_version()
@@ -271,3 +273,28 @@ class WithLogin(BaseExtension):
 class WithCaptcha(BaseExtension):
     def __init__(self, captcha_decoder, **_):
         self._captcha_decoder = captcha_decoder
+
+
+class WithTime(BaseExtension):
+    def __init__(self, timezone, **_):
+        self._default_timezone = timezone
+
+    @classmethod
+    def get_options(cls):
+        return {
+            "timezone": Option(default=None, type=str, help="Site timezone, is automatically detected if possible"
+                                                            " (or manually, 'Europe/Moscow' for example)"),
+        }
+
+    def _select_tzinfo(self, site_timezone):
+        if site_timezone is None or self._default_timezone is not None:
+            return self._get_default_tzinfo()
+        try:
+            return pytz.timezone(site_timezone)
+        except pytz.UnknownTimeZoneError:
+            return self._get_default_tzinfo()
+
+    def _get_default_tzinfo(self):
+        msg = "Can't determine timezone of site, your must configure it manually"
+        self._assert_logic(self._default_timezone is not None, msg)  # pylint: disable=no-member
+        return pytz.timezone(self._default_timezone)
