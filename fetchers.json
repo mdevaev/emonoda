@@ -7,6 +7,14 @@
         },
         "version": 1
     },
+    "pornolab.net": {
+        "fingerprint": {
+            "encoding": "cp1251",
+            "text": "<link rel=\"search\" type=\"application/opensearchdescription+xml\" title=\"\u041f\u043e\u0438\u0441\u043a \u043d\u0430 Pornolab.net\" href=\"http://static.pornolab.net/opensearch.xml\">",
+            "url": "http://pornolab.net/forum/index.php"
+        },
+        "version": 1
+    },
     "pravtor.ru": {
         "fingerprint": {
             "encoding": "cp1251",
