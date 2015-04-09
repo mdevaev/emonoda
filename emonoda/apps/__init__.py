@@ -138,7 +138,7 @@ def get_configured_client(config, required, with_customs, log):
         log.info("Client {blue}%s{reset} is {green}ready{reset}", (name,))
         return client
     elif required:
-        RuntimeError("No configured client found")
+        raise RuntimeError("No configured client found")
     else:
         return None
 
