@@ -53,6 +53,7 @@ if __name__ == "__main__":
                 "emfile = emonoda.apps.emfile:main",
                 "emload = emonoda.apps.emload:main",
                 "emfind = emonoda.apps.emfind:main",
+                "emrm = emonoda.apps.emrm:main",
                 "emhook-manage-trackers = emonoda.apps.hooks.manage_trackers:main",
             ],
         },
