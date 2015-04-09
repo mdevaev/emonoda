@@ -22,8 +22,8 @@ import os
 import errno
 import argparse
 
-from .. import tfile
 from .. import fmt
+from .. import helpers
 
 from . import init
 from . import get_configured_log
@@ -53,13 +53,6 @@ def link_data(torrent, data_dir_path, link_to_path, mkdir_mode):
 
     make_path(mkdir_path, mkdir_mode)
     os.symlink(os.path.join(data_dir_path, torrent.get_name()), link_to_path)
-
-
-def get_abs_torrents(path, file_names):
-    return [
-        tfile.Torrent(path=(os.path.abspath(item) if path == "." else os.path.join(path, item)))
-        for item in file_names
-    ]
 
 
 def load_torrents(torrents, client, data_root_path, link_to_path, torrent_mode, mkdir_mode, customs):
@@ -107,26 +100,21 @@ def main():
     args_parser.add_argument("-l", "--link-to", default=None, metavar="<path>")
     args_parser.add_argument("--set-customs", default=[], nargs="+", metavar="<key=value>")
     args_parser.add_argument("-v", "--verbose", action="store_true")
-    args_parser.add_argument("torrents", type=str, nargs="+", metavar="<path>")
+    args_parser.add_argument("torrents", nargs="+", metavar="<path>")
     options = args_parser.parse_args(argv[1:])
 
     if len(options.torrents) > 1 and options.link_to is not None:
         raise RuntimeError("Option -l/--link-to be used with only one torrent")
 
     customs = parse_customs(options.set_customs)
+    torrents = helpers.find_torrents(config.core.torrents_dir, options.torrents, False)
 
     with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
-
         client = get_configured_client(
             config=config,
             required=True,
             with_customs=bool(customs),
             log=log_stderr,
-        )
-
-        torrents = get_abs_torrents(
-            path=config.core.torrents_dir,
-            file_names=options.torrents,
         )
 
         load_torrents(

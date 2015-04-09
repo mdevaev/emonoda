@@ -28,6 +28,7 @@ from ..plugins.clients import NoSuchTorrentError
 
 from .. import tfile
 from .. import fmt
+from .. import helpers
 
 from . import init
 from . import get_configured_log
@@ -165,7 +166,7 @@ def main():  # pylint: disable=too-many-locals
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
         prog="emfile",
-        description="Show the metadata of torrent file",
+        description="Show a metadata of torrent file",
         parents=[parent_parser],
     )
     for (option, dest, _) in actions:
@@ -173,12 +174,18 @@ def main():  # pylint: disable=too-many-locals
     args_parser.add_argument("--without-headers", action="store_true")
     args_parser.add_argument("--magnet-fields", nargs="+", default=(),  metavar="<fields>", choices=tfile.ALL_MAGNET_FIELDS)
     args_parser.add_argument("-v", "--verbose", action="store_true")
-    args_parser.add_argument("torrents", type=(lambda path: tfile.Torrent(path=path)), nargs="+", metavar="<path>")
+    args_parser.add_argument("torrents", nargs="+", metavar="<path>")
     options = args_parser.parse_args(argv[1:])
+
+    to_print = [
+        (option[2:], method)
+        for (option, dest, method) in actions
+        if getattr(options, dest)
+    ]
+    torrents = helpers.find_torrents(config.core.torrents_dir, options.torrents, False)
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
-
             client = get_configured_client(
                 config=config,
                 required=False,
@@ -186,13 +193,7 @@ def main():  # pylint: disable=too-many-locals
                 log=log_stderr,
             )
 
-            to_print = [
-                (option[2:], method)
-                for (option, dest, method) in actions
-                if getattr(options, dest)
-            ]
-
-            for torrent in options.torrents:
+            for torrent in torrents:
                 if len(to_print) == 0:
                     print_pretty_meta(torrent, client, log_stdout)
                 else:
@@ -204,7 +205,7 @@ def main():  # pylint: disable=too-many-locals
                                 log_stdout.print(line, (header, str(item)))
                         else:
                             log_stdout.print(line, (header, str(retval)))
-                if len(options.torrents) > 1:
+                if len(torrents) > 1:
                     log_stdout.print()
 
 

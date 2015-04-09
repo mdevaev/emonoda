@@ -18,11 +18,11 @@
 
 
 import sys
-import os
 import argparse
 
 from .. import tfile
 from .. import fmt
+from .. import helpers
 
 from . import init
 from . import get_configured_log
@@ -34,24 +34,23 @@ def main():
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
         prog="emdiff",
-        description="Show the difference between two torrent files",
+        description="Show a difference between two torrent files",
         parents=[parent_parser],
     )
     args_parser.add_argument("-v", "--verbose", action="store_true")
     args_parser.add_argument("torrents", type=str, nargs=2, metavar="<path/hash>")
     options = args_parser.parse_args(argv[1:])
 
+    torrents = helpers.find_torrents(config.core.torrents_dir, options.torrents, True)
+
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
-
             client = None
-
-            for count in range(2):
-                item = options.torrents[count]
-                if os.path.exists(item):
-                    options.torrents[count] = tfile.Torrent(path=item).get_files()
-
-                elif tfile.is_hash(item):
+            lists = []
+            for item in torrents:
+                if isinstance(item, tfile.Torrent):
+                    lists.append(item.get_files())
+                else:  # Hash
                     if client is None:
                         client = get_configured_client(
                             config=config,
@@ -59,12 +58,8 @@ def main():
                             with_customs=False,
                             log=log_stderr,
                         )
-                    options.torrents[count] = client.get_files(item)
-
-                else:
-                    raise RuntimeError("Invalid file or hash: {}".format(item))
-
-            log_stdout.print(*fmt.format_torrents_diff(tfile.get_difference(*options.torrents), " "))
+                    lists.append(client.get_files(item))
+            log_stdout.print(*fmt.format_torrents_diff(tfile.get_difference(*lists), " "))
 
 
 if __name__ == "__main__":

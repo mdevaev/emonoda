@@ -24,6 +24,23 @@ from . import tfile
 
 
 # =====
+def find_torrents(path, items, pass_hash):
+    return [find_torrent(path, item, pass_hash) for item in items]
+
+
+def find_torrent(path, item, pass_hash):
+    if os.path.exists(item):
+        return tfile.Torrent(path=os.path.abspath(item))
+    if os.path.sep not in item:
+        full_path = os.path.join(path, item)
+        if os.path.exists(full_path):
+            return tfile.Torrent(path=full_path)
+    if pass_hash and tfile.is_hash(item.strip()):
+        return item.strip()
+    raise RuntimeError("Can't find torrent: {}".format(item))
+
+
+# =====
 def load_torrents_from_dir(path, name_filter, log):
     if log.isatty():
         def load_torrent(file_path):
