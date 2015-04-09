@@ -40,10 +40,10 @@ _NO_COLORS = dict.fromkeys(list(_COLORS), "")
 # =====
 class Log:
     def __init__(self, use_colors=True, force_colors=False, quiet=False, output=sys.stdout):
-        self._use_colors = use_colors
-        self._force_colors = force_colors
         self._quiet = quiet
         self._output = output
+        self._fill = 0
+        self._colored = (use_colors and (self.isatty() or force_colors))
 
     def isatty(self):
         return self._output.isatty()
@@ -56,37 +56,22 @@ class Log:
 
     def print(self, text="", placeholders=(), one_line=False, no_nl=False):
         if not self._quiet:
-            colored = (self._use_colors and (self.isatty() or self._force_colors))
-            _inner_print(text, placeholders, colored, one_line, no_nl, self._output)
+            if self._fill:
+                self._output.write((" " * self._fill) + "\r")
+                self._fill = 0
+            self._output.write(self._format_text(text, placeholders, self._colored))
+            if not no_nl:
+                self._output.write("\n")
+                self._fill = 0
+            elif one_line:
+                self._output.write("\r")
+                self._fill = len(self._format_text(text, placeholders, False))
 
     def finish(self):
-        _inner_finish(self._output)
+        if self._fill:
+            self._output.write("\n")
 
-
-# =====
-_next_ctl = ""
-
-
-def _format_text(text, placeholders, colored):
-    text = text.format(**(_COLORS if colored else _NO_COLORS))
-    text = text % placeholders
-    return text
-
-
-def _inner_print(text, placeholders, colored, one_line, no_nl, output):
-    global _next_ctl  # pylint: disable=global-statement
-    output.write(_next_ctl + _format_text(text, placeholders, colored))
-    output.flush()
-    if no_nl:
-        _next_ctl = ""
-    else:
-        stub_len = len(_format_text(text, placeholders, False))
-        _next_ctl = ("\r" + (" " * stub_len) + "\r" if one_line else "\n")
-
-
-def _inner_finish(output):
-    global _next_ctl  # pylint: disable=global-statement
-    if len(_next_ctl) != 0:
-        output.write("\n")
-        output.flush()
-        _next_ctl = ""
+    def _format_text(self, text, placeholders, colored):
+        text = text.format(**(_COLORS if colored else _NO_COLORS))
+        text = text % placeholders
+        return text
