@@ -55,18 +55,17 @@ def _parse_value(value):
 # =====
 def make_config(raw, scheme, keys=()):
     if not isinstance(raw, dict):
-        raise ValueError("The node '{}' must be a dictionary".format(".".join(keys) or "/"))
+        raise ValueError("The node '{}' must be a dictionary".format("/".join(keys) or "/"))
 
     config = Section()
     for (key, option) in scheme.items():
         full_key = keys + (key,)
-        full_name = ".".join(full_key)
+        full_name = "/".join(full_key)
 
         if isinstance(option, Option):
             value = raw.get(key, option.default)
             try:
-                if value is not None:
-                    value = option.type(value)
+                value = option.type(value)
             except:
                 raise ValueError("Invalid value '{value}' for key '{key}'".format(key=full_name, value=value))
             config[key] = value

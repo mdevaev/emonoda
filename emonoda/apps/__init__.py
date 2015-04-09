@@ -179,38 +179,52 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
 
 # =====
 def _as_path(value):
-    return os.path.abspath(os.path.expanduser(str(value)))
+    return os.path.abspath(os.path.expanduser(value))
+
+
+def _as_path_or_none(value):
+    if value is None:
+        return None
+    return _as_path(value)
+
+
+def _as_string_or_none(value):
+    if value is None:
+        return None
+    return str(value)
 
 
 def _as_string_list(values):
     return list(map(str, values))
 
 
-def _as_8base_int(value):
+def _as_8int_or_none(value):
+    if value is None:
+        return None
     return int(str(value), 8)
 
 
 def _get_config_scheme():
     return {
         "core": {
-            "client":        Option(default=None, type=str, help="The name of plugin for torrent client"),
+            "client":        Option(default=None, type=_as_string_or_none, help="The name of plugin for torrent client"),
             "torrents_dir":  Option(default=".", type=_as_path, help="Path to directory with torrent files"),
-            "data_root_dir": Option(default=None, type=_as_path, help="Path to root directory with data of torrents"),
+            "data_root_dir": Option(default=None, type=_as_path_or_none, help="Path to root directory with data of torrents"),
             "use_colors":    Option(default=True, help="Enable colored output"),
             "force_colors":  Option(default=False, help="Always use the coloring"),
         },
 
         "emfetch": {
             "conveyor":      Option(default="term", help="Logger and captcha decoder"),
-            "backup_dir":    Option(default=None, type=_as_path, help="Backup old torrent files after update here"),
+            "backup_dir":    Option(default=None, type=_as_path_or_none, help="Backup old torrent files after update here"),
             "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
             "save_customs":  Option(default=[], type=_as_string_list, help="Save client custom fields after update if supports"),
             "set_customs":   Option(default=[], type=_as_string_list, help="Set client custom fileds after update if supports")
         },
 
         "emload": {
-            "torrent_mode": Option(default=None, type=_as_8base_int, help="Change permissions of torrent file before load"),
-            "mkdir_mode": Option(default=None, type=_as_8base_int, help="Permission for new directories"),
+            "torrent_mode": Option(default=None, type=_as_8int_or_none, help="Change permissions of torrent file before load"),
+            "mkdir_mode": Option(default=None, type=_as_8int_or_none, help="Permission for new directories"),
         },
 
         "emfind": {
