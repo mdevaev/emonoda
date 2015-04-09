@@ -22,11 +22,10 @@ import re
 
 from datetime import datetime
 
-import pytz
-
 from . import BaseFetcher
 from . import WithLogin
 from . import WithCaptcha
+from . import WithTime
 
 
 # =====
@@ -38,11 +37,12 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Plugin(BaseFetcher, WithLogin, WithCaptcha):
+class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithTime):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
         self._comment_regexp = re.compile(r"http://pornolab\.net/forum/viewtopic\.php\?t=(\d+)")
+        self._tzinfo = None
 
     @classmethod
     def get_name(cls):
@@ -73,21 +73,20 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
         return (torrent.get_mtime() < self._get_upload_time(page))
 
     def _get_upload_time(self, page):
-        upload_date_match = re.search(r"<span title=\"Зарегистрирован\">\[ (\d\d-([а-яА-Я]{3})-\d\d \d\d:\d\d) \]</span>", page)
-        self._assert_logic(upload_date_match is not None, "Upload date not found")
-        upload_date = upload_date_match.group(1)
-        upload_month = upload_date_match.group(2)
+        date_match = re.search(r"<span title=\"Зарегистрирован\">\[ (\d\d-([а-яА-Я]{3})-\d\d \d\d:\d\d) \]</span>", page)
+        self._assert_logic(date_match is not None, "Upload date not found")
+        date = date_match.group(1)
+        date_month = date_match.group(2)
 
-        tz = pytz.timezone("Europe/Moscow")
-        upload_date = upload_date.replace(upload_month, {
+        date = date.replace(date_month, {
             month: str(number) for (number, month) in enumerate(
                 ("Янв", "Фев", "Мар", "Апр", "Май", "Июн",
                  "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"), 1
             )
-        }[upload_month])  # TODO: Send shitbeam to datetime authors
-        upload_date += " " + datetime.now(tz).strftime("%z")
+        }[date_month])  # TODO: Send shitbeam to datetime authors
+        date += " " + datetime.now(self._tzinfo).strftime("%z")
 
-        upload_time = int(datetime.strptime(upload_date, "%d-%m-%y %H:%M %z").strftime("%s"))
+        upload_time = int(datetime.strptime(date, "%d-%m-%y %H:%M %z").strftime("%s"))
         return upload_time
 
     def fetch_new_data(self, torrent):
@@ -123,8 +122,15 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
             page = self._read_login(post)
             self._assert_auth(cap_static_regexp.search(page) is None, "Invalid login, password or captcha")
 
+        self._tzinfo = self._get_tzinfo(page)
+
     def _read_login(self, post):
         return _decode(self._read_url(
             url="http://pornolab.net/forum/login.php",
             data=_encode(urllib.parse.urlencode(post)),
         ))
+
+    def _get_tzinfo(self, page):
+        timezone_match = re.search(r"<p>Часовой пояс: <span class='tz_time'>(GMT [+-] \d{1,2})</span></p>", page)
+        timezone = (timezone_match and "Etc/" + timezone_match.group(1).replace(" ", ""))
+        return self._select_tzinfo(timezone)

@@ -23,13 +23,13 @@ import operator
 
 from datetime import datetime
 
-import pytz
 from dateutil.relativedelta import relativedelta
 
 from ... import tfile
 
 from . import BaseFetcher
 from . import WithLogin
+from . import WithTime
 
 
 # =====
@@ -41,11 +41,12 @@ def _decode(arg):
     return arg.decode("utf-8")
 
 
-class Plugin(BaseFetcher, WithLogin):
+class Plugin(BaseFetcher, WithLogin, WithTime):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
         self._comment_regexp = re.compile(r"http://tr\.anidub\.com/\?newsid=(\d+)")
+        self._tzinfo = None
         self._last_data = None
 
     @classmethod
@@ -83,21 +84,20 @@ class Plugin(BaseFetcher, WithLogin):
         return False
 
     def _get_upload_time(self, page):
-        upload_date_match = re.search(r"<li><b>Дата:</b> ([^,\s]+, \d\d:\d\d)</li>", page)
-        self._assert_logic(upload_date_match is not None, "Upload date not found")
-        upload_date = upload_date_match.group(1)
+        date_match = re.search(r"<li><b>Дата:</b> ([^,\s]+, \d\d:\d\d)</li>", page)
+        self._assert_logic(date_match is not None, "Upload date not found")
+        date = date_match.group(1)
 
-        tz = pytz.timezone("Europe/Moscow")
-        now = datetime.now(tz)
+        now = datetime.now(self._tzinfo)
         day_template = "{date.day:02d}-{date.month:02d}-{date.year}"
-        if "Сегодня" in upload_date:
-            upload_date = upload_date.replace("Сегодня", day_template.format(date=now))
-        if "Вчера" in upload_date:
+        if "Сегодня" in date:
+            date = date.replace("Сегодня", day_template.format(date=now))
+        if "Вчера" in date:
             yesterday = now - relativedelta(days=1)
-            upload_date = upload_date.replace("Вчера", day_template.format(date=yesterday))
-        upload_date += " " + (datetime.now(tz).strftime("%z"))
+            date = date.replace("Вчера", day_template.format(date=yesterday))
+        date += " " + datetime.now(self._tzinfo).strftime("%z")
 
-        upload_time = int(datetime.strptime(upload_date, "%d-%m-%Y, %H:%M %z").strftime("%s"))
+        upload_time = int(datetime.strptime(date, "%d-%m-%Y, %H:%M %z").strftime("%s"))
         return upload_time
 
     def _get_candidate(self, page, torrent):
@@ -137,3 +137,4 @@ class Plugin(BaseFetcher, WithLogin):
         page = _decode(self._read_url("http://tr.anidub.com/", data=post_data))
         profile = "<li><a href=\"http://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
         self._assert_auth(profile in page, "Invalid login or password")
+        self._tzinfo = self._select_tzinfo("Etc/GMT+4")

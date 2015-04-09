@@ -19,10 +19,12 @@
 
 import urllib.parse
 import re
-import time
+
+from datetime import datetime
 
 from . import BaseFetcher
 from . import WithLogin
+from . import WithTime
 
 
 # =====
@@ -34,11 +36,12 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Plugin(BaseFetcher, WithLogin):
+class Plugin(BaseFetcher, WithLogin, WithTime):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=(self._user is not None))
         self._comment_regexp = re.compile(r"http://tfile\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
+        self._tzinfo = None
 
     @classmethod
     def get_name(cls):
@@ -71,13 +74,15 @@ class Plugin(BaseFetcher, WithLogin):
             torrent_hash = hash_match.group(1).lower()
             return (torrent.get_hash() != torrent_hash)
         else:
-            reg_match = re.search(r"class=\"regDate\">(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span><br/>", page)
-            if reg_match is None:
+            date_match = re.search(r"class=\"regDate\">(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span><br/>", page)
+            if date_match is None:
                 page = _decode(self._read_url(torrent.get_comment()))
-                reg_match = re.search(r"Зарегистрирован: (\d\d\d\d-\d\d-\d\d \d\d:\d\d),", page)
-                self._assert_logic(reg_match is not None, "Unknown hash and date")
-            reg_time = int(time.mktime(time.strptime(reg_match.group(1), "%Y-%m-%d %H:%M")))
-            return (torrent.get_mtime() <= reg_time)
+                date_match = re.search(r"Зарегистрирован: (\d\d\d\d-\d\d-\d\d \d\d:\d\d),", page)
+                self._assert_logic(date_match is not None, "Unknown hash and date")
+            date = date_match.group(1) + " " + datetime.now(self._tzinfo).strftime("%z")
+
+            upload_time = int(datetime.strptime(date, "%Y-%m-%d %H:%M %z").strftime("%s"))
+            return (torrent.get_mtime() <= upload_time)
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
@@ -105,3 +110,13 @@ class Plugin(BaseFetcher, WithLogin):
             post_data = _encode(urllib.parse.urlencode(post))
             page = _decode(self._read_url("http://tfile.me/login/", data=post_data))
             self._assert_auth("class=\"nick u\">{}</a>".format(self._user) in page, "Invalid login or password")
+
+            page = _decode(self._read_url("http://tfile.me/forum/viewtopic.php?t=579690"))
+            self._tzinfo = self._get_tzinfo(page)
+        else:
+            self._tzinfo = self._select_tzinfo("Europe/Moscow")
+
+    def _get_tzinfo(self, page):
+        timezone_match = re.search(r"<span class=\"gensmall\">Часовой пояс: (GMT [+-] \d{1,2})</span>", page)
+        timezone = (timezone_match and "Etc/" + timezone_match.group(1).replace(" ", ""))
+        return self._select_tzinfo(timezone)
