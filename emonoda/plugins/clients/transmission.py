@@ -21,6 +21,7 @@ import os
 
 from ...optconf import Option
 from ...optconf import SecretOption
+from ...optconf.converters import as_string_or_none
 
 from . import BaseClient
 from . import NoSuchTorrentError
@@ -62,8 +63,8 @@ class Plugin(BaseClient):
         return cls._get_merged_options({
             "url":     Option(default="http://localhost:9091/transmission/rpc", help="Transmission HTTP-RPC URL"),
             "timeout": Option(default=10.0, type=float, help="Timeout for HTTP-RPC"),
-            "user":    Option(default=None, type=str, help="HTTP login"),
-            "passwd":  SecretOption(default=None, type=str, help="HTTP password"),
+            "user":    Option(default=None, type=as_string_or_none, help="HTTP login"),
+            "passwd":  SecretOption(default=None, type=as_string_or_none, help="HTTP password"),
         })
 
     # ===

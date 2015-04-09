@@ -29,6 +29,7 @@ import pytz
 
 from ...optconf import Option
 from ...optconf import SecretOption
+from ...optconf.converters import as_string_or_none
 
 from ... import tfile
 from ... import sockshandler
@@ -158,7 +159,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "timeout":        Option(default=10.0, type=float, help="Timeout for HTTP client"),
             "user_agent":     Option(default="Mozilla/5.0", help="User-agent for site"),
             "client_agent":   Option(default="rtorrent/0.9.2/0.13.2", help="User-agent for tracker"),
-            "proxy_url":      Option(default=None, type=str, help="The URL of the HTTP proxy"),
+            "proxy_url":      Option(default=None, type=as_string_or_none, help="The URL of the HTTP proxy"),
             "check_version":  Option(default=True, help="Check the fetcher version from GitHub")
         }
 
@@ -259,8 +260,8 @@ class WithLogin(BaseExtension):
     @classmethod
     def get_options(cls):
         return {
-            "user":   Option(default=None, type=str, help="Site login"),
-            "passwd": SecretOption(default=None, type=str, help="Site password"),
+            "user":   Option(default=None, type=as_string_or_none, help="Site login"),
+            "passwd": SecretOption(default=None, type=as_string_or_none, help="Site password"),
         }
 
     def login(self):
@@ -282,8 +283,11 @@ class WithTime(BaseExtension):
     @classmethod
     def get_options(cls):
         return {
-            "timezone": Option(default=None, type=str, help="Site timezone, is automatically detected if possible"
-                                                            " (or manually, 'Europe/Moscow' for example)"),
+            "timezone": Option(
+                default=None,
+                type=as_string_or_none,
+                help="Site timezone, is automatically detected if possible (or manually, 'Europe/Moscow' for example)",
+            ),
         }
 
     def _select_tzinfo(self, site_timezone):
