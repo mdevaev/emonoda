@@ -56,20 +56,19 @@ class Log:
 
     def print(self, text="", placeholders=(), one_line=False, no_nl=False):
         if not self._quiet:
-            if self._fill:
-                self._output.write((" " * self._fill) + "\r")
-                self._fill = 0
+            self.finish()
             self._output.write(self._format_text(text, placeholders, self._colored))
-            if not no_nl:
-                self._output.write("\n")
-                self._fill = 0
-            elif one_line:
+            if one_line:
                 self._output.write("\r")
                 self._fill = len(self._format_text(text, placeholders, False))
+            elif not no_nl:
+                self._output.write("\n")
+                self._fill = 0
 
     def finish(self):
         if self._fill:
-            self._output.write("\n")
+            self._output.write((" " * self._fill) + "\r")
+            self._fill = 0
 
     def _format_text(self, text, placeholders, colored):
         text = text.format(**(_COLORS if colored else _NO_COLORS))
