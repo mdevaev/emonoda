@@ -20,6 +20,8 @@
 import sys
 import argparse
 
+from ..plugins.clients import NoSuchTorrentError
+
 from .. import tfile
 from .. import helpers
 
@@ -52,12 +54,16 @@ def main():
             hashes = []
             for item in helpers.find_torrents(config.core.torrents_dir, options.torrents, True):
                 torrent_hash = (item.get_hash() if isinstance(item, tfile.Torrent) else item)
-                hashes.append((torrent_hash, client.get_file_name(torrent_hash)))
+                try:
+                    hashes.append((torrent_hash, client.get_file_name(torrent_hash)))
+                except NoSuchTorrentError:
+                    log_stderr.error("No such torrent: {yellow}%s{reset}", (torrent_hash,))
 
-            log_stderr.info("Removed:")
-            for (torrent_hash, name) in hashes:
-                client.remove_torrent(torrent_hash)
-                log_stdout.print("{yellow}%s{reset} -- %s", (torrent_hash, name))
+            if len(hashes) != 0:
+                log_stderr.info("Removed:")
+                for (torrent_hash, name) in hashes:
+                    client.remove_torrent(torrent_hash)
+                    log_stdout.print("{yellow}%s{reset} -- %s", (torrent_hash, name))
 
 
 if __name__ == "__main__":
