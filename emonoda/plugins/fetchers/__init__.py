@@ -129,7 +129,9 @@ def _assert(exception, arg, msg=""):
 
 
 class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
-    def __init__(self, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url, check_version, **_):
+    def __init__(self, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url,
+                 check_version, check_fingerprint, **_):
+
         self._url_retries = url_retries
         self._url_sleep_time = url_sleep_time
         self._timeout = timeout
@@ -137,6 +139,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         self._client_agent = client_agent
         self._proxy_url = proxy_url
         self._check_version = check_version
+        self._check_fingerprint = check_fingerprint
 
         self._comment_regexp = None
         self._retry_codes = (500, 502, 503)
@@ -154,13 +157,14 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
     @classmethod
     def get_options(cls):
         return {
-            "url_retries":    Option(default=20, help="The number of retries to handle tracker-specific HTTP errors"),
-            "url_sleep_time": Option(default=1.0, help="Sleep interval between the retries"),
-            "timeout":        Option(default=10.0, type=float, help="Timeout for HTTP client"),
-            "user_agent":     Option(default="Mozilla/5.0", help="User-agent for site"),
-            "client_agent":   Option(default="rtorrent/0.9.2/0.13.2", help="User-agent for tracker"),
-            "proxy_url":      Option(default=None, type=as_string_or_none, help="The URL of the HTTP proxy"),
-            "check_version":  Option(default=True, help="Check the fetcher version from GitHub")
+            "url_retries":       Option(default=20, help="The number of retries to handle tracker-specific HTTP errors"),
+            "url_sleep_time":    Option(default=1.0, help="Sleep interval between the retries"),
+            "timeout":           Option(default=10.0, type=float, help="Timeout for HTTP client"),
+            "user_agent":        Option(default="Mozilla/5.0", help="User-agent for site"),
+            "client_agent":      Option(default="rtorrent/0.9.2/0.13.2", help="User-agent for tracker"),
+            "proxy_url":         Option(default=None, type=as_string_or_none, help="The URL of the HTTP proxy"),
+            "check_fingerprint": Option(default=True, help="Check the site fingerprint"),
+            "check_version":     Option(default=True, help="Check the fetcher version from GitHub"),
         }
 
     def is_torrent_changed(self, torrent):
@@ -218,9 +222,11 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
     # ===
 
     def test(self):
-        opener = build_opener(self._proxy_url)
-        info = self._get_upstream_info(opener)
-        self._test_fingerprint(info["fingerprint"], opener)
+        if self._check_fingerprint or self._check_version:
+            opener = build_opener(self._proxy_url)
+            info = self._get_upstream_info(opener)
+        if self._check_fingerprint:
+            self._test_fingerprint(info["fingerprint"], opener)
         if self._check_version:
             self._test_version(info["version"])
 
