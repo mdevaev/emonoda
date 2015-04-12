@@ -18,6 +18,7 @@
 
 
 import os
+import base64
 
 from ...optconf import Option
 from ...optconf import SecretOption
@@ -76,11 +77,10 @@ class Plugin(BaseClient):
 
     @check_torrent_accessible
     def load_torrent(self, torrent, prefix=None):
-        torrent_path = torrent.get_path()
         kwargs = {"paused": False}
         if prefix is not None:
             kwargs["download_dir"] = prefix
-        self._client.add_torrent(torrent_path, **kwargs)
+        self._client.add_torrent(base64.b64encode(torrent.get_data()).decode("utf-8"), **kwargs)
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash):
