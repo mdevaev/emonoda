@@ -72,12 +72,12 @@ def get_client_hashes(client, log):
 
 
 # =====
-def read_torrents_cache(path, rebuild, log):
+def read_torrents_cache(path, force_rebuild, log):
     fallback = {
         "version":  0,
         "torrents": {},
     }
-    if rebuild or not os.path.exists(path):
+    if force_rebuild or not os.path.exists(path):
         return fallback
 
     log.info("Reading the cache from {cyan}%s{reset} ...", (path,))

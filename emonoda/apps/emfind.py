@@ -32,8 +32,8 @@ from . import get_configured_client
 
 
 # =====
-def build_cache(cache_path, rebuild, client, torrents_dir_path, name_filter, log):
-    cache = helpers.read_torrents_cache(cache_path, rebuild, log)
+def build_cache(cache_path, force_rebuild, client, torrents_dir_path, name_filter, log):
+    cache = helpers.read_torrents_cache(cache_path, force_rebuild, log)
     if helpers.build_torrents_cache(cache, client, torrents_dir_path, name_filter, log):
         helpers.write_torrents_cache(cache, cache_path, log)
     return cache
@@ -141,8 +141,12 @@ def main():
         description="Querying the client",
         parents=[parent_parser],
     )
-    args_parser.add_argument("--rebuild-cache", action="store_true")
     commands = args_parser.add_subparsers(dest="cmd")
+
+    commands.add_parser(
+        name="rebuild-cache",
+        help="Rebuild files cache",
+    )
 
     commands.add_parser(
         name="orphans",
@@ -172,19 +176,22 @@ def main():
                     log=log_stderr,
                 )
 
-            def get_cache():
+            def get_cache(force_rebuild):
                 return build_cache(
                     cache_path=config.emfind.cache_file,
-                    rebuild=options.rebuild_cache,
+                    force_rebuild=force_rebuild,
                     client=get_client(),
                     torrents_dir_path=config.core.torrents_dir,
                     name_filter=config.emfind.name_filter,
                     log=log_stderr,
                 )
 
-            if options.cmd == "orphans":
+            if options.cmd == "rebuild-cache":
+                get_cache(True)
+
+            elif options.cmd == "orphans":
                 print_orphaned_files(
-                    cache=get_cache(),
+                    cache=get_cache(False),
                     data_root_path=config.core.data_root_dir,
                     dirs_only=options.dirs_only,
                     log_stdout=log_stdout,
