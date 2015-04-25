@@ -25,9 +25,10 @@ import argparse
 from ..plugins.fetchers import FetcherError
 from ..plugins.fetchers import select_fetcher
 
+from ..helpers import tcollection
+
 from .. import tfile
 from .. import fmt
-from .. import helpers
 
 from . import init
 from . import get_configured_log
@@ -153,7 +154,7 @@ def main():
                 log=log_stderr,
             )
 
-            conveyor.set_torrents(helpers.load_torrents_from_dir(
+            conveyor.set_torrents(tcollection.load_from_dir(
                 path=config.core.torrents_dir,
                 name_filter=options.name_filter,
                 log=log_stderr,

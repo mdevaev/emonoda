@@ -23,8 +23,10 @@ import argparse
 
 import chardet
 
+from ..helpers import tcollection
+from ..helpers import datacache
+
 from .. import fmt
-from .. import helpers
 
 from . import init
 from . import get_configured_log
@@ -32,13 +34,6 @@ from . import get_configured_client
 
 
 # =====
-def build_cache(cache_path, force_rebuild, client, torrents_dir_path, name_filter, log):
-    cache = helpers.read_torrents_cache(cache_path, force_rebuild, log)
-    if helpers.build_torrents_cache(cache, client, torrents_dir_path, name_filter, log):
-        helpers.write_torrents_cache(cache, cache_path, log)
-    return cache
-
-
 def build_used_files(cache, data_root_path):
     files = {data_root_path: None}
     for info in cache["torrents"].values():
@@ -104,9 +99,11 @@ def print_orphaned_files(cache, data_root_path, dirs_only, log_stdout, log_stder
 
 
 def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
-    torrents = helpers.load_torrents_from_dir(torrents_dir_path, name_filter, log_stderr)
-    torrents = helpers.get_torrents_by_hash(torrents)
-    client_hashes = helpers.get_client_hashes(client, log_stderr)
+    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, log_stderr)
+    torrents = tcollection.by_hash(torrents)
+
+    log_stderr.info("Fetching all hashes from client ...")
+    client_hashes = client.get_hashes()
 
     not_in_client = set(torrents).difference(client_hashes)
     if len(not_in_client) != 0:
@@ -119,9 +116,11 @@ def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_
 
 
 def print_missing_torrents(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
-    torrents = helpers.load_torrents_from_dir(torrents_dir_path, name_filter, log_stderr)
-    torrents = helpers.get_torrents_by_hash(torrents)
-    client_hashes = helpers.get_client_hashes(client, log_stderr)
+    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, log_stderr)
+    torrents = tcollection.by_hash(torrents)
+
+    log_stderr.info("Fetching all hashes from client ...")
+    client_hashes = client.get_hashes()
 
     missing_torrents = set(client_hashes).difference(torrents)
     if len(missing_torrents) != 0:
@@ -177,7 +176,7 @@ def main():
                 )
 
             def get_cache(force_rebuild):
-                return build_cache(
+                return datacache.get_cache(
                     cache_path=config.emfind.cache_file,
                     force_rebuild=force_rebuild,
                     client=get_client(),

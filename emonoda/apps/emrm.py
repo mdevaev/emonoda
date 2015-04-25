@@ -22,8 +22,9 @@ import argparse
 
 from ..plugins.clients import NoSuchTorrentError
 
+from ..helpers import tcollection
+
 from .. import tfile
-from .. import helpers
 
 from . import init
 from . import get_configured_log
@@ -52,7 +53,7 @@ def main():
             )
 
             hashes = []
-            for item in helpers.find_torrents(config.core.torrents_dir, options.torrents, True):
+            for item in tcollection.find(config.core.torrents_dir, options.torrents, True):
                 torrent_hash = (item.get_hash() if isinstance(item, tfile.Torrent) else item)
                 try:
                     hashes.append((torrent_hash, client.get_file_name(torrent_hash)))

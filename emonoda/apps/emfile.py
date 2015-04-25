@@ -26,9 +26,10 @@ import datetime
 
 from ..plugins.clients import NoSuchTorrentError
 
+from ..helpers import tcollection
+
 from .. import tfile
 from .. import fmt
-from .. import helpers
 
 from . import init
 from . import get_configured_log
@@ -182,7 +183,7 @@ def main():  # pylint: disable=too-many-locals
         for (option, dest, method) in actions
         if getattr(options, dest)
     ]
-    torrents = helpers.find_torrents(config.core.torrents_dir, options.torrents, False)
+    torrents = tcollection.find(config.core.torrents_dir, options.torrents, False)
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:

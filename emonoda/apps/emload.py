@@ -22,8 +22,9 @@ import os
 import errno
 import argparse
 
+from ..helpers import tcollection
+
 from .. import fmt
-from .. import helpers
 
 from . import init
 from . import get_configured_log
@@ -107,7 +108,7 @@ def main():
         raise RuntimeError("Option -l/--link-to be used with only one torrent")
 
     customs = parse_customs(options.set_customs)
-    torrents = helpers.find_torrents(config.core.torrents_dir, options.torrents, False)
+    torrents = tcollection.find(config.core.torrents_dir, options.torrents, False)
 
     with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
         client = get_configured_client(

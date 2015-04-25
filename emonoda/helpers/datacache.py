@@ -20,59 +20,19 @@
 import os
 import json
 
-from . import tfile
+from . import tcollection
 
 
 # =====
-def find_torrents(path, items, pass_hash):
-    return [find_torrent(path, item, pass_hash) for item in items]
-
-
-def find_torrent(path, item, pass_hash):
-    if os.path.exists(item):
-        return tfile.Torrent(path=os.path.abspath(item))
-    if os.path.sep not in item:
-        full_path = os.path.join(path, item)
-        if os.path.exists(full_path):
-            return tfile.Torrent(path=full_path)
-    if pass_hash and tfile.is_hash(item.strip()):
-        return item.strip()
-    raise RuntimeError("Can't find torrent: {}".format(item))
+def get_cache(cache_path, force_rebuild, client, torrents_dir_path, name_filter, log):
+    cache = _read(cache_path, force_rebuild, log)
+    if _update(cache, client, torrents_dir_path, name_filter, log):
+        _write(cache, cache_path, log)
+    return cache
 
 
 # =====
-def load_torrents_from_dir(path, name_filter, log):
-    if log.isatty():
-        def load_torrent(file_path):
-            log.info("Loading torrents from {cyan}%s/{yellow}%s{reset} -- {yellow}%s{reset} ...",
-                     (path, name_filter, os.path.basename(file_path)), one_line=True)
-            return tfile.load_torrent_from_path(file_path)
-    else:
-        log.info("Loading torrents from {cyan}%s/{yellow}%s{reset} ...", (path, name_filter))
-        load_torrent = tfile.load_torrent_from_path
-
-    torrents = tfile.load_from_dir(path, name_filter, as_abs=True, loader=load_torrent)
-
-    log.info("Loaded {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}",
-             (len(torrents), path, name_filter))
-    return torrents
-
-
-def get_torrents_by_hash(torrents):
-    return {
-        torrent.get_hash(): torrent
-        for torrent in filter(None, torrents.values())
-    }
-
-
-# =====
-def get_client_hashes(client, log):
-    log.info("Fetching all hashes from client ...")
-    return client.get_hashes()
-
-
-# =====
-def read_torrents_cache(path, force_rebuild, log):
+def _read(path, force_rebuild, log):
     fallback = {
         "version":  0,
         "torrents": {},
@@ -93,15 +53,16 @@ def read_torrents_cache(path, force_rebuild, log):
             return fallback
 
 
-def write_torrents_cache(cache, path, log):
+def _write(cache, path, log):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     log.info("Writing the cache to {cyan}%s{reset} ...", (path,))
     with open(path, "w") as cache_file:
         cache_file.write(json.dumps(cache))
 
 
-def build_torrents_cache(cache, client, torrents_dir_path, name_filter, log):
-    hashes = get_client_hashes(client, log)
+def _update(cache, client, path, name_filter, log):
+    log.info("Fetching all hashes from client ...")
+    hashes = client.get_hashes()
 
     log.info("Validating the cache ...")
 
@@ -116,8 +77,8 @@ def build_torrents_cache(cache, client, torrents_dir_path, name_filter, log):
     to_add = tuple(sorted(set(hashes).difference(cache["torrents"])))
     added = 0
     if len(to_add) != 0:
-        torrents = load_torrents_from_dir(torrents_dir_path, name_filter, log)
-        torrents = get_torrents_by_hash(torrents)
+        torrents = tcollection.load_from_dir(path, name_filter, log)
+        torrents = tcollection.by_hash(torrents)
 
         if not log.isatty():
             log.info("Adding files for the new {yellow}%d{reset} hashes ...", (len(to_add),))

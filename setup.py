@@ -39,6 +39,7 @@ if __name__ == "__main__":
             "emonoda.optconf.loaders",
             "emonoda.apps",
             "emonoda.apps.hooks",
+            "emonoda.helpers",
             "emonoda.plugins",
             "emonoda.plugins.conveyors",
             "emonoda.plugins.clients",
