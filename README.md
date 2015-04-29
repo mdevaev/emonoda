@@ -45,3 +45,6 @@ pip install --user --upgrade emonoda
 ```
 packer -S emonoda
 ```
+
+### Скриншотик
+![emfetch](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emfetch.png)
