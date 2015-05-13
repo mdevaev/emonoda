@@ -26,10 +26,10 @@
     "rutor.org": {
         "fingerprint": {
             "encoding": "utf-8",
-            "text": "<a href=\"/\"><img src=\"http://s.rutor.org/logo.jpg\" alt=\"rutor.org logo\" /></a>",
-            "url": "http://rutor.org"
+            "text": "<a href=\"/\"><img src=\"/s/logo.jpg\" alt=\"rutor.org logo\" /></a>",
+            "url": "http://zerkalo-rutor.org"
         },
-        "version": 1
+        "version": 2
     },
     "rutracker.org": {
         "fingerprint": {
