@@ -129,7 +129,7 @@ def main():
         parents=[parent_parser],
     )
     args_parser.add_argument("-f", "--name-filter", default="*.torrent", metavar="<wildcard_pattern>")
-    args_parser.add_argument("-l", "--only-fetchers", default=[], nargs="+", metavar="<fetcher>")
+    args_parser.add_argument("-y", "--only-fetchers", default=[], nargs="+", metavar="<fetcher>")
     args_parser.add_argument("-x", "--exclude-fetchers", default=[], nargs="+", metavar="<fetcher>")
     args_parser.add_argument("--noop", action="store_true")
     options = args_parser.parse_args(argv[1:])
