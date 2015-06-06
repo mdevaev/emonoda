@@ -19,7 +19,9 @@
 
 import sys
 import os
+import json
 import shutil
+import contextlib
 import argparse
 
 from ..plugins.fetchers import FetcherError
@@ -44,32 +46,50 @@ def backup_torrent(torrent, backup_dir_path, backup_suffix):
     shutil.copyfile(torrent.get_path(), backup_file_path)
 
 
-def update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, noop):
-    new_data = fetcher.fetch_new_data(torrent)
-    diff = tfile.get_difference(torrent, tfile.Torrent(data=new_data))
+def make_sub_name(path, prefix, suffix):
+    return os.path.join(
+        os.path.dirname(path),
+        prefix + os.path.basename(path) + suffix,
+    )
 
-    if not noop:
-        if client is not None:
-            if len(to_save_customs) != 0:
-                old_customs = client.get_customs(torrent, to_save_customs)
-            prefix = client.get_data_prefix(torrent)
-            client.remove_torrent(torrent)
 
-        with open(torrent.get_path(), "wb") as torrent_file:
-            torrent_file.write(new_data)
+@contextlib.contextmanager
+def client_hooks(client, torrent, to_save_customs, to_set_customs):
+    if client is not None:
+        prefix = client.get_data_prefix(torrent)
+        if len(to_save_customs) != 0:
+            customs = client.get_customs(torrent, to_save_customs)
+        else:
+            customs = {}
+        meta_file_path = make_sub_name(torrent.get_path(), ".", ".meta")
+        with open(meta_file_path, "w") as meta_file:
+            meta_file.write(json.dumps({
+                "prefix": prefix,
+                "customs": customs,
+            }))
+        client.remove_torrent(torrent)
+
+    yield  # Torrent-object was changed
+
+    if client is not None:
+        client.load_torrent(torrent, prefix)
+        to_set_customs  # pylint: disable=pointless-statement
+#        customs.update({
+#            key: fmt.format_now(value)
+#            for (key, value) in to_set_customs.items()
+#        })
+        if len(customs) != 0:
+            client.set_customs(torrent, customs)
+        os.remove(meta_file_path)
+
+
+def update_torrent(client, torrent, new_data, to_save_customs, to_set_customs):
+    data_file_path = make_sub_name(torrent.get_path(), ".", ".newdata")
+    with open(data_file_path, "wb") as data_file:
+        data_file.write(new_data)
+    with client_hooks(client, torrent, to_save_customs, to_set_customs):
+        os.replace(data_file_path, torrent.get_path())
         torrent.load_from_data(new_data, torrent.get_path())
-
-        if client is not None:
-            client.load_torrent(torrent, prefix)
-            if len(to_save_customs) != 0:
-                client.set_customs(torrent, old_customs)
-            if len(to_set_customs) != 0:
-                client.set_customs(torrent, {
-                    key: fmt.format_now(value)
-                    for (key, value) in to_set_customs.items()
-                })
-
-    return diff
 
 
 def update(
@@ -105,9 +125,12 @@ def update(
                 conveyor.mark_passed(fetcher)
                 continue
 
-            if not noop and backup_dir_path is not None:
-                backup_torrent(torrent, backup_dir_path, backup_suffix)
-            diff = update_torrent(client, fetcher, torrent, to_save_customs, to_set_customs, noop)
+            new_data = fetcher.fetch_new_data(torrent)
+            diff = tfile.get_difference(torrent, tfile.Torrent(data=new_data))
+            if not noop:
+                if backup_dir_path is not None:
+                    backup_torrent(torrent, backup_dir_path, backup_suffix)
+                update_torrent(client, torrent, new_data, to_save_customs, to_set_customs)
 
             conveyor.mark_updated(fetcher, diff)
 
