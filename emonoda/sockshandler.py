@@ -26,12 +26,10 @@ from .thirdparty import socks
 
 
 # =====
-SCHEME_TO_TYPE = {}
-if socks is not None:
-    SCHEME_TO_TYPE.update({
-        "socks4": socks.PROXY_TYPE_SOCKS4,
-        "socks5": socks.PROXY_TYPE_SOCKS5,
-    })
+SCHEME_TO_TYPE = {
+    "socks4": socks.PROXY_TYPE_SOCKS4,
+    "socks5": socks.PROXY_TYPE_SOCKS5,
+}
 
 SOCKS_PORT = 1080
 
