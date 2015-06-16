@@ -41,7 +41,7 @@
 pip install --user --upgrade emonoda
 ```
 ##### Пакет для Arch Linux
-Актуальный PKGBUILD находится в [AUR`е](https://aur.archlinux.org/packages/emonoda/):
+Актуальный PKGBUILD находится в [AUR`е](https://aur4.archlinux.org/packages/emonoda/):
 ```
 packer -S emonoda
 ```
