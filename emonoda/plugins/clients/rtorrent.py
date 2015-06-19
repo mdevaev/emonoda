@@ -181,7 +181,7 @@ class Plugin(BaseClient, WithCustoms):
 
     @classmethod
     def get_custom_keys(cls):
-        return ("1", "2", "3", "4", "5")
+        return ("c1", "c2", "c3", "c4", "c5")
 
     @hash_or_torrent
     @_catch_unknown_torrent
@@ -189,7 +189,7 @@ class Plugin(BaseClient, WithCustoms):
         assert len(customs) != 0, "Empty customs dict"
         mc = xmlrpc.client.MultiCall(self._server)
         for (key, value) in customs.items():
-            getattr(mc.d, "set_custom{}".format(key))(torrent_hash, value)
+            getattr(mc.d, "set_custom{}".format(key[1:]))(torrent_hash, value)
         mc()
 
     @hash_or_torrent
@@ -199,5 +199,5 @@ class Plugin(BaseClient, WithCustoms):
         keys = tuple(set(keys))
         mc = xmlrpc.client.MultiCall(self._server)
         for key in keys:
-            getattr(mc.d, "get_custom{}".format(key))(torrent_hash)
+            getattr(mc.d, "get_custom{}".format(key[1:]))(torrent_hash)
         return dict(zip(keys, tuple(mc())))
