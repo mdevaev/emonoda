@@ -73,11 +73,10 @@ def client_hooks(client, torrent, to_save_customs, to_set_customs):
 
     if client is not None:
         client.load_torrent(torrent, prefix)
-        to_set_customs  # pylint: disable=pointless-statement
-#        customs.update({
-#            key: fmt.format_now(value)
-#            for (key, value) in to_set_customs.items()
-#        })
+        customs.update({
+            key: fmt.format_now(value)
+            for (key, value) in to_set_customs.items()
+        })
         if len(customs) != 0:
             client.set_customs(torrent, customs)
         os.remove(meta_file_path)

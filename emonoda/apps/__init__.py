@@ -32,6 +32,7 @@ from ..optconf.loaders.yaml import load_file as load_yaml_file
 from ..optconf.converters import (
     as_string_or_none,
     as_string_list,
+    as_key_value,
     as_path,
     as_path_or_none,
     as_8int_or_none,
@@ -200,7 +201,7 @@ def _get_config_scheme():
             "backup_dir":    Option(default=None, type=as_path_or_none, help="Backup old torrent files after update here"),
             "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
             "save_customs":  Option(default=[], type=as_string_list, help="Save client custom fields after update if supports"),
-            "set_customs":   Option(default=[], type=as_string_list, help="Set client custom fileds after update if supports")
+            "set_customs":   Option(default={}, type=as_key_value, help="Set client custom fileds after update if supports")
         },
 
         "emload": {
@@ -211,5 +212,5 @@ def _get_config_scheme():
         "emfind": {
             "cache_file": Option(default=as_path("~/.cache/emfind.json"), type=as_path, help="Torrents cache"),
             "name_filter": Option(default="*.torrent", type=str, help="Cache only filtered torrent files"),
-        }
+        },
     }
