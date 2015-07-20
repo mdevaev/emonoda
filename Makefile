@@ -18,7 +18,6 @@ release:
 	make bump
 	make push
 	make pypi
-	make aur
 	make clean
 
 tox:
@@ -34,10 +33,6 @@ push:
 pypi:
 	python setup.py register
 	python setup.py sdist upload
-
-aur:
-	mkaurball -f
-	burp -c network emonoda-*.src.tar.gz
 
 clean:
 	rm -rf build dist pkg src *.egg-info emonoda-*.tar.gz
