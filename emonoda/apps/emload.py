@@ -19,7 +19,6 @@
 
 import sys
 import os
-import errno
 import argparse
 
 from ..helpers import tcollection
@@ -37,9 +36,8 @@ def make_path(path, tail_mode):
         os.makedirs(path)
         if tail_mode is not None:
             os.chmod(path, tail_mode)
-    except OSError as err:
-        if err.errno != errno.EEXIST:
-            raise
+    except FileExistsError:
+        pass
 
 
 def link_data(torrent, data_dir_path, link_to_path, mkdir_mode):
