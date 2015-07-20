@@ -56,7 +56,11 @@ def build_all_files(data_root_path):
         files[get_decoded_path(prefix)] = None
         for name in local_files:
             path = os.path.join(prefix, name)
-            files[get_decoded_path(path)] = os.path.getsize(path)
+            try:
+                size = os.path.getsize(path)
+            except FileNotFoundError:
+                continue
+            files[get_decoded_path(path)] = size
     return files
 
 
