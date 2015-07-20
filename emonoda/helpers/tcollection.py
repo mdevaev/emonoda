@@ -37,9 +37,12 @@ def load_from_dir(path, name_filter, log):
                          (path, name_filter, name), one_line=True)
             try:
                 torrents[name] = tfile.Torrent(path=file_path)
-            except TypeError:
+            except ValueError:
                 log.error("Found broken torrent: {cyan}%s/{yellow}%s{reset}", (path, name))
                 torrents[name] = None
+            except Exception:
+                log.error("Can't process torrent: {cyan}%s/{yellow}%s{reset}", (path, name))
+                raise
 
     log.info("Loaded {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}",
              (len(torrents), path, name_filter))
