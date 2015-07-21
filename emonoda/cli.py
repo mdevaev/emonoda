@@ -64,11 +64,13 @@ class Log:
             elif not no_nl:
                 self._output.write("\n")
                 self._fill = 0
+            self._output.flush()
 
     def finish(self):
         if self._fill:
             self._output.write((" " * self._fill) + "\r")
             self._fill = 0
+            self._output.flush()
 
     def _format_text(self, text, placeholders, colored):
         text = text.format(**(_COLORS if colored else _NO_COLORS))
