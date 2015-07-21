@@ -126,7 +126,7 @@ def get_configured_conveyor(config, log_stdout, log_stderr):
             })
         conveyor = conveyor_class(**kwargs)
     except Exception as err:
-        log_stderr.error("Init error: {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
+        log_stderr.error("Can't init conveyor {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
         raise
     log_stderr.info("Conveyor {blue}%s{reset} is {green}ready{reset}", (name,))
     return conveyor
@@ -141,7 +141,7 @@ def get_configured_client(config, required, with_customs, log):
             if with_customs and C_WithCustoms not in client.get_bases():
                 raise RuntimeError("Your client does not support customs")
         except Exception as err:
-            log.error("Init error: {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
+            log.error("Can't init client {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
             raise
         log.info("Client {blue}%s{reset} is {green}ready{reset}", (name,))
         return client
@@ -177,7 +177,7 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
                 fetcher.login()
             log.info("Fetcher {blue}%s{reset} is {green}ready{reset}", (fetcher_name,))
         except Exception as err:
-            log.error("Init error: {red}%s{reset}: {red}%s{reset}(%s)", (fetcher_name, type(err).__name__, err))
+            log.error("Can't init fetcher {red}%s{reset}: {red}%s{reset}(%s)", (fetcher_name, type(err).__name__, err))
             raise
 
         fetchers.append(fetcher)
