@@ -34,19 +34,21 @@ from . import get_configured_client
 
 
 # =====
-def build_used_files(cache, data_root_path):
-    files = {data_root_path: None}
+def build_used_files(cache, data_roots):
+    files = dict.fromkeys(data_roots, None)
     for info in cache["torrents"].values():
         prefix = os.path.normpath(info["prefix"])
 
         for (path, meta) in info["files"].items():
             files[os.path.join(prefix, path)] = (meta or {}).get("size")
 
-        if prefix.startswith(data_root_path):
-            parts = list(filter(None, prefix[len(data_root_path):].split(os.path.sep)))
-            for index in range(len(parts)):
-                path = os.path.join(*([data_root_path] + parts[:index + 1]))
-                files[path] = None
+        for data_root_path in data_roots:
+            if prefix.startswith(data_root_path):
+                parts = list(filter(None, prefix[len(data_root_path):].split(os.path.sep)))
+                for index in range(len(parts)):
+                    path = os.path.join(*([data_root_path] + parts[:index + 1]))
+                    files[path] = None
+                break
     return files
 
 
@@ -79,12 +81,14 @@ def get_decoded_path(path):
 
 
 # =====
-def print_orphaned_files(cache, data_root_path, dirs_only, log_stdout, log_stderr):
-    log_stderr.info("Scanning directory {cyan}%s{reset} ... ", (data_root_path,))
-    all_files = build_all_files(data_root_path)
+def print_orphaned_files(cache, data_roots, dirs_only, log_stdout, log_stderr):
+    all_files = {}
+    for data_root_path in data_roots:
+        log_stderr.info("Scanning directory {cyan}%s{reset} ... ", (data_root_path,))
+        all_files.update(build_all_files(data_root_path))
 
     log_stderr.info("Transposing the cache: by-hashes -> files ...")
-    used_files = build_used_files(cache, data_root_path)
+    used_files = build_used_files(cache, data_roots)
 
     files = set(all_files).difference(used_files)
     if len(files) != 0:
@@ -195,7 +199,7 @@ def main():
             elif options.cmd == "orphans":
                 print_orphaned_files(
                     cache=get_cache(False),
-                    data_root_path=config.core.data_root_dir,
+                    data_roots=(config.core.data_root_dir,) + tuple(config.core.another_data_root_dirs),
                     dirs_only=options.dirs_only,
                     log_stdout=log_stdout,
                     log_stderr=log_stderr,

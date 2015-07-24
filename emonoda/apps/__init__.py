@@ -38,6 +38,7 @@ from ..optconf.converters import (
     as_string_list,
     as_key_value,
     as_path,
+    as_paths_list,
     as_path_or_none,
     as_8int_or_none,
 )
@@ -202,7 +203,8 @@ def _get_config_scheme():
         "core": {
             "client":        Option(default=None, type=as_string_or_none, help="The name of plugin for torrent client"),
             "torrents_dir":  Option(default=".", type=as_path, help="Path to directory with torrent files"),
-            "data_root_dir": Option(default=None, type=as_path_or_none, help="Path to root directory with data of torrents"),
+            "data_root_dir": Option(default="~/Downloads", type=as_path, help="Path to root directory with data of torrents"),
+            "another_data_root_dirs": Option(default=[], type=as_paths_list, help="Paths to another data directories"),
             "use_colors":    Option(default=True, help="Enable colored output"),
             "force_colors":  Option(default=False, help="Always use the coloring"),
         },

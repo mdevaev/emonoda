@@ -26,6 +26,12 @@ def as_path(value):
     return os.path.abspath(os.path.expanduser(value))
 
 
+def as_paths_list(values):
+    if isinstance(values, str):
+        values = [values]
+    return list(map(as_path, values))
+
+
 def as_path_or_none(value):
     if value is None:
         return None
