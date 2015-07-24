@@ -36,7 +36,6 @@ if __name__ == "__main__":
         packages=[
             "emonoda",
             "emonoda.optconf",
-            "emonoda.optconf.loaders",
             "emonoda.apps",
             "emonoda.apps.hooks",
             "emonoda.helpers",

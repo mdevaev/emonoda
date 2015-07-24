@@ -22,13 +22,17 @@ import os
 import contextlib
 import argparse
 
+import pygments
+import pygments.lexers.data
+import pygments.formatters
+
 from ..optconf import make_config
 from ..optconf import Section
 from ..optconf import Option
 
 from ..optconf import build_raw_from_options
 from ..optconf.dumper import make_config_dump
-from ..optconf.loaders.yaml import load_file as load_yaml_file
+from ..optconf.loader import load_file as load_yaml_file
 from ..optconf.converters import (
     as_string_or_none,
     as_string_list,
@@ -83,7 +87,14 @@ def init():
     config = make_config(raw_config, scheme)
 
     if options.dump_config:
-        print(make_config_dump(config, split_by=((), ("fetchers",))))
+        dump = make_config_dump(config)
+        if sys.stdout.isatty():
+            dump = pygments.highlight(
+                dump,
+                pygments.lexers.data.YamlLexer(),
+                pygments.formatters.TerminalFormatter(bg="dark"),
+            )
+        print(dump)
         sys.exit(0)
 
     config.setdefault("client", Section())
