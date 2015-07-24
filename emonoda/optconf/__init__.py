@@ -66,7 +66,7 @@ def make_config(raw, scheme, keys=()):
             value = raw.get(key, option.default)
             try:
                 value = option.type(value)
-            except:
+            except Exception:
                 raise ValueError("Invalid value '{value}' for key '{key}'".format(key=full_name, value=value))
             config[key] = value
             config._set_meta(  # pylint: disable=protected-access
