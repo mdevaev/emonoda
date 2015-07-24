@@ -49,4 +49,4 @@ def _inner_make_dump(config, path=()):
 
 
 def _make_yaml(value):
-    return yaml.dump(value).replace("\n...\n", "").strip()
+    return yaml.dump(value, allow_unicode=True).replace("\n...\n", "").strip()
