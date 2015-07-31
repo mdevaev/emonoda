@@ -98,7 +98,8 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
 
     def mark_unknown(self):
         self._kill_thread()
-        self._log_stdout.print(*self._format_fail("yellow", " ", "UNKNOWN"), one_line=(not self._show_unknown))
+        one_line = (not self._show_unknown and self._log_stdout.isatty())
+        self._log_stdout.print(*self._format_fail("yellow", " ", "UNKNOWN"), one_line=one_line)
         self.unknown_count += 1
 
     def mark_in_progress(self, fetcher):
@@ -110,11 +111,12 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
             self._fan_thread = threading.Thread(target=loop, daemon=True)
             self._fan_thread.start()
         else:
-            self._log_stdout.print(*self._format_status("magenta", " ", fetcher), one_line=True)
+            self._log_stdout.print(*self._format_status("magenta", " ", fetcher))
 
     def mark_passed(self, fetcher):
         self._kill_thread()
-        self._log_stdout.print(*self._format_status("blue", " ", fetcher), one_line=(not self._show_passed))
+        one_line = (not self._show_passed and self._log_stdout.isatty())
+        self._log_stdout.print(*self._format_status("blue", " ", fetcher), one_line=one_line)
         self.passed_count += 1
 
     def mark_updated(self, fetcher, diff):

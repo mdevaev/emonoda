@@ -18,6 +18,8 @@
 
 
 import sys
+import os
+import re
 
 from colorama import Fore
 from colorama import Style
@@ -44,6 +46,7 @@ class Log:
         self._output = output
         self._fill = 0
         self._colored = (use_colors and (self.isatty() or force_colors))
+        self._ansi_regexp = re.compile(r"(\x1b[^m]*m)")
 
     def isatty(self):
         return self._output.isatty()
@@ -57,10 +60,21 @@ class Log:
     def print(self, text="", placeholders=(), one_line=False, no_nl=False):
         if not self._quiet:
             self.finish()
-            self._output.write(self._format_text(text, placeholders, self._colored))
+
+            rendered = self._format_text(text, placeholders, self._colored)
+            view_len = len(self._format_text(text, placeholders, False) if self._colored else rendered)
+
+            cut = 0
+            if one_line and self.isatty():
+                max_len = self._get_term_width()
+                if max_len is not None and view_len > max_len:
+                    cut = view_len - max_len
+                    rendered = self._cut_line(rendered, cut)
+
+            self._output.write(rendered)
             if one_line:
                 self._output.write("\r")
-                self._fill = len(self._format_text(text, placeholders, False))
+                self._fill = view_len - cut
             elif not no_nl:
                 self._output.write("\n")
                 self._fill = 0
@@ -72,7 +86,33 @@ class Log:
             self._fill = 0
             self._output.flush()
 
+    def _get_term_width(self):
+        try:
+            return int(os.environ["COLUMNS"])
+        except (KeyError, ValueError):
+            try:
+                return os.get_terminal_size(self._output.fileno()).columns
+            except OSError:
+                return None
+
     def _format_text(self, text, placeholders, colored):
         text = text.format(**(_COLORS if colored else _NO_COLORS))
         text = text % placeholders
         return text
+
+    def _cut_line(self, text, cut):
+        parts = self._ansi_regexp.split(text)
+        for index in reversed(range(len(parts))):
+            if cut <= 0:
+                break
+            if parts[index].startswith("\x1b"):
+                parts[index] = ""
+            elif cut <= len(parts[index]):
+                parts[index] = parts[index][:-cut]
+                break
+            else:
+                cut -= len(parts[index])
+                parts[index] = ""
+        if self._colored:
+            parts.append(Fore.RESET)
+        return "".join(parts)
