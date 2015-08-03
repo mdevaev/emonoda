@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Emonoda by mdevaev</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Emonoda</h1>
+        <h2>Набор программ для организации и управления коллекцией торрентов</h2>
+        <a href="https://github.com/mdevaev/emonoda" class="button"><small>View project on</small> GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>
+<a id="-emonoda----得物だ" class="anchor" href="#-emonoda----%E5%BE%97%E7%89%A9%E3%81%A0" aria-hidden="true"><span class="octicon octicon-link"></span></a><img src="https://raw.githubusercontent.com/wiki/mdevaev/emonoda/chi.png" alt="Chi"> Emonoda -- 得物だ</h1>
+
+<p><strong>Emonoda</strong> (moon. <em>得物だ</em>, рус. <em>это добыча</em>) -- набор программ для организации и управления коллекцией торрентов. Он поможет вам следить за актуальностью раздач и автоматически обновлять торрент-файлы, а так же вычищать старые данные, просматривать мета-информацию и делать множество других вещей.<br>
+За детальной информацией обращайтесь на вики: <a href="https://github.com/mdevaev/emonoda/wiki">https://github.com/mdevaev/emonoda/wiki</a>  </p>
+
+<h3>
+<a id="Из-коробки" class="anchor" href="#%D0%98%D0%B7-%D0%BA%D0%BE%D1%80%D0%BE%D0%B1%D0%BA%D0%B8" aria-hidden="true"><span class="octicon octicon-link"></span></a>Из коробки</h3>
+
+<ul>
+<li>
+<code>emfetch</code> -- Следит за раздачами, используя плагины для популярных трекеров; обновляет торрент-файлы при добавлении новых серий или перезаливке; интегрируется с основными линуксовыми клиентами.</li>
+<li>
+<code>emfile</code> -- Позволяет читать метаданные торрент-файлов и выдает их в человекочитаемом, либо удобном для скриптов формате.</li>
+<li>
+<code>emdiff</code> -- Показывает разницу содержимого двух торрент-файлов в виде диффа.</li>
+<li>
+<code>emfind</code> -- Служит для выполнения различных поисковых запросов, например - найти в каталоге с данными файлы, не принадлежащими ни одному торренту, зарегистрированному в клиенте.</li>
+<li>
+<code>emload</code> -- Загружает торрент, используя модель "t.data" для хранения данных (см. документацию).</li>
+<li>
+<code>emrm</code> -- Удаляет торрент из клиента.</li>
+</ul>
+
+<h3>
+<a id="Основные-фичи" class="anchor" href="#%D0%9E%D1%81%D0%BD%D0%BE%D0%B2%D0%BD%D1%8B%D0%B5-%D1%84%D0%B8%D1%87%D0%B8" aria-hidden="true"><span class="octicon octicon-link"></span></a>Основные фичи</h3>
+
+<ul>
+<li>UNIX-way -- система представлена в виде простых консольных программ с текстовыми конфигами. Не нужно разворачивать оракл, апач и кластер эллиптикса - просто поставьте <code>emonoda</code> и укажите в ее конфиге несколько несложных параметров.</li>
+<li>Python -- можно очень просто добавить поддержку других трекеров, используя готовый набор классов и функций.</li>
+<li>Интегрируемость - программы стараются по-максимуму использовать все возможности торрент-клиентов. Например, <code>emfile</code> способна найти каталог, куда вы загружали указанный торрент, а <code>emfetch</code>, при обновлении торрент-файла, может сохранить его метку, назначенную в <a href="https://github.com/Novik/ruTorrent">ruTorrent</a>.</li>
+<li>Индивидуальная настройка HTTP/Socks4/Socks5-прокси для каждого трекера -- если в вашей сети недоступен любимый ресурс, вы можете сконфигурировать для него прокси отдельно от остальных трекеров.</li>
+<li>Фингерпринты -- перед тем, как логиниться на трекер, программа проверит содержимое сайта и сообщит вам, если вместо него вдруг показывается провайдерская заглушка.</li>
+</ul>
+
+<h3>
+<a id="Поддерживаемые-трекеры" class="anchor" href="#%D0%9F%D0%BE%D0%B4%D0%B4%D0%B5%D1%80%D0%B6%D0%B8%D0%B2%D0%B0%D0%B5%D0%BC%D1%8B%D0%B5-%D1%82%D1%80%D0%B5%D0%BA%D0%B5%D1%80%D1%8B" aria-hidden="true"><span class="octicon octicon-link"></span></a>Поддерживаемые трекеры</h3>
+
+<ul>
+<li><a href="http://rutracker.org">http://rutracker.org</a></li>
+<li><a href="http://nnm-club.me">http://nnm-club.me</a></li>
+<li><a href="http://rutor.org">http://rutor.org</a></li>
+<li><a href="http://tfile.me">http://tfile.me</a></li>
+<li><a href="http://pravtor.ru">http://pravtor.ru</a></li>
+<li><a href="http://tr.anidub.com">http://tr.anidub.com</a></li>
+<li><a href="http://tabun.everypony.ru">http://tabun.everypony.ru</a></li>
+<li><a href="http://pornolab.net">http://pornolab.net</a></li>
+</ul>
+
+<h3>
+<a id="Поддерживаемые-клиенты" class="anchor" href="#%D0%9F%D0%BE%D0%B4%D0%B4%D0%B5%D1%80%D0%B6%D0%B8%D0%B2%D0%B0%D0%B5%D0%BC%D1%8B%D0%B5-%D0%BA%D0%BB%D0%B8%D0%B5%D0%BD%D1%82%D1%8B" aria-hidden="true"><span class="octicon octicon-link"></span></a>Поддерживаемые клиенты</h3>
+
+<ul>
+<li><a href="http://rakshasa.github.io/rtorrent/">RTorrent</a></li>
+<li><a href="http://ktorrent.pwsp.net/">KTorrent</a></li>
+<li><a href="http://www.transmissionbt.com/">Transmission</a></li>
+</ul>
+
+<h3>
+<a id="Установка" class="anchor" href="#%D0%A3%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0" aria-hidden="true"><span class="octicon octicon-link"></span></a>Установка</h3>
+
+<h5>
+<a id="Локальная-установка-из-pypi" class="anchor" href="#%D0%9B%D0%BE%D0%BA%D0%B0%D0%BB%D1%8C%D0%BD%D0%B0%D1%8F-%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B8%D0%B7-pypi" aria-hidden="true"><span class="octicon octicon-link"></span></a>Локальная установка из PyPI</h5>
+
+<p>Вы можете поставить <code>emonoda</code> в свой домашний каталог из <a href="https://pypi.python.org/pypi/emonoda">PyPI</a>, при этом программы будут доступны в <code>~/.local/bin</code>, например - <code>~/.local/bin/emfetch</code>. Для установки введите:</p>
+
+<pre><code>pip install --user --upgrade emonoda
+</code></pre>
+
+<h5>
+<a id="Пакет-для-arch-linux" class="anchor" href="#%D0%9F%D0%B0%D0%BA%D0%B5%D1%82-%D0%B4%D0%BB%D1%8F-arch-linux" aria-hidden="true"><span class="octicon octicon-link"></span></a>Пакет для Arch Linux</h5>
+
+<p>Актуальный PKGBUILD находится в <a href="https://aur4.archlinux.org/packages/emonoda/">AUR`е</a>:</p>
+
+<pre><code>packer -S emonoda
+</code></pre>
+
+<h3>
+<a id="Скриншотик" class="anchor" href="#%D0%A1%D0%BA%D1%80%D0%B8%D0%BD%D1%88%D0%BE%D1%82%D0%B8%D0%BA" aria-hidden="true"><span class="octicon octicon-link"></span></a>Скриншотик</h3>
+
+<p><img src="https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emfetch.png" alt="emfetch"></p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/mdevaev/emonoda/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/mdevaev/emonoda/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/mdevaev/emonoda"></a> is maintained by <a href="https://github.com/mdevaev">mdevaev</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
