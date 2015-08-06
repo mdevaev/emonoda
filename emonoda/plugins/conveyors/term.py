@@ -76,11 +76,11 @@ class Plugin(BaseConveyor, WithLogs):  # pylint: disable=too-many-instance-attri
     def print_summary(self):
         self._kill_thread()
         self._log_stdout.finish()
-        self._log_stderr.info("Invalid:       %d", (self.invalid_count,))
+        self._log_stderr.info("Updated:       %d", (self.updated_count,))
+        self._log_stderr.info("Passed:        %d", (self.passed_count,))
         self._log_stderr.info("Not in client: %d", (self.not_in_client_count,))
         self._log_stderr.info("Unknown:       %d", (self.unknown_count,))
-        self._log_stderr.info("Passed:        %d", (self.passed_count,))
-        self._log_stderr.info("Updated:       %d", (self.updated_count,))
+        self._log_stderr.info("Invalid:       %d", (self.invalid_count,))
         self._log_stderr.info("Errors:        %d", (self.error_count,))
         self._log_stderr.info("Exceptions:    %d", (self.exception_count,))
 
