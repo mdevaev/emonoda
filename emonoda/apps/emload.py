@@ -105,7 +105,9 @@ def main():
     if len(options.torrents) > 1 and options.link_to is not None:
         raise RuntimeError("Option -l/--link-to be used with only one torrent")
 
-    customs = parse_customs(options.set_customs)
+    customs = dict(config.emload.set_customs)
+    customs.update(parse_customs(options.set_customs))
+
     torrents = tcollection.find(config.core.torrents_dir, options.torrents, False)
 
     with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
