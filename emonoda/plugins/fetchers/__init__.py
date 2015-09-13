@@ -51,7 +51,7 @@ class LogicError(FetcherError):
     pass
 
 
-class TypicalNetworkError(FetcherError):
+class NetworkError(FetcherError):
     def __init__(self, err):
         super().__init__()
         self.err = err
@@ -105,19 +105,19 @@ def read_url(
             return opener.open(request, timeout=timeout).read()
         except socket.timeout as err:
             if retries == 0 or not retry_timeout:
-                raise TypicalNetworkError(err)
+                raise NetworkError(err)
         except urllib.error.HTTPError as err:
             if retries == 0 or err.code not in retry_codes:
-                raise TypicalNetworkError(err)
+                raise NetworkError(err)
         except urllib.error.URLError as err:
             if "timed out" in str(err.reason):
                 if retries == 0 or not retry_timeout:
-                    raise TypicalNetworkError(err)
+                    raise NetworkError(err)
             else:
                 raise
         except (http.client.IncompleteRead, http.client.BadStatusLine, ConnectionResetError) as err:
             if retries == 0:
-                raise TypicalNetworkError(err)
+                raise NetworkError(err)
         time.sleep(sleep_time)
         retries -= 1
 
