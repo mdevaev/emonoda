@@ -1,6 +1,9 @@
 ![Chi](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/chi.png) Emonoda -- 得物だ
 =======
 
+[![Build Status](https://img.shields.io/travis/mdevaev/emonoda.svg)](https://travis-ci.org/mdevaev/emonoda)
+[![Latest Version](https://img.shields.io/pypi/v/emonoda.svg)](https://pypi.python.org/pypi/emonoda/)
+
 **Emonoda** (moon. _得物だ_, рус. _это добыча_) -- набор программ для организации и управления коллекцией торрентов. Он поможет вам следить за актуальностью раздач и автоматически обновлять торрент-файлы, а так же вычищать старые данные, просматривать мета-информацию и делать множество других вещей.  
 За детальной информацией обращайтесь на вики: https://github.com/mdevaev/emonoda/wiki  
 
