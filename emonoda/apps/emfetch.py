@@ -22,6 +22,8 @@ import os
 import json
 import shutil
 import contextlib
+import threading
+import operator
 import argparse
 
 from ..plugins.fetchers import FetcherError
@@ -34,12 +36,137 @@ from .. import fmt
 
 from . import init
 from . import get_configured_log
-from . import get_configured_conveyor
 from . import get_configured_client
 from . import get_configured_fetchers
 
 
 # =====
+class Feeder:  # pylint: disable=too-many-instance-attributes
+    def __init__(self, torrents, show_unknown, show_passed, show_diff, log_stdout, log_stderr):
+        self._torrents = torrents
+        self._show_unknown = show_unknown
+        self._show_passed = show_passed
+        self._show_diff = show_diff
+        self._log_stdout = log_stdout
+        self._log_stderr = log_stderr
+
+        self._current_count = 0
+        self._current_file_name = None
+        self._current_torrent = None
+
+        self._fan = fmt.make_fan()
+        self._fan_thread = None
+        self._stop_fan = threading.Event()
+
+        self.invalid_count = 0
+        self.not_in_client_count = 0
+        self.unknown_count = 0
+        self.passed_count = 0
+        self.updated_count = 0
+        self.error_count = 0
+        self.exception_count = 0
+
+    def get_torrents(self):
+        for (count, (file_name, torrent)) in enumerate(sorted(self._torrents.items(), key=operator.itemgetter(0))):
+            self._current_count = count
+            self._current_file_name = file_name
+            self._current_torrent = torrent
+            self._kill_thread()
+            yield torrent
+        self._kill_thread()
+
+    def done_invalid(self):
+        self._kill_thread()
+        self._log_stdout.print(*self._format_fail("red", "!", "INVALID_TORRENT"))
+        self.invalid_count += 1
+
+    def done_not_in_client(self):
+        self._kill_thread()
+        self._log_stdout.print(*self._format_fail("red", "!", "NOT_IN_CLIENT"))
+        self.not_in_client_count += 1
+
+    def done_unknown(self):
+        self._kill_thread()
+        one_line = (not self._show_unknown and self._log_stdout.isatty())
+        self._log_stdout.print(*self._format_fail("yellow", " ", "UNKNOWN"), one_line=one_line)
+        self.unknown_count += 1
+
+    def mark_in_progress(self, fetcher):
+        self._kill_thread()
+        if self._log_stdout.isatty():
+            def loop():
+                while not self._stop_fan.wait(timeout=0.1):
+                    self._log_stdout.print(*self._format_status("magenta", next(self._fan), fetcher), one_line=True)
+            self._fan_thread = threading.Thread(target=loop, daemon=True)
+            self._fan_thread.start()
+        else:
+            self._log_stdout.print(*self._format_status("magenta", " ", fetcher))
+
+    def done_passed(self, fetcher):
+        self._kill_thread()
+        one_line = (not self._show_passed and self._log_stdout.isatty())
+        self._log_stdout.print(*self._format_status("blue", " ", fetcher), one_line=one_line)
+        self.passed_count += 1
+
+    def done_updated(self, fetcher, diff):
+        self._kill_thread()
+        self._log_stdout.print(*self._format_status("green", "+", fetcher))
+        if self._show_diff:
+            self._log_stdout.print(*fmt.format_torrents_diff(diff, "\t"))
+        self.updated_count += 1
+
+    def done_fetcher_error(self, fetcher, err):
+        self._kill_thread()
+        (line, placeholders) = self._format_status("red", "-", fetcher)
+        line += " :: {red}%s({reset}%s{red}){reset}"
+        placeholders += (type(err).__name__, err)
+        self._log_stdout.print(line, placeholders)
+        self.error_count += 1
+
+    def done_exception(self, fetcher):
+        self._kill_thread()
+        self._log_stdout.print(*self._format_status("red", "-", fetcher))
+        self._log_stdout.print("%s", (fmt.format_traceback("\t"),))
+        self.exception_count += 1
+
+    def print_summary(self):
+        self._kill_thread()
+        self._log_stdout.finish()
+        self._log_stderr.info("Updated:       %d", (self.updated_count,))
+        self._log_stderr.info("Passed:        %d", (self.passed_count,))
+        self._log_stderr.info("Not in client: %d", (self.not_in_client_count,))
+        self._log_stderr.info("Unknown:       %d", (self.unknown_count,))
+        self._log_stderr.info("Invalid:       %d", (self.invalid_count,))
+        self._log_stderr.info("Errors:        %d", (self.error_count,))
+        self._log_stderr.info("Exceptions:    %d", (self.exception_count,))
+
+    def _kill_thread(self):
+        if self._fan_thread is not None:
+            self._stop_fan.set()
+            self._fan_thread.join()
+            self._fan_thread = None
+            self._stop_fan.clear()
+
+    def _format_fail(self, color, sign, error):
+        return (
+            "[{" + color + "}%s{reset}] %s {" + color + "}%s {cyan}%s{reset}",
+            (sign, self._format_progress(), error, self._current_file_name),
+        )
+
+    def _format_status(self, color, sign, fetcher):
+        return (
+            "[{" + color + "}%s{reset}] %s {" + color + "}%s {cyan}%s{reset} -- %s",
+            (
+                sign, self._format_progress(), fetcher.get_name(),
+                self._current_file_name, (self._current_torrent.get_comment() or ""),
+            ),
+        )
+
+    def _format_progress(self):
+        return fmt.format_progress(self._current_count + 1, len(self._torrents))
+
+
+# ===
 def backup_torrent(torrent, backup_dir_path, backup_suffix):
     backup_suffix = fmt.format_now(backup_suffix)
     backup_file_path = os.path.join(backup_dir_path, os.path.basename(torrent.get_path()) + backup_suffix)
@@ -91,8 +218,9 @@ def update_torrent(client, torrent, new_data, to_save_customs, to_set_customs):
         torrent.load_from_data(new_data, torrent.get_path())
 
 
+# ===
 def update(
-    conveyor,
+    feeder,
     client,
     fetchers,
     backup_dir_path,
@@ -103,25 +231,25 @@ def update(
 ):
     hashes = (client.get_hashes() if client is not None else [])
 
-    for torrent in conveyor.get_torrents():
+    for torrent in feeder.get_torrents():
         if torrent is None:
-            conveyor.mark_invalid()
+            feeder.done_invalid()
             continue
 
         if client is not None and torrent.get_hash() not in hashes:
-            conveyor.mark_not_in_client()
+            feeder.done_not_in_client()
             continue
 
         fetcher = select_fetcher(torrent, fetchers)
         if fetcher is None:
-            conveyor.mark_unknown()
+            feeder.done_unknown()
             continue
 
-        conveyor.mark_in_progress(fetcher)
+        feeder.mark_in_progress(fetcher)
 
         try:
             if not fetcher.is_torrent_changed(torrent):
-                conveyor.mark_passed(fetcher)
+                feeder.done_passed(fetcher)
                 continue
 
             new_data = fetcher.fetch_new_data(torrent)
@@ -131,15 +259,15 @@ def update(
                     backup_torrent(torrent, backup_dir_path, backup_suffix)
                 update_torrent(client, torrent, new_data, to_save_customs, to_set_customs)
 
-            conveyor.mark_updated(fetcher, diff)
+            feeder.done_updated(fetcher, diff)
 
         except FetcherError as err:
-            conveyor.mark_fetcher_error(fetcher, err)
+            feeder.done_fetcher_error(fetcher, err)
 
         except Exception:
-            conveyor.mark_exception(fetcher)
+            feeder.done_exception(fetcher)
 
-    conveyor.print_summary()
+    feeder.print_summary()
 
 
 # ===== Main =====
@@ -159,8 +287,6 @@ def main():
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, False, sys.stderr) as log_stderr:
 
-            conveyor = get_configured_conveyor(config, log_stdout, log_stderr)
-
             client = get_configured_client(
                 config=config,
                 required=False,
@@ -168,22 +294,33 @@ def main():
                 log=log_stderr,
             )
 
+            def read_captcha(url):
+                log_stderr.info("{yellow}Enter the captcha{reset} from [{blue}%s{reset}]: ", (url,), no_nl=True)
+                return input()
+
             fetchers = get_configured_fetchers(
                 config=config,
-                captcha_decoder=conveyor.read_captcha,
+                captcha_decoder=read_captcha,
                 only=options.only_fetchers,
                 exclude=options.exclude_fetchers,
                 log=log_stderr,
             )
 
-            conveyor.set_torrents(tcollection.load_from_dir(
-                path=config.core.torrents_dir,
-                name_filter=options.name_filter,
-                log=log_stderr,
-            ))
+            feeder = Feeder(
+                torrents=tcollection.load_from_dir(
+                    path=config.core.torrents_dir,
+                    name_filter=options.name_filter,
+                    log=log_stderr,
+                ),
+                show_unknown=config.emfetch.show_unknown,
+                show_passed=config.emfetch.show_passed,
+                show_diff=config.emfetch.show_diff,
+                log_stdout=log_stdout,
+                log_stderr=log_stderr,
+            )
 
             update(
-                conveyor=conveyor,
+                feeder=feeder,
                 client=client,
                 fetchers=fetchers,
                 backup_dir_path=config.emfetch.backup_dir,

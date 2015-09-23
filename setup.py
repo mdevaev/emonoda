@@ -40,7 +40,6 @@ if __name__ == "__main__":
             "emonoda.apps.hooks",
             "emonoda.helpers",
             "emonoda.plugins",
-            "emonoda.plugins.conveyors",
             "emonoda.plugins.clients",
             "emonoda.plugins.fetchers",
             "emonoda.thirdparty",

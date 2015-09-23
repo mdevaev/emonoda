@@ -23,10 +23,6 @@ import os
 
 
 # =====
-def get_conveyor_class(name):
-    return _get_classes()["conveyors"][name]
-
-
 def get_client_class(name):
     return _get_classes()["clients"][name]
 
@@ -38,7 +34,7 @@ def get_fetcher_class(name):
 @functools.lru_cache()
 def _get_classes():
     classes = {}
-    for sub in ("conveyors", "clients", "fetchers"):
+    for sub in ("clients", "fetchers"):
         classes.setdefault(sub, {})
         sub_path = os.path.join(os.path.dirname(__file__), sub)
         for file_name in os.listdir(sub_path):
