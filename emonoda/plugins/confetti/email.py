@@ -1,0 +1,151 @@
+"""
+    Emonoda -- A set of tools to organize and manage your torrents
+    Copyright (C) 2015  Devaev Maxim <mdevaev@gmail.com>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
+
+
+import socket
+import smtplib
+import email.mime.multipart
+import email.mime.text
+import email.header
+import email.utils
+import contextlib
+import time
+
+from ...optconf import Option
+from ...optconf.converters import as_string_or_none
+from ...optconf.converters import as_string_list
+
+from . import BaseConfetti
+from . import ST
+from . import templated
+
+
+# =====
+class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
+    def __init__(self,  # pylint: disable=super-init-not-called,too-many-arguments
+                 to, cc, subject, sender, html, server, port, ssl, user, passwd, timeout, retries, retries_sleep, **kwargs):
+        self._init_bases(**kwargs)
+
+        self._to = to
+        self._cc = cc
+        self._subject = subject
+        self._sender = sender
+        self._html = html
+
+        self._server = server
+        self._port = port
+        self._ssl = ssl
+        self._user = user
+        self._passwd = passwd
+
+        self._timeout = timeout
+        self._retries = retries
+        self._retries_sleep = retries_sleep
+
+    @classmethod
+    def get_name(cls):
+        return "email"
+
+    @classmethod
+    def get_options(cls):
+        return cls._get_merged_options({
+            "to":            Option(default=["root@localhost"], type=as_string_list, help="Destination email address"),
+            "cc":            Option(default=[], type=as_string_list, help="Email 'CC' field"),
+            "subject":       Option(default="{app} report: you have {updated} new torrents ^_^", help="Email subject"),
+            "sender":        Option(default="root@localhost", help="Email 'From' field"),
+            "html":          Option(default=True, help="HTML or plaintext email body"),
+
+            "server":        Option(default="localhost", help="Hostname of SMTP server"),
+            "port":          Option(default=0, help="Port of SMTP server"),
+            "ssl":           Option(default=False, help="Use SMTPS"),
+            "user":          Option(default=None, type=as_string_or_none, help="Account on SMTP server"),
+            "passwd":        Option(default=None, type=as_string_or_none, help="Passwd for account on SMTP server"),
+
+            "timeout":       Option(default=30, help="SMTP timeout"),
+            "retries":       Option(default=5, help="Retries for failed attempts"),
+            "retries_sleep": Option(default=1, help="Sleep interval between failed attempts"),
+        })
+
+    # ===
+
+    def send_results(self, app, results):
+        msg = self._format_message(app, results)
+        retries = self._retries
+        while True:
+            try:
+                self._send_message(msg)
+                break
+            except (
+                smtplib.SMTPServerDisconnected,
+                smtplib.SMTPConnectError,
+                smtplib.SMTPHeloError,
+                socket.timeout,
+            ):
+                if retries == 0:
+                    raise
+                time.sleep(self._retries_sleep)
+                retries -= 1
+
+    # ===
+
+    def _format_message(self, app, results):
+        subject_placeholders = {st.value: len(results[st]) for st in ST}
+        subject_placeholders["app"] = app
+
+        body_kwargs = {st.value: results[st] for st in ST}
+        body_kwargs["app"] = app
+
+        return self._make_message(
+            subject=self._subject.format(**subject_placeholders),
+            body=templated("email.{ctype}.{app}.mako".format(
+                ctype=("html" if self._html else "plain"),
+                app=app,
+            ), **body_kwargs),
+        )
+
+    def _make_message(self, subject, body):
+        email_headers = {
+            "From":    self._sender,
+            "To":      ", ".join(self._to),
+            "Date":    email.utils.formatdate(localtime=True),
+            "Subject": email.header.Header(subject, "utf-8"),
+        }
+        if len(self._cc) > 0:
+            email_headers["CC"] = ", ".join(self._cc)
+
+        msg = email.mime.multipart.MIMEMultipart()
+        for (key, value) in email_headers.items():
+            msg[key] = value
+
+        msg.attach(email.mime.text.MIMEText(
+            _text=body.encode("utf-8"),
+            _subtype=("html" if self._html else "plain"),
+            _charset="utf-8",
+        ))
+        return msg
+
+    def _send_message(self, msg):
+        smtp_class = (smtplib.SMTP_SSL if self._ssl else smtplib.SMTP)
+        with contextlib.closing(smtp_class(
+            host=self._server,
+            port=self._port,
+            timeout=self._timeout,
+        )) as client:
+            if self._user is not None:
+                client.login(self._user, self._passwd)
+            client.send_message(msg)

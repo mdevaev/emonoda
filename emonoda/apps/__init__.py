@@ -45,6 +45,7 @@ from ..optconf.converters import (
 
 from ..plugins import get_client_class
 from ..plugins import get_fetcher_class
+from ..plugins import get_confetti_class
 
 from ..plugins.fetchers import WithLogin as F_WithLogin
 from ..plugins.fetchers import WithCaptcha as F_WithCaptcha
@@ -73,12 +74,17 @@ def init():
     if config.core.client is not None:
         client_scheme = get_client_class(config.core.client).get_options()
         scheme["client"] = client_scheme
-        config = make_config(raw_config, scheme)
 
     for fetcher_name in raw_config.get("fetchers", []):
         fetcher_scheme = get_fetcher_class(fetcher_name).get_options()
         scheme.setdefault("fetchers", {})
         scheme["fetchers"][fetcher_name] = fetcher_scheme
+
+    for confetti_name in raw_config.get("confetti", []):
+        confetti_scheme = get_confetti_class(confetti_name).get_options()
+        scheme.setdefault("confetti", {})
+        scheme["confetti"][confetti_name] = confetti_scheme
+
     config = make_config(raw_config, scheme)
 
     if options.dump_config:
@@ -94,6 +100,7 @@ def init():
 
     config.setdefault("client", Section())
     config.setdefault("fetchers", Section())
+    config.setdefault("confetti", Section())
 
     return (args_parser, remaining, config)
 
@@ -170,6 +177,21 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
         fetchers.append(fetcher)
 
     return fetchers
+
+
+def get_configured_confetti(config, log):
+    confetti = []
+    for confetti_name in sorted(config.confetti):
+        log.info("Enabling the confetti {blue}%s{reset} ...", (confetti_name,), one_line=True)
+        confetti_class = get_confetti_class(confetti_name)
+        confetti_kwargs = dict(config.confetti[confetti_name])
+        try:
+            confetti.append(confetti_class(**confetti_kwargs))
+            log.info("Confetti {blue}%s{reset} is {green}ready{reset}", (confetti_name,))
+        except Exception as err:
+            log.error("Can't init confetti {red}%s{reset}: {red}%s{reset}(%s)", (confetti_name, type(err).__name__, err))
+            raise
+    return confetti
 
 
 # =====

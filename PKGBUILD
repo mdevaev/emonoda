@@ -15,6 +15,7 @@ depends=(
 	"python-pyyaml"
 	"python-colorama"
 	"python-pygments"
+	"python-mako"
 	"python-pytz"
 	"python-dateutil"
 )

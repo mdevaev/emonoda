@@ -15,3 +15,20 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+
+
+# =====
+def deploy_surprise(app, results, confetti, log):
+    ok = True
+    for sender in confetti:
+        name = sender.get_name()
+        log.info("Sending {blue}%s{reset} ...", (name,), one_line=True)
+        try:
+            sender.send_results(app, results)
+        except Exception as err:
+            log.error("Can't send {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
+            ok = False
+        log.info("Result {blue}%s{reset} was {green}sent{reset}", (name,))
+    if not ok:
+        log.error("One or more confetti failed")
+    return ok

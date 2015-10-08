@@ -31,10 +31,14 @@ def get_fetcher_class(name):
     return _get_classes()["fetchers"][name]
 
 
+def get_confetti_class(name):
+    return _get_classes()["confetti"][name]
+
+
 @functools.lru_cache()
 def _get_classes():
     classes = {}
-    for sub in ("clients", "fetchers"):
+    for sub in ("clients", "fetchers", "confetti"):
         classes.setdefault(sub, {})
         sub_path = os.path.join(os.path.dirname(__file__), sub)
         for file_name in os.listdir(sub_path):

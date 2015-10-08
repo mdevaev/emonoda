@@ -9,6 +9,8 @@ def as_string_or_none(value):
 
 
 def as_string_list(values):
+    if isinstance(values, str):
+        values = [values]
     return list(map(str, values))
 
 

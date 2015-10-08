@@ -20,7 +20,6 @@
 import sys
 import os
 import json
-import enum
 import shutil
 import contextlib
 import traceback
@@ -31,7 +30,10 @@ import argparse
 from ..plugins.fetchers import FetcherError
 from ..plugins.fetchers import select_fetcher
 
+from ..plugins.confetti import ST
+
 from ..helpers import tcollection
+from ..helpers import surprise
 
 from .. import tfile
 from .. import fmt
@@ -40,19 +42,10 @@ from . import init
 from . import get_configured_log
 from . import get_configured_client
 from . import get_configured_fetchers
+from . import get_configured_confetti
 
 
 # =====
-class ST(enum.Enum):
-    INVALID = "invalid"
-    NOT_IN_CLIENT = "not_in_client"
-    UNKNOWN = "unknown"
-    PASSED = "passed"
-    UPDATED = "updated"
-    FETCHER_ERROR = "fetcher_error"
-    EXCEPTION = "exception"
-
-
 class OpContext:
     def __init__(self, feeder, torrent, fetcher):
         self._feeder = feeder
@@ -75,7 +68,7 @@ class OpContext:
     def __exit__(self, exc_type, exc, tb):
         self._feeder._stop_op()  # pylint: disable=protected-access
         if isinstance(exc, FetcherError):
-            self._status = ST.FETCHER_ERROR
+            self._status = ST.ERROR
             self._result = {
                 "err_name": type(exc).__name__,
                 "err_msg": str(exc),
@@ -107,7 +100,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         self._fan_thread = None
         self._stop_fan = threading.Event()
 
-        self.results = {st: {} for st in ST}
+        self._results = {st: {} for st in ST}
 
     def get_ops(self):
         for (self._current_count, (self._current_file_name, self._current_torrent)) in enumerate(
@@ -134,23 +127,26 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
                 ST.PASSED:        self._done_passed,
                 ST.UPDATED:       self._done_updated,
                 ST.NOT_IN_CLIENT: self._done_not_in_client,
-                ST.FETCHER_ERROR: self._done_fetcher_error,
+                ST.ERROR:         self._done_fetcher_error,
                 ST.EXCEPTION:     self._done_exception,
             }[op._status](op._result)  # pylint: disable=protected-access
 
         self._print_summary()
 
+    def get_results(self):
+        return self._results
+
     def _save_current_result(self, status, result):
-        self.results[status][self._current_file_name] = {
+        self._results[status][self._current_file_name] = {
             "torrent": self._current_torrent,
             "fetcher": self._current_fetcher,
             "result":  result,
         }
 
-    def _done_invalid(self):  # TODO
+    def _done_invalid(self):
         self._log_stdout.print(*self._format_fail("red", "!", "INVALID_TORRENT"))
 
-    def _done_unknown(self):  # TODO
+    def _done_unknown(self):
         one_line = (not self._show_unknown and self._log_stdout.isatty())
         self._log_stdout.print(*self._format_fail("yellow", " ", "UNKNOWN"), one_line=one_line)
 
@@ -217,10 +213,10 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
             ("Not in client: %d", ST.NOT_IN_CLIENT),
             ("Unknown:       %d", ST.UNKNOWN),
             ("Invalid:       %d", ST.INVALID),
-            ("Errors:        %d", ST.FETCHER_ERROR),
+            ("Errors:        %d", ST.ERROR),
             ("Exceptions:    %d", ST.EXCEPTION),
         ):
-            self._log_stderr.info(msg, (len(self.results[st]),))
+            self._log_stderr.info(msg, (len(self._results[st]),))
 
 
 def backup_torrent(torrent, backup_dir_path, backup_suffix):
@@ -315,6 +311,7 @@ def main():
     args_parser.add_argument("-y", "--only-fetchers", default=[], nargs="+", metavar="<fetcher>")
     args_parser.add_argument("-x", "--exclude-fetchers", default=[], nargs="+", metavar="<fetcher>")
     args_parser.add_argument("--noop", action="store_true")
+    args_parser.add_argument("--mute", action="store_true")
     options = args_parser.parse_args(argv[1:])
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
@@ -338,6 +335,12 @@ def main():
                 exclude=options.exclude_fetchers,
                 log=log_stderr,
             )
+
+            if not options.mute:
+                confetti = get_configured_confetti(
+                    config=config,
+                    log=log_stderr,
+                )
 
             torrents = tcollection.load_from_dir(
                 path=config.core.torrents_dir,
@@ -364,6 +367,17 @@ def main():
                 to_set_customs=config.emfetch.set_customs,
                 noop=options.noop,
             )
+
+            if not options.mute:
+                results = feeder.get_results()
+                if len(results[ST.UPDATED]) != 0:
+                    if not surprise.deploy_surprise(
+                        app="emfetch",
+                        results=results,
+                        confetti=confetti,
+                        log=log_stderr,
+                    ):
+                        raise SystemExit(1)
 
 
 if __name__ == "__main__":

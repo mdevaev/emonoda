@@ -42,8 +42,13 @@ if __name__ == "__main__":
             "emonoda.plugins",
             "emonoda.plugins.clients",
             "emonoda.plugins.fetchers",
+            "emonoda.plugins.confetti",
             "emonoda.thirdparty",
         ],
+
+        package_data={
+            "emonoda.plugins.confetti": ["templates/*.mako"],
+        },
 
         entry_points={
             "console_scripts": [
@@ -64,6 +69,7 @@ if __name__ == "__main__":
             "pygments",
             "pytz",
             "python-dateutil",
+            "Mako",
         ],
 
         classifiers=[
