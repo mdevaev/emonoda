@@ -4,13 +4,9 @@ all:
 regen: regen-fetchers
 
 regen-fetchers:
-	python -c '\
-			import json, emonoda.plugins; \
-			print(json.dumps({ \
-				item.get_name(): item._get_local_info() \
-				for item in emonoda.plugins._get_classes()["fetchers"].values() \
-			}, sort_keys=True, indent=" " * 4)) \
-		' > fetchers.json
+	python -c 'from json import dumps; from emonoda.plugins import _get_classes; \
+			[ open("fetchers/{}.json".format(name), "w").write(dumps(cls._get_local_info(), sort_keys=True, indent=" " * 4)) \
+			for (name, cls) in _get_classes()["fetchers"].items() ]'
 
 release:
 	make tox

@@ -231,10 +231,15 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
             self._test_version(info["version"])
 
     def _get_upstream_info(self, opener):
-        return json.loads(self._read_url(
-            url="https://raw.githubusercontent.com/mdevaev/emonoda/master/fetchers.json",
-            opener=opener,
-        ).decode("utf-8")).get(self.get_name(), self._get_local_info())
+        try:
+            return json.loads(self._read_url(
+                url="https://raw.githubusercontent.com/mdevaev/emonoda/master/fetchers/{}.json".format(self.get_name()),
+                opener=opener,
+            ).decode("utf-8"))
+        except urllib.error.HTTPError as err:
+            if err.code == 404:
+                return self._get_local_info()
+            raise
 
     @classmethod
     def _get_local_info(cls):
