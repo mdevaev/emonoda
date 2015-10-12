@@ -19,6 +19,7 @@
 
 import os
 import re
+import enum
 import hashlib
 import base64
 import urllib.parse
@@ -32,7 +33,10 @@ from .thirdparty.bcoding import bencode as encode_struct
 
 
 # =====
-ALL_MAGNET_FIELDS = ("dn", "tr", "xl")
+class MAGNET_FIELDS(enum.Enum):  # pylint: disable=invalid-name
+    NAME = "dn"
+    TRACKERS = "tr"
+    SIZE = "xl"
 
 
 # =====
@@ -172,13 +176,13 @@ class Torrent:
         b32_hash = base64.b32encode(info_digest)
 
         magnet = "magnet:?xt={}".format(urllib.parse.quote_plus("urn:btih:{}".format(b32_hash)))
-        if "dn" in extras:
+        if MAGNET_FIELDS.NAME in extras:
             magnet += "&dn={}".format(urllib.parse.quote_plus(self.get_name()))
-        if "tr" in extras:
+        if MAGNET_FIELDS.TRACKERS in extras:
             announces = tuple(filter(None, [self.get_announce()] + self.get_announce_list()))
             for announce in set(itertools.chain.from_iterable(announces)):
                 magnet += "&tr={}".format(urllib.parse.quote_plus(announce))
-        if "xl" in extras:
+        if MAGNET_FIELDS.SIZE in extras:
             magnet += "&xl={}".format(self.get_size())
         return magnet
 
