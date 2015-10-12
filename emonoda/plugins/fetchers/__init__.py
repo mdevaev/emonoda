@@ -95,7 +95,7 @@ def read_url(
     headers=None,
     timeout=10,
     retries=10,
-    sleep_time=1,
+    retries_sleep=1,
     retry_codes=(500, 502, 503),
     retry_timeout=True,
 ):
@@ -118,7 +118,7 @@ def read_url(
         except (http.client.IncompleteRead, http.client.BadStatusLine, ConnectionResetError) as err:
             if retries == 0:
                 raise NetworkError(err)
-        time.sleep(sleep_time)
+        time.sleep(retries_sleep)
         retries -= 1
 
 
@@ -129,12 +129,12 @@ def _assert(exception, arg, msg=""):
 
 
 class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
-    def __init__(self, url_retries, url_sleep_time, timeout, user_agent, client_agent, proxy_url,
+    def __init__(self, timeout, retries, retries_sleep, user_agent, client_agent, proxy_url,
                  check_version, check_fingerprint, **_):
 
-        self._url_retries = url_retries
-        self._url_sleep_time = url_sleep_time
         self._timeout = timeout
+        self._retries = retries
+        self._retries_sleep = retries_sleep
         self._user_agent = user_agent
         self._client_agent = client_agent
         self._proxy_url = proxy_url
@@ -157,9 +157,9 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
     @classmethod
     def get_options(cls):
         return {
-            "url_retries":       Option(default=20, help="The number of retries to handle tracker-specific HTTP errors"),
-            "url_sleep_time":    Option(default=1.0, help="Sleep interval between the retries"),
             "timeout":           Option(default=10.0, type=float, help="Timeout for HTTP client"),
+            "retries":           Option(default=20, help="The number of retries to handle tracker-specific HTTP errors"),
+            "retries_sleep":     Option(default=1.0, help="Sleep interval between the retries"),
             "user_agent":        Option(default="Mozilla/5.0", help="User-agent for site"),
             "client_agent":      Option(default="rtorrent/0.9.2/0.13.2", help="User-agent for tracker"),
             "proxy_url":         Option(default=None, type=as_string_or_none, help="The URL of the HTTP proxy"),
@@ -198,8 +198,8 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
             data=data,
             headers=headers,
             timeout=self._timeout,
-            retries=self._url_retries,
-            sleep_time=self._url_sleep_time,
+            retries=self._retries,
+            retries_sleep=self._retries_sleep,
             retry_codes=self._retry_codes,
         )
 
