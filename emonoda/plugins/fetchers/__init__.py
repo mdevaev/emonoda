@@ -17,13 +17,11 @@
 """
 
 
-import json
 import socket
-import urllib.request
-import urllib.parse
-import http.cookiejar
+import urllib.error
 import http.client
-import time
+import http.cookiejar
+import json
 
 import pytz
 
@@ -32,7 +30,7 @@ from ...optconf import SecretOption
 from ...optconf.converters import as_string_or_none
 
 from ... import tfile
-from ... import sockshandler
+from ... import web
 
 from .. import BasePlugin
 from .. import BaseExtension
@@ -52,74 +50,12 @@ class LogicError(FetcherError):
 
 
 class NetworkError(FetcherError):
-    def __init__(self, err):
+    def __init__(self, sub):
         super().__init__()
-        self.err = err
+        self._sub = sub
 
     def __str__(self):
-        return "{}: {}".format(type(self.err).__name__, str(self.err))
-
-
-# =====
-def select_fetcher(torrent, fetchers):
-    for fetcher in fetchers:
-        if fetcher.is_matched_for(torrent):
-            return fetcher
-    return None
-
-
-# =====
-def build_opener(proxy_url=None, cookie_jar=None):
-    handlers = []
-
-    if proxy_url is not None:
-        scheme = (urllib.parse.urlparse(proxy_url).scheme or "").lower()
-        if scheme == "http":
-            proxies = dict.fromkeys(("http", "https"), proxy_url)
-            handlers.append(urllib.request.ProxyHandler(proxies))
-        elif scheme in ("socks4", "socks5"):
-            handlers.append(sockshandler.SocksHandler(proxy_url=proxy_url))
-        else:
-            raise RuntimeError("Invalid proxy protocol: {}".format(scheme))
-
-    if cookie_jar is not None:
-        handlers.append(urllib.request.HTTPCookieProcessor(cookie_jar))
-
-    return urllib.request.build_opener(*handlers)
-
-
-def read_url(
-    opener,
-    url,
-    data=None,
-    headers=None,
-    timeout=10,
-    retries=10,
-    retries_sleep=1,
-    retry_codes=(500, 502, 503),
-    retry_timeout=True,
-):
-    while True:
-        try:
-            request = urllib.request.Request(url, data, (headers or {}))
-            return opener.open(request, timeout=timeout).read()
-        except socket.timeout as err:
-            if retries == 0 or not retry_timeout:
-                raise NetworkError(err)
-        except urllib.error.HTTPError as err:
-            if retries == 0 or err.code not in retry_codes:
-                raise NetworkError(err)
-        except urllib.error.URLError as err:
-            if "timed out" in str(err.reason):
-                if retries == 0 or not retry_timeout:
-                    raise NetworkError(err)
-            else:
-                raise
-        except (http.client.IncompleteRead, http.client.BadStatusLine, ConnectionResetError) as err:
-            if retries == 0:
-                raise NetworkError(err)
-        time.sleep(retries_sleep)
-        retries -= 1
+        return "{}: {}".format(type(self._sub).__name__, str(self._sub))
 
 
 # =====
@@ -159,10 +95,10 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         return {
             "timeout":           Option(default=10.0, type=float, help="Timeout for HTTP client"),
             "retries":           Option(default=20, help="The number of retries to handle tracker-specific HTTP errors"),
-            "retries_sleep":     Option(default=1.0, help="Sleep interval between the retries"),
+            "retries_sleep":     Option(default=1.0, help="Sleep interval between failed retries"),
             "user_agent":        Option(default="Mozilla/5.0", help="User-agent for site"),
             "client_agent":      Option(default="rtorrent/0.9.2/0.13.2", help="User-agent for tracker"),
-            "proxy_url":         Option(default=None, type=as_string_or_none, help="The URL of the HTTP proxy"),
+            "proxy_url":         Option(default=None, type=as_string_or_none, help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
             "check_fingerprint": Option(default=True, help="Check the site fingerprint"),
             "check_version":     Option(default=True, help="Check the fetcher version from GitHub"),
         }
@@ -178,21 +114,34 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def _init_opener(self, with_cookies):
         if with_cookies:
             self._cookie_jar = http.cookiejar.CookieJar()
-            self._opener = build_opener(self._proxy_url, self._cookie_jar)
+            self._opener = web.build_opener(self._proxy_url, self._cookie_jar)
         else:
-            self._opener = build_opener(self._proxy_url)
+            self._opener = web.build_opener(self._proxy_url)
 
     def _build_opener(self):
-        return build_opener(self._proxy_url)
+        return web.build_opener(self._proxy_url)
 
-    def _read_url(self, url, data=None, headers=None, opener=None):
+    def _read_url(self, *args, **kwargs):
+        try:
+            self._read_url_nofe(*args, **kwargs)
+        except (
+            socket.timeout,
+            urllib.error.HTTPError,
+            urllib.error.URLError,
+            http.client.IncompleteRead,
+            http.client.BadStatusLine,
+            ConnectionResetError,
+        ) as err:
+            raise NetworkError(err)
+
+    def _read_url_nofe(self, url, data=None, headers=None, opener=None):
         opener = (opener or self._opener)
         assert opener is not None
 
         headers = (headers or {})
         headers.setdefault("User-Agent", self._user_agent)
 
-        return read_url(
+        return web.read_url(
             opener=opener,
             url=url,
             data=data,
@@ -223,7 +172,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     def test(self):
         if self._check_fingerprint or self._check_version:
-            opener = build_opener(self._proxy_url)
+            opener = web.build_opener(self._proxy_url)
             info = self._get_upstream_info(opener)
         if self._check_fingerprint:
             self._test_fingerprint(info["fingerprint"], opener)
@@ -232,7 +181,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     def _get_upstream_info(self, opener):
         try:
-            return json.loads(self._read_url(
+            return json.loads(self._read_url_nofe(
                 url="https://raw.githubusercontent.com/mdevaev/emonoda/master/fetchers/{}.json".format(self.get_name()),
                 opener=opener,
             ).decode("utf-8"))

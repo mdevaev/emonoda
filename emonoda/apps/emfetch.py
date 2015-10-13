@@ -28,7 +28,6 @@ import operator
 import argparse
 
 from ..plugins.fetchers import FetcherError
-from ..plugins.fetchers import select_fetcher
 
 from ..plugins.confetti import ST
 
@@ -109,20 +108,20 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
             self._current_fetcher = None
 
             if self._current_torrent is None:
-                self._save_current_result(ST.INVALID, None)
+                self._save_result(ST.INVALID, None)
                 self._done_invalid()
                 continue
 
-            fetcher = select_fetcher(self._current_torrent, self._fetchers)
+            fetcher = self._select_fetcher()
             if fetcher is None:
-                self._save_current_result(ST.UNKNOWN, None)
+                self._save_result(ST.UNKNOWN, None)
                 self._done_unknown()
                 continue
             self._current_fetcher = fetcher
 
             op = OpContext(self, self._current_torrent, fetcher)
             yield op
-            self._save_current_result(op._status, op._result)  # pylint: disable=protected-access
+            self._save_result(op._status, op._result)  # pylint: disable=protected-access
             {
                 ST.PASSED:        self._done_passed,
                 ST.UPDATED:       self._done_updated,
@@ -136,7 +135,13 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
     def get_results(self):
         return self._results
 
-    def _save_current_result(self, status, result):
+    def _select_fetcher(self):
+        for fetcher in self._fetchers:
+            if fetcher.is_matched_for(self._current_torrent):
+                return fetcher
+        return None
+
+    def _save_result(self, status, result):
         self._results[status][self._current_file_name] = {
             "torrent": self._current_torrent,
             "fetcher": self._current_fetcher,
