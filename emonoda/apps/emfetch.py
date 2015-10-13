@@ -99,7 +99,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         self._fan_thread = None
         self._stop_fan = threading.Event()
 
-        self._results = {st: {} for st in ST}
+        self._results = {status: {} for status in ST}
 
     def get_ops(self):
         for (self._current_count, (self._current_file_name, self._current_torrent)) in enumerate(
@@ -212,7 +212,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
 
     def _print_summary(self):
         self._log_stdout.finish()
-        for (msg, st) in (
+        for (msg, status) in (
             ("Updated:       %d", ST.UPDATED),
             ("Passed:        %d", ST.PASSED),
             ("Not in client: %d", ST.NOT_IN_CLIENT),
@@ -221,7 +221,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
             ("Errors:        %d", ST.ERROR),
             ("Exceptions:    %d", ST.EXCEPTION),
         ):
-            self._log_stderr.info(msg, (len(self._results[st]),))
+            self._log_stderr.info(msg, (len(self._results[status]),))
 
 
 def backup_torrent(torrent, backup_dir_path, backup_suffix):

@@ -96,10 +96,10 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     # ===
 
     def _format_message(self, app, results):
-        subject_placeholders = {st.value: len(results[st]) for st in ST}
+        subject_placeholders = {status.value: len(results[status]) for status in ST}
         subject_placeholders["app"] = app
 
-        body_kwargs = {st.value: results[st] for st in ST}
+        body_kwargs = {status.value: results[status] for status in ST}
         body_kwargs["app"] = app
 
         return self._make_message(
