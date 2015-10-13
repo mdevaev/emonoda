@@ -123,7 +123,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     def _read_url(self, *args, **kwargs):
         try:
-            self._read_url_nofe(*args, **kwargs)
+            return self._read_url_nofe(*args, **kwargs)
         except (
             socket.timeout,
             urllib.error.HTTPError,
