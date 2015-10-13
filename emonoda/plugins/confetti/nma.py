@@ -52,7 +52,7 @@ class Plugin(BaseConfetti):
             self._notify(
                 app="Emonoda ({})".format(app),
                 event="{}".format(attrs["torrent"].get_name()),
-                description=self._format_description(attrs["diff"]),
+                description=self._format_description(attrs["result"]["diff"]),
             )
 
     # ===
