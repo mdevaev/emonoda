@@ -38,7 +38,7 @@ from . import templated
 # =====
 class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     def __init__(self,  # pylint: disable=super-init-not-called,too-many-arguments
-                 to, cc, subject, sender, html, server, port, ssl, user, passwd, timeout, retries, retries_sleep, **kwargs):
+                 to, cc, subject, sender, html, server, port, ssl, user, passwd, **kwargs):
         self._init_bases(**kwargs)
 
         self._to = to
@@ -53,10 +53,6 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         self._user = user
         self._passwd = passwd
 
-        self._timeout = timeout
-        self._retries = retries
-        self._retries_sleep = retries_sleep
-
     @classmethod
     def get_name(cls):
         return "email"
@@ -64,21 +60,17 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     @classmethod
     def get_options(cls):
         return cls._get_merged_options({
-            "to":            Option(default=["root@localhost"], type=as_string_list, help="Destination email address"),
-            "cc":            Option(default=[], type=as_string_list, help="Email 'CC' field"),
-            "subject":       Option(default="{app} report: you have {updated} new torrents ^_^", help="Email subject"),
-            "sender":        Option(default="root@localhost", help="Email 'From' field"),
-            "html":          Option(default=True, help="HTML or plaintext email body"),
+            "to":      Option(default=["root@localhost"], type=as_string_list, help="Destination email address"),
+            "cc":      Option(default=[], type=as_string_list, help="Email 'CC' field"),
+            "subject": Option(default="{app} report: you have {updated} new torrents ^_^", help="Email subject"),
+            "sender":  Option(default="root@localhost", help="Email 'From' field"),
+            "html":    Option(default=True, help="HTML or plaintext email body"),
 
-            "server":        Option(default="localhost", help="Hostname of SMTP server"),
-            "port":          Option(default=0, help="Port of SMTP server"),
-            "ssl":           Option(default=False, help="Use SMTPS"),
-            "user":          Option(default=None, type=as_string_or_none, help="Account on SMTP server"),
-            "passwd":        Option(default=None, type=as_string_or_none, help="Passwd for account on SMTP server"),
-
-            "timeout":       Option(default=30, help="SMTP timeout"),
-            "retries":       Option(default=5, help="Retries for failed attempts"),
-            "retries_sleep": Option(default=1, help="Sleep interval between failed attempts"),
+            "server":  Option(default="localhost", help="Hostname of SMTP server"),
+            "port":    Option(default=0, help="Port of SMTP server"),
+            "ssl":     Option(default=False, help="Use SMTPS"),
+            "user":    Option(default=None, type=as_string_or_none, help="Account on SMTP server"),
+            "passwd":  Option(default=None, type=as_string_or_none, help="Passwd for account on SMTP server"),
         })
 
     # ===

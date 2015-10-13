@@ -24,6 +24,8 @@ import enum
 
 import mako.template
 
+from ...optconf import Option
+
 from .. import BasePlugin
 
 
@@ -47,8 +49,18 @@ def templated(name, **kwargs):
 
 # =====
 class BaseConfetti(BasePlugin):
-    def __init__(self, **_):
-        pass
+    def __init__(self, timeout, retries, retries_sleep, **_):
+        self._timeout = timeout
+        self._retries = retries
+        self._retries_sleep = retries_sleep
+
+    @classmethod
+    def get_options(cls):
+        return {
+            "timeout":       Option(default=10, help="Network timeout"),
+            "retries":       Option(default=5, help="Retries for failed attempts"),
+            "retries_sleep": Option(default=1, help="Sleep interval between failed attempts"),
+        }
 
     def send_results(self, app, results):
         raise NotImplementedError
