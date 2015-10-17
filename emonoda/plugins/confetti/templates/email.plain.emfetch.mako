@@ -1,27 +1,27 @@
-=== You have ${len(updated)} torrents:
-% for (file_name, attrs) in updated.items():
-${file_name} (from ${attrs["torrent"].get_comment()}):
-    % for (sign, cat) in ( \
+=== You have ${len(results["affected"])} new torrents:
+% for (file_name, result) in results["affected"].items():
+${file_name} (from ${result["torrent"].get_comment()}):
+    % for (sign, field) in ( \
         ("+", "added"), \
         ("-", "removed"), \
         ("~", "modified"), \
         ("?", "type_modified"), \
     ):
-        % for item in sorted(getattr(attrs["result"]["diff"], cat)):
+        % for item in sorted(result["diff"][field]):
     ${sign} ${item}
         % endfor
     % endfor
 % endfor
 
 === Extra summary:
-% for (msg, col) in ( \
-    ("Updated:      ", updated), \
-    ("Passed:       ", passed), \
-    ("Not in client:", not_in_client), \
-    ("Unknown:      ", unknown), \
-    ("Invalid:      ", invalid), \
-    ("Errors:       ", error), \
-    ("Exceptions:   ", exception), \
+% for (msg, field) in ( \
+    ("Updated:          ", "affected"), \
+    ("Passed:           ", "passed"), \
+    ("Not in client:    ", "not_in_client"), \
+    ("Unknown:          ", "unknown"), \
+    ("Invalid torrents: ", "invalid"), \
+    ("Fetcher errors:   ", "fetcher_error"), \
+    ("Unhandled errors: ", "unhandled_error"), \
 ):
-${msg} ${len(col)}
+${msg} ${len(results[field])}
 % endfor

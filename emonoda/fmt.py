@@ -56,10 +56,10 @@ def format_torrents_diff(diff, prefix):
     lines = []
     placeholders = ()
     for (sign, color, items) in (
-        ("+", "green",  diff.added),
-        ("-", "red",    diff.removed),
-        ("~", "cyan",   diff.modified),
-        ("?", "yellow", diff.type_modified),
+        ("+", "green",  diff["added"]),
+        ("-", "red",    diff["removed"]),
+        ("~", "cyan",   diff["modified"]),
+        ("?", "yellow", diff["type_modified"]),
     ):
         for item in sorted(items):
             lines.append("%s{" + color + "}%s{reset} %s")

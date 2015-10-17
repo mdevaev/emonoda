@@ -19,24 +19,15 @@
 
 import os
 import re
-import enum
 import hashlib
 import base64
 import urllib.parse
-import collections
 import itertools
 
 import chardet
 
 from .thirdparty.bcoding import bdecode as decode_data
 from .thirdparty.bcoding import bencode as encode_struct
-
-
-# =====
-class MAGNET_FIELDS(enum.Enum):  # pylint: disable=invalid-name
-    NAME = "dn"
-    TRACKERS = "tr"
-    SIZE = "xl"
 
 
 # =====
@@ -73,18 +64,15 @@ def get_difference(old, new):
         if old_attrs["size"] != new_attrs["size"]:
             modified.add(path)
 
-    return Diff(
-        added=set(new).difference(set(old)),
-        removed=set(old).difference(set(new)),
-        modified=modified,
-        type_modified=type_modified,
-    )
+    return {
+        "added":         set(new).difference(set(old)),
+        "removed":       set(old).difference(set(new)),
+        "modified":      modified,
+        "type_modified": type_modified,
+    }
 
 
 # =====
-Diff = collections.namedtuple("Diff", ("added", "removed", "modified", "type_modified"))
-
-
 class Torrent:
     def __init__(self, data=None, path=None):
         # https://wiki.theory.org/BitTorrentSpecification
@@ -176,13 +164,13 @@ class Torrent:
         b32_hash = base64.b32encode(info_digest)
 
         magnet = "magnet:?xt={}".format(urllib.parse.quote_plus("urn:btih:{}".format(b32_hash)))
-        if MAGNET_FIELDS.NAME in extras:
+        if "name" in extras:
             magnet += "&dn={}".format(urllib.parse.quote_plus(self.get_name()))
-        if MAGNET_FIELDS.TRACKERS in extras:
+        if "trackers" in extras:
             announces = tuple(filter(None, [self.get_announce()] + self.get_announce_list()))
             for announce in set(itertools.chain.from_iterable(announces)):
                 magnet += "&tr={}".format(urllib.parse.quote_plus(announce))
-        if MAGNET_FIELDS.SIZE in extras:
+        if "size" in extras:
             magnet += "&xl={}".format(self.get_size())
         return magnet
 

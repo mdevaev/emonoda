@@ -20,24 +20,12 @@
 import os
 import pkgutil
 import textwrap
-import enum
 
 import mako.template
 
 from ...optconf import Option
 
 from .. import BasePlugin
-
-
-# =====
-class ST(enum.Enum):
-    INVALID = "invalid"
-    NOT_IN_CLIENT = "not_in_client"
-    UNKNOWN = "unknown"
-    PASSED = "passed"
-    UPDATED = "updated"
-    ERROR = "error"
-    EXCEPTION = "exception"
 
 
 # =====
@@ -62,5 +50,5 @@ class BaseConfetti(BasePlugin):
             "retries_sleep": Option(default=1, help="Sleep interval between failed attempts"),
         }
 
-    def send_results(self, app, results):
+    def send_results(self, source, results):
         raise NotImplementedError

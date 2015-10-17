@@ -29,8 +29,6 @@ import argparse
 
 from ..plugins.fetchers import FetcherError
 
-from ..plugins.confetti import ST
-
 from ..helpers import tcollection
 from ..helpers import surprise
 
@@ -52,14 +50,14 @@ class OpContext:
         self.fetcher = fetcher
 
         self._status = None
-        self._result = None
+        self._attrs = {}
 
     def done_not_in_client(self):
-        self._status = ST.NOT_IN_CLIENT
+        self._status = "not_in_client"
 
-    def done_updated(self, diff):
-        self._status = ST.UPDATED
-        self._result = {"diff": diff}
+    def done_affected(self, diff):
+        self._status = "affected"
+        self._attrs = {"diff": diff}
 
     def __enter__(self):
         self._feeder._start_op()  # pylint: disable=protected-access
@@ -67,17 +65,17 @@ class OpContext:
     def __exit__(self, exc_type, exc, tb):
         self._feeder._stop_op()  # pylint: disable=protected-access
         if isinstance(exc, FetcherError):
-            self._status = ST.ERROR
-            self._result = {
+            self._status = "fetcher_error"
+            self._attrs = {
                 "err_name": type(exc).__name__,
                 "err_msg": str(exc),
             }
         elif isinstance(exc, Exception):
-            self._status = ST.EXCEPTION
-            self._result = {"tb_lines": traceback.format_exception(exc_type, exc, tb)}
+            self._status = "unhandled_error"
+            self._attrs = {"tb_lines": traceback.format_exception(exc_type, exc, tb)}
         assert exc_type is None, "\n".join(traceback.format_exception(exc_type, exc, tb))
         if self._status is None:
-            self._status = ST.PASSED
+            self._status = "passed"
 
 
 class Feeder:  # pylint: disable=too-many-instance-attributes
@@ -99,7 +97,17 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         self._fan_thread = None
         self._stop_fan = threading.Event()
 
-        self._results = {status: {} for status in ST}
+        self._status_mapping = {
+            "invalid":         self._done_invalid,
+            "not_in_client":   self._done_not_in_client,
+            "unknown":         self._done_unknown,
+            "passed":          self._done_passed,
+            "affected":        self._done_affected,
+            "fetcher_error":   self._done_fetcher_error,
+            "unhandled_error": self._done_unhandled_error,
+        }
+
+        self._results = {status: {} for status in self._status_mapping}
 
     def get_ops(self):
         for (self._current_count, (self._current_file_name, self._current_torrent)) in enumerate(
@@ -108,29 +116,19 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
             self._current_fetcher = None
 
             if self._current_torrent is None:
-                self._save_result(ST.INVALID, None)
-                self._done_invalid()
+                self._done("invalid", {})
                 continue
 
-            fetcher = self._select_fetcher()
-            if fetcher is None:
-                self._save_result(ST.UNKNOWN, None)
-                self._done_unknown()
+            self._current_fetcher = self._select_fetcher()
+            if self._current_fetcher is None:
+                self._done("unknown", {})
                 continue
-            self._current_fetcher = fetcher
 
-            op = OpContext(self, self._current_torrent, fetcher)
+            op = OpContext(self, self._current_torrent, self._current_fetcher)
             yield op
-            self._save_result(op._status, op._result)  # pylint: disable=protected-access
-            {
-                ST.PASSED:        self._done_passed,
-                ST.UPDATED:       self._done_updated,
-                ST.NOT_IN_CLIENT: self._done_not_in_client,
-                ST.ERROR:         self._done_fetcher_error,
-                ST.EXCEPTION:     self._done_exception,
-            }[op._status](op._result)  # pylint: disable=protected-access
+            self._done(op._status, op._attrs)  # pylint: disable=protected-access
 
-        self._print_summary()
+        self._log_stdout.finish()
 
     def get_results(self):
         return self._results
@@ -141,17 +139,19 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
                 return fetcher
         return None
 
-    def _save_result(self, status, result):
-        self._results[status][self._current_file_name] = {
+    def _done(self, status, attrs):
+        self._status_mapping[status](attrs)
+        result = {
             "torrent": self._current_torrent,
             "fetcher": self._current_fetcher,
-            "result":  result,
         }
+        result.update(attrs)
+        self._results[status][self._current_file_name] = result
 
-    def _done_invalid(self):
+    def _done_invalid(self, _):
         self._log_stdout.print(*self._format_fail("red", "!", "INVALID_TORRENT"))
 
-    def _done_unknown(self):
+    def _done_unknown(self, _):
         one_line = (not self._show_unknown and self._log_stdout.isatty())
         self._log_stdout.print(*self._format_fail("yellow", " ", "UNKNOWN"), one_line=one_line)
 
@@ -159,23 +159,23 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         one_line = (not self._show_passed and self._log_stdout.isatty())
         self._log_stdout.print(*self._format_status("blue", " "), one_line=one_line)
 
-    def _done_updated(self, result):
+    def _done_affected(self, attrs):
         self._log_stdout.print(*self._format_status("green", "+"))
         if self._show_diff:
-            self._log_stdout.print(*fmt.format_torrents_diff(result["diff"], "\t"))
+            self._log_stdout.print(*fmt.format_torrents_diff(attrs["diff"], "\t"))
 
     def _done_not_in_client(self, _):
         self._log_stdout.print(*self._format_fail("red", "!", "NOT_IN_CLIENT"))
 
-    def _done_fetcher_error(self, result):
+    def _done_fetcher_error(self, attrs):
         (line, placeholders) = self._format_status("red", "-")
         line += " :: {red}%s({reset}%s{red}){reset}"
-        placeholders += (result["err_name"], result["err_msg"])
+        placeholders += (attrs["err_name"], attrs["err_msg"])
         self._log_stdout.print(line, placeholders)
 
-    def _done_exception(self, result):
+    def _done_unhandled_error(self, attrs):
         self._log_stdout.print(*self._format_status("red", "-"))
-        self._log_stdout.print("%s", ("\n".join("\t" + row for row in result["tb_lines"]),))
+        self._log_stdout.print("%s", ("\n".join("\t" + row for row in attrs["tb_lines"]),))
 
     def _start_op(self):
         if self._log_stdout.isatty():
@@ -209,19 +209,6 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
 
     def _format_progress(self):
         return fmt.format_progress(self._current_count + 1, len(self._torrents))
-
-    def _print_summary(self):
-        self._log_stdout.finish()
-        for (msg, status) in (
-            ("Updated:       %d", ST.UPDATED),
-            ("Passed:        %d", ST.PASSED),
-            ("Not in client: %d", ST.NOT_IN_CLIENT),
-            ("Unknown:       %d", ST.UNKNOWN),
-            ("Invalid:       %d", ST.INVALID),
-            ("Errors:        %d", ST.ERROR),
-            ("Exceptions:    %d", ST.EXCEPTION),
-        ):
-            self._log_stderr.info(msg, (len(self._results[status]),))
 
 
 def backup_torrent(torrent, backup_dir_path, backup_suffix):
@@ -299,9 +286,22 @@ def update(
                         if backup_dir_path is not None:
                             backup_torrent(op.torrent, backup_dir_path, backup_suffix)
                         update_torrent(client, op.torrent, new_data, to_save_customs, to_set_customs)
-                    op.done_updated(diff)
+                    op.done_affected(diff)
         except Exception:
             pass
+
+
+def print_results(results, log):
+    for (msg, field) in (
+        ("Updated:          %d", "affected"),
+        ("Passed:           %d", "passed"),
+        ("Not in client:    %d", "not_in_client"),
+        ("Unknown:          %d", "unknown"),
+        ("Invalid torrents: %d", "invalid"),
+        ("Fetcher errors:   %d", "fetcher_error"),
+        ("Unhandled errors: %d", "unhandled_error"),
+    ):
+        log.info(msg, (len(results[field]),))
 
 
 # ===== Main =====
@@ -373,11 +373,15 @@ def main():
                 noop=options.noop,
             )
 
+            results = feeder.get_results()
+            print_results(
+                results=results,
+                log=log_stderr,
+            )
             if not options.mute:
-                results = feeder.get_results()
-                if len(results[ST.UPDATED]) != 0:
+                if len(results["affected"]) != 0:
                     if not surprise.deploy_surprise(
-                        app="emfetch",
+                        source="emfetch",
                         results=results,
                         confetti=confetti,
                         log=log_stderr,

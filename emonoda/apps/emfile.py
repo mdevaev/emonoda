@@ -161,8 +161,7 @@ def main():  # pylint: disable=too-many-locals
             ("--is-private-pretty",    format_is_private_pretty),
             ("--client-path",          lambda torrent: format_client_path(torrent, client)),
             ("--client-prefix",        lambda torrent: format_client_prefix(torrent, client)),
-            ("--make-magnet",          lambda torrent: torrent.make_magnet([tfile.MAGNET_FIELDS[name.upper()]
-                                                                            for name in options.magnet_fields])),
+            ("--make-magnet",          lambda torrent: torrent.make_magnet(options.magnet_fields)),
         )
     ]
 
@@ -175,8 +174,7 @@ def main():  # pylint: disable=too-many-locals
     for (option, dest, _) in actions:
         args_parser.add_argument(option, dest=dest, action="store_true")
     args_parser.add_argument("--without-headers", action="store_true")
-    args_parser.add_argument("--magnet-fields", nargs="+", default=(), metavar="<fields>",
-                             choices=[item.name.lower() for item in tfile.MAGNET_FIELDS])
+    args_parser.add_argument("--magnet-fields", nargs="+", default=(), metavar="<fields>", choices=("names", "trackers", "size"))
     args_parser.add_argument("-v", "--verbose", action="store_true")
     args_parser.add_argument("torrents", nargs="+", metavar="<path>")
     options = args_parser.parse_args(argv[1:])

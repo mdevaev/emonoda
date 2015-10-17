@@ -25,7 +25,6 @@ from ...optconf.converters import as_string_list
 from ... import web
 
 from . import BaseConfetti
-from . import ST
 
 
 # =====
@@ -47,12 +46,12 @@ class Plugin(BaseConfetti):
 
     # ===
 
-    def send_results(self, app, results):
-        for attrs in results[ST.UPDATED].values():
+    def send_results(self, source, results):
+        for result in results["affected"].values():
             self._notify(
-                app="Emonoda ({})".format(app),
-                event="{}".format(attrs["torrent"].get_name()),
-                description=self._format_description(attrs["result"]["diff"]),
+                app="Emonoda ({})".format(source),
+                event="{}".format(result["torrent"].get_name()),
+                description=self._format_description(result["diff"]),
             )
 
     # ===
@@ -60,10 +59,10 @@ class Plugin(BaseConfetti):
     def _format_description(self, diff):
         description_lines = []
         for (sign, items) in (
-            ("+", diff.added),
-            ("-", diff.removed),
-            ("~", diff.modified),
-            ("?", diff.type_modified),
+            ("+", diff["added"]),
+            ("-", diff["removed"]),
+            ("~", diff["modified"]),
+            ("?", diff["type_modified"]),
         ):
             for item in sorted(items):
                 description_lines.append("[{}] {}".format(sign, item))

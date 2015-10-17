@@ -31,7 +31,6 @@ from ...optconf.converters import as_string_or_none
 from ...optconf.converters import as_string_list
 
 from . import BaseConfetti
-from . import ST
 from . import templated
 
 
@@ -62,7 +61,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         return cls._get_merged_options({
             "to":      Option(default=["root@localhost"], type=as_string_list, help="Destination email address"),
             "cc":      Option(default=[], type=as_string_list, help="Email 'CC' field"),
-            "subject": Option(default="{app} report: you have {updated} new torrents ^_^", help="Email subject"),
+            "subject": Option(default="{source} report: you have {affected} new torrents ^_^", help="Email subject"),
             "sender":  Option(default="root@localhost", help="Email 'From' field"),
             "html":    Option(default=True, help="HTML or plaintext email body"),
 
@@ -75,8 +74,8 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
 
     # ===
 
-    def send_results(self, app, results):
-        msg = self._format_message(app, results)
+    def send_results(self, source, results):
+        msg = self._format_message(source, results)
         retries = self._retries
         while True:
             try:
@@ -95,19 +94,15 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
 
     # ===
 
-    def _format_message(self, app, results):
-        subject_placeholders = {status.value: len(results[status]) for status in ST}
-        subject_placeholders["app"] = app
-
-        body_kwargs = {status.value: results[status] for status in ST}
-        body_kwargs["app"] = app
-
+    def _format_message(self, source, results):
+        subject_placeholders = {field: len(items) for (field, items) in results.items()}
+        subject_placeholders["source"] = source
         return self._make_message(
             subject=self._subject.format(**subject_placeholders),
-            body=templated("email.{ctype}.{app}.mako".format(
+            body=templated("email.{ctype}.{source}.mako".format(
                 ctype=("html" if self._html else "plain"),
-                app=app,
-            ), **body_kwargs),
+                source=source,
+            ), source=source, results=results),
         )
 
     def _make_message(self, subject, body):
