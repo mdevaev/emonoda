@@ -127,7 +127,8 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
     # ===
 
     def login(self):
-        self._assert_auth(self._passwd is not None, "Required passwd for tr.anidub.com")
+        self._assert_auth(self._user is not None, "Required user for site")
+        self._assert_auth(self._passwd is not None, "Required password for site")
         post = {
             "login_name":      _encode(self._user),
             "login_password":  _encode(self._passwd),
@@ -136,5 +137,5 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
         post_data = _encode(urllib.parse.urlencode(post))
         page = _decode(self._read_url("http://tr.anidub.com/", data=post_data))
         profile = "<li><a href=\"http://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
-        self._assert_auth(profile in page, "Invalid login or password")
+        self._assert_auth(profile in page, "Invalid user or password")
         self._tzinfo = self._select_tzinfo("Etc/GMT+4")

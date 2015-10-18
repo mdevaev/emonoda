@@ -112,8 +112,8 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
     # ===
 
     def login(self):
-        self._assert_auth(self._user is not None, "Required user for rutracker")
-        self._assert_auth(self._passwd is not None, "Required passwd for rutracker")
+        self._assert_auth(self._user is not None, "Required user for site")
+        self._assert_auth(self._passwd is not None, "Required passwd for site")
 
         post = {
             "login_username": _encode(self._user),
@@ -133,7 +133,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha):
             post[cap_code_match.group(1)] = self._captcha_decoder(cap_static_match.group(1))
             post["cap_sid"] = cap_sid_match.group(1)
             page = self._read_login(post)
-            self._assert_auth(cap_static_regexp.search(page) is None, "Invalid login, password or captcha")
+            self._assert_auth(cap_static_regexp.search(page) is None, "Invalid user, password or captcha")
 
     def _read_login(self, post):
         return _decode(self._read_url(

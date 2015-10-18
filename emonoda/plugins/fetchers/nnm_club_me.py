@@ -86,8 +86,8 @@ class Plugin(BaseFetcher, WithLogin):
     # ===
 
     def login(self):
-        self._assert_auth(self._user is not None, "Required user nnmclub")
-        self._assert_auth(self._passwd is not None, "Required passwd nnmclub")
+        self._assert_auth(self._user is not None, "Required user for site")
+        self._assert_auth(self._passwd is not None, "Required password for site")
         post = {
             "username": _encode(self._user),
             "password": _encode(self._passwd),
@@ -98,4 +98,4 @@ class Plugin(BaseFetcher, WithLogin):
             url="http://nnm-club.me/forum/login.php",
             data=_encode(urllib.parse.urlencode(post)),
         ))
-        self._assert_auth("[ {} ]".format(self._user) in page, "Invalid login or password")
+        self._assert_auth("[ {} ]".format(self._user) in page, "Invalid user or password")

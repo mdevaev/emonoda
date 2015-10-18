@@ -115,8 +115,8 @@ class Plugin(BaseFetcher, WithLogin):
     # ===
 
     def login(self):
-        self._assert_auth(self._user is not None, "Required user for pravtor.ru")
-        self._assert_auth(self._passwd is not None, "Required passwd for pravtor.ru")
+        self._assert_auth(self._user is not None, "Required user for site")
+        self._assert_auth(self._passwd is not None, "Required passwd for site")
         post = {
             "login_username": _encode(self._user),
             "login_password": _encode(self._passwd),
@@ -126,4 +126,4 @@ class Plugin(BaseFetcher, WithLogin):
             url="http://pravtor.ru/login.php",
             data=_encode(urllib.parse.urlencode(post)),
         ))
-        self._assert_auth(re.search(r"<!--login form-->", page) is None, "Invalid login or password")
+        self._assert_auth(re.search(r"<!--login form-->", page) is None, "Invalid user or password")

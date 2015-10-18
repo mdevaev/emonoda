@@ -87,7 +87,8 @@ class Plugin(BaseFetcher, WithLogin):
     # ===
 
     def login(self):
-        self._assert_auth(self._passwd is not None, "Required passwd for tabun.everypony.ru")
+        self._assert_auth(self._user is not None, "Required user for site")
+        self._assert_auth(self._passwd is not None, "Required passwd for site")
 
         page = _decode(self._read_url("http://tabun.everypony.ru"))
         key_match = re.search(r"var LIVESTREET_SECURITY_KEY = '([0-9a-fA-F]+)';", page)
@@ -106,4 +107,4 @@ class Plugin(BaseFetcher, WithLogin):
             data=post_data,
             headers={"Referer": "http://tabun.everypony.ru/"},
         ))
-        self._assert_auth("\"bStateError\":false" in page, "Invalid login or password")
+        self._assert_auth("\"bStateError\":false" in page, "Invalid user or password")
