@@ -35,7 +35,7 @@ from . import get_configured_client
 def main():
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
-        prog="emdiff",
+        prog="emrm",
         description="Remove a torrent from client",
         parents=[parent_parser],
     )
