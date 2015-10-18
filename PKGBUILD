@@ -12,7 +12,7 @@ license="GPL"
 depends=(
 	"python"
 	"python-chardet"
-	"python-pyyaml"
+	"python-yaml"
 	"python-colorama"
 	"python-pygments"
 	"python-mako"
