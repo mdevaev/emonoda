@@ -207,6 +207,7 @@ def _get_config_scheme():
         },
 
         "emfetch": {
+            "name_filter":   Option(default="*.torrent", type=str, help="Update only filtered torrent files"),
             "backup_dir":    Option(default=None, type=as_path_or_none, help="Backup old torrent files after update here"),
             "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
             "save_customs":  Option(default=[], type=as_string_list, help="Save client custom fields after update if supports"),

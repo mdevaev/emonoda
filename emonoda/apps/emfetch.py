@@ -312,7 +312,7 @@ def main():
         description="Update torrent files from popular trackers",
         parents=[parent_parser],
     )
-    args_parser.add_argument("-f", "--name-filter", default="*.torrent", metavar="<wildcard_pattern>")
+    args_parser.add_argument("-f", "--name-filter", default=None, metavar="<wildcard_pattern>")
     args_parser.add_argument("-y", "--only-fetchers", default=[], nargs="+", metavar="<fetcher>")
     args_parser.add_argument("-x", "--exclude-fetchers", default=[], nargs="+", metavar="<fetcher>")
     args_parser.add_argument("--noop", action="store_true")
@@ -349,7 +349,7 @@ def main():
 
             torrents = tcollection.load_from_dir(
                 path=config.core.torrents_dir,
-                name_filter=options.name_filter,
+                name_filter=(options.name_filter or config.emfetch.name_filter),
                 log=log_stderr,
             )
 
