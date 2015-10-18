@@ -25,10 +25,11 @@ from ...optconf.converters import as_string_list
 from ... import web
 
 from . import BaseConfetti
+from . import WithProxy
 
 
 # =====
-class Plugin(BaseConfetti):
+class Plugin(BaseConfetti, WithProxy):
     def __init__(self, api_keys, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
 
@@ -81,7 +82,7 @@ class Plugin(BaseConfetti):
             "Content-Type": "text/plain",
         }
         web.read_url(
-            opener=web.build_opener(),  # TODO: Add proxy
+            opener=web.build_opener(proxy_url=self._proxy_url),
             url="https://www.notifymyandroid.com/publicapi/notify",
             data=urllib.parse.urlencode(post).encode("utf-8"),
             timeout=self._timeout,

@@ -24,8 +24,10 @@ import textwrap
 import mako.template
 
 from ...optconf import Option
+from ...optconf.converters import as_string_or_none
 
 from .. import BasePlugin
+from .. import BaseExtension
 
 
 # =====
@@ -52,3 +54,14 @@ class BaseConfetti(BasePlugin):
 
     def send_results(self, source, results):
         raise NotImplementedError
+
+
+class WithProxy(BaseExtension):
+    def __init__(self, proxy_url, **_):
+        self._proxy_url = proxy_url
+
+    @classmethod
+    def get_options(cls):
+        return {
+            "proxy_url": Option(default=None, type=as_string_or_none, help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
+        }
