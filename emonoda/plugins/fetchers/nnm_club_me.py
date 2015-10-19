@@ -36,6 +36,8 @@ def _decode(arg):
 
 
 class Plugin(BaseFetcher, WithLogin):
+    _domain = "nnm-club.me"
+
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
@@ -52,7 +54,7 @@ class Plugin(BaseFetcher, WithLogin):
     @classmethod
     def get_fingerprint(cls):
         return {
-            "url":      "http://nnm-club.me",
+            "url":      "http://{}".format(cls._domain),
             "encoding": "cp1251",
             "text":     "<link rel=\"canonical\" href=\"http://nnm-club.me/\">",
         }
@@ -66,7 +68,7 @@ class Plugin(BaseFetcher, WithLogin):
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
         data = self._read_url(
-            url="http://bt.nnm-club.me:2710/scrape?info_hash={}".format(torrent.get_scrape_hash()),
+            url="http://bt.{}:2710/scrape?info_hash={}".format(self._domain, torrent.get_scrape_hash()),
             headers={"User-Agent": self._client_agent},
         )
         return (len(tfile.decode_data(data).get("files", {})) == 0)
@@ -79,7 +81,7 @@ class Plugin(BaseFetcher, WithLogin):
         self._assert_logic(torrent_id_match is not None, "Unknown torrent_id")
         torrent_id = torrent_id_match.group(1)
 
-        data = self._read_url("http://nnm-club.me//forum/download.php?id={}".format(torrent_id))
+        data = self._read_url("http://{}//forum/download.php?id={}".format(self._domain, torrent_id))
         self._assert_valid_data(data)
         return data
 
@@ -95,7 +97,7 @@ class Plugin(BaseFetcher, WithLogin):
             "login":    b"\xc2\xf5\xee\xe4",
         }
         page = _decode(self._read_url(
-            url="http://nnm-club.me/forum/login.php",
+            url="http://{}/forum/login.php".format(self._domain),
             data=_encode(urllib.parse.urlencode(post)),
         ))
         self._assert_auth("[ {} ]".format(self._user) in page, "Invalid user or password")

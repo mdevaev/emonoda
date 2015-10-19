@@ -34,6 +34,7 @@
 ### Поддерживаемые трекеры ###
 * http://rutracker.org
 * http://nnm-club.me
+* http://ipv6.nnm-club.me
 * http://rutor.org
 * http://tfile.me
 * http://pravtor.ru
