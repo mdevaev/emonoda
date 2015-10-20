@@ -131,9 +131,10 @@ def get_configured_client(config, required, with_customs, log):
     if name is not None:
         log.info("Enabling the client {blue}%s{reset} ...", (name,), one_line=True)
         try:
-            client = get_client_class(name)(**config.client)
-            if with_customs and C_WithCustoms not in client.get_bases():
-                raise RuntimeError("Your client does not support customs")
+            cls = get_client_class(name)
+            if with_customs and C_WithCustoms not in cls.get_bases():
+                raise RuntimeError("Your client does not support custom fields")
+            client = cls(**config.client)
         except Exception as err:
             log.error("Can't init client {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
             raise
@@ -154,24 +155,24 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
         raise RuntimeError("No fetchers to init")
 
     fetchers = []
-    for fetcher_name in sorted(to_init):
-        log.info("Enabling the fetcher {blue}%s{reset} ...", (fetcher_name,), one_line=True)
+    for name in sorted(to_init):
+        log.info("Enabling the fetcher {blue}%s{reset} ...", (name,), one_line=True)
 
-        fetcher_class = get_fetcher_class(fetcher_name)
-        fetcher_kwargs = dict(config.fetchers[fetcher_name])
-        if F_WithCaptcha in fetcher_class.get_bases():
-            fetcher_kwargs["captcha_decoder"] = captcha_decoder
-        fetcher = fetcher_class(**fetcher_kwargs)
+        cls = get_fetcher_class(name)
+        kwargs = dict(config.fetchers[name])
+        if F_WithCaptcha in cls.get_bases():
+            kwargs["captcha_decoder"] = captcha_decoder
+        fetcher = cls(**kwargs)
 
         try:
-            log.info("Enabling the fetcher {blue}%s{reset}: {yellow}testing{reset} ...", (fetcher_name,), one_line=True)
+            log.info("Enabling the fetcher {blue}%s{reset}: {yellow}testing{reset} ...", (name,), one_line=True)
             fetcher.test()
-            if F_WithLogin in fetcher_class.get_bases():
-                log.info("Enabling the fetcher {blue}%s{reset}: {yellow}logging in{reset} ...", (fetcher_name,), one_line=True)
+            if F_WithLogin in cls.get_bases():
+                log.info("Enabling the fetcher {blue}%s{reset}: {yellow}logging in{reset} ...", (name,), one_line=True)
                 fetcher.login()
-            log.info("Fetcher {blue}%s{reset} is {green}ready{reset}", (fetcher_name,))
+            log.info("Fetcher {blue}%s{reset} is {green}ready{reset}", (name,))
         except Exception as err:
-            log.error("Can't init fetcher {red}%s{reset}: {red}%s{reset}(%s)", (fetcher_name, type(err).__name__, err))
+            log.error("Can't init fetcher {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
             raise
 
         fetchers.append(fetcher)
@@ -180,18 +181,17 @@ def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
 
 
 def get_configured_confetti(config, log):
-    confetti = []
-    for confetti_name in sorted(config.confetti):
-        log.info("Enabling the confetti {blue}%s{reset} ...", (confetti_name,), one_line=True)
-        confetti_class = get_confetti_class(confetti_name)
-        confetti_kwargs = dict(config.confetti[confetti_name])
+    senders = []
+    for name in sorted(config.confetti):
+        log.info("Enabling the confetti {blue}%s{reset} ...", (name,), one_line=True)
+        cls = get_confetti_class(name)
         try:
-            confetti.append(confetti_class(**confetti_kwargs))
-            log.info("Confetti {blue}%s{reset} is {green}ready{reset}", (confetti_name,))
+            senders.append(cls(**config.confetti[name]))
+            log.info("Confetti {blue}%s{reset} is {green}ready{reset}", (name,))
         except Exception as err:
-            log.error("Can't init confetti {red}%s{reset}: {red}%s{reset}(%s)", (confetti_name, type(err).__name__, err))
+            log.error("Can't init confetti {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
             raise
-    return confetti
+    return senders
 
 
 # =====
