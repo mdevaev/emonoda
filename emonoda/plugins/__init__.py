@@ -51,6 +51,13 @@ def _get_classes():
 
 
 # =====
+def _get_bases(mro):
+    return tuple(
+        cls for cls in mro
+        if set(cls.__bases__).intersection((BasePlugin, BaseExtension))
+    )
+
+
 class BasePlugin:
     @classmethod
     def get_name(cls):
@@ -62,18 +69,18 @@ class BasePlugin:
 
     @classmethod
     def get_bases(cls):
-        return cls.__bases__
+        return _get_bases(cls.__mro__)
 
     # ===
 
     def _init_bases(self, **kwargs):
-        for parent in self.__class__.__bases__:
+        for parent in _get_bases(self.__class__.__mro__):
             parent.__init__(self, **kwargs)
 
     @classmethod
     def _get_merged_options(cls, params=None):
         merged = {}
-        for parent in cls.__bases__:
+        for parent in _get_bases(cls.__mro__):
             merged.update(parent.get_options())
         merged.update(params or {})
         return merged
