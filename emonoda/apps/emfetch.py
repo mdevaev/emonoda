@@ -60,22 +60,28 @@ class OpContext:
         self._attrs = {"diff": diff}
 
     def __enter__(self):
-        self._feeder._start_op()  # pylint: disable=protected-access
+        try:
+            self._feeder._start_op()  # pylint: disable=protected-access
+        except Exception:  # Moar debug
+            self.__exit__(*sys.exc_info())
 
     def __exit__(self, exc_type, exc, tb):
-        self._feeder._stop_op()  # pylint: disable=protected-access
         if isinstance(exc, FetcherError):
             self._status = "fetcher_error"
             self._attrs = {
                 "err_name": type(exc).__name__,
                 "err_msg": str(exc),
             }
-        elif isinstance(exc, Exception):
+        elif exc is not None:
             self._status = "unhandled_error"
-            self._attrs = {"tb_lines": traceback.format_exception(exc_type, exc, tb)}
-        assert exc_type is None, "\n".join(traceback.format_exception(exc_type, exc, tb))
+            self._attrs = {"tb_lines": "".join(traceback.format_exception(exc_type, exc, tb)).strip().split("\n")}
         if self._status is None:
             self._status = "passed"
+        try:
+            self._feeder._stop_op()  # pylint: disable=protected-access
+        except Exception:  # Moard debug
+            self._status = "unhandled_error"
+            self._attrs = {"tb_lines": traceback.format_exc().strip().split("\n")}
 
 
 class Feeder:  # pylint: disable=too-many-instance-attributes
