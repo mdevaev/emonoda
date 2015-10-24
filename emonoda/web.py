@@ -23,12 +23,13 @@ import urllib.parse
 import http.client
 import time
 
+from . import gziphandler
 from . import sockshandler
 
 
 # =====
 def build_opener(proxy_url=None, cookie_jar=None):
-    handlers = []
+    handlers = [gziphandler.GzipHandler]
 
     if proxy_url is not None:
         scheme = (urllib.parse.urlparse(proxy_url).scheme or "").lower()
