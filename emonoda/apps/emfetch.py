@@ -281,7 +281,7 @@ def update(
     for op in feeder.get_ops():
         try:
             with op:
-                if op.torrent.get_hash() not in hashes:
+                if client is not None and op.torrent.get_hash() not in hashes:
                     op.done_not_in_client()
                     continue
 
