@@ -44,8 +44,7 @@ from . import get_configured_confetti
 
 # =====
 class OpContext:
-    def __init__(self, feeder, torrent, fetcher):
-        self._feeder = feeder
+    def __init__(self, torrent, fetcher):
         self.torrent = torrent
         self.fetcher = fetcher
 
@@ -60,10 +59,7 @@ class OpContext:
         self._attrs = {"diff": diff}
 
     def __enter__(self):
-        try:
-            self._feeder._start_op()  # pylint: disable=protected-access
-        except Exception:  # Moar debug
-            self.__exit__(*sys.exc_info())
+        pass
 
     def __exit__(self, exc_type, exc, tb):
         if isinstance(exc, FetcherError):
@@ -77,11 +73,6 @@ class OpContext:
             self._attrs = {"tb_lines": "".join(traceback.format_exception(exc_type, exc, tb)).strip().split("\n")}
         if self._status is None:
             self._status = "passed"
-        try:
-            self._feeder._stop_op()  # pylint: disable=protected-access
-        except Exception:  # Moard debug
-            self._status = "unhandled_error"
-            self._attrs = {"tb_lines": traceback.format_exc().strip().split("\n")}
 
 
 class Feeder:  # pylint: disable=too-many-instance-attributes
@@ -130,8 +121,10 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
                 self._done("unknown", {})
                 continue
 
-            op = OpContext(self, self._current_torrent, self._current_fetcher)
+            op = OpContext(self._current_torrent, self._current_fetcher)
+            self._start_op()
             yield op
+            self._stop_op()
             self._done(op._status, op._attrs)  # pylint: disable=protected-access
 
         self._log_stdout.finish()
