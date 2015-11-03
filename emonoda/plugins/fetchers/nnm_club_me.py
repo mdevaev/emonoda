@@ -20,10 +20,9 @@
 import urllib.parse
 import re
 
-from ... import tfile
-
 from . import BaseFetcher
 from . import WithLogin
+from . import WithScrape
 
 
 # =====
@@ -35,7 +34,7 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Plugin(BaseFetcher, WithLogin):
+class Plugin(BaseFetcher, WithLogin, WithScrape):
     _domain = "nnm-club.me"
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
@@ -66,12 +65,7 @@ class Plugin(BaseFetcher, WithLogin):
     # ===
 
     def is_torrent_changed(self, torrent):
-        self._assert_match(torrent)
-        data = self._read_url(
-            url="http://bt.{}:2710/scrape?info_hash={}".format(self._domain, torrent.get_scrape_hash()),
-            headers={"User-Agent": self._client_agent},
-        )
-        return (len(tfile.decode_data(data).get("files", {})) == 0)
+        return self._is_torrent_registered("http://bt.{}:2710".format(self._domain), torrent)
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)

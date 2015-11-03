@@ -18,6 +18,7 @@
 
 
 import socket
+import urllib.parse
 import urllib.error
 import http.client
 import http.cookiejar
@@ -65,14 +66,13 @@ def _assert(exception, arg, msg=""):
 
 
 class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
-    def __init__(self, timeout, retries, retries_sleep, user_agent, client_agent, proxy_url,
+    def __init__(self, timeout, retries, retries_sleep, user_agent, proxy_url,
                  check_version, check_fingerprint, **_):
 
         self._timeout = timeout
         self._retries = retries
         self._retries_sleep = retries_sleep
         self._user_agent = user_agent
-        self._client_agent = client_agent
         self._proxy_url = proxy_url
         self._check_version = check_version
         self._check_fingerprint = check_fingerprint
@@ -96,8 +96,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "timeout":           Option(default=10.0, type=float, help="Timeout for HTTP client"),
             "retries":           Option(default=20, help="The number of retries to handle tracker-specific HTTP errors"),
             "retries_sleep":     Option(default=1.0, help="Sleep interval between failed retries"),
-            "user_agent":        Option(default="Mozilla/5.0", help="User-agent for site"),
-            "client_agent":      Option(default="rtorrent/0.9.2/0.13.2", help="User-agent for tracker"),
+            "user_agent":        Option(default="Mozilla/5.0", help="User-Agent for site"),
             "proxy_url":         Option(default=None, type=as_string_or_none, help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
             "check_fingerprint": Option(default=True, help="Check the site fingerprint"),
             "check_version":     Option(default=True, help="Check the fetcher version from GitHub"),
@@ -234,6 +233,26 @@ class WithLogin(BaseExtension):
 class WithCaptcha(BaseExtension):
     def __init__(self, captcha_decoder, **_):
         self._captcha_decoder = captcha_decoder
+
+
+class WithScrape(BaseExtension):
+    def __init__(self, client_agent, **_):
+        self._client_agent = client_agent
+
+    @classmethod
+    def get_options(cls):
+        return {
+            "client_agent": Option(default="rtorrent/0.9.2/0.13.2", help="User-Agent for tracker"),
+        }
+
+    def _is_torrent_registered(self, base_scrape_url, torrent):
+        # https://wiki.theory.org/BitTorrentSpecification#Tracker_.27scrape.27_Convention
+        self._assert_match(torrent)  # pylint: disable=no-member
+        data = self._read_url(  # pylint: disable=no-member
+            url=urllib.parse.urljoin(base_scrape_url, "scrape.php?info_hash={}".format(torrent.get_scrape_hash())),
+            headers={"User-Agent": self._client_agent},
+        )
+        return (len(tfile.decode_data(data).get("files", {})) == 0)
 
 
 class WithTime(BaseExtension):
