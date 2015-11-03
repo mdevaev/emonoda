@@ -81,7 +81,7 @@ def get_decoded_path(path):
 
 
 # =====
-def print_orphaned_files(cache, data_roots, dirs_only, log_stdout, log_stderr):
+def print_orphaned_files(cache, data_roots, reduce_dirs, log_stdout, log_stderr):
     all_files = {}
     for data_root_path in data_roots:
         log_stderr.info("Scanning directory {cyan}%s{reset} ... ", (data_root_path,))
@@ -94,12 +94,17 @@ def print_orphaned_files(cache, data_roots, dirs_only, log_stdout, log_stderr):
     if len(files) != 0:
         log_stderr.info("Orhpaned files:")
         size = 0
+        common_root = "\0"
         for path in sorted(files):
             is_dir = (all_files[path] is None)
             size += (all_files[path] or 0)
+            if reduce_dirs:
+                if path.startswith(common_root + os.path.sep):
+                    continue
+                else:
+                    common_root = (path if is_dir else "\0")
             line = ("{blue}D" if is_dir else "{magenta}F") + "{reset} %s"
-            if dirs_only and is_dir or not dirs_only:
-                log_stdout.print(line, (path,))
+            log_stdout.print(line, (path,))
         log_stderr.info("Found {red}%d{reset} orphaned files = {red}%s{reset}",
                         (len(files), fmt.format_size(size)))
     else:
@@ -157,8 +162,8 @@ def main():
 
     commands.add_parser(
         name="orphans",
-        help="Find files that do not belong to the client",
-    ).add_argument("--dirs-only", action="store_true")
+        help="Reduce orphaned files when base directory also orphaned",
+    ).add_argument("--no-reduce-dirs", action="store_true")
 
     commands.add_parser(
         name="not-in-client",
@@ -200,7 +205,7 @@ def main():
                 print_orphaned_files(
                     cache=get_cache(False),
                     data_roots=(config.core.data_root_dir,) + tuple(config.core.another_data_root_dirs),
-                    dirs_only=options.dirs_only,
+                    reduce_dirs=(not options.no_reduce_dirs),
                     log_stdout=log_stdout,
                     log_stderr=log_stderr,
                 )
