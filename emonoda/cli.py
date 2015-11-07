@@ -72,7 +72,7 @@ class Log:
                     rendered = self._cut_line(rendered, cut)
 
             self._output.write(rendered)
-            if one_line:
+            if one_line and self.isatty():
                 self._output.write("\r")
                 self._fill = view_len - cut
             elif not no_nl:
