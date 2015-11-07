@@ -187,9 +187,10 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
             self._log_stdout.print(*self._format_status("magenta", " "))
 
     def _stop_op(self):
-        self._stop_fan.set()
-        self._fan_thread.join()
-        self._stop_fan.clear()
+        if self._fan_thread is not None:
+            self._stop_fan.set()
+            self._fan_thread.join()
+            self._stop_fan.clear()
 
     def _format_fail(self, color, sign, error):
         return (
