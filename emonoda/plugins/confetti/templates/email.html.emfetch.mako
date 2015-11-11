@@ -1,3 +1,6 @@
+<%!
+    from emonoda.tools import sorted_paths
+%>
 <h3>&bull; &bull; &bull; You have ${len(results["affected"])} new torrents:</h3>
 <table cellspacing="0" cellpadding="0">
 % for (file_name, result) in results["affected"].items():
@@ -12,7 +15,7 @@
                 ("~", "teal",   "modified"), \
                 ("?", "orange", "type_modified"), \
             ):
-                % for item in sorted(result["diff"][field]):
+                % for item in sorted_paths(result["diff"][field]):
                     <tr>
                         <td width="20" align="center" valign="top"><b><font color="${color}">${sign}</font></b></td>
                         <td align="left" valign="top">${item}</td>

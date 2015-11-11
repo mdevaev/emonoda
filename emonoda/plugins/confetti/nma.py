@@ -23,6 +23,7 @@ from ...optconf import Option
 from ...optconf.converters import as_string_list
 
 from ... import web
+from ... import tools
 
 from . import BaseConfetti
 from . import WithProxy
@@ -65,7 +66,7 @@ class Plugin(BaseConfetti, WithProxy):
             ("~", diff["modified"]),
             ("?", diff["type_modified"]),
         ):
-            for item in sorted(items):
+            for item in tools.sorted_paths(items):
                 description_lines.append("[{}] {}".format(sign, item))
         description = "Affected {} files\n".format(len(description_lines)) + "\n".join(description_lines)
         if len(description) > 9999:

@@ -20,7 +20,6 @@
 import sys
 import os
 import itertools
-import operator
 import argparse
 import datetime
 
@@ -30,6 +29,7 @@ from ..helpers import tcollection
 
 from .. import tfile
 from .. import fmt
+from .. import tools
 
 from . import init
 from . import get_configured_log
@@ -67,7 +67,7 @@ def format_created_by(torrent):
 
 
 def format_provides(torrent):
-    return sorted(torrent.get_files())
+    return tools.sorted_paths(torrent.get_files())
 
 
 def format_is_private(torrent):
@@ -100,7 +100,7 @@ def format_client_prefix(torrent, client):
 
 def _make_formatted_tree(files, depth=0, prefix="    "):
     text = ""
-    for (name, sub) in sorted(files.items(), key=operator.itemgetter(0)):
+    for (name, sub) in tools.sorted_paths(files.items(), 0):
         text += prefix + "*   " * depth + name + "\n"
         text += _make_formatted_tree(sub, depth + 1)
     return text

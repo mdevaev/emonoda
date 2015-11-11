@@ -20,6 +20,8 @@
 import math
 import datetime
 
+from . import tools
+
 
 # =====
 _UNITS = tuple(zip(
@@ -61,7 +63,7 @@ def format_torrents_diff(diff, prefix):
         ("~", "cyan",   diff["modified"]),
         ("?", "yellow", diff["type_modified"]),
     ):
-        for item in sorted(items):
+        for item in tools.sorted_paths(items):
             lines.append("%s{" + color + "}%s{reset} %s")
             placeholders += (prefix, sign, item)
     return ("\n".join(lines), placeholders)

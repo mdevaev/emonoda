@@ -27,6 +27,7 @@ from ..helpers import tcollection
 from ..helpers import datacache
 
 from .. import fmt
+from .. import tools
 
 from . import init
 from . import get_configured_log
@@ -95,7 +96,7 @@ def print_orphaned_files(cache, data_roots, reduce_dirs, log_stdout, log_stderr)
         log_stderr.info("Orhpaned files:")
         size = 0
         common_root = "\0"
-        for path in sorted(files):
+        for path in tools.sorted_paths(files):
             is_dir = (all_files[path] is None)
             size += (all_files[path] or 0)
             if reduce_dirs:

@@ -1,3 +1,6 @@
+<%!
+    from emonoda.tools import sorted_paths
+%>
 === You have ${len(results["affected"])} new torrents:
 % for (file_name, result) in results["affected"].items():
 ${file_name} (from ${result["torrent"].get_comment()}):
@@ -7,7 +10,7 @@ ${file_name} (from ${result["torrent"].get_comment()}):
         ("~", "modified"), \
         ("?", "type_modified"), \
     ):
-        % for item in sorted(result["diff"][field]):
+        % for item in sorted_paths(result["diff"][field]):
     ${sign} ${item}
         % endfor
     % endfor
