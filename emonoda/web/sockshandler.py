@@ -22,7 +22,7 @@ import urllib.parse
 import http.client
 import socket
 
-from .thirdparty import socks
+from ..thirdparty import socks
 
 
 # =====
