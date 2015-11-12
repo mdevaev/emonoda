@@ -21,8 +21,6 @@ import sys
 import os
 import argparse
 
-import chardet
-
 from ..helpers import tcollection
 from ..helpers import datacache
 
@@ -56,29 +54,15 @@ def build_used_files(cache, data_roots):
 def build_all_files(data_root_path):
     files = {}
     for (prefix, _, local_files) in os.walk(data_root_path):
-        files[get_decoded_path(prefix)] = None
+        files[tools.get_decoded_path(prefix)] = None
         for name in local_files:
             path = os.path.join(prefix, name)
             try:
                 size = os.path.getsize(path)
             except FileNotFoundError:
                 continue
-            files[get_decoded_path(path)] = size
+            files[tools.get_decoded_path(path)] = size
     return files
-
-
-def get_decoded_path(path):
-    try:
-        path.encode()
-        return path
-    except UnicodeEncodeError:
-        path_bytes = os.fsencode(path)
-        try:
-            return path_bytes.decode("cp1251")
-        except UnicodeDecodeError:
-            encoding = chardet.detect(path)["encoding"]
-            assert encoding is not None, "Can't determine encoding for bytes string: '{}'".format(repr(path_bytes))
-            return path_bytes.decode(encoding)
 
 
 # =====

@@ -19,18 +19,30 @@
 
 import os
 
+import chardet
+
 
 # =====
 def sorted_paths(paths, get=None):
-    return sorted(paths, key=_make_get_path_nulled(get))
-
-
-# =====
-def _make_get_path_nulled(get):
     if get is None:
+        # def for speed
         def get_path_nulled(path):
             return path.replace(os.path.sep, "\0")
     else:
         def get_path_nulled(item):
             return item[get].replace(os.path.sep, "\0")
-    return get_path_nulled
+    return sorted(paths, key=get_path_nulled)
+
+
+def get_decoded_path(path):
+    try:
+        path.encode()
+        return path
+    except UnicodeEncodeError:
+        path_bytes = os.fsencode(path)
+        try:
+            return path_bytes.decode("cp1251")
+        except UnicodeDecodeError:
+            encoding = chardet.detect(path)["encoding"]
+            assert encoding is not None, "Can't determine encoding for bytes string: '{}'".format(repr(path_bytes))
+            return path_bytes.decode(encoding)
