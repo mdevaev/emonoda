@@ -33,9 +33,8 @@ def build_opener(proxy_url=None, cookie_jar=None):
 
     if proxy_url is not None:
         scheme = (urllib.parse.urlparse(proxy_url).scheme or "").lower()
-        if scheme == "http":
-            proxies = dict.fromkeys(("http", "https"), proxy_url)
-            handlers.append(urllib.request.ProxyHandler(proxies))
+        if scheme in ("http", "https"):
+            handlers.append(urllib.request.ProxyHandler({scheme: proxy_url}))
         elif scheme in ("socks4", "socks5"):
             handlers.append(sockshandler.SocksHandler(proxy_url=proxy_url))
         else:
