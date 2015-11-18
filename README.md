@@ -71,5 +71,6 @@ packer -S emonoda
 
 ***
 
-### Скриншотик ###
+### Скриншотики ###
 ![emfetch](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emfetch.png)
+![email](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/email.png)
