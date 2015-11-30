@@ -60,7 +60,8 @@ def main():
                             log=log_stderr,
                         )
                     lists.append(client.get_files(item))
-            log_stdout.print(*fmt.format_torrents_diff(tfile.get_difference(*lists), " "))
+            diff = tfile.get_difference(*lists)  # pylint: disable=no-value-for-parameter
+            log_stdout.print(*fmt.format_torrents_diff(diff, " "))
 
 
 if __name__ == "__main__":

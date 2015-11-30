@@ -227,7 +227,7 @@ class WithLogin(BaseExtension):
         raise NotImplementedError
 
     def _assert_auth(self, *args):
-        _assert(AuthError, *args)
+        _assert(AuthError, *args)  # pylint: disable=no-value-for-parameter
 
 
 class WithCaptcha(BaseExtension):

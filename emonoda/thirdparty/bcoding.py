@@ -49,7 +49,7 @@ _TYPE_SEP  = b':'
 _TYPES_STR = [d.encode() for d in digits]
 
 def assert_btype(byte, typ):
-    if not byte == typ:
+    if byte != typ:
         raise TypeError(
             'Tried to decode type {!r} with identifier {!r} but got identifier {!r} instead'
             .format(TYPES[typ] or 'End', typ, byte))
@@ -88,7 +88,7 @@ def _decode_buffer(f):
     """
     strlen = int(_readuntil(f, _TYPE_SEP))
     buf = f.read(strlen)
-    if not len(buf) == strlen:
+    if len(buf) != strlen:
         raise ValueError(
             'string expected to be {} bytes long but the file ended after {} bytes'
             .format(strlen, len(buf)))
@@ -145,7 +145,8 @@ def bdecode(f_or_data):
         first_byte = f_or_data.read(1)
         f_or_data.seek(-1, SEEK_CUR)
     else:
-        first_byte = f_or_data.peek(1)[:1]
+        #FIXME: muted bug!
+        first_byte = f_or_data.peek(1)[:1]  # pylint: disable=no-member
     btype = TYPES.get(first_byte)
     if btype is not None:
         return btype(f_or_data)
