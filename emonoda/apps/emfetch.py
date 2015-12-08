@@ -317,6 +317,7 @@ def main():
     args_parser.add_argument("-x", "--exclude-fetchers", default=[], nargs="+", metavar="<fetcher>")
     args_parser.add_argument("--noop", action="store_true")
     args_parser.add_argument("--mute", action="store_true")
+    args_parser.add_argument("--fail-on-captcha", action="store_true")
     options = args_parser.parse_args(argv[1:])
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
@@ -330,8 +331,11 @@ def main():
             )
 
             def read_captcha(url):
-                log_stderr.info("{yellow}Enter the captcha{reset} from [{blue}%s{reset}]: ", (url,), no_nl=True)
-                return input()
+                if options.fail_on_captcha:
+                    raise RuntimeError("Required decoding of captcha but '--fail-on-captcha' specified")
+                else:
+                    log_stderr.info("{yellow}Enter the captcha{reset} from [{blue}%s{reset}]: ", (url,), no_nl=True)
+                    return input()
 
             fetchers = get_configured_fetchers(
                 config=config,
