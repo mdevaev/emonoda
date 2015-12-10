@@ -50,7 +50,7 @@
 
 ***
 
-### Поддерживаемые пособы оповещения ###
+### [Способы оповещения](https://github.com/mdevaev/emonoda/wiki/confetti) ###
 * **E-mail** -- в виде плейнтекста или HTML, на ваш выбор. Посылаются в виде дайджеста по всем обновленным раздачам.
 * [Notify My Android](http://notifymyandroid.com/) -- короткие push-нотификации на андроид, по одной на обновленную раздачу.
 
@@ -73,5 +73,6 @@ packer -S emonoda
 ***
 
 ### Скриншотики ###
+
 ![emfetch](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emfetch.png)
 ![email](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/email.png)
