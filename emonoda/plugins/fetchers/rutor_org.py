@@ -41,12 +41,12 @@ class Plugin(BaseFetcher):
 
     @classmethod
     def get_version(cls):
-        return 2
+        return 3
 
     @classmethod
     def get_fingerprint(cls):
         return {
-            "url":      "http://zerkalo-rutor.org",
+            "url":      "http://fast-bit.org",
             "encoding": "utf-8",
             "text":     "<a href=\"/\"><img src=\"/s/logo.jpg\" alt=\"rutor.org logo\" /></a>",
         }
@@ -61,7 +61,7 @@ class Plugin(BaseFetcher):
 
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment().replace("rutor.org", "zerkalo-rutor.org")))
+        page = _decode(self._read_url(torrent.get_comment().replace("rutor.org", "fast-bit.org")))
         hash_match = re.search(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})", page)
         self._assert_logic(hash_match is not None, "Hash not found")
         return (torrent.get_hash() != hash_match.group(1).lower())
@@ -69,6 +69,6 @@ class Plugin(BaseFetcher):
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
         topic_id = self._comment_regexp.match(torrent.get_comment()).group(1)
-        data = self._read_url("http://zerkalo-rutor.org/download/{}".format(topic_id))
+        data = self._read_url("http://fast-bit.org/download/{}".format(topic_id))
         self._assert_valid_data(data)
         return data
