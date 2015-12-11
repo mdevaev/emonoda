@@ -74,5 +74,6 @@ packer -S emonoda
 
 ### Скриншотики ###
 
-![emfetch](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emfetch.png)
-![email](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/email.png)
+| Emfetch в консоли | Сообщение на почту | Нотификации на андроид |
+|-------------------|--------------------|------------------------|
+| <img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emfetch.png height=150> | <img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/email.png height=150> | <img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/android.png height=150> |
