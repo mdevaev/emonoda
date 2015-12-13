@@ -56,6 +56,14 @@ def by_hash(torrents):
     }
 
 
+def by_hash_with_dups(torrents):
+    with_dups = {}
+    for torrent in filter(None, torrents.values()):
+        with_dups.setdefault(torrent.get_hash(), [])
+        with_dups[torrent.get_hash()].append(torrent)
+    return with_dups
+
+
 # =====
 def find(path, items, pass_hash):
     return [_find_torrent(path, item, pass_hash) for item in items]

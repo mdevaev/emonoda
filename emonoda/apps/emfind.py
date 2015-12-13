@@ -93,7 +93,7 @@ def print_orphaned_files(cache, data_roots, reduce_dirs, log_stdout, log_stderr)
         log_stderr.info("Found {red}%d{reset} orphaned files = {red}%s{reset}",
                         (len(files), fmt.format_size(size)))
     else:
-        log_stderr.info("No orphaned files founded")
+        log_stderr.info("No orphaned files found")
 
 
 def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
@@ -110,7 +110,7 @@ def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_
             log_stdout.print("%s", torrents[torrent_hash].get_path())
         log_stderr.info("Found {red}%d{reset} unregistered torrents", (len(not_in_client),))
     else:
-        log_stderr.info("No unregistered files founded")
+        log_stderr.info("No unregistered files found")
 
 
 def print_missing_torrents(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
@@ -127,7 +127,24 @@ def print_missing_torrents(client, torrents_dir_path, name_filter, log_stdout, l
             log_stdout.print("%s -- %s", (torrent_hash, client.get_file_name(torrent_hash)))
         log_stderr.info("Found {red}%d{reset} torrents without torrent-files", (len(missing_torrents),))
     else:
-        log_stderr.info("No torrents without torrent-files founded")
+        log_stderr.info("No torrents without torrent-files found")
+
+
+def print_duplicate_torrents(torrents_dir_path, name_filter, log_stdout, log_stderr):
+    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, log_stderr)
+    torrents = tcollection.by_hash_with_dups(torrents)
+    torrents = {
+        torrent_hash: variants
+        for (torrent_hash, variants) in torrents.items()
+        if len(variants) > 1
+    }
+    if len(torrents) != 0:
+        for (torrent_hash, variants) in torrents.items():
+            log_stdout.print(torrent_hash)
+            for torrent in variants:
+                log_stdout.print("\t%s", torrent.get_path())
+    else:
+        log_stderr.info("No duplicate torrents found")
 
 
 # ===== Main =====
@@ -158,6 +175,11 @@ def main():
     commands.add_parser(
         name="missing-torrents",
         help="Find torrents registered in the client for which there is no torrent files",
+    )
+
+    commands.add_parser(
+        name="duplicate-torrents",
+        help="Find torrent-files with duplicate hashes",
     )
 
     options = args_parser.parse_args(argv[1:])
@@ -201,6 +223,14 @@ def main():
                     "missing-torrents": print_missing_torrents,
                 }[options.cmd](
                     client=get_client(),
+                    torrents_dir_path=config.core.torrents_dir,
+                    name_filter=config.emfind.name_filter,
+                    log_stdout=log_stdout,
+                    log_stderr=log_stderr,
+                )
+
+            elif options.cmd == "duplicate-torrents":
+                print_duplicate_torrents(
                     torrents_dir_path=config.core.torrents_dir,
                     name_filter=config.emfind.name_filter,
                     log_stdout=log_stdout,
