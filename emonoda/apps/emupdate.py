@@ -308,7 +308,7 @@ def print_results(results, log):
 def main():
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
-        prog="emfetch",
+        prog="emupdate",
         description="Update torrent files from popular trackers",
         parents=[parent_parser],
     )
@@ -326,7 +326,7 @@ def main():
             client = get_configured_client(
                 config=config,
                 required=False,
-                with_customs=(len(config.emfetch.save_customs) or len(config.emfetch.set_customs)),
+                with_customs=(len(config.emupdate.save_customs) or len(config.emupdate.set_customs)),
                 log=log_stderr,
             )
 
@@ -353,16 +353,16 @@ def main():
 
             torrents = tcollection.load_from_dir(
                 path=config.core.torrents_dir,
-                name_filter=(options.name_filter or config.emfetch.name_filter),
+                name_filter=(options.name_filter or config.emupdate.name_filter),
                 log=log_stderr,
             )
 
             feeder = Feeder(
                 fetchers=fetchers,
                 torrents=torrents,
-                show_unknown=config.emfetch.show_unknown,
-                show_passed=config.emfetch.show_passed,
-                show_diff=config.emfetch.show_diff,
+                show_unknown=config.emupdate.show_unknown,
+                show_passed=config.emupdate.show_passed,
+                show_diff=config.emupdate.show_diff,
                 log_stdout=log_stdout,
                 log_stderr=log_stderr,
             )
@@ -370,10 +370,10 @@ def main():
             update(
                 feeder=feeder,
                 client=client,
-                backup_dir_path=config.emfetch.backup_dir,
-                backup_suffix=config.emfetch.backup_suffix,
-                to_save_customs=config.emfetch.save_customs,
-                to_set_customs=config.emfetch.set_customs,
+                backup_dir_path=config.emupdate.backup_dir,
+                backup_suffix=config.emupdate.backup_suffix,
+                to_save_customs=config.emupdate.save_customs,
+                to_set_customs=config.emupdate.set_customs,
                 noop=options.noop,
             )
 
@@ -385,7 +385,7 @@ def main():
             if not options.mute:
                 if len(results["affected"]) != 0:
                     if not surprise.deploy_surprise(
-                        source="emfetch",
+                        source="emupdate",
                         results=results,
                         confetti=confetti,
                         log=log_stderr,

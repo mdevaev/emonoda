@@ -54,7 +54,7 @@ if __name__ == "__main__":
         entry_points={
             "console_scripts": [
                 "emdiff = emonoda.apps.emdiff:main",
-                "emfetch = emonoda.apps.emfetch:main",
+                "emupdate = emonoda.apps.emupdate:main",
                 "emfile = emonoda.apps.emfile:main",
                 "emload = emonoda.apps.emload:main",
                 "emfind = emonoda.apps.emfind:main",

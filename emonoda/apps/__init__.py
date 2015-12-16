@@ -206,7 +206,7 @@ def _get_config_scheme():
             "force_colors":  Option(default=False, help="Always use the coloring"),
         },
 
-        "emfetch": {
+        "emupdate": {
             "name_filter":   Option(default="*.torrent", type=str, help="Update only filtered torrent files"),
             "backup_dir":    Option(default=None, type=as_path_or_none, help="Backup old torrent files after update here"),
             "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
