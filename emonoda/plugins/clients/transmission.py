@@ -63,7 +63,7 @@ class Plugin(BaseClient):
     def get_options(cls):
         return cls._get_merged_options({
             "url":     Option(default="http://localhost:9091/transmission/rpc", help="Transmission HTTP-RPC URL"),
-            "timeout": Option(default=10.0, type=float, help="Timeout for HTTP-RPC"),
+            "timeout": Option(default=10.0, help="Timeout for HTTP-RPC"),
             "user":    Option(default=None, type=as_string_or_none, help="HTTP login"),
             "passwd":  SecretOption(default=None, type=as_string_or_none, help="HTTP password"),
         })

@@ -47,9 +47,9 @@ class BaseConfetti(BasePlugin):
     @classmethod
     def get_options(cls):
         return {
-            "timeout":       Option(default=10, help="Network timeout"),
+            "timeout":       Option(default=10.0, help="Network timeout"),
             "retries":       Option(default=5, help="Retries for failed attempts"),
-            "retries_sleep": Option(default=1, help="Sleep interval between failed attempts"),
+            "retries_sleep": Option(default=1.0, help="Sleep interval between failed attempts"),
         }
 
     def send_results(self, source, results):

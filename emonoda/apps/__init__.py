@@ -207,7 +207,7 @@ def _get_config_scheme():
         },
 
         "emupdate": {
-            "name_filter":   Option(default="*.torrent", type=str, help="Update only filtered torrent files"),
+            "name_filter":   Option(default="*.torrent", help="Update only filtered torrent files"),
             "backup_dir":    Option(default=None, type=as_path_or_none, help="Backup old torrent files after update here"),
             "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
             "save_customs":  Option(default=[], type=as_string_list, help="Save client custom fields after update if supports"),
@@ -219,12 +219,12 @@ def _get_config_scheme():
 
         "emload": {
             "torrent_mode": Option(default=None, type=as_8int_or_none, help="Change permissions of torrent file before load"),
-            "mkdir_mode": Option(default=None, type=as_8int_or_none, help="Permission for new directories"),
-            "set_customs":   Option(default={}, type=as_key_value, help="Set client custom fileds after update if supports")
+            "mkdir_mode":   Option(default=None, type=as_8int_or_none, help="Permission for new directories"),
+            "set_customs":  Option(default={}, type=as_key_value, help="Set client custom fileds after update if supports")
         },
 
         "emfind": {
-            "cache_file": Option(default=as_path("~/.cache/emfind.json"), type=as_path, help="Torrents cache"),
-            "name_filter": Option(default="*.torrent", type=str, help="Cache only filtered torrent files"),
+            "cache_file":  Option(default="~/.cache/emfind.json", type=as_path, help="Torrents cache"),
+            "name_filter": Option(default="*.torrent", help="Cache only filtered torrent files"),
         },
     }
