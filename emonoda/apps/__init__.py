@@ -217,6 +217,10 @@ def _get_config_scheme():
             "show_diff":     Option(default=True, help="Show diff between old and updated torrent files"),
         },
 
+        "emfile": {
+            "show_customs": Option(default=[], type=as_key_value, help="Show custom fields from client"),
+        },
+
         "emload": {
             "torrent_mode": Option(default=None, type=as_8int_or_none, help="Change permissions of torrent file before load"),
             "mkdir_mode":   Option(default=None, type=as_8int_or_none, help="Permission for new directories"),

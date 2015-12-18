@@ -19,6 +19,7 @@
 
 import sys
 import os
+import shlex
 import itertools
 import argparse
 import datetime
@@ -82,10 +83,10 @@ def format_comment(torrent):
     return (torrent.get_comment() or "")
 
 
-def _format_client_method(torrent, client, method_name):
+def _format_client_method(torrent, client, method_name, *args, **kwargs):
     assert client is not None, "Required a client"
     try:
-        return getattr(client, method_name)(torrent)
+        return getattr(client, method_name)(torrent, *args, **kwargs)
     except NoSuchTorrentError:
         return ""
 
@@ -96,6 +97,20 @@ def format_client_path(torrent, client):
 
 def format_client_prefix(torrent, client):
     return _format_client_method(torrent, client, "get_data_prefix")
+
+
+def format_client_customs(torrent, client, to_show_customs):
+    assert client is not None, "Required a client"
+    if len(to_show_customs) == 0:
+        return ""
+    try:
+        customs = client.get_customs(torrent, to_show_customs)
+    except NoSuchTorrentError:
+        return ""
+    return " ".join(sorted(
+        "{}={}".format(key, shlex.quote(str(value or "")))
+        for (key, value) in customs.items()
+    ))
 
 
 def _make_formatted_tree(files, depth=0, prefix="    "):
@@ -119,28 +134,30 @@ def format_files_tree(torrent):
     return _make_formatted_tree(tree)
 
 
-def print_pretty_meta(torrent, client, log):
-    log.print("{blue}Path:{reset}          %s", (torrent.get_path(),))
-    log.print("{blue}Name:{reset}          %s", (torrent.get_name(),))
-    log.print("{blue}Hash:{reset}          %s", (torrent.get_hash(),))
-    log.print("{blue}Size:{reset}          %s", (format_size_pretty(torrent),))
-    log.print("{blue}Announce:{reset}      %s", (format_announce(torrent),))
-    log.print("{blue}Announce list:{reset} %s", (format_announce_list_pretty(torrent),))
-    log.print("{blue}Creation date:{reset} %s", (format_creation_date_pretty(torrent),))
-    log.print("{blue}Created by:{reset}    %s", (format_created_by(torrent),))
-    log.print("{blue}Private:{reset}       %s", (format_is_private_pretty(torrent),))
-    log.print("{blue}Comment:{reset}       %s", (format_comment(torrent),))
+def print_pretty_meta(torrent, client, to_show_customs, log):
+    log.print("{blue}Path:{reset}           %s", (torrent.get_path(),))
+    log.print("{blue}Name:{reset}           %s", (torrent.get_name(),))
+    log.print("{blue}Hash:{reset}           %s", (torrent.get_hash(),))
+    log.print("{blue}Size:{reset}           %s", (format_size_pretty(torrent),))
+    log.print("{blue}Announce:{reset}       %s", (format_announce(torrent),))
+    log.print("{blue}Announce list:{reset}  %s", (format_announce_list_pretty(torrent),))
+    log.print("{blue}Creation date:{reset}  %s", (format_creation_date_pretty(torrent),))
+    log.print("{blue}Created by:{reset}     %s", (format_created_by(torrent),))
+    log.print("{blue}Private:{reset}        %s", (format_is_private_pretty(torrent),))
+    log.print("{blue}Comment:{reset}        %s", (format_comment(torrent),))
     if client is not None:
-        log.print("{blue}Client path:{reset}   %s", (format_client_path(torrent, client),))
+        log.print("{blue}Client path:{reset}    %s", (format_client_path(torrent, client),))
+        if len(to_show_customs) != 0:
+            log.print("{blue}Client customs:{reset} %s", (format_client_customs(torrent, client, to_show_customs),))
     if torrent.is_single_file():
-        log.print("{blue}Provides:{reset}      %s", (tuple(torrent.get_files())[0],))
+        log.print("{blue}Provides:{reset}       %s", (tuple(torrent.get_files())[0],))
     else:
         log.print("{blue}Provides:{reset}\n%s", (format_files_tree(torrent),))
 
 
 # ===== Main =====
 def main():  # pylint: disable=too-many-locals
-    options = None  # Makes pylint happy
+    options = config = None  # Makes pylint happy
     actions = [
         (option, option[2:].replace("-", "_"), method)
         for (option, method) in (
@@ -161,6 +178,7 @@ def main():  # pylint: disable=too-many-locals
             ("--is-private-pretty",    format_is_private_pretty),
             ("--client-path",          lambda torrent: format_client_path(torrent, client)),
             ("--client-prefix",        lambda torrent: format_client_prefix(torrent, client)),
+            ("--client-customs",       lambda torrent: format_client_customs(torrent, client, config.emfile.show_customs)),
             ("--make-magnet",          lambda torrent: torrent.make_magnet(options.magnet_fields)),
         )
     ]
@@ -191,13 +209,13 @@ def main():  # pylint: disable=too-many-locals
             client = get_configured_client(
                 config=config,
                 required=False,
-                with_customs=False,
+                with_customs=bool(config.emfile.show_customs),
                 log=log_stderr,
             )
 
             for torrent in torrents:
                 if len(to_print) == 0:
-                    print_pretty_meta(torrent, client, log_stdout)
+                    print_pretty_meta(torrent, client, config.emfile.show_customs, log_stdout)
                 else:
                     for (header, method) in to_print:
                         line = ("%s" if options.without_headers else "{blue}%s:{reset} %s")
