@@ -218,7 +218,7 @@ def _get_config_scheme():
         },
 
         "emfile": {
-            "show_customs": Option(default=[], type=as_key_value, help="Show custom fields from client"),
+            "show_customs": Option(default=[], type=as_string_list, help="Show custom fields from client"),
         },
 
         "emload": {
