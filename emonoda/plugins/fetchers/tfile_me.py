@@ -20,11 +20,8 @@
 import urllib.parse
 import re
 
-from datetime import datetime
-
 from . import BaseFetcher
 from . import WithLogin
-from . import WithTime
 
 
 # =====
@@ -36,12 +33,11 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Plugin(BaseFetcher, WithLogin, WithTime):
+class Plugin(BaseFetcher, WithLogin):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=(self._user is not None))
         self._comment_regexp = re.compile(r"http://tfile\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
-        self._tzinfo = None
 
     @classmethod
     def get_name(cls):
@@ -49,7 +45,7 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
 
     @classmethod
     def get_version(cls):
-        return 0
+        return 1
 
     @classmethod
     def get_fingerprint(cls):
@@ -67,22 +63,10 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
 
     def is_torrent_changed(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment(), opener=self._build_opener()))
-
-        hash_match = re.search(r"<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})", page)
-        if hash_match is not None:
-            torrent_hash = hash_match.group(1).lower()
-            return (torrent.get_hash() != torrent_hash)
-        else:
-            date_match = re.search(r"class=\"regDate\">(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span><br/>", page)
-            if date_match is None:
-                page = _decode(self._read_url(torrent.get_comment()))
-                date_match = re.search(r"Зарегистрирован: (\d\d\d\d-\d\d-\d\d \d\d:\d\d),", page)
-                self._assert_logic(date_match is not None, "Unknown hash and date")
-            date = date_match.group(1) + " " + datetime.now(self._tzinfo).strftime("%z")
-
-            upload_time = int(datetime.strptime(date, "%Y-%m-%d %H:%M %z").strftime("%s"))
-            return (torrent.get_mtime() <= upload_time)
+        page = _decode(self._read_url(torrent.get_comment()))
+        hash_match = re.search(r"<td style=\"color:darkgreen\">Info hash:</td><td><strong>([a-fA-F0-9]{40})</strong></td>", page)
+        self._assert_logic(hash_match is not None, "Hash not found")
+        return (torrent.get_hash() != hash_match.group(1).lower())
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
@@ -99,25 +83,14 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
     # ===
 
     def login(self):
-        if self._user is not None:
-            self._assert_auth(self._passwd is not None, "Required user for site")
-            self._assert_auth(self._passwd is not None, "Required password for site")
-            post = {
-                "username":  _encode(self._user),
-                "password":  _encode(self._passwd),
-                "autologin": b"",
-                "login":     b"",
-            }
-            post_data = _encode(urllib.parse.urlencode(post))
-            page = _decode(self._read_url("http://tfile.me/login/", data=post_data))
-            self._assert_auth("class=\"nick u\">{}</a>".format(self._user) in page, "Invalid user or password")
-
-            page = _decode(self._read_url("http://tfile.me/forum/viewtopic.php?t=579690"))
-            self._tzinfo = self._get_tzinfo(page)
-        else:
-            self._tzinfo = self._select_tzinfo("Europe/Moscow")
-
-    def _get_tzinfo(self, page):
-        timezone_match = re.search(r"<span class=\"gensmall\">Часовой пояс: (GMT [+-] \d{1,2})</span>", page)
-        timezone = (timezone_match and "Etc/" + timezone_match.group(1).replace(" ", ""))
-        return self._select_tzinfo(timezone)
+        self._assert_auth(self._passwd is not None, "Required user for site")
+        self._assert_auth(self._passwd is not None, "Required password for site")
+        post = {
+            "username":  _encode(self._user),
+            "password":  _encode(self._passwd),
+            "autologin": b"",
+            "login":     b"",
+        }
+        post_data = _encode(urllib.parse.urlencode(post))
+        page = _decode(self._read_url("http://tfile.me/login/", data=post_data))
+        self._assert_auth("class=\"nick u\">{}</a>".format(self._user) in page, "Invalid user or password")
