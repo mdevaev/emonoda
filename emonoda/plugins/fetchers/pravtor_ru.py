@@ -117,13 +117,10 @@ class Plugin(BaseFetcher, WithLogin):
     def login(self):
         self._assert_auth(self._user is not None, "Required user for site")
         self._assert_auth(self._passwd is not None, "Required passwd for site")
-        post = {
+        post_data = _encode(urllib.parse.urlencode({
             "login_username": _encode(self._user),
             "login_password": _encode(self._passwd),
             "login":          b"\xc2\xf5\xee\xe4",
-        }
-        page = _decode(self._read_url(
-            url="http://pravtor.ru/login.php",
-            data=_encode(urllib.parse.urlencode(post)),
-        ))
+        }))
+        page = _decode(self._read_url("http://pravtor.ru/login.php", data=post_data))
         self._assert_auth(re.search(r"<!--login form-->", page) is None, "Invalid user or password")

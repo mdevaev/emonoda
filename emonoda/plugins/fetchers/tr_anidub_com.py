@@ -129,12 +129,11 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
     def login(self):
         self._assert_auth(self._user is not None, "Required user for site")
         self._assert_auth(self._passwd is not None, "Required password for site")
-        post = {
+        post_data = _encode(urllib.parse.urlencode({
             "login_name":      _encode(self._user),
             "login_password":  _encode(self._passwd),
             "login":           b"submit",
-        }
-        post_data = _encode(urllib.parse.urlencode(post))
+        }))
         page = _decode(self._read_url("http://tr.anidub.com/", data=post_data))
         profile = "<li><a href=\"http://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
         self._assert_auth(profile in page, "Invalid user or password")

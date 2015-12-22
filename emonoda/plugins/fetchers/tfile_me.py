@@ -85,12 +85,11 @@ class Plugin(BaseFetcher, WithLogin):
     def login(self):
         self._assert_auth(self._passwd is not None, "Required user for site")
         self._assert_auth(self._passwd is not None, "Required password for site")
-        post = {
+        post_data = _encode(urllib.parse.urlencode({
             "username":  _encode(self._user),
             "password":  _encode(self._passwd),
             "autologin": b"",
             "login":     b"",
-        }
-        post_data = _encode(urllib.parse.urlencode(post))
+        }))
         page = _decode(self._read_url("http://tfile.me/login/", data=post_data))
         self._assert_auth("class=\"nick u\">{}</a>".format(self._user) in page, "Invalid user or password")
