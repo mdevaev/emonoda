@@ -39,6 +39,7 @@ if __name__ == "__main__":
             "emonoda.optconf",
             "emonoda.apps",
             "emonoda.apps.hooks",
+            "emonoda.apps.hooks.rtorrent",
             "emonoda.helpers",
             "emonoda.plugins",
             "emonoda.plugins.clients",
@@ -59,7 +60,6 @@ if __name__ == "__main__":
                 "emload = emonoda.apps.emload:main",
                 "emfind = emonoda.apps.emfind:main",
                 "emrm = emonoda.apps.emrm:main",
-                "emhook-manage-trackers = emonoda.apps.hooks.manage_trackers:main",
             ],
         },
 
