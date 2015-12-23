@@ -21,12 +21,48 @@ import sys
 import os
 import socket
 import xmlrpc.client
+import operator
+import math
 import time
 import argparse
 
 
 # =====
-def print_stat(client_url, host, interval):
+def get_summary(server, hashes):
+    mapping = (
+        ("get_peers_accounted",  "leechers"),
+        ("is_hash_checking",     "is_checking"),
+        ("get_completed_chunks", "completed_chunks"),
+        ("get_chunks_hashed",    "hashed_chunks"),
+        ("get_size_chunks",      "size_chunks"),
+        ("get_message",          "msg"),
+    )
+    multicall = xmlrpc.client.MultiCall(server)
+    for torrent_hash in hashes:
+        for (method_name, _) in mapping:
+            getattr(multicall.d, method_name)(torrent_hash)
+    rows = tuple(multicall())
+    rows = tuple(
+        dict(zip(map(operator.itemgetter(1), mapping), rows[count:count + len(mapping)]))
+        for count in range(0, len(rows), len(mapping))
+    )
+
+    summary = dict.fromkeys(("total", "dn", "up", "errors"), 0)
+    for row in rows:
+        if row["leechers"]:
+            summary["up"] += 1
+        chunks_processing = (row["completed_chunks"] if row["is_checking"] else row["hashed_chunks"])
+        done = math.floor(chunks_processing / row["size_chunks"] * 1000)
+        if done != 1000:
+            summary["dn"] += 1
+        if len(row["msg"]) and row["msg"] != "Tracker: [Tried all trackers.]":
+            summary["errors"] += 1
+    summary["total"] = len(hashes)
+    return summary
+
+
+# =====
+def print_stat(client_url, host, interval, with_dht, with_summary):
     server = xmlrpc.client.ServerProxy(client_url)
     while True:
         multicall = xmlrpc.client.MultiCall(server)
@@ -37,31 +73,44 @@ def print_stat(client_url, host, interval):
         multicall.get_upload_rate()  # Upload rate limit
         multicall.get_up_total()  # Uploaded
         multicall.dht_statistics()
+        multicall.download_list()
         values = tuple(multicall())
 
-        for (key, value) in (
+        metrics = [
             ("gauge-dn_rate",       values[0]),
             ("gauge-dn_rate_limit", values[1]),
             ("bytes-dn_total",      values[2]),
             ("gauge-up_rate",       values[3]),
             ("gauge-up_rate_limit", values[4]),
             ("bytes-up_total",      values[5]),
+        ]
+        if with_dht:
+            metrics += [
+                ("gauge-dht_active",           values[6]["active"]),
+                ("count-dht_nodes",            values[6]["nodes"]),
+                ("count-dht_cycle",            values[6]["cycle"]),
+                ("count-dht_torrents",         values[6]["torrents"]),
+                ("count-dht_buckets",          values[6]["buckets"]),
+                ("count-dht_replies_received", values[6]["replies_received"]),
+                ("count-dht_peers",            values[6]["peers"]),
+                ("count-dht_peers_max",        values[6]["peers_max"]),
+                ("count-dht_errors_caught",    values[6]["errors_caught"]),
+                ("count-dht_errors_received",  values[6]["errors_received"]),
+                ("count-dht_queries_sent",     values[6]["queries_sent"]),
+                ("count-dht_queries_received", values[6]["queries_received"]),
+                ("bytes-dht_bytes_written",    values[6]["bytes_written"]),
+                ("bytes-dht_bytes_read",       values[6]["bytes_read"]),
+            ]
+        if with_summary:
+            summary = get_summary(server, values[7])
+            metrics += [
+                ("count-summary_total",  summary["total"]),
+                ("count-summary_dn",     summary["dn"]),
+                ("count-summary_up",     summary["up"]),
+                ("count-summary_errors", summary["errors"]),
+            ]
 
-            ("gauge-dht_active",           values[6]["active"]),
-            ("count-dht_nodes",            values[6]["nodes"]),
-            ("count-dht_cycle",            values[6]["cycle"]),
-            ("count-dht_torrents",         values[6]["torrents"]),
-            ("count-dht_buckets",          values[6]["buckets"]),
-            ("count-dht_replies_received", values[6]["replies_received"]),
-            ("count-dht_peers",            values[6]["peers"]),
-            ("count-dht_peers_max",        values[6]["peers_max"]),
-            ("count-dht_errors_caught",    values[6]["errors_caught"]),
-            ("count-dht_errors_received",  values[6]["errors_received"]),
-            ("count-dht_queries_sent",     values[6]["queries_sent"]),
-            ("count-dht_queries_received", values[6]["queries_received"]),
-            ("bytes-dht_bytes_written",    values[6]["bytes_written"]),
-            ("bytes-dht_bytes_read",       values[6]["bytes_read"]),
-        ):
+        for (key, value) in metrics:
             print("PUTVAL {}/rtorrent/{} interval={} N:{}".format(host, key, interval, value), flush=True)
         time.sleep(interval)
 
@@ -69,6 +118,8 @@ def print_stat(client_url, host, interval):
 # ===== Main =====
 def main():
     args_parser = argparse.ArgumentParser(description="Prints collectd stat in plaintext protocol")
+    args_parser.add_argument("--with-dht", action="store_true")
+    args_parser.add_argument("--with-summary", action="store_true")
     args_parser.add_argument("-n", "--host", default=os.getenv("COLLECTD_HOSTNAME", "localhost"), metavar="<seconds>")
     args_parser.add_argument("-i", "--interval", default=os.getenv("COLLECTD_INTERVAL", 60), type=float, metavar="<seconds>")
     args_parser.add_argument("-t", "--timeout", default=5.0, type=float, metavar="<seconds>")
@@ -81,6 +132,8 @@ def main():
             client_url=options.client_url,
             host=options.host,
             interval=options.interval,
+            with_dht=options.with_dht,
+            with_summary=options.with_summary,
         )
     except (SystemExit, KeyboardInterrupt):
         pass
