@@ -61,7 +61,6 @@ def get_summary(server, hashes):
     return summary
 
 
-# =====
 def print_stat(client_url, host, interval, with_dht, with_summary):
     server = xmlrpc.client.ServerProxy(client_url)
     while True:
@@ -120,7 +119,7 @@ def main():
     args_parser = argparse.ArgumentParser(description="Prints collectd stat in plaintext protocol")
     args_parser.add_argument("--with-dht", action="store_true")
     args_parser.add_argument("--with-summary", action="store_true")
-    args_parser.add_argument("-n", "--host", default=os.getenv("COLLECTD_HOSTNAME", "localhost"), metavar="<seconds>")
+    args_parser.add_argument("-n", "--host", default=os.getenv("COLLECTD_HOSTNAME", "localhost"), metavar="<hostname>")
     args_parser.add_argument("-i", "--interval", default=os.getenv("COLLECTD_INTERVAL", 60), type=float, metavar="<seconds>")
     args_parser.add_argument("-t", "--timeout", default=5.0, type=float, metavar="<seconds>")
     args_parser.add_argument("--client-url", default="http://localhost/RPC2", metavar="<url>")
