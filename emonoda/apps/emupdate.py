@@ -28,6 +28,9 @@ import operator
 import argparse
 
 from ..plugins.fetchers import FetcherError
+from ..plugins.fetchers import WithHash
+from ..plugins.fetchers import WithScrape
+from ..plugins.fetchers import WithTime
 
 from ..helpers import tcollection
 from ..helpers import surprise
@@ -279,14 +282,28 @@ def update(
                     op.done_not_in_client()
                     continue
 
-                if op.fetcher.is_torrent_changed(op.torrent):
+                def on_change(op):  # XXX: op for pylint: Cell variable op defined in loop
                     new_data = op.fetcher.fetch_new_data(op.torrent)
-                    diff = tfile.get_difference(op.torrent, tfile.Torrent(data=new_data))
-                    if not noop:
-                        if backup_dir_path is not None:
-                            backup_torrent(op.torrent, backup_dir_path, backup_suffix)
-                        update_torrent(client, op.torrent, new_data, to_save_customs, to_set_customs)
-                    op.done_affected(diff)
+                    tmp_torrent = tfile.Torrent(data=new_data)
+                    if op.torrent.get_hash() != tmp_torrent.get_hash():
+                        diff = tfile.get_difference(op.torrent, tmp_torrent)
+                        if not noop:
+                            if backup_dir_path is not None:
+                                backup_torrent(op.torrent, backup_dir_path, backup_suffix)
+                            update_torrent(client, op.torrent, new_data, to_save_customs, to_set_customs)
+                        op.done_affected(diff)
+                    # else: TODO modify mtime
+
+                fetcher_bases = op.fetcher.get_bases()
+                if WithHash in fetcher_bases:
+                    if op.fetcher.fetch_hash(op.torrent) != op.torrent.get_hash():
+                        on_change(op)
+                elif WithScrape in fetcher_bases:
+                    if not op.fetcher.is_registered(op.torrent):
+                        on_change(op)
+                elif WithTime in fetcher_bases:
+                    if op.fetcher.fetch_time(op.torrent) != op.torrent.get_mtime():
+                        on_change(op)
         except Exception:
             pass
 

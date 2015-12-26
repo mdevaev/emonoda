@@ -35,12 +35,13 @@ def _decode(arg):
 
 
 class Plugin(BaseFetcher, WithLogin, WithScrape):
+    _comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
     _domain = "nnm-club.me"
+    _base_scrape_url = "http://bt.{}:2710".format(_domain)
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-        self._comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
 
     @classmethod
     def get_name(cls):
@@ -63,9 +64,6 @@ class Plugin(BaseFetcher, WithLogin, WithScrape):
         return cls._get_merged_options()
 
     # ===
-
-    def is_torrent_changed(self, torrent):
-        return self._is_torrent_registered("http://bt.{}:2710".format(self._domain), torrent)
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)

@@ -37,10 +37,11 @@ def _decode(arg):
 
 
 class Plugin(BaseFetcher, WithLogin, WithTime):
+    _comment_regexp = re.compile(r"http://booktracker\.org/viewtopic\.php\?p=(\d+)")
+
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-        self._comment_regexp = re.compile(r"http://booktracker\.org/viewtopic\.php\?p=(\d+)")
         self._tzinfo = None
 
     @classmethod
@@ -65,12 +66,10 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
 
     # ===
 
-    def is_torrent_changed(self, torrent):
+    def fetch_time(self, torrent):
         self._assert_match(torrent)
         page = _decode(self._read_url(torrent.get_comment()))
-        return (torrent.get_mtime() < self._get_upload_time(page))
 
-    def _get_upload_time(self, page):
         date_match = re.search(r"Зарегистрирован &nbsp;\s*\[ <span title=\"[\w\s]+\">"
                                r"(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span> ]", page)
         self._assert_logic(date_match is not None, "Upload date not found")

@@ -24,11 +24,9 @@ from . import nnm_club_me
 
 # =====
 class Plugin(nnm_club_me.Plugin):
+    _comment_regexp = re.compile(r"http://ipv6\.nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
     _domain = "ipv6.nnm-club.me"
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._comment_regexp = re.compile(r"http://ipv6\.nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
+    _base_scrape_url = "http://bt.{}:2710".format(_domain)
 
     @classmethod
     def get_name(cls):

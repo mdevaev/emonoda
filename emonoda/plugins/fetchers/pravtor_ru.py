@@ -23,6 +23,7 @@ import re
 
 from . import BaseFetcher
 from . import WithLogin
+from . import WithHash
 
 
 # =====
@@ -34,11 +35,12 @@ def _decode(arg):
     return arg.decode("cp1251")
 
 
-class Plugin(BaseFetcher, WithLogin):
+class Plugin(BaseFetcher, WithLogin, WithHash):
+    _comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
+
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-        self._comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
 
     @classmethod
     def get_name(cls):
@@ -62,12 +64,12 @@ class Plugin(BaseFetcher, WithLogin):
 
     # ===
 
-    def is_torrent_changed(self, torrent):
+    def fetch_hash(self, torrent):
         self._assert_match(torrent)
         page = _decode(self._read_url(torrent.get_comment()))
         hash_match = re.search(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>", page)
         self._assert_logic(hash_match is not None, "Hash not found")
-        return (torrent.get_hash() != hash_match.group(1).lower())
+        return hash_match.group(1).lower()
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)

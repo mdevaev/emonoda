@@ -28,8 +28,8 @@ from dateutil.relativedelta import relativedelta
 from ... import tfile
 
 from . import BaseFetcher
-from . import WithLogin
 from . import WithTime
+from . import WithLogin
 
 
 # =====
@@ -41,13 +41,13 @@ def _decode(arg):
     return arg.decode("utf-8")
 
 
-class Plugin(BaseFetcher, WithLogin, WithTime):
+class Plugin(BaseFetcher, WithTime, WithLogin, WithTime):
+    _comment_regexp = re.compile(r"http://tr\.anidub\.com/\?newsid=(\d+)")
+
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-        self._comment_regexp = re.compile(r"http://tr\.anidub\.com/\?newsid=(\d+)")
         self._tzinfo = None
-        self._last_data = None
 
     @classmethod
     def get_name(cls):
@@ -72,18 +72,9 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
 
     # ===
 
-    def is_torrent_changed(self, torrent):
-        self._last_data = None
+    def fetch_time(self, torrent):
         self._assert_match(torrent)
         page = _decode(self._read_url(torrent.get_comment()))
-        if torrent.get_mtime() < self._get_upload_time(page):
-            candidate = self._get_candidate(page, torrent)
-            if torrent.get_hash() != candidate.get_hash():
-                self._last_data = candidate.get_data()
-                return True
-        return False
-
-    def _get_upload_time(self, page):
         date_match = re.search(r"<li><b>Дата:</b> ([^,\s]+, \d\d:\d\d)</li>", page)
         self._assert_logic(date_match is not None, "Upload date not found")
         date = date_match.group(1)
@@ -100,7 +91,9 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
         upload_time = int(datetime.strptime(date, "%d-%m-%Y, %H:%M %z").strftime("%s"))
         return upload_time
 
-    def _get_candidate(self, page, torrent):
+    def fetch_new_data(self, torrent):
+        self._assert_match(torrent)
+        page = _decode(self._read_url(torrent.get_comment()))
         downloads = set(map(int, re.findall(r"<a href=\"/engine/download.php\?id=(\d+)\" class=\" \">", page)))
         candidates = {}
         for download_id in downloads:
@@ -119,10 +112,7 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
         self._assert_logic(name in candidates, "Can't find torrent named '{}' in downloads".format(name))
         self._assert_logic(len(candidates[name]) == 1, "Too many variants to download: {}".format(
                                                        ", ".join(map(operator.itemgetter(1), candidates[name]))))
-        return candidates[name][0][0]
-
-    def fetch_new_data(self, torrent):
-        return self._last_data
+        return candidates[name][0][0].get_data()
 
     # ===
 

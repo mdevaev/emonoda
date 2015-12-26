@@ -66,6 +66,9 @@ def _assert(exception, arg, msg=""):
 
 
 class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
+    _comment_regexp = None
+    _retry_codes = (500, 502, 503)
+
     def __init__(self, timeout, retries, retries_sleep, user_agent, proxy_url,
                  check_version, check_fingerprint, **_):
 
@@ -77,8 +80,6 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         self._check_version = check_version
         self._check_fingerprint = check_fingerprint
 
-        self._comment_regexp = None
-        self._retry_codes = (500, 502, 503)
         self._cookie_jar = None
         self._opener = None
 
@@ -101,9 +102,6 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "check_fingerprint": Option(default=True, help="Check the site fingerprint"),
             "check_version":     Option(default=True, help="Check the fetcher version from GitHub"),
         }
-
-    def is_torrent_changed(self, torrent):
-        raise NotImplementedError
 
     def fetch_new_data(self, torrent):
         raise NotImplementedError
@@ -235,8 +233,20 @@ class WithCaptcha(BaseExtension):
         self._captcha_decoder = captcha_decoder
 
 
+# =====
+class WithHash(BaseExtension):
+    def __init__(self, **_):
+        pass
+
+    def fetch_hash(self, torrent):
+        raise NotImplementedError
+
+
 class WithScrape(BaseExtension):
+    _base_scrape_url = None
+
     def __init__(self, client_agent, **_):
+        assert self._base_scrape_url is not None
         self._client_agent = client_agent
 
     @classmethod
@@ -245,11 +255,11 @@ class WithScrape(BaseExtension):
             "client_agent": Option(default="rtorrent/0.9.2/0.13.2", help="User-Agent for tracker"),
         }
 
-    def _is_torrent_registered(self, base_scrape_url, torrent):
+    def is_registered(self, torrent):
         # https://wiki.theory.org/BitTorrentSpecification#Tracker_.27scrape.27_Convention
         self._assert_match(torrent)  # pylint: disable=no-member
         data = self._read_url(  # pylint: disable=no-member
-            url=urllib.parse.urljoin(base_scrape_url, "scrape.php?info_hash={}".format(torrent.get_scrape_hash())),
+            url=urllib.parse.urljoin(self._base_scrape_url, "scrape.php?info_hash={}".format(torrent.get_scrape_hash())),
             headers={"User-Agent": self._client_agent},
         )
         return (len(tfile.decode_data(data).get("files", {})) == 0)
@@ -268,6 +278,9 @@ class WithTime(BaseExtension):
                 help="Site timezone, is automatically detected if possible (or manually, 'Europe/Moscow' for example)",
             ),
         }
+
+    def fetch_time(self, torrent):
+        raise NotImplementedError
 
     def _select_tzinfo(self, site_timezone):
         if site_timezone is None or self._default_timezone is not None:
