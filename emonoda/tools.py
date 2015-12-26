@@ -23,6 +23,13 @@ import chardet
 
 
 # =====
+def make_sub_name(path, prefix, suffix):
+    return os.path.join(
+        os.path.dirname(path),
+        prefix + os.path.basename(path) + suffix,
+    )
+
+
 def sorted_paths(paths, get=None):
     if get is None:
         # def for speed

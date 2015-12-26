@@ -37,6 +37,7 @@ from ..helpers import surprise
 
 from .. import tfile
 from .. import fmt
+from .. import tools
 
 from . import init
 from . import get_configured_log
@@ -220,13 +221,6 @@ def backup_torrent(torrent, backup_dir_path, backup_suffix):
     shutil.copyfile(torrent.get_path(), backup_file_path)
 
 
-def make_sub_name(path, prefix, suffix):
-    return os.path.join(
-        os.path.dirname(path),
-        prefix + os.path.basename(path) + suffix,
-    )
-
-
 @contextlib.contextmanager
 def client_hooks(client, torrent, to_save_customs, to_set_customs):
     if client is not None:
@@ -235,7 +229,7 @@ def client_hooks(client, torrent, to_save_customs, to_set_customs):
             customs = client.get_customs(torrent, to_save_customs)
         else:
             customs = {}
-        meta_file_path = make_sub_name(torrent.get_path(), ".", ".meta")
+        meta_file_path = tools.make_sub_name(torrent.get_path(), ".", ".meta")
         with open(meta_file_path, "w") as meta_file:
             meta_file.write(json.dumps({
                 "prefix": prefix,
@@ -257,7 +251,7 @@ def client_hooks(client, torrent, to_save_customs, to_set_customs):
 
 
 def update_torrent(client, torrent, new_data, to_save_customs, to_set_customs):
-    data_file_path = make_sub_name(torrent.get_path(), ".", ".newdata")
+    data_file_path = tools.make_sub_name(torrent.get_path(), ".", ".newdata")
     with open(data_file_path, "wb") as data_file:
         data_file.write(new_data)
     with client_hooks(client, torrent, to_save_customs, to_set_customs):
