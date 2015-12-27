@@ -276,7 +276,17 @@ def update(
                     op.done_not_in_client()
                     continue
 
-                def on_change(op):  # XXX: op for pylint: Cell variable op defined in loop
+                fetcher_bases = op.fetcher.get_bases()
+                if WithHash in fetcher_bases:
+                    run_update = (op.fetcher.fetch_hash(op.torrent) != op.torrent.get_hash())
+                elif WithScrape in fetcher_bases:
+                    run_update = (not op.fetcher.is_registered(op.torrent))
+                elif WithTime in fetcher_bases:
+                    run_update = (op.fetcher.fetch_time(op.torrent) != op.torrent.get_mtime())
+                else:
+                    RuntimeError("Invalid fetcher {}: missing method of check".format(op.fetcher))
+
+                if run_update:
                     new_data = op.fetcher.fetch_new_data(op.torrent)
                     tmp_torrent = tfile.Torrent(data=new_data)
                     if op.torrent.get_hash() != tmp_torrent.get_hash():
@@ -287,17 +297,6 @@ def update(
                             update_torrent(client, op.torrent, new_data, to_save_customs, to_set_customs)
                         op.done_affected(diff)
                     # else: TODO modify mtime
-
-                fetcher_bases = op.fetcher.get_bases()
-                if WithHash in fetcher_bases:
-                    if op.fetcher.fetch_hash(op.torrent) != op.torrent.get_hash():
-                        on_change(op)
-                elif WithScrape in fetcher_bases:
-                    if not op.fetcher.is_registered(op.torrent):
-                        on_change(op)
-                elif WithTime in fetcher_bases:
-                    if op.fetcher.fetch_time(op.torrent) != op.torrent.get_mtime():
-                        on_change(op)
         except Exception:
             pass
 
