@@ -259,7 +259,26 @@ def update_torrent(client, torrent, new_data, to_save_customs, to_set_customs):
         torrent.load_from_data(new_data, torrent.get_path())
 
 
-def update(
+class TorrentTimeInfo:
+    def __init__(self, torrent):
+        self._torrent = torrent
+        self._time_file_path = tools.make_sub_name(self._torrent.get_path(), ".", ".time")
+
+    def check_and_fill(self):
+        if not os.path.exists(self._time_file_path):
+            self.write(int(os.stat(self._torrent.get_path()).st_mtime))
+        return self
+
+    def read(self):
+        with open(self._time_file_path) as time_file:
+            return int(time_file.read().strip())
+
+    def write(self, value):
+        with open(self._time_file_path, "w") as time_file:
+            time_file.write(str(int(value)))
+
+
+def update(  # pylint: disable=too-many-branches
     feeder,
     client,
     backup_dir_path,
@@ -277,26 +296,34 @@ def update(
                     continue
 
                 fetcher_bases = op.fetcher.get_bases()
+
                 if WithHash in fetcher_bases:
-                    run_update = (op.fetcher.fetch_hash(op.torrent) != op.torrent.get_hash())
+                    need_update = (op.fetcher.fetch_hash(op.torrent) != op.torrent.get_hash())
+
                 elif WithScrape in fetcher_bases:
-                    run_update = (not op.fetcher.is_registered(op.torrent))
+                    need_update = (not op.fetcher.is_registered(op.torrent))
+
                 elif WithTime in fetcher_bases:
-                    run_update = (op.fetcher.fetch_time(op.torrent) != op.torrent.get_mtime())
+                    time_info = TorrentTimeInfo(op.torrent).check_and_fill()
+                    fetcher_time = op.fetcher.fetch_time(op.torrent)
+                    need_update = (fetcher_time > time_info.read())
+
                 else:
                     RuntimeError("Invalid fetcher {}: missing method of check".format(op.fetcher))
 
-                if run_update:
-                    new_data = op.fetcher.fetch_new_data(op.torrent)
-                    tmp_torrent = tfile.Torrent(data=new_data)
+                if need_update:
+                    tmp_torrent = tfile.Torrent(data=op.fetcher.fetch_new_data(op.torrent))
                     if op.torrent.get_hash() != tmp_torrent.get_hash():
                         diff = tfile.get_difference(op.torrent, tmp_torrent)
                         if not noop:
                             if backup_dir_path is not None:
                                 backup_torrent(op.torrent, backup_dir_path, backup_suffix)
-                            update_torrent(client, op.torrent, new_data, to_save_customs, to_set_customs)
+                            update_torrent(client, op.torrent, tmp_torrent.get_data(), to_save_customs, to_set_customs)
+                            if WithTime in fetcher_bases:
+                                time_info.write(fetcher_time)
                         op.done_affected(diff)
-                    # else: TODO modify mtime
+                    elif WithTime in fetcher_bases and not noop:
+                        time_info.write(fetcher_time)
         except Exception:
             pass
 
