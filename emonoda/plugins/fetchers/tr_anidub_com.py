@@ -41,7 +41,7 @@ def _decode(arg):
     return arg.decode("utf-8")
 
 
-class Plugin(BaseFetcher, WithTime, WithLogin, WithTime):
+class Plugin(BaseFetcher, WithLogin, WithTime):
     _comment_regexp = re.compile(r"http://tr\.anidub\.com/\?newsid=(\d+)")
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
