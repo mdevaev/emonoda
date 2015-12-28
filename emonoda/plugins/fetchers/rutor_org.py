@@ -26,32 +26,22 @@ from . import WithHash
 
 
 # =====
-def _decode(arg):
-    return arg.decode("utf-8")
-
-
 class Plugin(BaseFetcher, WithHash):
-    _comment_regexp = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
+    PLUGIN_NAME = "rutor.org"
+
+    _SITE_VERSION = 3
+    _SITE_ENCODING = "utf-8"
+
+    _SITE_FINGERPRINT_URL = "http://fast-bit.org"
+    _SITE_FINGERPRINT_TEXT = "<a href=\"/\"><img src=\"/s/logo.jpg\" alt=\"rutor.org logo\" /></a>"
+
+    _COMMENT_REGEXP = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
+
+    # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=False)
-
-    @classmethod
-    def get_name(cls):
-        return "rutor.org"
-
-    @classmethod
-    def get_version(cls):
-        return 3
-
-    @classmethod
-    def get_fingerprint(cls):
-        return {
-            "url":      "http://fast-bit.org",
-            "encoding": "utf-8",
-            "text":     "<a href=\"/\"><img src=\"/s/logo.jpg\" alt=\"rutor.org logo\" /></a>",
-        }
 
     @classmethod
     def get_options(cls):
@@ -63,14 +53,14 @@ class Plugin(BaseFetcher, WithHash):
 
     def fetch_hash(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment().replace("rutor.org", "fast-bit.org")))
+        page = self._decode(self._read_url(torrent.get_comment().replace("rutor.org", "fast-bit.org")))
         hash_match = re.search(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})", page)
         self._assert_logic(hash_match is not None, "Hash not found")
         return hash_match.group(1).lower()
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        topic_id = self._comment_regexp.match(torrent.get_comment()).group(1)
+        topic_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
         data = self._read_url("http://fast-bit.org/download/{}".format(topic_id))
         self._assert_valid_data(data)
         return data

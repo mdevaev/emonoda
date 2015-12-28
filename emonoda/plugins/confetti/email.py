@@ -36,6 +36,8 @@ from . import templated
 
 # =====
 class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
+    PLUGIN_NAME = "email"
+
     def __init__(self,  # pylint: disable=super-init-not-called,too-many-arguments
                  to, cc, subject, sender, html, server, port, ssl, user, passwd, **kwargs):
         self._init_bases(**kwargs)
@@ -51,10 +53,6 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         self._ssl = ssl
         self._user = user
         self._passwd = passwd
-
-    @classmethod
-    def get_name(cls):
-        return "email"
 
     @classmethod
     def get_options(cls):

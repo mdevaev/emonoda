@@ -24,14 +24,11 @@ from . import nnm_club_me
 
 # =====
 class Plugin(nnm_club_me.Plugin):
-    _comment_regexp = re.compile(r"http://ipv6\.nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
-    _domain = "ipv6.nnm-club.me"
-    _base_scrape_url = "http://bt.{}:2710".format(_domain)
+    PLUGIN_NAME = _DOMAIN = "ipv6.nnm-club.me"
 
-    @classmethod
-    def get_name(cls):
-        return "ipv6.nnm-club.me"
+    _SITE_VERSION = 0
+    _SITE_FINGERPRINT_URL = "http://{}".format(_DOMAIN)
 
-    @classmethod
-    def get_version(cls):
-        return 0
+    _COMMENT_REGEXP = re.compile(r"http://ipv6\.nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
+
+    _BASE_SCRAPE_URL = "http://bt.{}:2710".format(_DOMAIN)

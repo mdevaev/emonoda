@@ -26,38 +26,24 @@ from . import WithScrape
 
 
 # =====
-def _encode(arg):
-    return arg.encode("cp1251")
-
-
-def _decode(arg):
-    return arg.decode("cp1251")
-
-
 class Plugin(BaseFetcher, WithLogin, WithScrape):
-    _comment_regexp = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
-    _domain = "nnm-club.me"
-    _base_scrape_url = "http://bt.{}:2710".format(_domain)
+    PLUGIN_NAME = _DOMAIN = "nnm-club.me"
+
+    _SITE_VERSION = 1
+    _SITE_ENCODING = "cp1251"
+
+    _SITE_FINGERPRINT_URL = "http://{}".format(_DOMAIN)
+    _SITE_FINGERPRINT_TEXT = "<link rel=\"canonical\" href=\"http://nnm-club.me/\">"
+
+    _COMMENT_REGEXP = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
+
+    _BASE_SCRAPE_URL = "http://bt.{}:2710".format(_DOMAIN)
+
+    # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-
-    @classmethod
-    def get_name(cls):
-        return "nnm-club.me"
-
-    @classmethod
-    def get_version(cls):
-        return 1
-
-    @classmethod
-    def get_fingerprint(cls):
-        return {
-            "url":      "http://{}".format(cls._domain),
-            "encoding": "cp1251",
-            "text":     "<link rel=\"canonical\" href=\"http://nnm-club.me/\">",
-        }
 
     @classmethod
     def get_options(cls):
@@ -67,13 +53,13 @@ class Plugin(BaseFetcher, WithLogin, WithScrape):
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment().replace("nnm-club.ru", "nnm-club.me")))
+        page = self._decode(self._read_url(torrent.get_comment().replace("nnm-club.ru", "nnm-club.me")))
 
         torrent_id_match = re.search(r"filelst.php\?attach_id=([a-zA-Z0-9]+)", page)
         self._assert_logic(torrent_id_match is not None, "Unknown torrent_id")
         torrent_id = torrent_id_match.group(1)
 
-        data = self._read_url("http://{}//forum/download.php?id={}".format(self._domain, torrent_id))
+        data = self._read_url("http://{}//forum/download.php?id={}".format(self._DOMAIN, torrent_id))
         self._assert_valid_data(data)
         return data
 
@@ -82,11 +68,11 @@ class Plugin(BaseFetcher, WithLogin, WithScrape):
     def login(self):
         self._assert_auth(self._user is not None, "Required user for site")
         self._assert_auth(self._passwd is not None, "Required password for site")
-        post_data = _encode(urllib.parse.urlencode({
-            "username": _encode(self._user),
-            "password": _encode(self._passwd),
+        post_data = self._encode(urllib.parse.urlencode({
+            "username": self._encode(self._user),
+            "password": self._encode(self._passwd),
             "redirect": b"",
             "login":    b"\xc2\xf5\xee\xe4",
         }))
-        page = _decode(self._read_url("http://{}/forum/login.php".format(self._domain), data=post_data))
+        page = self._decode(self._read_url("http://{}/forum/login.php".format(self._DOMAIN), data=post_data))
         self._assert_auth("[ {} ]".format(self._user) in page, "Invalid user or password")

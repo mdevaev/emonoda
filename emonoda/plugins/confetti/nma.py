@@ -31,14 +31,12 @@ from . import WithProxy
 
 # =====
 class Plugin(BaseConfetti, WithProxy):
+    PLUGIN_NAME = "nma"
+
     def __init__(self, api_keys, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
 
         self._api_keys = api_keys
-
-    @classmethod
-    def get_name(cls):
-        return "nma"
 
     @classmethod
     def get_options(cls):

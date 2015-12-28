@@ -42,6 +42,8 @@ class Plugin(BaseClient):
     #   http://pythonhosted.org/transmissionrpc/
     #   https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
 
+    PLUGIN_NAME = "transmission"
+
     def __init__(self, url, user, passwd, timeout, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
 
@@ -54,10 +56,6 @@ class Plugin(BaseClient):
             password=passwd,
             timeout=timeout,
         )
-
-    @classmethod
-    def get_name(cls):
-        return "transmission"
 
     @classmethod
     def get_options(cls):

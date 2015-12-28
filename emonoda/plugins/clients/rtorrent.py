@@ -50,6 +50,8 @@ def _catch_unknown_torrent(method):
 class Plugin(BaseClient, WithCustoms):
     # API description: http://code.google.com/p/gi-torrent/wiki/rTorrent_XMLRPC_reference
 
+    PLUGIN_NAME = "rtorrent"
+
     def __init__(self, url, load_retries, retries_sleep, xmlrpc_size_limit, **kwargs):  # pylint:disable=super-init-not-called
         self._init_bases(**kwargs)
 
@@ -57,10 +59,6 @@ class Plugin(BaseClient, WithCustoms):
         self._retries_sleep = retries_sleep
         self._server = xmlrpc.client.ServerProxy(url)
         self._server.set_xmlrpc_size_limit(xmlrpc_size_limit)
-
-    @classmethod
-    def get_name(cls):
-        return "rtorrent"
 
     @classmethod
     def get_options(cls):

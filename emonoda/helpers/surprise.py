@@ -24,13 +24,12 @@ import traceback
 def deploy_surprise(source, results, confetti, log):
     ok = True
     for sender in confetti:
-        name = sender.get_name()
-        log.info("Sending {blue}%s{reset} ...", (name,), one_line=True)
+        log.info("Sending {blue}%s{reset} ...", (sender.PLUGIN_NAME,), one_line=True)
         try:
             sender.send_results(source, results)
-            log.info("Result {blue}%s{reset} was {green}sent{reset}", (name,))
+            log.info("Result {blue}%s{reset} was {green}sent{reset}", (sender.PLUGIN_NAME,))
         except Exception as err:
-            log.error("Can't send {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
+            log.error("Can't send {red}%s{reset}: {red}%s{reset}(%s)", (sender.PLUGIN_NAME, type(err).__name__, err))
             log.print("%s", ("\n".join("\t" + row for row in traceback.format_exc().strip().split("\n")),))
             ok = False
     if not ok:

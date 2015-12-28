@@ -28,37 +28,21 @@ from . import WithHash
 
 
 # =====
-def _encode(arg):
-    return arg.encode("cp1251")
-
-
-def _decode(arg):
-    return arg.decode("cp1251")
-
-
 class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithHash):
-    _comment_regexp = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
-    _retry_codes = (503, 404)
+    PLUGIN_NAME = "rutracker.org"
+
+    _SITE_VERSION = 1
+    _SITE_ENCODING = "cp1251"
+    _SITE_RETRY_CODES = (503, 404)
+
+    _SITE_FINGERPRINT_URL = "http://rutracker.org/forum/index.php"
+    _SITE_FINGERPRINT_TEXT = "href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\""
+
+    _COMMENT_REGEXP = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-
-    @classmethod
-    def get_name(cls):
-        return "rutracker.org"
-
-    @classmethod
-    def get_version(cls):
-        return 1
-
-    @classmethod
-    def get_fingerprint(cls):
-        return {
-            "url":      "http://rutracker.org/forum/index.php",
-            "encoding": "cp1251",
-            "text":     "<link rel=\"shortcut icon\" href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\">",
-        }
 
     @classmethod
     def get_options(cls):
@@ -68,7 +52,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithHash):
 
     def fetch_hash(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment()))
+        page = self._decode(self._read_url(torrent.get_comment()))
         hash_match = re.search(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>", page)
         self._assert_logic(hash_match is not None, "Hash not found")
         return hash_match.group(1).lower()
@@ -76,7 +60,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithHash):
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
 
-        topic_id = self._comment_regexp.match(torrent.get_comment()).group(1)
+        topic_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
 
         cookie = http.cookiejar.Cookie(
             version=0,
@@ -118,8 +102,8 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithHash):
         self._assert_auth(self._passwd is not None, "Required passwd for site")
 
         post = {
-            "login_username": _encode(self._user),
-            "login_password": _encode(self._passwd),
+            "login_username": self._encode(self._user),
+            "login_password": self._encode(self._passwd),
             "login":          b"\xc2\xf5\xee\xe4",
         }
         page = self._read_login(post)
@@ -138,7 +122,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithHash):
             self._assert_auth(cap_static_regexp.search(page) is None, "Invalid user, password or captcha")
 
     def _read_login(self, post):
-        return _decode(self._read_url(
+        return self._decode(self._read_url(
             url="http://login.rutracker.org/forum/login.php",
-            data=_encode(urllib.parse.urlencode(post)),
+            data=self._encode(urllib.parse.urlencode(post)),
         ))

@@ -46,7 +46,7 @@ def _get_classes():
                 module_name = file_name[:-3]
                 module = importlib.import_module("emonoda.plugins.{}.{}".format(sub, module_name))
                 plugin_class = getattr(module, "Plugin")
-                classes[sub][plugin_class.get_name()] = plugin_class
+                classes[sub][plugin_class.PLUGIN_NAME] = plugin_class
     return classes
 
 
@@ -59,9 +59,7 @@ def _get_bases(mro):
 
 
 class BasePlugin:
-    @classmethod
-    def get_name(cls):
-        raise NotImplementedError
+    PLUGIN_NAME = None
 
     @classmethod
     def get_options(cls):
@@ -74,6 +72,7 @@ class BasePlugin:
     # ===
 
     def _init_bases(self, **kwargs):
+        assert self.PLUGIN_NAME is not None
         for parent in _get_bases(self.__class__.__mro__):
             parent.__init__(self, **kwargs)
 

@@ -28,37 +28,23 @@ from . import WithTime
 
 
 # =====
-def _encode(arg):
-    return arg.encode("utf-8")
-
-
-def _decode(arg):
-    return arg.decode("utf-8")
-
-
 class Plugin(BaseFetcher, WithLogin, WithTime):
-    _comment_regexp = re.compile(r"http://booktracker\.org/viewtopic\.php\?p=(\d+)")
+    PLUGIN_NAME = "booktracker.org"
+
+    _SITE_VERSION = 0
+    _SITE_ENCODING = "utf-8"
+
+    _SITE_FINGERPRINT_URL = "http://booktracker.org"
+    _SITE_FINGERPRINT_TEXT = "var cookieDomain  = \"booktracker.org\";"
+
+    _COMMENT_REGEXP = re.compile(r"http://booktracker\.org/viewtopic\.php\?p=(\d+)")
+
+    # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
         self._tzinfo = None
-
-    @classmethod
-    def get_name(cls):
-        return "booktracker.org"
-
-    @classmethod
-    def get_version(cls):
-        return 0
-
-    @classmethod
-    def get_fingerprint(cls):
-        return {
-            "url":      "http://booktracker.org",
-            "encoding": "utf-8",
-            "text":     "var cookieDomain  = \"booktracker.org\";"
-        }
 
     @classmethod
     def get_options(cls):
@@ -68,7 +54,7 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
 
     def fetch_time(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment()))
+        page = self._decode(self._read_url(torrent.get_comment()))
 
         date_match = re.search(r"Зарегистрирован &nbsp;\s*\[ <span title=\"[\w\s]+\">"
                                r"(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span> ]", page)
@@ -79,7 +65,7 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment()))
+        page = self._decode(self._read_url(torrent.get_comment()))
 
         dl_id_match = re.search(r"<a href=\"download\.php\?id=(\d+)\" class=\"\">", page)
         self._assert_logic(dl_id_match is not None, "Unknown dl_id")
@@ -95,19 +81,19 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
         self._assert_auth(self._user is not None, "Required user for site")
         self._assert_auth(self._passwd is not None, "Required passwd for site")
 
-        post_data = _encode(urllib.parse.urlencode({
-            "login_username": _encode(self._user),
-            "login_password": _encode(self._passwd),
-            "login":          _encode("Вход"),
+        post_data = self._encode(urllib.parse.urlencode({
+            "login_username": self._encode(self._user),
+            "login_password": self._encode(self._passwd),
+            "login":          self._encode("Вход"),
         }))
-        page = _decode(self._read_url("http://booktracker.org/login.php", data=post_data))
+        page = self._decode(self._read_url("http://booktracker.org/login.php", data=post_data))
         logout = "<b class=\"med\">{}</b></a>&nbsp; [ <a href=\"./login.php?logout=1".format(self._user)
         self._assert_auth(logout in page, "Invalid user or password")
 
         self._tzinfo = self._get_tzinfo()
 
     def _get_tzinfo(self):
-        page = _decode(self._read_url("http://booktracker.org/profile.php?mode=editprofile"))
+        page = self._decode(self._read_url("http://booktracker.org/profile.php?mode=editprofile"))
         timezone_match = re.search(r"<option value=\"[\.\d+-]\" selected=\"selected\">(GMT [+-] [\d\.]+)[\s<\(]", page)
         timezone = (timezone_match and "Etc/" + timezone_match.group(1).replace(" ", ""))
         return self._select_tzinfo(timezone)

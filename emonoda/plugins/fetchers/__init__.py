@@ -66,11 +66,23 @@ def _assert(exception, arg, msg=""):
 
 
 class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
-    _comment_regexp = None
-    _retry_codes = (500, 502, 503)
+    _SITE_VERSION = None
+    _SITE_ENCODING = None
+    _SITE_RETRY_CODES = (500, 502, 503)
+    _SITE_FINGERPRINT_URL = None
+    _SITE_FINGERPRINT_TEXT = None
+
+    _COMMENT_REGEXP = None
 
     def __init__(self, timeout, retries, retries_sleep, user_agent, proxy_url,
                  check_version, check_fingerprint, **_):
+
+        assert self._SITE_VERSION is not None
+        assert self._SITE_ENCODING is not None
+        assert self._SITE_FINGERPRINT_URL is not None
+        assert self._SITE_FINGERPRINT_TEXT is not None
+
+        assert self._COMMENT_REGEXP is not None
 
         self._timeout = timeout
         self._retries = retries
@@ -82,14 +94,6 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
         self._cookie_jar = None
         self._opener = None
-
-    @classmethod
-    def get_version(cls):
-        raise NotImplementedError
-
-    @classmethod
-    def get_fingerprint(cls):
-        raise NotImplementedError
 
     @classmethod
     def get_options(cls):
@@ -105,6 +109,14 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     def fetch_new_data(self, torrent):
         raise NotImplementedError
+
+    # ===
+
+    def _encode(self, arg):
+        return arg.encode(self._SITE_ENCODING)
+
+    def _decode(self, arg):
+        return arg.decode(self._SITE_ENCODING)
 
     # ===
 
@@ -146,14 +158,14 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
             timeout=self._timeout,
             retries=self._retries,
             retries_sleep=self._retries_sleep,
-            retry_codes=self._retry_codes,
+            retry_codes=self._SITE_RETRY_CODES,
         )
 
     # ===
 
     def is_matched_for(self, torrent):
-        assert self._comment_regexp is not None
-        return (self._comment_regexp.match(torrent.get_comment() or "") is not None)
+        assert self._COMMENT_REGEXP is not None
+        return (self._COMMENT_REGEXP.match(torrent.get_comment() or "") is not None)
 
     def _assert_logic(self, arg, *args):
         _assert(LogicError, arg, *args)
@@ -179,7 +191,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def _get_upstream_info(self, opener):
         try:
             return json.loads(self._read_url_nofe(
-                url="https://raw.githubusercontent.com/mdevaev/emonoda/master/fetchers/{}.json".format(self.get_name()),
+                url="https://raw.githubusercontent.com/mdevaev/emonoda/master/fetchers/{}.json".format(self.PLUGIN_NAME),
                 opener=opener,
             ).decode("utf-8"))
         except urllib.error.HTTPError as err:
@@ -190,8 +202,12 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
     @classmethod
     def _get_local_info(cls):
         return {
-            "fingerprint": cls.get_fingerprint(),
-            "version":     cls.get_version(),
+            "version": cls._SITE_VERSION,
+            "fingerprint": {
+                "url":      cls._SITE_FINGERPRINT_URL,
+                "encoding": cls._SITE_ENCODING,
+                "text":     cls._SITE_FINGERPRINT_TEXT,
+            },
         }
 
     def _test_fingerprint(self, fingerprint, opener):
@@ -204,9 +220,14 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         _assert(FetcherError, fingerprint["text"] in page, msg)
 
     def _test_version(self, upstream):
-        local = self.get_version()
-        _assert(FetcherError, local >= upstream, "Fetcher is outdated (ver. local:{}, upstream:{})."
-                                                 " I recommend to update the program".format(local, upstream))
+        _assert(
+            FetcherError,
+            self._SITE_VERSION >= upstream,
+            "Fetcher is outdated (ver. local:{}, upstream:{}). I recommend to update the program".format(
+                self._SITE_VERSION,
+                upstream,
+            ),
+        )
 
 
 class WithLogin(BaseExtension):
@@ -243,10 +264,11 @@ class WithHash(BaseExtension):
 
 
 class WithScrape(BaseExtension):
-    _base_scrape_url = None
+    _BASE_SCRAPE_URL = None
 
     def __init__(self, client_agent, **_):
-        assert self._base_scrape_url is not None
+        assert self._BASE_SCRAPE_URL is not None
+
         self._client_agent = client_agent
 
     @classmethod
@@ -259,7 +281,7 @@ class WithScrape(BaseExtension):
         # https://wiki.theory.org/BitTorrentSpecification#Tracker_.27scrape.27_Convention
         self._assert_match(torrent)  # pylint: disable=no-member
         data = self._read_url(  # pylint: disable=no-member
-            url=urllib.parse.urljoin(self._base_scrape_url, "scrape.php?info_hash={}".format(torrent.get_scrape_hash())),
+            url=urllib.parse.urljoin(self._BASE_SCRAPE_URL, "scrape.php?info_hash={}".format(torrent.get_scrape_hash())),
             headers={"User-Agent": self._client_agent},
         )
         return (len(tfile.decode_data(data).get("files", {})) == 0)

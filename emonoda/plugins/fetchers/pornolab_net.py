@@ -29,38 +29,23 @@ from . import WithTime
 
 
 # =====
-def _encode(arg):
-    return arg.encode("cp1251")
-
-
-def _decode(arg):
-    return arg.decode("cp1251")
-
-
 class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithTime):
-    _comment_regexp = re.compile(r"http://pornolab\.net/forum/viewtopic\.php\?t=(\d+)")
+    PLUGIN_NAME = "pornolab.net"
+
+    _SITE_VERSION = 1
+    _SITE_ENCODING = "cp1251"
+
+    _SITE_FINGERPRINT_URL = "http://pornolab.net/forum/index.php"
+    _SITE_FINGERPRINT_TEXT = "title=\"Поиск на Pornolab.net\" href=\"http://static.pornolab.net/opensearch.xml\""
+
+    _COMMENT_REGEXP = re.compile(r"http://pornolab\.net/forum/viewtopic\.php\?t=(\d+)")
+
+    # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
         self._tzinfo = None
-
-    @classmethod
-    def get_name(cls):
-        return "pornolab.net"
-
-    @classmethod
-    def get_version(cls):
-        return 1
-
-    @classmethod
-    def get_fingerprint(cls):
-        return {
-            "url":      "http://pornolab.net/forum/index.php",
-            "encoding": "cp1251",
-            "text":     "<link rel=\"search\" type=\"application/opensearchdescription+xml\" title=\"Поиск на Pornolab.net\""
-                        " href=\"http://static.pornolab.net/opensearch.xml\">",
-        }
 
     @classmethod
     def get_options(cls):
@@ -70,7 +55,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithTime):
 
     def fetch_time(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment()))
+        page = self._decode(self._read_url(torrent.get_comment()))
         date_match = re.search(r"<span title=\"Зарегистрирован\">\[ (\d\d-([а-яА-Я]{3})-\d\d \d\d:\d\d) \]</span>", page)
         self._assert_logic(date_match is not None, "Upload date not found")
         date = date_match.group(1)
@@ -89,7 +74,7 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithTime):
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        topic_id = self._comment_regexp.match(torrent.get_comment()).group(1)
+        topic_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
         data = self._read_url("http://pornolab.net/forum/dl.php?t={}".format(topic_id), data=b"")
         self._assert_valid_data(data)
         return data
@@ -101,8 +86,8 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithTime):
         self._assert_auth(self._passwd is not None, "Required passwd for site")
 
         post = {
-            "login_username": _encode(self._user),
-            "login_password": _encode(self._passwd),
+            "login_username": self._encode(self._user),
+            "login_password": self._encode(self._passwd),
             "login":          b"\xc2\xf5\xee\xe4",
         }
         page = self._read_login(post)
@@ -123,9 +108,9 @@ class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithTime):
         self._tzinfo = self._get_tzinfo(page)
 
     def _read_login(self, post):
-        return _decode(self._read_url(
+        return self._decode(self._read_url(
             url="http://pornolab.net/forum/login.php",
-            data=_encode(urllib.parse.urlencode(post)),
+            data=self._encode(urllib.parse.urlencode(post)),
         ))
 
     def _get_tzinfo(self, page):

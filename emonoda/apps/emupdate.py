@@ -206,7 +206,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         return (
             "[{" + color + "}%s{reset}] %s {" + color + "}%s {cyan}%s{reset} -- %s",
             (
-                sign, self._format_progress(), self._current_fetcher.get_name(),
+                sign, self._format_progress(), self._current_fetcher.PLUGIN_NAME,
                 self._current_file_name, (self._current_torrent.get_comment() or ""),
             ),
         )

@@ -33,38 +33,23 @@ from . import WithLogin
 
 
 # =====
-def _encode(arg):
-    return arg.encode("utf-8")
-
-
-def _decode(arg):
-    return arg.decode("utf-8")
-
-
 class Plugin(BaseFetcher, WithLogin, WithTime):
-    _comment_regexp = re.compile(r"http://tr\.anidub\.com/\?newsid=(\d+)")
+    PLUGIN_NAME = "tr.anidub.com"
+
+    _SITE_VERSION = 0
+    _SITE_ENCODING = "utf-8"
+
+    _SITE_FINGERPRINT_URL = "http://tr.anidub.com"
+    _SITE_FINGERPRINT_TEXT = "href=\"http://tr.anidub.com/engine/opensearch.php\" title=\"AniDUB Tracker\""
+
+    _COMMENT_REGEXP = re.compile(r"http://tr\.anidub\.com/\?newsid=(\d+)")
+
+    # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
         self._tzinfo = None
-
-    @classmethod
-    def get_name(cls):
-        return "tr.anidub.com"
-
-    @classmethod
-    def get_version(cls):
-        return 0
-
-    @classmethod
-    def get_fingerprint(cls):
-        return {
-            "url":      "http://tr.anidub.com",
-            "encoding": "utf-8",
-            "text":     "<link rel=\"search\" type=\"application/opensearchdescription+xml\""
-                        " href=\"http://tr.anidub.com/engine/opensearch.php\" title=\"AniDUB Tracker\" />",
-        }
 
     @classmethod
     def get_options(cls):
@@ -74,7 +59,7 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
 
     def fetch_time(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment()))
+        page = self._decode(self._read_url(torrent.get_comment()))
         date_match = re.search(r"<li><b>Дата:</b> ([^,\s]+, \d\d:\d\d)</li>", page)
         self._assert_logic(date_match is not None, "Upload date not found")
         date = date_match.group(1)
@@ -93,7 +78,7 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment()))
+        page = self._decode(self._read_url(torrent.get_comment()))
         downloads = set(map(int, re.findall(r"<a href=\"/engine/download.php\?id=(\d+)\" class=\" \">", page)))
         candidates = {}
         for download_id in downloads:
@@ -119,12 +104,12 @@ class Plugin(BaseFetcher, WithLogin, WithTime):
     def login(self):
         self._assert_auth(self._user is not None, "Required user for site")
         self._assert_auth(self._passwd is not None, "Required password for site")
-        post_data = _encode(urllib.parse.urlencode({
-            "login_name":      _encode(self._user),
-            "login_password":  _encode(self._passwd),
+        post_data = self._encode(urllib.parse.urlencode({
+            "login_name":      self._encode(self._user),
+            "login_password":  self._encode(self._passwd),
             "login":           b"submit",
         }))
-        page = _decode(self._read_url("http://tr.anidub.com/", data=post_data))
+        page = self._decode(self._read_url("http://tr.anidub.com/", data=post_data))
         profile = "<li><a href=\"http://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
         self._assert_auth(profile in page, "Invalid user or password")
         self._tzinfo = self._select_tzinfo("Etc/GMT+4")

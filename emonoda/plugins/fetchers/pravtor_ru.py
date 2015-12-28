@@ -27,36 +27,22 @@ from . import WithHash
 
 
 # =====
-def _encode(arg):
-    return arg.encode("cp1251")
-
-
-def _decode(arg):
-    return arg.decode("cp1251")
-
-
 class Plugin(BaseFetcher, WithLogin, WithHash):
-    _comment_regexp = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
+    PLUGIN_NAME = "pravtor.ru"
+
+    _SITE_VERSION = 0
+    _SITE_ENCODING = "cp1251"
+
+    _SITE_FINGERPRINT_URL = "http://pravtor.ru"
+    _SITE_FINGERPRINT_TEXT = "<img src=\"/images/pravtor_beta1.png\""
+
+    _COMMENT_REGEXP = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
+
+    # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-
-    @classmethod
-    def get_name(cls):
-        return "pravtor.ru"
-
-    @classmethod
-    def get_version(cls):
-        return 0
-
-    @classmethod
-    def get_fingerprint(cls):
-        return {
-            "url":      "http://pravtor.ru",
-            "encoding": "cp1251",
-            "text":     "<img src=\"/images/pravtor_beta1.png\"",
-        }
 
     @classmethod
     def get_options(cls):
@@ -66,7 +52,7 @@ class Plugin(BaseFetcher, WithLogin, WithHash):
 
     def fetch_hash(self, torrent):
         self._assert_match(torrent)
-        page = _decode(self._read_url(torrent.get_comment()))
+        page = self._decode(self._read_url(torrent.get_comment()))
         hash_match = re.search(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>", page)
         self._assert_logic(hash_match is not None, "Hash not found")
         return hash_match.group(1).lower()
@@ -74,9 +60,9 @@ class Plugin(BaseFetcher, WithLogin, WithHash):
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
 
-        topic_id = self._comment_regexp.match(torrent.get_comment()).group(1)
+        topic_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
 
-        page = _decode(self._read_url(torrent.get_comment()))
+        page = self._decode(self._read_url(torrent.get_comment()))
         torrent_id_match = re.search(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">", page)
         self._assert_logic(torrent_id_match is not None, "Torrent-ID not found")
         torrent_id = int(torrent_id_match.group(1))
@@ -119,10 +105,10 @@ class Plugin(BaseFetcher, WithLogin, WithHash):
     def login(self):
         self._assert_auth(self._user is not None, "Required user for site")
         self._assert_auth(self._passwd is not None, "Required passwd for site")
-        post_data = _encode(urllib.parse.urlencode({
-            "login_username": _encode(self._user),
-            "login_password": _encode(self._passwd),
+        post_data = self._encode(urllib.parse.urlencode({
+            "login_username": self._encode(self._user),
+            "login_password": self._encode(self._passwd),
             "login":          b"\xc2\xf5\xee\xe4",
         }))
-        page = _decode(self._read_url("http://pravtor.ru/login.php", data=post_data))
+        page = self._decode(self._read_url("http://pravtor.ru/login.php", data=post_data))
         self._assert_auth(re.search(r"<!--login form-->", page) is None, "Invalid user or password")

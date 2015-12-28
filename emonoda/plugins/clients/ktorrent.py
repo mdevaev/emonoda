@@ -33,6 +33,8 @@ except ImportError:
 
 # =====
 class Plugin(BaseClient):
+    PLUGIN_NAME = "ktorrent"
+
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
 
@@ -45,10 +47,6 @@ class Plugin(BaseClient):
 
         if self._settings.useSaveDir():
             raise RuntimeError("Turn off the path by default in the settings of KTorrent")
-
-    @classmethod
-    def get_name(cls):
-        return "ktorrent"
 
     @classmethod
     def get_options(cls):
