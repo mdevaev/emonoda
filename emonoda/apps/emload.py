@@ -54,12 +54,10 @@ def link_data(torrent, data_dir_path, link_to_path, mkdir_mode):
     os.symlink(os.path.join(data_dir_path, torrent.get_name()), link_to_path)
 
 
-def load_torrents(torrents, client, data_root_path, link_to_path, torrent_mode, mkdir_mode, customs):
+def load_torrents(torrents, client, data_root_path, link_to_path, mkdir_mode, customs):
     for torrent in torrents:
         if client.has_torrent(torrent):
             raise RuntimeError("{}: already loaded".format(torrent.get_path()))
-        elif torrent_mode is not None:
-            os.chmod(torrent.get_path(), torrent_mode)
 
     if data_root_path is None:
         data_root_path = client.get_data_prefix_default()
@@ -123,7 +121,6 @@ def main():
             client=client,
             data_root_path=config.core.data_root_dir,
             link_to_path=options.link_to,
-            torrent_mode=config.emload.torrent_mode,
             mkdir_mode=config.emload.mkdir_mode,
             customs=customs,
         )
