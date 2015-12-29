@@ -51,7 +51,7 @@ def link_data(torrent, data_dir_path, link_to_path, mkdir_mode):
         raise RuntimeError("{}: link target already exists".format(link_to_path))
 
     make_path(mkdir_path, mkdir_mode)
-    os.symlink(os.path.join(data_dir_path, torrent.get_name()), link_to_path)
+    os.symlink(os.path.join(data_dir_path, torrent.get_name(surrogate_escape=True)), link_to_path)
 
 
 def load_torrents(torrents, client, data_root_path, link_to_path, mkdir_mode, customs):

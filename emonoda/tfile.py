@@ -113,8 +113,8 @@ class Torrent:
 
     # ===
 
-    def get_name(self):
-        return self._decode(self._bencode["info"]["name"])
+    def get_name(self, surrogate_escape=False):
+        return self._decode(self._bencode["info"]["name"], surrogate_escape)
 
     def get_comment(self):
         return self._decode(self._bencode.get("comment"))
@@ -202,13 +202,18 @@ class Torrent:
 
     # ===
 
-    def _decode(self, value):
+    def _decode(self, value, surrogate_escape=False):
         if isinstance(value, bytes):
+            if surrogate_escape:
+                # https://www.python.org/dev/peps/pep-0383
+                return value.decode("ascii", "surrogateescape")
+
             for encoding in (self._bencode.get("encoding", "utf-8"), "cp1251"):
                 try:
                     return value.decode(encoding)
                 except UnicodeDecodeError:
                     pass
+
             encoding = chardet.detect(value)["encoding"]
             assert encoding is not None, "Can't determine encoding for bytes string: '{}'".format(repr(value))
             return value.decode(encoding)
