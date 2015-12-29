@@ -27,10 +27,10 @@ import threading
 import operator
 import argparse
 
-from ..plugins.fetchers import FetcherError
-from ..plugins.fetchers import WithHash
-from ..plugins.fetchers import WithScrape
-from ..plugins.fetchers import WithTime
+from ..plugins.trackers import TrackerError
+from ..plugins.trackers import WithHash
+from ..plugins.trackers import WithScrape
+from ..plugins.trackers import WithTime
 
 from ..helpers import tcollection
 from ..helpers import surprise
@@ -42,15 +42,15 @@ from .. import tools
 from . import init
 from . import get_configured_log
 from . import get_configured_client
-from . import get_configured_fetchers
+from . import get_configured_trackers
 from . import get_configured_confetti
 
 
 # =====
 class OpContext:
-    def __init__(self, torrent, fetcher):
+    def __init__(self, torrent, tracker):
         self.torrent = torrent
-        self.fetcher = fetcher
+        self.tracker = tracker
 
         self._status = None
         self._attrs = {}
@@ -66,8 +66,8 @@ class OpContext:
         pass
 
     def __exit__(self, exc_type, exc, tb):
-        if isinstance(exc, FetcherError):
-            self._status = "fetcher_error"
+        if isinstance(exc, TrackerError):
+            self._status = "tracker_error"
             self._attrs = {
                 "err_name": type(exc).__name__,
                 "err_msg": str(exc),
@@ -80,8 +80,8 @@ class OpContext:
 
 
 class Feeder:  # pylint: disable=too-many-instance-attributes
-    def __init__(self, fetchers, torrents, show_unknown, show_passed, show_diff, log_stdout, log_stderr):
-        self._fetchers = fetchers
+    def __init__(self, trackers, torrents, show_unknown, show_passed, show_diff, log_stdout, log_stderr):
+        self._trackers = trackers
         self._torrents = torrents
         self._show_unknown = show_unknown
         self._show_passed = show_passed
@@ -92,7 +92,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         self._current_count = 0
         self._current_file_name = None
         self._current_torrent = None
-        self._current_fetcher = None
+        self._current_tracker = None
 
         self._fan = fmt.make_fan()
         self._fan_thread = None
@@ -104,7 +104,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
             "unknown":         self._done_unknown,
             "passed":          self._done_passed,
             "affected":        self._done_affected,
-            "fetcher_error":   self._done_fetcher_error,
+            "tracker_error":   self._done_tracker_error,
             "unhandled_error": self._done_unhandled_error,
         }
 
@@ -114,18 +114,18 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         for (self._current_count, (self._current_file_name, self._current_torrent)) in enumerate(
             sorted(self._torrents.items(), key=operator.itemgetter(0))
         ):
-            self._current_fetcher = None
+            self._current_tracker = None
 
             if self._current_torrent is None:
                 self._done("invalid", {})
                 continue
 
-            self._current_fetcher = self._select_fetcher()
-            if self._current_fetcher is None:
+            self._current_tracker = self._select_tracker()
+            if self._current_tracker is None:
                 self._done("unknown", {})
                 continue
 
-            op = OpContext(self._current_torrent, self._current_fetcher)
+            op = OpContext(self._current_torrent, self._current_tracker)
             self._start_op()
             yield op
             self._stop_op()
@@ -136,17 +136,17 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
     def get_results(self):
         return self._results
 
-    def _select_fetcher(self):
-        for fetcher in self._fetchers:
-            if fetcher.is_matched_for(self._current_torrent):
-                return fetcher
+    def _select_tracker(self):
+        for tracker in self._trackers:
+            if tracker.is_matched_for(self._current_torrent):
+                return tracker
         return None
 
     def _done(self, status, attrs):
         self._status_mapping[status](attrs)
         result = {
             "torrent": self._current_torrent,
-            "fetcher": self._current_fetcher,
+            "tracker": self._current_tracker,
         }
         result.update(attrs)
         self._results[status][self._current_file_name] = result
@@ -170,7 +170,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
     def _done_not_in_client(self, _):
         self._log_stdout.print(*self._format_fail("red", "!", "NOT_IN_CLIENT"))
 
-    def _done_fetcher_error(self, attrs):
+    def _done_tracker_error(self, attrs):
         (line, placeholders) = self._format_status("red", "-")
         line += " :: {red}%s({reset}%s{red}){reset}"
         placeholders += (attrs["err_name"], attrs["err_msg"])
@@ -206,7 +206,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         return (
             "[{" + color + "}%s{reset}] %s {" + color + "}%s {cyan}%s{reset} -- %s",
             (
-                sign, self._format_progress(), self._current_fetcher.PLUGIN_NAME,
+                sign, self._format_progress(), self._current_tracker.PLUGIN_NAME,
                 self._current_file_name, (self._current_torrent.get_comment() or ""),
             ),
         )
@@ -295,35 +295,35 @@ def update(  # pylint: disable=too-many-branches
                     op.done_not_in_client()
                     continue
 
-                fetcher_bases = op.fetcher.get_bases()
+                tracker_bases = op.tracker.get_bases()
 
-                if WithHash in fetcher_bases:
-                    need_update = (op.fetcher.fetch_hash(op.torrent) != op.torrent.get_hash())
+                if WithHash in tracker_bases:
+                    need_update = (op.tracker.fetch_hash(op.torrent) != op.torrent.get_hash())
 
-                elif WithScrape in fetcher_bases:
-                    need_update = (not op.fetcher.is_registered(op.torrent))
+                elif WithScrape in tracker_bases:
+                    need_update = (not op.tracker.is_registered(op.torrent))
 
-                elif WithTime in fetcher_bases:
+                elif WithTime in tracker_bases:
                     time_info = TorrentTimeInfo(op.torrent).check_and_fill()
-                    fetcher_time = op.fetcher.fetch_time(op.torrent)
-                    need_update = (fetcher_time > time_info.read())
+                    tracker_time = op.tracker.fetch_time(op.torrent)
+                    need_update = (tracker_time > time_info.read())
 
                 else:
-                    RuntimeError("Invalid fetcher {}: missing method of check".format(op.fetcher))
+                    RuntimeError("Invalid tracker {}: missing method of check".format(op.tracker))
 
                 if need_update:
-                    tmp_torrent = tfile.Torrent(data=op.fetcher.fetch_new_data(op.torrent))
+                    tmp_torrent = tfile.Torrent(data=op.tracker.fetch_new_data(op.torrent))
                     if op.torrent.get_hash() != tmp_torrent.get_hash():
                         diff = tfile.get_difference(op.torrent, tmp_torrent)
                         if not noop:
                             if backup_dir_path is not None:
                                 backup_torrent(op.torrent, backup_dir_path, backup_suffix)
                             update_torrent(client, op.torrent, tmp_torrent.get_data(), to_save_customs, to_set_customs)
-                            if WithTime in fetcher_bases:
-                                time_info.write(fetcher_time)
+                            if WithTime in tracker_bases:
+                                time_info.write(tracker_time)
                         op.done_affected(diff)
-                    elif WithTime in fetcher_bases and not noop:
-                        time_info.write(fetcher_time)
+                    elif WithTime in tracker_bases and not noop:
+                        time_info.write(tracker_time)
         except Exception:
             pass
 
@@ -335,7 +335,7 @@ def print_results(results, log):
         ("Not in client:    %d", "not_in_client"),
         ("Unknown:          %d", "unknown"),
         ("Invalid torrents: %d", "invalid"),
-        ("Fetcher errors:   %d", "fetcher_error"),
+        ("Tracker errors:   %d", "tracker_error"),
         ("Unhandled errors: %d", "unhandled_error"),
     ):
         log.info(msg, (len(results[field]),))
@@ -350,8 +350,8 @@ def main():
         parents=[parent_parser],
     )
     args_parser.add_argument("-f", "--name-filter", default=None, metavar="<wildcard_pattern>")
-    args_parser.add_argument("-y", "--only-fetchers", default=[], nargs="+", metavar="<fetcher>")
-    args_parser.add_argument("-x", "--exclude-fetchers", default=[], nargs="+", metavar="<fetcher>")
+    args_parser.add_argument("-y", "--only-trackers", default=[], nargs="+", metavar="<tracker>")
+    args_parser.add_argument("-x", "--exclude-trackers", default=[], nargs="+", metavar="<tracker>")
     args_parser.add_argument("--noop", action="store_true")
     args_parser.add_argument("--mute", action="store_true")
     args_parser.add_argument("--fail-on-captcha", action="store_true")
@@ -374,11 +374,11 @@ def main():
                     log_stderr.info("{yellow}Enter the captcha{reset} from [{blue}%s{reset}]: ", (url,), no_nl=True)
                     return input()
 
-            fetchers = get_configured_fetchers(
+            trackers = get_configured_trackers(
                 config=config,
                 captcha_decoder=read_captcha,
-                only=options.only_fetchers,
-                exclude=options.exclude_fetchers,
+                only=options.only_trackers,
+                exclude=options.exclude_trackers,
                 log=log_stderr,
             )
 
@@ -395,7 +395,7 @@ def main():
             )
 
             feeder = Feeder(
-                fetchers=fetchers,
+                trackers=trackers,
                 torrents=torrents,
                 show_unknown=config.emupdate.show_unknown,
                 show_passed=config.emupdate.show_passed,

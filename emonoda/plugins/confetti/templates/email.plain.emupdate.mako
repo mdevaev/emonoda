@@ -23,7 +23,7 @@ ${file_name} (from ${result["torrent"].get_comment()}):
     ("Not in client:    ", "not_in_client"), \
     ("Unknown:          ", "unknown"), \
     ("Invalid torrents: ", "invalid"), \
-    ("Fetcher errors:   ", "fetcher_error"), \
+    ("Tracker errors:   ", "tracker_error"), \
     ("Unhandled errors: ", "unhandled_error"), \
 ):
 ${msg} ${len(results[field])}

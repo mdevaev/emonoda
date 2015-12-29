@@ -20,13 +20,13 @@
 import urllib.parse
 import re
 
-from . import BaseFetcher
+from . import BaseTracker
 from . import WithLogin
 from . import WithHash
 
 
 # =====
-class Plugin(BaseFetcher, WithLogin, WithHash):
+class Plugin(BaseTracker, WithLogin, WithHash):
     PLUGIN_NAME = "tfile.me"
 
     _SITE_VERSION = 1

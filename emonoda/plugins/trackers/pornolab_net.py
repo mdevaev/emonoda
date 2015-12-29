@@ -22,14 +22,14 @@ import re
 
 from datetime import datetime
 
-from . import BaseFetcher
+from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
 from . import WithTime
 
 
 # =====
-class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithTime):
+class Plugin(BaseTracker, WithLogin, WithCaptcha, WithTime):
     PLUGIN_NAME = "pornolab.net"
 
     _SITE_VERSION = 1

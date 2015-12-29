@@ -1,12 +1,12 @@
 all:
 	true
 
-regen: regen-fetchers
+regen: regen-trackers
 
-regen-fetchers:
+regen-trackers:
 	python -c 'from json import dumps; from emonoda.plugins import _get_classes; \
-			[ open("fetchers/{}.json".format(name), "w").write(dumps(cls._get_local_info(), sort_keys=True, indent=" " * 4)) \
-			for (name, cls) in _get_classes()["fetchers"].items() ]'
+			[ open("trackers/{}.json".format(name), "w").write(dumps(cls._get_local_info(), sort_keys=True, indent=" " * 4)) \
+			for (name, cls) in _get_classes()["trackers"].items() ]'
 
 release:
 	make tox

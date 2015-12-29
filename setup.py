@@ -43,7 +43,7 @@ if __name__ == "__main__":
             "emonoda.helpers",
             "emonoda.plugins",
             "emonoda.plugins.clients",
-            "emonoda.plugins.fetchers",
+            "emonoda.plugins.trackers",
             "emonoda.plugins.confetti",
             "emonoda.thirdparty",
         ],

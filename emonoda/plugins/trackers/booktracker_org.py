@@ -22,13 +22,13 @@ import re
 
 from datetime import datetime
 
-from . import BaseFetcher
+from . import BaseTracker
 from . import WithLogin
 from . import WithTime
 
 
 # =====
-class Plugin(BaseFetcher, WithLogin, WithTime):
+class Plugin(BaseTracker, WithLogin, WithTime):
     PLUGIN_NAME = "booktracker.org"
 
     _SITE_VERSION = 0

@@ -21,12 +21,12 @@ import re
 
 from ...optconf import Option
 
-from . import BaseFetcher
+from . import BaseTracker
 from . import WithHash
 
 
 # =====
-class Plugin(BaseFetcher, WithHash):
+class Plugin(BaseTracker, WithHash):
     PLUGIN_NAME = "rutor.org"
 
     _SITE_VERSION = 3

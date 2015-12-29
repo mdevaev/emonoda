@@ -44,11 +44,11 @@ from ..optconf.converters import (
 )
 
 from ..plugins import get_client_class
-from ..plugins import get_fetcher_class
+from ..plugins import get_tracker_class
 from ..plugins import get_confetti_class
 
-from ..plugins.fetchers import WithLogin as F_WithLogin
-from ..plugins.fetchers import WithCaptcha as F_WithCaptcha
+from ..plugins.trackers import WithLogin as F_WithLogin
+from ..plugins.trackers import WithCaptcha as F_WithCaptcha
 from ..plugins.clients import WithCustoms as C_WithCustoms
 
 from .. import cli
@@ -75,10 +75,10 @@ def init():
         client_scheme = get_client_class(config.core.client).get_options()
         scheme["client"] = client_scheme
 
-    for fetcher_name in raw_config.get("fetchers", []):
-        fetcher_scheme = get_fetcher_class(fetcher_name).get_options()
-        scheme.setdefault("fetchers", {})
-        scheme["fetchers"][fetcher_name] = fetcher_scheme
+    for tracker_name in raw_config.get("trackers", []):
+        tracker_scheme = get_tracker_class(tracker_name).get_options()
+        scheme.setdefault("trackers", {})
+        scheme["trackers"][tracker_name] = tracker_scheme
 
     for confetti_name in raw_config.get("confetti", []):
         confetti_scheme = get_confetti_class(confetti_name).get_options()
@@ -99,7 +99,7 @@ def init():
         sys.exit(0)
 
     config.setdefault("client", Section())
-    config.setdefault("fetchers", Section())
+    config.setdefault("trackers", Section())
     config.setdefault("confetti", Section())
 
     return (args_parser, remaining, config)
@@ -146,38 +146,38 @@ def get_configured_client(config, required, with_customs, log):
         return None
 
 
-def get_configured_fetchers(config, captcha_decoder, only, exclude, log):
-    to_init = set(config.fetchers).difference(exclude)
+def get_configured_trackers(config, captcha_decoder, only, exclude, log):
+    to_init = set(config.trackers).difference(exclude)
     if len(only) != 0:
         to_init = to_init.intersection(only)
 
     if len(to_init) == 0:
-        raise RuntimeError("No fetchers to init")
+        raise RuntimeError("No trackers to init")
 
-    fetchers = []
+    trackers = []
     for name in sorted(to_init):
-        log.info("Enabling the fetcher {blue}%s{reset} ...", (name,), one_line=True)
+        log.info("Enabling the tracker {blue}%s{reset} ...", (name,), one_line=True)
 
-        cls = get_fetcher_class(name)
-        kwargs = dict(config.fetchers[name])
+        cls = get_tracker_class(name)
+        kwargs = dict(config.trackers[name])
         if F_WithCaptcha in cls.get_bases():
             kwargs["captcha_decoder"] = captcha_decoder
-        fetcher = cls(**kwargs)
+        tracker = cls(**kwargs)
 
         try:
-            log.info("Enabling the fetcher {blue}%s{reset}: {yellow}testing{reset} ...", (name,), one_line=True)
-            fetcher.test()
+            log.info("Enabling the tracker {blue}%s{reset}: {yellow}testing{reset} ...", (name,), one_line=True)
+            tracker.test()
             if F_WithLogin in cls.get_bases():
-                log.info("Enabling the fetcher {blue}%s{reset}: {yellow}logging in{reset} ...", (name,), one_line=True)
-                fetcher.login()
-            log.info("Fetcher {blue}%s{reset} is {green}ready{reset}", (name,))
+                log.info("Enabling the tracker {blue}%s{reset}: {yellow}logging in{reset} ...", (name,), one_line=True)
+                tracker.login()
+            log.info("Tracker {blue}%s{reset} is {green}ready{reset}", (name,))
         except Exception as err:
-            log.error("Can't init fetcher {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
+            log.error("Can't init tracker {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
             raise
 
-        fetchers.append(fetcher)
+        trackers.append(tracker)
 
-    return fetchers
+    return trackers
 
 
 def get_configured_confetti(config, log):

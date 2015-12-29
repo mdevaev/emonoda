@@ -7,7 +7,7 @@
     <tr>
         <td width="20" align="center" valign="top">&bull;</td>
         <td align="left" valign="top">
-            <b>${file_name}</b> (from <a href="${result["torrent"].get_comment()}">${result["fetcher"].PLUGIN_NAME}</a>)
+            <b>${file_name}</b> (from <a href="${result["torrent"].get_comment()}">${result["tracker"].PLUGIN_NAME}</a>)
             <table cellspacing="0" cellpadding="0">
             % for (sign, color, field) in ( \
                 ("+", "green",  "added"), \
@@ -36,7 +36,7 @@
     ("Not in client",    "not_in_client"), \
     ("Unknown",          "unknown"), \
     ("Invalid torrents", "invalid"), \
-    ("Fetcher errors",   "fetcher_error"), \
+    ("Tracker errors",   "tracker_error"), \
     ("Unhandled errors", "unhandled_error"), \
 ):
     <tr>

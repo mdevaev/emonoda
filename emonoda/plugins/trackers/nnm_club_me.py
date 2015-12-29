@@ -20,13 +20,13 @@
 import urllib.parse
 import re
 
-from . import BaseFetcher
+from . import BaseTracker
 from . import WithLogin
 from . import WithScrape
 
 
 # =====
-class Plugin(BaseFetcher, WithLogin, WithScrape):
+class Plugin(BaseTracker, WithLogin, WithScrape):
     PLUGIN_NAME = _DOMAIN = "nnm-club.me"
 
     _SITE_VERSION = 1

@@ -21,13 +21,13 @@ import urllib.parse
 import http.cookiejar
 import re
 
-from . import BaseFetcher
+from . import BaseTracker
 from . import WithLogin
 from . import WithHash
 
 
 # =====
-class Plugin(BaseFetcher, WithLogin, WithHash):
+class Plugin(BaseTracker, WithLogin, WithHash):
     PLUGIN_NAME = "pravtor.ru"
 
     _SITE_VERSION = 0

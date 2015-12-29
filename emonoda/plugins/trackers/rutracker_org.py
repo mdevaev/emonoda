@@ -21,14 +21,14 @@ import urllib.parse
 import http.cookiejar
 import re
 
-from . import BaseFetcher
+from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
 from . import WithHash
 
 
 # =====
-class Plugin(BaseFetcher, WithLogin, WithCaptcha, WithHash):
+class Plugin(BaseTracker, WithLogin, WithCaptcha, WithHash):
     PLUGIN_NAME = "rutracker.org"
 
     _SITE_VERSION = 1

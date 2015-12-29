@@ -38,19 +38,19 @@ from .. import BaseExtension
 
 
 # =====
-class FetcherError(Exception):
+class TrackerError(Exception):
     pass
 
 
-class AuthError(FetcherError):
+class AuthError(TrackerError):
     pass
 
 
-class LogicError(FetcherError):
+class LogicError(TrackerError):
     pass
 
 
-class NetworkError(FetcherError):
+class NetworkError(TrackerError):
     def __init__(self, sub):
         super().__init__()
         self._sub = sub
@@ -65,7 +65,7 @@ def _assert(exception, arg, msg=""):
         raise exception(msg)
 
 
-class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
+class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     _SITE_VERSION = None
     _SITE_ENCODING = None
     _SITE_RETRY_CODES = (500, 502, 503)
@@ -104,7 +104,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "user_agent":        Option(default="Mozilla/5.0", help="User-Agent for site"),
             "proxy_url":         Option(default=None, type=as_string_or_none, help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
             "check_fingerprint": Option(default=True, help="Check the site fingerprint"),
-            "check_version":     Option(default=True, help="Check the fetcher version from GitHub"),
+            "check_version":     Option(default=True, help="Check the tracker version from GitHub"),
         }
 
     def fetch_new_data(self, torrent):
@@ -191,7 +191,7 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def _get_upstream_info(self, opener):
         try:
             return json.loads(self._read_url_nofe(
-                url="https://raw.githubusercontent.com/mdevaev/emonoda/master/fetchers/{}.json".format(self.PLUGIN_NAME),
+                url="https://raw.githubusercontent.com/mdevaev/emonoda/master/trackers/{}.json".format(self.PLUGIN_NAME),
                 opener=opener,
             ).decode("utf-8"))
         except urllib.error.HTTPError as err:
@@ -216,14 +216,14 @@ class BaseFetcher(BasePlugin):  # pylint: disable=too-many-instance-attributes
         try:
             page = data.decode(fingerprint["encoding"])
         except UnicodeDecodeError:
-            raise FetcherError(msg)
-        _assert(FetcherError, fingerprint["text"] in page, msg)
+            raise TrackerError(msg)
+        _assert(TrackerError, fingerprint["text"] in page, msg)
 
     def _test_version(self, upstream):
         _assert(
-            FetcherError,
+            TrackerError,
             self._SITE_VERSION >= upstream,
-            "Fetcher is outdated (ver. local:{}, upstream:{}). I recommend to update the program".format(
+            "Tracker plugin is outdated (ver. local:{}, upstream:{}). I recommend to update the program".format(
                 self._SITE_VERSION,
                 upstream,
             ),

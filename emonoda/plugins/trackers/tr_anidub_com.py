@@ -27,13 +27,13 @@ from dateutil.relativedelta import relativedelta
 
 from ... import tfile
 
-from . import BaseFetcher
+from . import BaseTracker
 from . import WithTime
 from . import WithLogin
 
 
 # =====
-class Plugin(BaseFetcher, WithLogin, WithTime):
+class Plugin(BaseTracker, WithLogin, WithTime):
     PLUGIN_NAME = "tr.anidub.com"
 
     _SITE_VERSION = 0

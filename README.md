@@ -31,7 +31,7 @@
 
 ***
 
-### [Поддерживаемые трекеры](https://github.com/mdevaev/emonoda/wiki/fetchers) ###
+### [Поддерживаемые трекеры](https://github.com/mdevaev/emonoda/wiki/trackers) ###
 * http://rutracker.org
 * http://nnm-club.me
 * http://ipv6.nnm-club.me
