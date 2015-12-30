@@ -155,6 +155,13 @@ def print_pretty_meta(torrent, client, to_show_customs, log):
         log.print("{blue}Provides:{reset}\n%s", (format_files_tree(torrent),))
 
 
+def print_value(header, value, without_headers, log):
+    if without_headers:
+        log.print("%s", str(value))
+    else:
+        log.print("{blue}%s:{reset} %s", (header, str(value)))
+
+
 # ===== Main =====
 def main():  # pylint: disable=too-many-locals
     options = config = None  # Makes pylint happy
@@ -218,13 +225,12 @@ def main():  # pylint: disable=too-many-locals
                     print_pretty_meta(torrent, client, config.emfile.show_customs, log_stdout)
                 else:
                     for (header, method) in to_print:
-                        line = ("%s" if options.without_headers else "{blue}%s:{reset} %s")
                         retval = method(torrent)
                         if isinstance(retval, (list, tuple)):
                             for item in retval:
-                                log_stdout.print(line, (header, str(item)))
+                                print_value(header, item, options.without_headers, log_stdout)
                         else:
-                            log_stdout.print(line, (header, str(retval)))
+                            print_value(header, retval, options.without_headers, log_stdout)
                 if len(torrents) > 1:
                     log_stdout.print()
 
