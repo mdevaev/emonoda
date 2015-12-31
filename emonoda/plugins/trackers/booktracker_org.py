@@ -79,9 +79,7 @@ class Plugin(BaseTracker, WithLogin, WithTime):
     # ===
 
     def login(self):
-        self._assert_auth(self._user is not None, "Required user for site")
-        self._assert_auth(self._passwd is not None, "Required passwd for site")
-
+        self._assert_required_user_passwd()
         post_data = self._encode(urllib.parse.urlencode({
             "login_username": self._encode(self._user),
             "login_password": self._encode(self._passwd),
@@ -90,7 +88,6 @@ class Plugin(BaseTracker, WithLogin, WithTime):
         page = self._decode(self._read_url("http://booktracker.org/login.php", data=post_data))
         logout = "<b class=\"med\">{}</b></a>&nbsp; [ <a href=\"./login.php?logout=1".format(self._user)
         self._assert_auth(logout in page, "Invalid user or password")
-
         self._tzinfo = self._get_tzinfo()
 
     def _get_tzinfo(self):

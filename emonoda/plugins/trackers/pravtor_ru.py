@@ -103,8 +103,7 @@ class Plugin(BaseTracker, WithLogin, WithHash):
     # ===
 
     def login(self):
-        self._assert_auth(self._user is not None, "Required user for site")
-        self._assert_auth(self._passwd is not None, "Required passwd for site")
+        self._assert_required_user_passwd()
         post_data = self._encode(urllib.parse.urlencode({
             "login_username": self._encode(self._user),
             "login_password": self._encode(self._passwd),

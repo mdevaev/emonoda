@@ -248,6 +248,10 @@ class WithLogin(BaseExtension):
     def _assert_auth(self, *args):
         _assert(AuthError, *args)  # pylint: disable=no-value-for-parameter
 
+    def _assert_required_user_passwd(self):
+        self._assert_auth(self._user is not None, "Required user for site")
+        self._assert_auth(self._passwd is not None, "Required password for site")
+
 
 class WithCaptcha(BaseExtension):
     def __init__(self, captcha_decoder, **_):
