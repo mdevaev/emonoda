@@ -25,10 +25,11 @@ from datetime import datetime
 from . import BaseTracker
 from . import WithLogin
 from . import WithTime
+from . import WithDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithTime):
+class Plugin(BaseTracker, WithLogin, WithTime, WithDownloadId):
     PLUGIN_NAME = "booktracker.org"
 
     _SITE_VERSION = 0
@@ -66,15 +67,11 @@ class Plugin(BaseTracker, WithLogin, WithTime):
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
-
-        dl_id_match = re.search(r"<a href=\"download\.php\?id=(\d+)\" class=\"\">", page)
-        self._assert_logic(dl_id_match is not None, "Unknown dl_id")
-        dl_id = dl_id_match.group(1)
-
-        data = self._read_url("http://booktracker.org/download.php?id={}".format(dl_id))
-        self._assert_valid_data(data)
-        return data
+        return self._fetch_data_by_id(
+            url=torrent.get_comment(),
+            dl_id_regexp=re.compile(r"<a href=\"download\.php\?id=(\d+)\" class=\"\">"),
+            dl_id_url="http://booktracker.org/download.php?id={dl_id}",
+        )
 
     # ===
 

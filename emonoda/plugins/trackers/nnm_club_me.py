@@ -23,10 +23,11 @@ import re
 from . import BaseTracker
 from . import WithLogin
 from . import WithScrape
+from . import WithDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithScrape):
+class Plugin(BaseTracker, WithLogin, WithScrape, WithDownloadId):
     PLUGIN_NAME = _DOMAIN = "nnm-club.me"
 
     _SITE_VERSION = 1
@@ -53,17 +54,11 @@ class Plugin(BaseTracker, WithLogin, WithScrape):
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment().replace("nnm-club.ru", "nnm-club.me")))
-
-        torrent_id_match = re.search(r"filelst.php\?attach_id=([a-zA-Z0-9]+)", page)
-        self._assert_logic(torrent_id_match is not None, "Unknown torrent_id")
-        torrent_id = torrent_id_match.group(1)
-
-        data = self._read_url("http://{}//forum/download.php?id={}".format(self._DOMAIN, torrent_id))
-        self._assert_valid_data(data)
-        return data
-
-    # ===
+        return self._fetch_data_by_id(
+            url=torrent.get_comment().replace("nnm-club.ru", "nnm-club.me"),
+            dl_id_regexp=re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)"),
+            dl_id_url="http://{}//forum/download.php?id={{dl_id}}".format(self._DOMAIN),
+        )
 
     def login(self):
         self._assert_required_user_passwd()

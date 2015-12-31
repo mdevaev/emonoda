@@ -23,7 +23,7 @@ from . import nnm_club_me
 
 
 # =====
-class Plugin(nnm_club_me.Plugin):
+class Plugin(nnm_club_me.Plugin):  # pylint: disable=too-many-ancestors
     PLUGIN_NAME = _DOMAIN = "ipv6.nnm-club.me"
 
     _SITE_VERSION = 0

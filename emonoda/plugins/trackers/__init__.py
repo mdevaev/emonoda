@@ -320,3 +320,16 @@ class WithTime(BaseExtension):
         msg = "Can't determine timezone of site, your must configure it manually"
         self._assert_logic(self._default_timezone is not None, msg)  # pylint: disable=no-member
         return pytz.timezone(self._default_timezone)
+
+
+class WithDownloadId(BaseExtension):
+    def __init__(self, **_):
+        pass
+
+    def _fetch_data_by_id(self, url, dl_id_regexp, dl_id_url):
+        page = self._decode(self._read_url(url))  # pylint: disable=no-member
+        dl_id_match = dl_id_regexp.search(page)
+        self._assert_logic(dl_id_match is not None, "Unknown download_id")  # pylint: disable=no-member
+        data = self._read_url(dl_id_url.format(dl_id=dl_id_match.group(1).strip()))  # pylint: disable=no-member
+        self._assert_valid_data(data)  # pylint: disable=no-member
+        return data

@@ -23,10 +23,11 @@ import re
 from . import BaseTracker
 from . import WithLogin
 from . import WithHash
+from . import WithDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithHash):
+class Plugin(BaseTracker, WithLogin, WithHash, WithDownloadId):
     PLUGIN_NAME = "tfile.me"
 
     _SITE_VERSION = 1
@@ -58,17 +59,11 @@ class Plugin(BaseTracker, WithLogin, WithHash):
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
-
-        dl_id_match = re.search(r"<a href=\"download.php\?id=(\d+)\" class=\"dlLink\"", page)
-        self._assert_logic(dl_id_match is not None, "Unknown dl_id")
-        dl_id = dl_id_match.group(1)
-
-        data = self._read_url("http://tfile.me/forum/download.php?id={}".format(dl_id))
-        self._assert_valid_data(data)
-        return data
-
-    # ===
+        return self._fetch_data_by_id(
+            url=torrent.get_comment(),
+            dl_id_regexp=re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"dlLink\""),
+            dl_id_url="http://tfile.me/forum/download.php?id={dl_id}",
+        )
 
     def login(self):
         self._assert_required_user_passwd()
