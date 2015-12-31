@@ -31,4 +31,4 @@ class Plugin(nnm_club_me.Plugin):
 
     _COMMENT_REGEXP = re.compile(r"http://ipv6\.nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
 
-    _BASE_SCRAPE_URL = "http://bt.{}:2710".format(_DOMAIN)
+    _SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_DOMAIN)

@@ -279,10 +279,10 @@ class WithHash(BaseExtension):
 
 
 class WithScrape(BaseExtension):
-    _BASE_SCRAPE_URL = None
+    _SCRAPE_URL = None
 
     def __init__(self, client_agent, **_):
-        assert self._BASE_SCRAPE_URL is not None
+        assert self._SCRAPE_URL is not None
 
         self._client_agent = client_agent
 
@@ -296,7 +296,7 @@ class WithScrape(BaseExtension):
         # https://wiki.theory.org/BitTorrentSpecification#Tracker_.27scrape.27_Convention
         self._assert_match(torrent)  # pylint: disable=no-member
         data = self._read_url(  # pylint: disable=no-member
-            url=urllib.parse.urljoin(self._BASE_SCRAPE_URL, "scrape.php?info_hash={}".format(torrent.get_scrape_hash())),
+            url=self._SCRAPE_URL.format(scrape_hash=torrent.get_scrape_hash()),
             headers={"User-Agent": self._client_agent},
         )
         return (len(tfile.decode_data(data).get("files", {})) == 0)
