@@ -17,7 +17,6 @@
 """
 
 
-import urllib.parse
 import re
 import operator
 
@@ -28,12 +27,13 @@ from dateutil.relativedelta import relativedelta
 from ... import tfile
 
 from . import BaseTracker
-from . import WithTime
 from . import WithLogin
+from . import WithSimplePostLogin
+from . import WithTime
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithTime):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithTime):
     PLUGIN_NAME = "tr.anidub.com"
 
     _SITE_VERSION = 0
@@ -99,16 +99,14 @@ class Plugin(BaseTracker, WithLogin, WithTime):
                                                        ", ".join(map(operator.itemgetter(1), candidates[name]))))
         return candidates[name][0][0].get_data()
 
-    # ===
-
     def login(self):
-        self._assert_required_user_passwd()
-        post_data = self._encode(urllib.parse.urlencode({
-            "login_name":      self._encode(self._user),
-            "login_password":  self._encode(self._passwd),
-            "login":           b"submit",
-        }))
-        page = self._decode(self._read_url("http://tr.anidub.com/", data=post_data))
-        profile = "<li><a href=\"http://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
-        self._assert_auth(profile in page, "Invalid user or password")
+        self._simple_post_login(
+            url="http://tr.anidub.com/",
+            post={
+                "login_name":      self._encode(self._user),
+                "login_password":  self._encode(self._passwd),
+                "login":           b"submit",
+            },
+            ok_text="<li><a href=\"http://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
+        )
         self._tzinfo = self._select_tzinfo("Etc/GMT+4")

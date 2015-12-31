@@ -69,6 +69,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     _SITE_VERSION = None
     _SITE_ENCODING = None
     _SITE_RETRY_CODES = (500, 502, 503)
+
     _SITE_FINGERPRINT_URL = None
     _SITE_FINGERPRINT_TEXT = None
 
@@ -256,6 +257,16 @@ class WithLogin(BaseExtension):
 class WithCaptcha(BaseExtension):
     def __init__(self, captcha_decoder, **_):
         self._captcha_decoder = captcha_decoder
+
+
+class WithSimplePostLogin(BaseExtension):
+    def __init__(self, **_):
+        pass
+
+    def _simple_post_login(self, url, post, ok_text):
+        self._assert_required_user_passwd()  # pylint: disable=no-member
+        page = self._decode(self._read_url(url, data=self._encode(urllib.parse.urlencode(post))))  # pylint: disable=no-member
+        self._assert_auth(ok_text in page, "Invalid user or password")  # pylint: disable=no-member
 
 
 # =====

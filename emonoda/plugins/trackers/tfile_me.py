@@ -17,17 +17,17 @@
 """
 
 
-import urllib.parse
 import re
 
 from . import BaseTracker
 from . import WithLogin
+from . import WithSimplePostLogin
 from . import WithHash
 from . import WithDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithHash, WithDownloadId):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithHash, WithDownloadId):
     PLUGIN_NAME = "tfile.me"
 
     _SITE_VERSION = 1
@@ -66,12 +66,13 @@ class Plugin(BaseTracker, WithLogin, WithHash, WithDownloadId):
         )
 
     def login(self):
-        self._assert_required_user_passwd()
-        post_data = self._encode(urllib.parse.urlencode({
-            "username":  self._encode(self._user),
-            "password":  self._encode(self._passwd),
-            "autologin": b"",
-            "login":     b"",
-        }))
-        page = self._decode(self._read_url("http://tfile.me/login/", data=post_data))
-        self._assert_auth("class=\"nick u\">{}</a>".format(self._user) in page, "Invalid user or password")
+        self._simple_post_login(
+            url="http://tfile.me/login/",
+            post={
+                "username":  self._encode(self._user),
+                "password":  self._encode(self._passwd),
+                "autologin": b"",
+                "login":     b"",
+            },
+            ok_text="class=\"nick u\">{}</a>".format(self._user),
+        )

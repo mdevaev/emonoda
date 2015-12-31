@@ -17,17 +17,17 @@
 """
 
 
-import urllib.parse
 import re
 
 from . import BaseTracker
 from . import WithLogin
+from . import WithSimplePostLogin
 from . import WithScrape
 from . import WithDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithScrape, WithDownloadId):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithScrape, WithDownloadId):
     PLUGIN_NAME = _DOMAIN = "nnm-club.me"
 
     _SITE_VERSION = 1
@@ -61,12 +61,13 @@ class Plugin(BaseTracker, WithLogin, WithScrape, WithDownloadId):
         )
 
     def login(self):
-        self._assert_required_user_passwd()
-        post_data = self._encode(urllib.parse.urlencode({
-            "username": self._encode(self._user),
-            "password": self._encode(self._passwd),
-            "redirect": b"",
-            "login":    b"\xc2\xf5\xee\xe4",
-        }))
-        page = self._decode(self._read_url("http://{}/forum/login.php".format(self._DOMAIN), data=post_data))
-        self._assert_auth("[ {} ]".format(self._user) in page, "Invalid user or password")
+        self._simple_post_login(
+            url="http://{}/forum/login.php".format(self._DOMAIN),
+            post={
+                "username": self._encode(self._user),
+                "password": self._encode(self._passwd),
+                "redirect": b"",
+                "login":    b"\xc2\xf5\xee\xe4",
+            },
+            ok_text="class=\"mainmenu\">Выход [ {} ]</a>".format(self._user),
+        )

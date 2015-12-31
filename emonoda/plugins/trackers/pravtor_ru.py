@@ -17,17 +17,17 @@
 """
 
 
-import urllib.parse
 import http.cookiejar
 import re
 
 from . import BaseTracker
 from . import WithLogin
+from . import WithSimplePostLogin
 from . import WithHash
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithHash):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithHash):
     PLUGIN_NAME = "pravtor.ru"
 
     _SITE_VERSION = 0
@@ -100,14 +100,13 @@ class Plugin(BaseTracker, WithLogin, WithHash):
         self._assert_valid_data(data)
         return data
 
-    # ===
-
     def login(self):
-        self._assert_required_user_passwd()
-        post_data = self._encode(urllib.parse.urlencode({
-            "login_username": self._encode(self._user),
-            "login_password": self._encode(self._passwd),
-            "login":          b"\xc2\xf5\xee\xe4",
-        }))
-        page = self._decode(self._read_url("http://pravtor.ru/login.php", data=post_data))
-        self._assert_auth(re.search(r"<!--login form-->", page) is None, "Invalid user or password")
+        self._simple_post_login(
+            url="http://pravtor.ru/login.php",
+            post={
+                "login_username": self._encode(self._user),
+                "login_password": self._encode(self._passwd),
+                "login":          b"\xc2\xf5\xee\xe4",
+            },
+            ok_text="<b class=\"med\">{}</b></a>&nbsp; [ <a href=\"./login.php?logout=1\"".format(self._user),
+        )

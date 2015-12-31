@@ -17,19 +17,19 @@
 """
 
 
-import urllib.parse
 import re
 
 from datetime import datetime
 
 from . import BaseTracker
 from . import WithLogin
+from . import WithSimplePostLogin
 from . import WithTime
 from . import WithDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithTime, WithDownloadId):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithTime, WithDownloadId):
     PLUGIN_NAME = "booktracker.org"
 
     _SITE_VERSION = 0
@@ -73,18 +73,16 @@ class Plugin(BaseTracker, WithLogin, WithTime, WithDownloadId):
             dl_id_url="http://booktracker.org/download.php?id={dl_id}",
         )
 
-    # ===
-
     def login(self):
-        self._assert_required_user_passwd()
-        post_data = self._encode(urllib.parse.urlencode({
-            "login_username": self._encode(self._user),
-            "login_password": self._encode(self._passwd),
-            "login":          self._encode("Вход"),
-        }))
-        page = self._decode(self._read_url("http://booktracker.org/login.php", data=post_data))
-        logout = "<b class=\"med\">{}</b></a>&nbsp; [ <a href=\"./login.php?logout=1".format(self._user)
-        self._assert_auth(logout in page, "Invalid user or password")
+        self._simple_post_login(
+            url="http://booktracker.org/login.php",
+            post={
+                "login_username": self._encode(self._user),
+                "login_password": self._encode(self._passwd),
+                "login":          self._encode("Вход"),
+            },
+            ok_text="<b class=\"med\">{}</b></a>&nbsp; [ <a href=\"./login.php?logout=1".format(self._user),
+        )
         self._tzinfo = self._get_tzinfo()
 
     def _get_tzinfo(self):

@@ -26,6 +26,7 @@ disable =
 	broad-except,
 	redundant-keyword-arg,
 	wrong-import-order,
+	too-many-ancestors,
 
 [REPORTS]
 msg-template={symbol} -- {path}:{line}({obj}): {msg}
