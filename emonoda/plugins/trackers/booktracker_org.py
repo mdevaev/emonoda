@@ -60,7 +60,8 @@ class Plugin(BaseTracker, WithLogin, WithTime):
                                r"(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span> ]", page)
         self._assert_logic(date_match is not None, "Upload date not found")
         date = date_match.group(1)
-        upload_time = int(datetime.strptime(date, "%Y-%m-%d %H:%M").strftime("%s"))
+        date += " " + datetime.now(self._tzinfo).strftime("%z")
+        upload_time = int(datetime.strptime(date, "%Y-%m-%d %H:%M %z").strftime("%s"))
         return upload_time
 
     def fetch_new_data(self, torrent):
