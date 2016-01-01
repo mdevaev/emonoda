@@ -21,13 +21,12 @@ import re
 
 from . import BaseTracker
 from . import WithLogin
-from . import WithSimplePostLogin
 from . import WithCheckHash
 from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFetchByDownloadId):
+class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchByDownloadId):
     PLUGIN_NAME = "tfile.me"
 
     _SITE_VERSION = 2
@@ -58,7 +57,7 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFet
         return cls._get_merged_options()
 
     def login(self):
-        self._simple_post_login(
+        self._login_using_post(
             url="http://tfile.me/login/",
             post={
                 "username":  self._encode(self._user),

@@ -243,6 +243,11 @@ class WithLogin(BaseExtension):
     def login(self):
         raise NotImplementedError
 
+    def _login_using_post(self, url, post, ok_text):
+        self._assert_required_user_passwd()
+        page = self._decode(self._read_url(url, data=self._encode(urllib.parse.urlencode(post))))  # pylint: disable=no-member
+        self._assert_auth(ok_text in page, "Invalid user or password")
+
     def _assert_auth(self, *args):
         _assert(AuthError, *args)  # pylint: disable=no-value-for-parameter
 
@@ -256,16 +261,6 @@ class WithCaptcha(BaseExtension):
         self._captcha_decoder = captcha_decoder
 
 
-class WithSimplePostLogin(BaseExtension):
-    def __init__(self, **_):
-        pass
-
-    def _simple_post_login(self, url, post, ok_text):
-        self._assert_required_user_passwd()  # pylint: disable=no-member
-        page = self._decode(self._read_url(url, data=self._encode(urllib.parse.urlencode(post))))  # pylint: disable=no-member
-        self._assert_auth(ok_text in page, "Invalid user or password")  # pylint: disable=no-member
-
-
 # =====
 class WithCheckHash(BaseExtension):
     _TORRENT_HASH_URL = None
@@ -276,11 +271,14 @@ class WithCheckHash(BaseExtension):
         assert self._TORRENT_HASH_REGEXP is not None
 
     def fetch_hash(self, torrent):
-        self._assert_match(torrent)  # pylint: disable=no-member
-        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")  # pylint: disable=no-member
-        page = self._decode(self._read_url(self._TORRENT_HASH_URL.format(torrent_id=torrent_id)))  # pylint: disable=no-member
+        # pylint: disable=no-member
+        self._assert_match(torrent)
+
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
+
+        page = self._decode(self._read_url(self._TORRENT_HASH_URL.format(torrent_id=torrent_id)))
         hash_match = self._TORRENT_HASH_REGEXP.search(page)
-        self._assert_logic(hash_match is not None, "Hash not found")  # pylint: disable=no-member
+        self._assert_logic(hash_match is not None, "Hash not found")
         return hash_match.group("torrent_hash").strip().lower()
 
 
@@ -348,13 +346,13 @@ class WithFetchByTorrentId(BaseExtension):
         assert self._DOWNLOAD_URL is not None
 
     def fetch_new_data(self, torrent):
-        self._assert_match(torrent)  # pylint: disable=no-member
-        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")  # pylint: disable=no-member
-        data = self._read_url(  # pylint: disable=no-member
-            url=self._DOWNLOAD_URL.format(torrent_id=torrent_id),
-            data=self._DOWNLOAD_PAYLOAD,
-        )
-        self._assert_valid_data(data)  # pylint: disable=no-member
+        # pylint: disable=no-member
+        self._assert_match(torrent)
+
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
+
+        data = self._read_url(self._DOWNLOAD_URL.format(torrent_id=torrent_id), data=self._DOWNLOAD_PAYLOAD)
+        self._assert_valid_data(data)
         return data
 
 
@@ -370,16 +368,18 @@ class WithFetchByDownloadId(BaseExtension):
         assert self._DOWNLOAD_URL is not None
 
     def fetch_new_data(self, torrent):
-        self._assert_match(torrent)  # pylint: disable=no-member
-        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")  # pylint: disable=no-member
-        page = self._decode(self._read_url(self._DOWNLOAD_ID_URL.format(torrent_id=torrent_id)))  # pylint: disable=no-member
+        # pylint: disable=no-member
+        self._assert_match(torrent)
+
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
+        page = self._decode(self._read_url(self._DOWNLOAD_ID_URL.format(torrent_id=torrent_id)))
+
         dl_id_match = self._DOWNLOAD_ID_REGEXP.search(page)
-        self._assert_logic(dl_id_match is not None, "Unknown download_id")  # pylint: disable=no-member
-        data = self._read_url(  # pylint: disable=no-member
-            url=self._DOWNLOAD_URL.format(download_id=dl_id_match.group("download_id")),
-            data=self._DOWNLOAD_PAYLOAD,
-        )
-        self._assert_valid_data(data)  # pylint: disable=no-member
+        self._assert_logic(dl_id_match is not None, "Unknown download_id")
+        dl_id = dl_id_match.group("download_id")
+
+        data = self._read_url(self._DOWNLOAD_URL.format(download_id=dl_id), data=self._DOWNLOAD_PAYLOAD)
+        self._assert_valid_data(data)
         return data
 
 

@@ -28,13 +28,12 @@ from ... import tfile
 
 from . import BaseTracker
 from . import WithLogin
-from . import WithSimplePostLogin
 from . import WithCheckTime
 from . import WithFetchCustom
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithFetchCustom):
+class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
     PLUGIN_NAME = "tr.anidub.com"
 
     _SITE_VERSION = 0
@@ -99,7 +98,7 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithFet
         return candidates[name][0][0].get_data()
 
     def login(self):
-        self._simple_post_login(
+        self._login_using_post(
             url="http://tr.anidub.com/",
             post={
                 "login_name":      self._encode(self._user),

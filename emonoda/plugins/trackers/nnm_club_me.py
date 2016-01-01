@@ -21,13 +21,12 @@ import re
 
 from . import BaseTracker
 from . import WithLogin
-from . import WithSimplePostLogin
 from . import WithCheckScrape
 from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckScrape, WithFetchByDownloadId):
+class Plugin(BaseTracker, WithLogin, WithCheckScrape, WithFetchByDownloadId):
     PLUGIN_NAME = _NNM_DOMAIN = "nnm-club.me"
 
     _SITE_VERSION = 1
@@ -55,7 +54,7 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckScrape, WithF
         return cls._get_merged_options()
 
     def login(self):
-        self._simple_post_login(
+        self._login_using_post(
             url="http://{}/forum/login.php".format(self._NNM_DOMAIN),
             post={
                 "username": self._encode(self._user),

@@ -22,13 +22,12 @@ import re
 
 from . import BaseTracker
 from . import WithLogin
-from . import WithSimplePostLogin
 from . import WithCheckHash
 from . import WithFetchCustom
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFetchCustom):
+class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchCustom):
     PLUGIN_NAME = "pravtor.ru"
 
     _SITE_VERSION = 0
@@ -90,12 +89,11 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFet
                 "Origin":  "http://pravtor.ru",
             }
         )
-
         self._assert_valid_data(data)
         return data
 
     def login(self):
-        self._simple_post_login(
+        self._login_using_post(
             url="http://pravtor.ru/login.php",
             post={
                 "login_username": self._encode(self._user),

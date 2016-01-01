@@ -23,13 +23,12 @@ from datetime import datetime
 
 from . import BaseTracker
 from . import WithLogin
-from . import WithSimplePostLogin
 from . import WithCheckTime
 from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithFetchByDownloadId):
+class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
     PLUGIN_NAME = "booktracker.org"
 
     _SITE_VERSION = 0
@@ -68,7 +67,7 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithFet
         return upload_time
 
     def login(self):
-        self._simple_post_login(
+        self._login_using_post(
             url="http://booktracker.org/login.php",
             post={
                 "login_username": self._encode(self._user),
