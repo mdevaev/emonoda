@@ -271,18 +271,27 @@ class WithSimplePostLogin(BaseExtension):
 
 # =====
 class WithHash(BaseExtension):
+    _TORRENT_HASH_URL = None
+    _TORRENT_HASH_REGEXP = None
+
     def __init__(self, **_):
-        pass
+        assert self._TORRENT_HASH_URL is not None
+        assert self._TORRENT_HASH_REGEXP is not None
 
     def fetch_hash(self, torrent):
-        raise NotImplementedError
+        self._assert_match(torrent)  # pylint: disable=no-member
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)  # pylint: disable=no-member
+        page = self._decode(self._read_url(self._TORRENT_HASH_URL.format(torrent_id=torrent_id)))  # pylint: disable=no-member
+        hash_match = self._TORRENT_HASH_REGEXP.search(page)
+        self._assert_logic(hash_match is not None, "Hash not found")  # pylint: disable=no-member
+        return hash_match.group(1).strip().lower()
 
 
 class WithScrape(BaseExtension):
-    _SCRAPE_URL = None
+    _TORRENT_SCRAPE_URL = None
 
     def __init__(self, client_agent, **_):
-        assert self._SCRAPE_URL is not None
+        assert self._TORRENT_SCRAPE_URL is not None
 
         self._client_agent = client_agent
 
@@ -296,7 +305,7 @@ class WithScrape(BaseExtension):
         # https://wiki.theory.org/BitTorrentSpecification#Tracker_.27scrape.27_Convention
         self._assert_match(torrent)  # pylint: disable=no-member
         data = self._read_url(  # pylint: disable=no-member
-            url=self._SCRAPE_URL.format(scrape_hash=torrent.get_scrape_hash()),
+            url=self._TORRENT_SCRAPE_URL.format(scrape_hash=torrent.get_scrape_hash()),
             headers={"User-Agent": self._client_agent},
         )
         return (len(tfile.decode_data(data).get("files", {})) == 0)

@@ -37,6 +37,9 @@ class Plugin(BaseTracker, WithHash):
 
     _COMMENT_REGEXP = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
 
+    _TORRENT_HASH_URL = "http://fast-bit.org/torrent/479259"
+    _TORRENT_HASH_REGEXP = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
+
     # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
@@ -51,16 +54,9 @@ class Plugin(BaseTracker, WithHash):
 
     # ===
 
-    def fetch_hash(self, torrent):
-        self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment().replace("rutor.org", "fast-bit.org")))
-        hash_match = re.search(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})", page)
-        self._assert_logic(hash_match is not None, "Hash not found")
-        return hash_match.group(1).lower()
-
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        topic_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
-        data = self._read_url("http://fast-bit.org/download/{}".format(topic_id))
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
+        data = self._read_url("http://fast-bit.org/download/{}".format(torrent_id))
         self._assert_valid_data(data)
         return data

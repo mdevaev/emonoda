@@ -40,6 +40,9 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithHash):
 
     _COMMENT_REGEXP = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
 
+    _TORRENT_HASH_URL = "http://rutracker.org/forum/viewtopic.php?t={torrent_id}"
+    _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">([a-fA-F0-9]{40})</span>")
+
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
@@ -50,22 +53,13 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithHash):
 
     # ===
 
-    def fetch_hash(self, torrent):
-        self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
-        hash_match = re.search(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>", page)
-        self._assert_logic(hash_match is not None, "Hash not found")
-        return hash_match.group(1).lower()
-
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-
-        topic_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
-
-        cookie = http.cookiejar.Cookie(
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
+        self._cookie_jar.set_cookie(http.cookiejar.Cookie(
             version=0,
             name="bb_dl",
-            value=topic_id,
+            value=torrent_id,
             port=None,
             port_specified=False,
             domain="",
@@ -80,18 +74,15 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithHash):
             comment_url=None,
             rest={"HttpOnly": None},
             rfc2109=False,
-        )
-        self._cookie_jar.set_cookie(cookie)
-
+        ))
         data = self._read_url(
-            url="http://dl.rutracker.org/forum/dl.php?t={}".format(topic_id),
+            url="http://dl.rutracker.org/forum/dl.php?t={}".format(torrent_id),
             data=b"",
             headers={
-                "Referer": "http://rutracker.org/forum/viewtopic.php?t={}".format(topic_id),
+                "Referer": "http://rutracker.org/forum/viewtopic.php?t={}".format(torrent_id),
                 "Origin":  "http://rutracker.org",
             }
         )
-
         self._assert_valid_data(data)
         return data
 

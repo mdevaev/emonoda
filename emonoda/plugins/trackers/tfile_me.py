@@ -38,6 +38,10 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithHash, WithDownload
 
     _COMMENT_REGEXP = re.compile(r"http://tfile\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
 
+    _TORRENT_HASH_URL = "http://tfile.me/forum/viewtopic.php?p={torrent_id}"
+    _TORRENT_HASH_REGEXP = re.compile(r"<td style=\"color:darkgreen\">Info hash:</td>"
+                                      r"<td><strong>([a-fA-F0-9]{40})</strong></td>")
+
     # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
@@ -49,13 +53,6 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithHash, WithDownload
         return cls._get_merged_options()
 
     # ===
-
-    def fetch_hash(self, torrent):
-        self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
-        hash_match = re.search(r"<td style=\"color:darkgreen\">Info hash:</td><td><strong>([a-fA-F0-9]{40})</strong></td>", page)
-        self._assert_logic(hash_match is not None, "Hash not found")
-        return hash_match.group(1).lower()
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)

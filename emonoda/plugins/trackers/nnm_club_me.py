@@ -28,17 +28,17 @@ from . import WithDownloadId
 
 # =====
 class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithScrape, WithDownloadId):
-    PLUGIN_NAME = _DOMAIN = "nnm-club.me"
+    PLUGIN_NAME = _NNM_DOMAIN = "nnm-club.me"
 
     _SITE_VERSION = 1
     _SITE_ENCODING = "cp1251"
 
-    _SITE_FINGERPRINT_URL = "http://{}".format(_DOMAIN)
+    _SITE_FINGERPRINT_URL = "http://{}".format(_NNM_DOMAIN)
     _SITE_FINGERPRINT_TEXT = "<link rel=\"canonical\" href=\"http://nnm-club.me/\">"
 
     _COMMENT_REGEXP = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
 
-    _SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_DOMAIN)
+    _SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_NNM_DOMAIN)
 
     # ===
 
@@ -57,12 +57,12 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithScrape, WithDownlo
         return self._fetch_data_by_id(
             url=torrent.get_comment().replace("nnm-club.ru", "nnm-club.me"),
             dl_id_regexp=re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)"),
-            dl_id_url="http://{}//forum/download.php?id={{dl_id}}".format(self._DOMAIN),
+            dl_id_url="http://{}//forum/download.php?id={{dl_id}}".format(self._NNM_DOMAIN),
         )
 
     def login(self):
         self._simple_post_login(
-            url="http://{}/forum/login.php".format(self._DOMAIN),
+            url="http://{}/forum/login.php".format(self._NNM_DOMAIN),
             post={
                 "username": self._encode(self._user),
                 "password": self._encode(self._passwd),

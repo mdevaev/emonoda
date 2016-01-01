@@ -38,6 +38,9 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithHash):
 
     _COMMENT_REGEXP = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
 
+    _TORRENT_HASH_URL = "http://pravtor.ru/viewtopic.php?p={torrent_id}"
+    _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
+
     # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
@@ -50,27 +53,19 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithHash):
 
     # ===
 
-    def fetch_hash(self, torrent):
-        self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
-        hash_match = re.search(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>", page)
-        self._assert_logic(hash_match is not None, "Hash not found")
-        return hash_match.group(1).lower()
-
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-
-        topic_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
 
         page = self._decode(self._read_url(torrent.get_comment()))
-        torrent_id_match = re.search(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">", page)
-        self._assert_logic(torrent_id_match is not None, "Torrent-ID not found")
-        torrent_id = int(torrent_id_match.group(1))
+        dl_id_match = re.search(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">", page)
+        self._assert_logic(dl_id_match is not None, "Torrent-ID not found")
+        dl_id = int(dl_id_match.group(1))
 
         cookie = http.cookiejar.Cookie(
             version=0,
             name="bb_dl",
-            value=topic_id,
+            value=torrent_id,
             port=None,
             port_specified=False,
             domain="",
@@ -89,10 +84,10 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithHash):
         self._cookie_jar.set_cookie(cookie)
 
         data = self._read_url(
-            url="http://pravtor.ru/download.php?id={}".format(torrent_id),
+            url="http://pravtor.ru/download.php?id={}".format(dl_id),
             data=b"",
             headers={
-                "Referer": "http://pravtor.ru/viewtopic.php?t={}".format(topic_id),
+                "Referer": "http://pravtor.ru/viewtopic.php?t={}".format(torrent_id),
                 "Origin":  "http://pravtor.ru",
             }
         )
