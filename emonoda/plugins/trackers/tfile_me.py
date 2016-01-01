@@ -43,7 +43,8 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFet
                                       r"<td><strong>(?P<torrent_hash>[a-fA-F0-9]{40})</strong></td>")
 
     _DOWNLOAD_ID_URL = "http://tfile.me/forum/viewtopic.php?p={torrent_id}"
-    _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download.php\?id=(?P<download_id>[^\"&]+)\" class=\"dlLink\"")
+    _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download.php\?id=(?P<download_id>\d+)"
+                                     r"(&amp;sid=[a-zA-Z0-9]+)?\" class=\"dlLink\"")
     _DOWNLOAD_URL = "http://tfile.me/forum/download.php?id={download_id}"
 
     # ===
