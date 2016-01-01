@@ -42,6 +42,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
     _COMMENT_REGEXP = re.compile(r"http://pornolab\.net/forum/viewtopic\.php\?t=(\d+)")
 
     _DOWNLOAD_URL = "http://pornolab.net/forum/dl.php?t={torrent_id}"
+    _DOWNLOAD_PAYLOAD = b""
 
     # ===
 

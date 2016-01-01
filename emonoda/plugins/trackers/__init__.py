@@ -342,6 +342,7 @@ class WithCheckTime(BaseExtension):
 # =====
 class WithFetchByTorrentId(BaseExtension):
     _DOWNLOAD_URL = None
+    _DOWNLOAD_PAYLOAD = None
 
     def __init__(self, **_):
         assert self._DOWNLOAD_URL is not None
@@ -349,7 +350,10 @@ class WithFetchByTorrentId(BaseExtension):
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)  # pylint: disable=no-member
         torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)  # pylint: disable=no-member
-        data = self._read_url(self._DOWNLOAD_URL.format(torrent_id=torrent_id))  # pylint: disable=no-member
+        data = self._read_url(  # pylint: disable=no-member
+            url=self._DOWNLOAD_URL.format(torrent_id=torrent_id),
+            data=self._DOWNLOAD_PAYLOAD,
+        )
         self._assert_valid_data(data)  # pylint: disable=no-member
         return data
 
@@ -358,6 +362,7 @@ class WithFetchByDownloadId(BaseExtension):
     _DOWNLOAD_ID_URL = None
     _DOWNLOAD_ID_REGEXP = None
     _DOWNLOAD_URL = None
+    _DOWNLOAD_PAYLOAD = None
 
     def __init__(self, **_):
         assert self._DOWNLOAD_ID_URL is not None
@@ -370,7 +375,10 @@ class WithFetchByDownloadId(BaseExtension):
         page = self._decode(self._read_url(self._DOWNLOAD_ID_URL.format(torrent_id=torrent_id)))  # pylint: disable=no-member
         dl_id_match = self._DOWNLOAD_ID_REGEXP.search(page)
         self._assert_logic(dl_id_match is not None, "Unknown download_id")  # pylint: disable=no-member
-        data = self._read_url(self._DOWNLOAD_URL.format(download_id=dl_id_match.group(1).strip()))  # pylint: disable=no-member
+        data = self._read_url(  # pylint: disable=no-member
+            url=self._DOWNLOAD_URL.format(download_id=dl_id_match.group(1).strip()),
+            data=self._DOWNLOAD_PAYLOAD,
+        )
         self._assert_valid_data(data)  # pylint: disable=no-member
         return data
 
