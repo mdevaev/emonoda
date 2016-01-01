@@ -23,10 +23,11 @@ from ...optconf import Option
 
 from . import BaseTracker
 from . import WithCheckHash
+from . import WithFetchByTorrentId
 
 
 # =====
-class Plugin(BaseTracker, WithCheckHash):
+class Plugin(BaseTracker, WithCheckHash, WithFetchByTorrentId):
     PLUGIN_NAME = "rutor.org"
 
     _SITE_VERSION = 3
@@ -40,6 +41,8 @@ class Plugin(BaseTracker, WithCheckHash):
     _TORRENT_HASH_URL = "http://fast-bit.org/torrent/479259"
     _TORRENT_HASH_REGEXP = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
 
+    _DOWNLOAD_URL = "http://fast-bit.org/download/{torrent_id}"
+
     # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
@@ -51,12 +54,3 @@ class Plugin(BaseTracker, WithCheckHash):
         return cls._get_merged_options({
             "user_agent": Option(default="Googlebot/2.1", help="User-agent for site"),
         })
-
-    # ===
-
-    def fetch_new_data(self, torrent):
-        self._assert_match(torrent)
-        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
-        data = self._read_url("http://fast-bit.org/download/{}".format(torrent_id))
-        self._assert_valid_data(data)
-        return data

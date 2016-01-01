@@ -108,8 +108,18 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "check_version":     Option(default=True, help="Check the tracker version from GitHub"),
         }
 
-    def fetch_new_data(self, torrent):
-        raise NotImplementedError
+    def test(self):
+        if self._check_fingerprint or self._check_version:
+            opener = web.build_opener(self._proxy_url)
+            info = self._get_upstream_info(opener)
+        if self._check_fingerprint:
+            self._test_fingerprint(info["fingerprint"], opener)
+        if self._check_version:
+            self._test_version(info["version"])
+
+    def is_matched_for(self, torrent):
+        assert self._COMMENT_REGEXP is not None
+        return (self._COMMENT_REGEXP.match(torrent.get_comment() or "") is not None)
 
     # ===
 
@@ -164,10 +174,6 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     # ===
 
-    def is_matched_for(self, torrent):
-        assert self._COMMENT_REGEXP is not None
-        return (self._COMMENT_REGEXP.match(torrent.get_comment() or "") is not None)
-
     def _assert_logic(self, arg, *args):
         _assert(LogicError, arg, *args)
 
@@ -179,15 +185,6 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         self._assert_logic(tfile.is_valid_data(data), msg)
 
     # ===
-
-    def test(self):
-        if self._check_fingerprint or self._check_version:
-            opener = web.build_opener(self._proxy_url)
-            info = self._get_upstream_info(opener)
-        if self._check_fingerprint:
-            self._test_fingerprint(info["fingerprint"], opener)
-        if self._check_version:
-            self._test_version(info["version"])
 
     def _get_upstream_info(self, opener):
         try:
@@ -343,14 +340,44 @@ class WithCheckTime(BaseExtension):
 
 
 # =====
-class WithDownloadId(BaseExtension):
+class WithFetchByTorrentId(BaseExtension):
+    _DOWNLOAD_URL = None
+
+    def __init__(self, **_):
+        assert self._DOWNLOAD_URL is not None
+
+    def fetch_new_data(self, torrent):
+        self._assert_match(torrent)  # pylint: disable=no-member
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)  # pylint: disable=no-member
+        data = self._read_url(self._DOWNLOAD_URL.format(torrent_id=torrent_id))  # pylint: disable=no-member
+        self._assert_valid_data(data)  # pylint: disable=no-member
+        return data
+
+
+class WithFetchByDownloadId(BaseExtension):
+    _DOWNLOAD_ID_URL = None
+    _DOWNLOAD_ID_REGEXP = None
+    _DOWNLOAD_URL = None
+
+    def __init__(self, **_):
+        assert self._DOWNLOAD_ID_URL is not None
+        assert self._DOWNLOAD_ID_REGEXP is not None
+        assert self._DOWNLOAD_URL is not None
+
+    def fetch_new_data(self, torrent):
+        self._assert_match(torrent)  # pylint: disable=no-member
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)  # pylint: disable=no-member
+        page = self._decode(self._read_url(self._DOWNLOAD_ID_URL.format(torrent_id=torrent_id)))  # pylint: disable=no-member
+        dl_id_match = self._DOWNLOAD_ID_REGEXP.search(page)
+        self._assert_logic(dl_id_match is not None, "Unknown download_id")  # pylint: disable=no-member
+        data = self._read_url(self._DOWNLOAD_URL.format(download_id=dl_id_match.group(1).strip()))  # pylint: disable=no-member
+        self._assert_valid_data(data)  # pylint: disable=no-member
+        return data
+
+
+class WithFetchCustom(BaseExtension):
     def __init__(self, **_):
         pass
 
-    def _fetch_data_by_id(self, url, dl_id_regexp, dl_id_url):
-        page = self._decode(self._read_url(url))  # pylint: disable=no-member
-        dl_id_match = dl_id_regexp.search(page)
-        self._assert_logic(dl_id_match is not None, "Unknown download_id")  # pylint: disable=no-member
-        data = self._read_url(dl_id_url.format(dl_id=dl_id_match.group(1).strip()))  # pylint: disable=no-member
-        self._assert_valid_data(data)  # pylint: disable=no-member
-        return data
+    def fetch_new_data(self, torrent):
+        raise NotImplementedError

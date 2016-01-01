@@ -30,10 +30,11 @@ from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
 from . import WithCheckTime
+from . import WithFetchCustom
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithFetchCustom):
     PLUGIN_NAME = "tr.anidub.com"
 
     _SITE_VERSION = 0
@@ -54,8 +55,6 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime):
     @classmethod
     def get_options(cls):
         return cls._get_merged_options()
-
-    # ===
 
     def fetch_time(self, torrent):
         self._assert_match(torrent)

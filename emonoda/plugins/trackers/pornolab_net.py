@@ -26,10 +26,11 @@ from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
 from . import WithCheckTime
+from . import WithFetchByTorrentId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime):
+class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId):
     PLUGIN_NAME = "pornolab.net"
 
     _SITE_VERSION = 1
@@ -39,6 +40,8 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime):
     _SITE_FINGERPRINT_TEXT = "title=\"Поиск на Pornolab.net\" href=\"http://static.pornolab.net/opensearch.xml\""
 
     _COMMENT_REGEXP = re.compile(r"http://pornolab\.net/forum/viewtopic\.php\?t=(\d+)")
+
+    _DOWNLOAD_URL = "http://pornolab.net/forum/dl.php?t={torrent_id}"
 
     # ===
 
@@ -50,8 +53,6 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime):
     @classmethod
     def get_options(cls):
         return cls._get_merged_options()
-
-    # ===
 
     def fetch_time(self, torrent):
         self._assert_match(torrent)
@@ -71,15 +72,6 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime):
 
         upload_time = int(datetime.strptime(date, "%d-%m-%y %H:%M %z").strftime("%s"))
         return upload_time
-
-    def fetch_new_data(self, torrent):
-        self._assert_match(torrent)
-        topic_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
-        data = self._read_url("http://pornolab.net/forum/dl.php?t={}".format(topic_id), data=b"")
-        self._assert_valid_data(data)
-        return data
-
-    # ===
 
     def login(self):
         self._assert_required_user_passwd()

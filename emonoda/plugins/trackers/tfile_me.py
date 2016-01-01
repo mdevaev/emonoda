@@ -23,11 +23,11 @@ from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
 from . import WithCheckHash
-from . import WithDownloadId
+from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithDownloadId):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFetchByDownloadId):
     PLUGIN_NAME = "tfile.me"
 
     _SITE_VERSION = 1
@@ -42,6 +42,10 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithDow
     _TORRENT_HASH_REGEXP = re.compile(r"<td style=\"color:darkgreen\">Info hash:</td>"
                                       r"<td><strong>([a-fA-F0-9]{40})</strong></td>")
 
+    _DOWNLOAD_ID_URL = "http://tfile.me/forum/viewtopic.php?p={torrent_id}"
+    _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"dlLink\"")
+    _DOWNLOAD_URL = "http://tfile.me/forum/download.php?id={download_id}"
+
     # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
@@ -51,16 +55,6 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithDow
     @classmethod
     def get_options(cls):
         return cls._get_merged_options()
-
-    # ===
-
-    def fetch_new_data(self, torrent):
-        self._assert_match(torrent)
-        return self._fetch_data_by_id(
-            url=torrent.get_comment(),
-            dl_id_regexp=re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"dlLink\""),
-            dl_id_url="http://tfile.me/forum/download.php?id={dl_id}",
-        )
 
     def login(self):
         self._simple_post_login(

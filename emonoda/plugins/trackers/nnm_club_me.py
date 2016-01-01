@@ -23,11 +23,11 @@ from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
 from . import WithCheckScrape
-from . import WithDownloadId
+from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckScrape, WithDownloadId):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckScrape, WithFetchByDownloadId):
     PLUGIN_NAME = _NNM_DOMAIN = "nnm-club.me"
 
     _SITE_VERSION = 1
@@ -40,6 +40,10 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckScrape, WithD
 
     _TORRENT_SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_NNM_DOMAIN)
 
+    _DOWNLOAD_ID_URL = "http://{}/forum/viewtopic.php?p={{torrent_id}}".format(_NNM_DOMAIN)
+    _DOWNLOAD_ID_REGEXP = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
+    _DOWNLOAD_URL = "http://{}//forum/download.php?id={{download_id}}".format(_NNM_DOMAIN)
+
     # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
@@ -49,16 +53,6 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckScrape, WithD
     @classmethod
     def get_options(cls):
         return cls._get_merged_options()
-
-    # ===
-
-    def fetch_new_data(self, torrent):
-        self._assert_match(torrent)
-        return self._fetch_data_by_id(
-            url=torrent.get_comment().replace("nnm-club.ru", "nnm-club.me"),
-            dl_id_regexp=re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)"),
-            dl_id_url="http://{}//forum/download.php?id={{dl_id}}".format(self._NNM_DOMAIN),
-        )
 
     def login(self):
         self._simple_post_login(

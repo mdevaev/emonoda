@@ -25,10 +25,11 @@ from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
 from . import WithCheckHash
+from . import WithFetchCustom
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash):
+class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom):
     PLUGIN_NAME = "rutracker.org"
 
     _SITE_VERSION = 1
@@ -85,8 +86,6 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash):
         )
         self._assert_valid_data(data)
         return data
-
-    # ===
 
     def login(self):
         self._assert_required_user_passwd()

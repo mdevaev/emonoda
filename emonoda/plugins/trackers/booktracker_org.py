@@ -25,11 +25,11 @@ from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
 from . import WithCheckTime
-from . import WithDownloadId
+from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithDownloadId):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithFetchByDownloadId):
     PLUGIN_NAME = "booktracker.org"
 
     _SITE_VERSION = 0
@@ -39,6 +39,10 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithDow
     _SITE_FINGERPRINT_TEXT = "var cookieDomain  = \"booktracker.org\";"
 
     _COMMENT_REGEXP = re.compile(r"http://booktracker\.org/viewtopic\.php\?p=(\d+)")
+
+    _DOWNLOAD_ID_URL = "http://booktracker.org/viewtopic.php?p={torrent_id}"
+    _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(\d+)\" class=\"\">")
+    _DOWNLOAD_URL = "http://booktracker.org/download.php?id={download_id}"
 
     # ===
 
@@ -50,8 +54,6 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithDow
     @classmethod
     def get_options(cls):
         return cls._get_merged_options()
-
-    # ===
 
     def fetch_time(self, torrent):
         self._assert_match(torrent)
@@ -65,14 +67,6 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithDow
         upload_time = int(datetime.strptime(date, "%Y-%m-%d %H:%M %z").strftime("%s"))
         return upload_time
 
-    def fetch_new_data(self, torrent):
-        self._assert_match(torrent)
-        return self._fetch_data_by_id(
-            url=torrent.get_comment(),
-            dl_id_regexp=re.compile(r"<a href=\"download\.php\?id=(\d+)\" class=\"\">"),
-            dl_id_url="http://booktracker.org/download.php?id={dl_id}",
-        )
-
     def login(self):
         self._simple_post_login(
             url="http://booktracker.org/login.php",
@@ -83,10 +77,8 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithDow
             },
             ok_text="<b class=\"med\">{}</b></a>&nbsp; [ <a href=\"./login.php?logout=1".format(self._user),
         )
-        self._tzinfo = self._get_tzinfo()
 
-    def _get_tzinfo(self):
         page = self._decode(self._read_url("http://booktracker.org/profile.php?mode=editprofile"))
         timezone_match = re.search(r"<option value=\"[\.\d+-]\" selected=\"selected\">(GMT [+-] [\d\.]+)[\s<\(]", page)
         timezone = (timezone_match and "Etc/" + timezone_match.group(1).replace(" ", ""))
-        return self._select_tzinfo(timezone)
+        self._tzinfo = self._select_tzinfo(timezone)

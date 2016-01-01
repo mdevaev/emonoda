@@ -32,3 +32,6 @@ class Plugin(nnm_club_me.Plugin):
     _COMMENT_REGEXP = re.compile(r"http://ipv6\.nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
 
     _TORRENT_SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_NNM_DOMAIN)
+
+    _DOWNLOAD_ID_URL = "http://{}/forum/viewtopic.php?p={{torrent_id}}".format(_NNM_DOMAIN)
+    _DOWNLOAD_URL = "http://{}//forum/download.php?id={{download_id}}".format(_NNM_DOMAIN)

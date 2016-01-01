@@ -24,10 +24,11 @@ from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
 from . import WithCheckHash
+from . import WithFetchCustom
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFetchCustom):
     PLUGIN_NAME = "pravtor.ru"
 
     _SITE_VERSION = 0
@@ -50,8 +51,6 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash):
     @classmethod
     def get_options(cls):
         return cls._get_merged_options()
-
-    # ===
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
