@@ -37,10 +37,10 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFet
     _SITE_FINGERPRINT_URL = "http://pravtor.ru"
     _SITE_FINGERPRINT_TEXT = "<img src=\"/images/pravtor_beta1.png\""
 
-    _COMMENT_REGEXP = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
     _TORRENT_HASH_URL = "http://pravtor.ru/viewtopic.php?p={torrent_id}"
-    _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">([a-zA-Z0-9]+)</span>")
+    _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-zA-Z0-9]+)</span>")
 
     # ===
 
@@ -54,7 +54,7 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFet
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
 
         page = self._decode(self._read_url(torrent.get_comment()))
         dl_id_match = re.search(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">", page)

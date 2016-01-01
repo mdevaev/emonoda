@@ -39,10 +39,10 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
     _SITE_FINGERPRINT_URL = "http://rutracker.org/forum/index.php"
     _SITE_FINGERPRINT_TEXT = "href=\"http://static.rutracker.org/favicon.ico\" type=\"image/x-icon\""
 
-    _COMMENT_REGEXP = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
 
     _TORRENT_HASH_URL = "http://rutracker.org/forum/viewtopic.php?t={torrent_id}"
-    _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">([a-fA-F0-9]{40})</span>")
+    _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-fA-F0-9]{40})</span>")
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
@@ -56,7 +56,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group(1)
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
         self._cookie_jar.set_cookie(http.cookiejar.Cookie(
             version=0,
             name="bb_dl",

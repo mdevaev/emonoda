@@ -36,12 +36,12 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckScrape, WithF
     _SITE_FINGERPRINT_URL = "http://{}".format(_NNM_DOMAIN)
     _SITE_FINGERPRINT_TEXT = "<link rel=\"canonical\" href=\"http://nnm-club.me/\">"
 
-    _COMMENT_REGEXP = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
     _TORRENT_SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_NNM_DOMAIN)
 
     _DOWNLOAD_ID_URL = "http://{}/forum/viewtopic.php?p={{torrent_id}}".format(_NNM_DOMAIN)
-    _DOWNLOAD_ID_REGEXP = re.compile(r"filelst.php\?attach_id=([a-zA-Z0-9]+)")
+    _DOWNLOAD_ID_REGEXP = re.compile(r"filelst.php\?attach_id=(?P<download_id>[a-zA-Z0-9]+)")
     _DOWNLOAD_URL = "http://{}//forum/download.php?id={{download_id}}".format(_NNM_DOMAIN)
 
     # ===

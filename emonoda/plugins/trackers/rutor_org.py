@@ -36,10 +36,11 @@ class Plugin(BaseTracker, WithCheckHash, WithFetchByTorrentId):
     _SITE_FINGERPRINT_URL = "http://fast-bit.org"
     _SITE_FINGERPRINT_TEXT = "<a href=\"/\"><img src=\"/s/logo.jpg\" alt=\"rutor.org logo\" /></a>"
 
-    _COMMENT_REGEXP = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
+    _COMMENT_REGEXP = re.compile(r"^http://rutor\.org/torrent/(?P<torrent_id>\d+)$")
 
     _TORRENT_HASH_URL = "http://fast-bit.org/torrent/{torrent_id}"
-    _TORRENT_HASH_REGEXP = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
+    _TORRENT_HASH_REGEXP = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:"
+                                      r"\?xt=urn:btih:(?P<torrent_hash>[a-fA-F0-9]{40})")
 
     _DOWNLOAD_URL = "http://fast-bit.org/download/{torrent_id}"
 

@@ -39,7 +39,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
     _SITE_FINGERPRINT_URL = "http://pornolab.net/forum/index.php"
     _SITE_FINGERPRINT_TEXT = "title=\"Поиск на Pornolab.net\" href=\"http://static.pornolab.net/opensearch.xml\""
 
-    _COMMENT_REGEXP = re.compile(r"http://pornolab\.net/forum/viewtopic\.php\?t=(\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://pornolab\.net/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
 
     _DOWNLOAD_URL = "http://pornolab.net/forum/dl.php?t={torrent_id}"
     _DOWNLOAD_PAYLOAD = b""

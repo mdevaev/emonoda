@@ -38,10 +38,10 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithFet
     _SITE_FINGERPRINT_URL = "http://booktracker.org"
     _SITE_FINGERPRINT_TEXT = "var cookieDomain  = \"booktracker.org\";"
 
-    _COMMENT_REGEXP = re.compile(r"http://booktracker\.org/viewtopic\.php\?p=(\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://booktracker\.org/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
     _DOWNLOAD_ID_URL = "http://booktracker.org/viewtopic.php?p={torrent_id}"
-    _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(\d+)\" class=\"\">")
+    _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(?P<download_id>\d+)\" class=\"\">")
     _DOWNLOAD_URL = "http://booktracker.org/download.php?id={download_id}"
 
     # ===

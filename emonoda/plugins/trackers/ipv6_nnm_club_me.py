@@ -29,7 +29,7 @@ class Plugin(nnm_club_me.Plugin):
     _SITE_VERSION = 0
     _SITE_FINGERPRINT_URL = "http://{}".format(_NNM_DOMAIN)
 
-    _COMMENT_REGEXP = re.compile(r"http://ipv6\.nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://ipv6\.nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
     _TORRENT_SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_NNM_DOMAIN)
 

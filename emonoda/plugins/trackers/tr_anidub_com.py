@@ -43,7 +43,7 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithFet
     _SITE_FINGERPRINT_URL = "http://tr.anidub.com"
     _SITE_FINGERPRINT_TEXT = "href=\"http://tr.anidub.com/engine/opensearch.php\" title=\"AniDUB Tracker\""
 
-    _COMMENT_REGEXP = re.compile(r"http://tr\.anidub\.com/\?newsid=(\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://tr\.anidub\.com/\?newsid=(?P<torrent_id>\d+)")
 
     # ===
 
