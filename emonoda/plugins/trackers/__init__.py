@@ -305,7 +305,7 @@ class WithCheckScrape(BaseExtension):
             url=self._TORRENT_SCRAPE_URL.format(scrape_hash=torrent.get_scrape_hash()),
             headers={"User-Agent": self._client_agent},
         )
-        return (len(tfile.decode_data(data).get("files", {})) == 0)
+        return (len(tfile.decode_data(data).get("files", {})) != 0)
 
 
 class WithCheckTime(BaseExtension):
