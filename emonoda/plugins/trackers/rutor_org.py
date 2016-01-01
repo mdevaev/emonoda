@@ -38,7 +38,7 @@ class Plugin(BaseTracker, WithCheckHash, WithFetchByTorrentId):
 
     _COMMENT_REGEXP = re.compile(r"^http://rutor\.org/torrent/(\d+)$")
 
-    _TORRENT_HASH_URL = "http://fast-bit.org/torrent/479259"
+    _TORRENT_HASH_URL = "http://fast-bit.org/torrent/{torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:\?xt=urn:btih:([a-fA-F0-9]{40})")
 
     _DOWNLOAD_URL = "http://fast-bit.org/download/{torrent_id}"
