@@ -30,7 +30,7 @@ from . import WithFetchByDownloadId
 class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFetchByDownloadId):
     PLUGIN_NAME = "tfile.me"
 
-    _SITE_VERSION = 1
+    _SITE_VERSION = 2
     _SITE_ENCODING = "cp1251"
 
     _SITE_FINGERPRINT_URL = "http://tfile.me"
@@ -43,7 +43,7 @@ class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithFet
                                       r"<td><strong>([a-fA-F0-9]{40})</strong></td>")
 
     _DOWNLOAD_ID_URL = "http://tfile.me/forum/viewtopic.php?p={torrent_id}"
-    _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"dlLink\"")
+    _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download.php\?id=([^\"&]+)\" class=\"dlLink\"")
     _DOWNLOAD_URL = "http://tfile.me/forum/download.php?id={download_id}"
 
     # ===
