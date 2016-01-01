@@ -22,11 +22,11 @@ import re
 from ...optconf import Option
 
 from . import BaseTracker
-from . import WithHash
+from . import WithCheckHash
 
 
 # =====
-class Plugin(BaseTracker, WithHash):
+class Plugin(BaseTracker, WithCheckHash):
     PLUGIN_NAME = "rutor.org"
 
     _SITE_VERSION = 3

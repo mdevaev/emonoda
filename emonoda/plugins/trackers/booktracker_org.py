@@ -24,12 +24,12 @@ from datetime import datetime
 from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
-from . import WithTime
+from . import WithCheckTime
 from . import WithDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithTime, WithDownloadId):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime, WithDownloadId):
     PLUGIN_NAME = "booktracker.org"
 
     _SITE_VERSION = 0

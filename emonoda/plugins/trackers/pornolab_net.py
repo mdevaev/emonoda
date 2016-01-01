@@ -25,11 +25,11 @@ from datetime import datetime
 from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
-from . import WithTime
+from . import WithCheckTime
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCaptcha, WithTime):
+class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime):
     PLUGIN_NAME = "pornolab.net"
 
     _SITE_VERSION = 1

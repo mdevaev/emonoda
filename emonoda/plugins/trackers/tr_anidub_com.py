@@ -29,11 +29,11 @@ from ... import tfile
 from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
-from . import WithTime
+from . import WithCheckTime
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithTime):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckTime):
     PLUGIN_NAME = "tr.anidub.com"
 
     _SITE_VERSION = 0

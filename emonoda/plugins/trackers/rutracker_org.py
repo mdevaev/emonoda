@@ -24,11 +24,11 @@ import re
 from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
-from . import WithHash
+from . import WithCheckHash
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCaptcha, WithHash):
+class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash):
     PLUGIN_NAME = "rutracker.org"
 
     _SITE_VERSION = 1

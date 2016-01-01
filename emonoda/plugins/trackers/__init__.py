@@ -270,7 +270,7 @@ class WithSimplePostLogin(BaseExtension):
 
 
 # =====
-class WithHash(BaseExtension):
+class WithCheckHash(BaseExtension):
     _TORRENT_HASH_URL = None
     _TORRENT_HASH_REGEXP = None
 
@@ -287,7 +287,7 @@ class WithHash(BaseExtension):
         return hash_match.group(1).strip().lower()
 
 
-class WithScrape(BaseExtension):
+class WithCheckScrape(BaseExtension):
     _TORRENT_SCRAPE_URL = None
 
     def __init__(self, client_agent, **_):
@@ -311,7 +311,7 @@ class WithScrape(BaseExtension):
         return (len(tfile.decode_data(data).get("files", {})) == 0)
 
 
-class WithTime(BaseExtension):
+class WithCheckTime(BaseExtension):
     def __init__(self, timezone, **_):
         self._default_timezone = timezone
 
@@ -342,6 +342,7 @@ class WithTime(BaseExtension):
         return pytz.timezone(self._default_timezone)
 
 
+# =====
 class WithDownloadId(BaseExtension):
     def __init__(self, **_):
         pass

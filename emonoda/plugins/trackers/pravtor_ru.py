@@ -23,11 +23,11 @@ import re
 from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
-from . import WithHash
+from . import WithCheckHash
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithHash):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash):
     PLUGIN_NAME = "pravtor.ru"
 
     _SITE_VERSION = 0

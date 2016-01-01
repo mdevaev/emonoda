@@ -22,12 +22,12 @@ import re
 from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
-from . import WithScrape
+from . import WithCheckScrape
 from . import WithDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithScrape, WithDownloadId):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckScrape, WithDownloadId):
     PLUGIN_NAME = _NNM_DOMAIN = "nnm-club.me"
 
     _SITE_VERSION = 1

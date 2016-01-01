@@ -22,12 +22,12 @@ import re
 from . import BaseTracker
 from . import WithLogin
 from . import WithSimplePostLogin
-from . import WithHash
+from . import WithCheckHash
 from . import WithDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithHash, WithDownloadId):
+class Plugin(BaseTracker, WithLogin, WithSimplePostLogin, WithCheckHash, WithDownloadId):
     PLUGIN_NAME = "tfile.me"
 
     _SITE_VERSION = 1

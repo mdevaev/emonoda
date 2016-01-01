@@ -28,9 +28,9 @@ import operator
 import argparse
 
 from ..plugins.trackers import TrackerError
-from ..plugins.trackers import WithHash
-from ..plugins.trackers import WithScrape
-from ..plugins.trackers import WithTime
+from ..plugins.trackers import WithCheckHash
+from ..plugins.trackers import WithCheckScrape
+from ..plugins.trackers import WithCheckTime
 
 from ..helpers import tcollection
 from ..helpers import surprise
@@ -297,13 +297,13 @@ def update(  # pylint: disable=too-many-branches
 
                 tracker_bases = op.tracker.get_bases()
 
-                if WithHash in tracker_bases:
+                if WithCheckHash in tracker_bases:
                     need_update = (op.tracker.fetch_hash(op.torrent) != op.torrent.get_hash())
 
-                elif WithScrape in tracker_bases:
+                elif WithCheckScrape in tracker_bases:
                     need_update = (not op.tracker.is_registered(op.torrent))
 
-                elif WithTime in tracker_bases:
+                elif WithCheckTime in tracker_bases:
                     time_info = TorrentTimeInfo(op.torrent).check_and_fill()
                     tracker_time = op.tracker.fetch_time(op.torrent)
                     need_update = (tracker_time > time_info.read())
@@ -319,10 +319,10 @@ def update(  # pylint: disable=too-many-branches
                             if backup_dir_path is not None:
                                 backup_torrent(op.torrent, backup_dir_path, backup_suffix)
                             update_torrent(client, op.torrent, tmp_torrent.get_data(), to_save_customs, to_set_customs)
-                            if WithTime in tracker_bases:
+                            if WithCheckTime in tracker_bases:
                                 time_info.write(tracker_time)
                         op.done_affected(diff)
-                    elif WithTime in tracker_bases and not noop:
+                    elif WithCheckTime in tracker_bases and not noop:
                         time_info.write(tracker_time)
         except Exception:
             pass
