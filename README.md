@@ -41,6 +41,7 @@
 * http://tr.anidub.com
 * http://pornolab.net
 * http://booktracker.org
+* http://torrent.rus.ec
 
 ***
 
