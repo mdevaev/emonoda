@@ -30,11 +30,11 @@ from . import WithFetchByTorrentId
 class Plugin(BaseTracker, WithCheckHash, WithFetchByTorrentId):
     PLUGIN_NAME = "rutor.org"
 
-    _SITE_VERSION = 3
+    _SITE_VERSION = 4
     _SITE_ENCODING = "utf-8"
 
     _SITE_FINGERPRINT_URL = "http://fast-bit.org"
-    _SITE_FINGERPRINT_TEXT = "<a href=\"/\"><img src=\"/s/logo.jpg\" alt=\"rutor.org logo\" /></a>"
+    _SITE_FINGERPRINT_TEXT = "<a href=\"/\"><img src=\"/s/logo.jpg\" alt=\"rutor.info logo\" /></a>"
 
     _COMMENT_REGEXP = re.compile(r"^http://rutor\.org/torrent/(?P<torrent_id>\d+)$")
 
