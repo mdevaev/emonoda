@@ -44,12 +44,13 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
 
     _COMMENT_REGEXP = re.compile(r"http://tr\.anidub\.com/\?newsid=(?P<torrent_id>\d+)")
 
+    _TIMEZONE_STATIC = "Etc/GMT+4"
+
     # ===
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-        self._tzinfo = None
 
     @classmethod
     def get_options(cls):
@@ -107,4 +108,3 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
             },
             ok_text="<li><a href=\"http://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
         )
-        self._tzinfo = self._select_tzinfo("Etc/GMT+4")

@@ -307,8 +307,21 @@ class WithCheckScrape(BaseExtension):
 
 
 class WithCheckTime(BaseExtension):
+    _TIMEZONE_URL = None
+    _TIMEZONE_REGEXP = None
+    _TIMEZONE_PREFIX = None
+
+    _TIMEZONE_STATIC = None
+
     def __init__(self, timezone, **_):
+        assert (
+            self._TIMEZONE_URL is not None
+            and self._TIMEZONE_REGEXP is not None
+            and self._TIMEZONE_PREFIX is not None
+        ) or self._TIMEZONE_STATIC is not None
+
         self._default_timezone = timezone
+        self._tzinfo = None
 
     @classmethod
     def get_options(cls):
@@ -319,6 +332,15 @@ class WithCheckTime(BaseExtension):
                 help="Site timezone, is automatically detected if possible (or manually, 'Europe/Moscow' for example)",
             ),
         }
+
+    def init_tzinfo(self):
+        if self._TIMEZONE_STATIC is not None:
+            timezone = self._TIMEZONE_STATIC
+        else:
+            page = self._decode(self._read_url(self._TIMEZONE_URL))  # pylint: disable=no-member
+            timezone_match = self._TIMEZONE_REGEXP.search(page)
+            timezone = (timezone_match and self._TIMEZONE_PREFIX + timezone_match.group("timezone").replace(" ", ""))
+        self._tzinfo = self._select_tzinfo(timezone)
 
     def fetch_time(self, torrent):
         raise NotImplementedError

@@ -41,6 +41,10 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
 
     _COMMENT_REGEXP = re.compile(r"http://pornolab\.net/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
 
+    _TIMEZONE_URL = "http://pornolab.net/forum/index.php"
+    _TIMEZONE_REGEXP = re.compile(r"<p>Часовой пояс: <span class='tz_time'>(?P<timezone>GMT [+-] \d{1,2})</span></p>")
+    _TIMEZONE_PREFIX = "Etc/"
+
     _DOWNLOAD_URL = "http://pornolab.net/forum/dl.php?t={torrent_id}"
     _DOWNLOAD_PAYLOAD = b""
 
@@ -49,7 +53,6 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-        self._tzinfo = None
 
     @classmethod
     def get_options(cls):
@@ -97,15 +100,8 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
             page = self._read_login(post)
             self._assert_auth(cap_static_regexp.search(page) is None, "Invalid user, password or captcha")
 
-        self._tzinfo = self._get_tzinfo(page)
-
     def _read_login(self, post):
         return self._decode(self._read_url(
             url="http://pornolab.net/forum/login.php",
             data=self._encode(urllib.parse.urlencode(post)),
         ))
-
-    def _get_tzinfo(self, page):
-        timezone_match = re.search(r"<p>Часовой пояс: <span class='tz_time'>(GMT [+-] \d{1,2})</span></p>", page)
-        timezone = (timezone_match and "Etc/" + timezone_match.group(1).replace(" ", ""))
-        return self._select_tzinfo(timezone)

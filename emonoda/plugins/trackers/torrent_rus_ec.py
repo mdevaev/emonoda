@@ -40,6 +40,10 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByDown
 
     _COMMENT_REGEXP = re.compile(r"http://torrent\.rus\.ec/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
+    _TIMEZONE_URL = "http://torrent.rus.ec"
+    _TIMEZONE_REGEXP = re.compile(r"<p>Часовой пояс: <span class=\"tz_time\">(?P<timezone>GMT [+-] \d{1,2})</span></p>")
+    _TIMEZONE_PREFIX = "Etc/"
+
     _DOWNLOAD_ID_URL = "http://torrent.rus.ec/viewtopic.php?p={torrent_id}"
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(?P<download_id>\d+)\" class=\"(leech|seed|gen)med\">")
     _DOWNLOAD_URL = "http://torrent.rus.ec/download.php?id={download_id}"
@@ -49,7 +53,6 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByDown
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-        self._tzinfo = None
 
     @classmethod
     def get_options(cls):
@@ -77,8 +80,3 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByDown
             },
             ok_text="<a href=\"./login.php?logout=1\" onclick=\"return confirm",
         )
-
-        page = self._decode(self._read_url("http://torrent.rus.ec"))
-        timezone_match = re.search(r"<p>Часовой пояс: <span class=\"tz_time\">(GMT [+-] \d{1,2})</span></p>", page)
-        timezone = (timezone_match and "Etc/" + timezone_match.group(1).replace(" ", ""))
-        self._tzinfo = self._select_tzinfo(timezone)

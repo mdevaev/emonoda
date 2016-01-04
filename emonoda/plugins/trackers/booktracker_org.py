@@ -39,6 +39,10 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
 
     _COMMENT_REGEXP = re.compile(r"http://booktracker\.org/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
+    _TIMEZONE_URL = "http://booktracker.org/profile.php?mode=editprofile"
+    _TIMEZONE_REGEXP = re.compile(r"<option value=\"[\.\d+-]\" selected=\"selected\">(?P<timezone>GMT [+-] [\d\.]+)[\s<\(]")
+    _TIMEZONE_PREFIX = "Etc/"
+
     _DOWNLOAD_ID_URL = "http://booktracker.org/viewtopic.php?p={torrent_id}"
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(?P<download_id>\d+)\" class=\"\">")
     _DOWNLOAD_URL = "http://booktracker.org/download.php?id={download_id}"
@@ -48,7 +52,6 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
-        self._tzinfo = None
 
     @classmethod
     def get_options(cls):
@@ -76,8 +79,3 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
             },
             ok_text="<b class=\"med\">{}</b></a>&nbsp; [ <a href=\"./login.php?logout=1".format(self._user),
         )
-
-        page = self._decode(self._read_url("http://booktracker.org/profile.php?mode=editprofile"))
-        timezone_match = re.search(r"<option value=\"[\.\d+-]\" selected=\"selected\">(GMT [+-] [\d\.]+)[\s<\(]", page)
-        timezone = (timezone_match and "Etc/" + timezone_match.group(1).replace(" ", ""))
-        self._tzinfo = self._select_tzinfo(timezone)
