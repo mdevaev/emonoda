@@ -278,7 +278,7 @@ class TorrentTimeInfo:
             time_file.write(str(int(value)))
 
 
-def update(  # pylint: disable=too-many-branches
+def update(  # pylint: disable=too-many-branches,too-many-locals
     feeder,
     client,
     backup_dir_path,
@@ -286,6 +286,7 @@ def update(  # pylint: disable=too-many-branches
     to_save_customs,
     to_set_customs,
     noop,
+    test_mode,
 ):
     hashes = (client.get_hashes() if client is not None else [])
     for op in feeder.get_ops():
@@ -311,9 +312,9 @@ def update(  # pylint: disable=too-many-branches
                 else:
                     RuntimeError("Invalid tracker {}: missing method of check".format(op.tracker))
 
-                if need_update:
+                if need_update or test_mode:
                     tmp_torrent = tfile.Torrent(data=op.tracker.fetch_new_data(op.torrent))
-                    if op.torrent.get_hash() != tmp_torrent.get_hash():
+                    if op.torrent.get_hash() != tmp_torrent.get_hash() or test_mode:
                         diff = tfile.get_difference(op.torrent, tmp_torrent)
                         if not noop:
                             if backup_dir_path is not None:
@@ -355,6 +356,7 @@ def main():
     args_parser.add_argument("--noop", action="store_true")
     args_parser.add_argument("--mute", action="store_true")
     args_parser.add_argument("--fail-on-captcha", action="store_true")
+    args_parser.add_argument("--test-mode", action="store_true", help=argparse.SUPPRESS)
     options = args_parser.parse_args(argv[1:])
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
@@ -412,6 +414,7 @@ def main():
                 to_save_customs=config.emupdate.save_customs,
                 to_set_customs=config.emupdate.set_customs,
                 noop=options.noop,
+                test_mode=options.test_mode,
             )
 
             results = feeder.get_results()
