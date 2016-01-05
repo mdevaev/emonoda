@@ -71,7 +71,13 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
     def fetch_time(self, torrent):
         self._assert_match(torrent)
         page = self._decode(self._read_url(torrent.get_comment()))
-        date_match = re.search(r"Торрент-файл обновлен (\d{1,2}) ([А-Яа-я]{3,8}) (\d{4}) в (\d{2}:\d{2})", page)
+
+        for label in ("Обновлен", "Залит"):
+            date_match = re.search(r"<li>%s<span class=\"floatright green n\">"
+                                   r"(\d{1,2}) ([А-Яа-я]{3,8}) (\d{4}) в (\d{2}:\d{2})"
+                                   r"</span></li>" % (label), page)
+            if date_match is not None:
+                break
         self._assert_logic(date_match is not None, "Upload date not found")
 
         months = {
@@ -88,7 +94,6 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
             "ноября":   "11",
             "декабря":  "12",
         }
-
         date_str = "%s %s %s %s %s" % (
             date_match.group(1),  # Day
             months[date_match.group(2)],  # Month
@@ -96,7 +101,6 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
             date_match.group(4),  # Time
             datetime.now(self._tzinfo).strftime("%z")  # Timezone offset
         )
-
         upload_time = int(datetime.strptime(date_str, "%d %m %Y %H:%M %z").strftime("%s"))
         return upload_time
 
