@@ -17,7 +17,6 @@
 """
 
 
-import urllib.parse
 import re
 
 from datetime import datetime
@@ -32,7 +31,7 @@ from . import WithFetchByTorrentId
 class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
     PLUGIN_NAME = "kinozal.tv"
 
-    _SITE_VERSION = 1
+    _SITE_VERSION = 0
     _SITE_ENCODING = "cp1251"
 
     _SITE_FINGERPRINT_URL = "http://kinozal.tv/"
@@ -42,7 +41,7 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
 
     _TIMEZONE_URL = "http://kinozal.tv/my.php"
     _TIMEZONE_REGEXP = re.compile(r"<option value=\"(?P<delta>-?\d{1,3})\" selected")
-    _TIMEZONE_PREFIX = 'Etc/GMT'
+    _TIMEZONE_PREFIX = "Etc/GMT"
 
     _DOWNLOAD_URL = "http://dl.kinozal.tv/download.php?id={torrent_id}"
     _DOWNLOAD_PAYLOAD = b""
@@ -59,12 +58,12 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
 
     def init_tzinfo(self):
         timezone = None
-        page = self._decode(self._read_url(self._TIMEZONE_URL))  # pylint: disable=no-member
+        page = self._decode(self._read_url(self._TIMEZONE_URL))
         delta_match = self._TIMEZONE_REGEXP.search(page)
         if delta_match:
             timezone_gmt_number = (int(delta_match.group("delta")) + 180) // 60  # Moscow Timezone GMT+3 -> 3 * 60 = 180
             if timezone_gmt_number > 0:
-                timezone = self._TIMEZONE_PREFIX + '+' + str(timezone_gmt_number)
+                timezone = self._TIMEZONE_PREFIX + "+" + str(timezone_gmt_number)
             else:
                 timezone = self._TIMEZONE_PREFIX + str(timezone_gmt_number)
         self._tzinfo = self._select_tzinfo(timezone)
@@ -76,18 +75,18 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
         self._assert_logic(date_match is not None, "Upload date not found")
 
         months = {
-            'января': '01',
-            'февраля': '02',
-            'марта': '03',
-            'апреля': '04',
-            'мая': '05',
-            'июня': '06',
-            'июля': '07',
-            'августа': '08',
-            'сентября': '09',
-            'октября': '10',
-            'ноября': '11',
-            'декабря': '12'
+            "января":   "01",
+            "февраля":  "02",
+            "марта":    "03",
+            "апреля":   "04",
+            "мая":      "05",
+            "июня":     "06",
+            "июля":     "07",
+            "августа":  "08",
+            "сентября": "09",
+            "октября":  "10",
+            "ноября":   "11",
+            "декабря":  "12",
         }
 
         date_str = "%s %s %s %s %s" % (
@@ -109,5 +108,5 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
                 "password": self._encode(self._passwd),
                 "returnto": "",
             },
-            ok_text='href="/my.php"',
+            ok_text="href=\"/my.php\"",
         )
