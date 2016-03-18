@@ -32,12 +32,12 @@ from . import WithFetchCustom
 class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom):
     PLUGIN_NAME = "rutracker.org"
 
-    _SITE_VERSION = 2
+    _SITE_VERSION = 3
     _SITE_ENCODING = "cp1251"
     _SITE_RETRY_CODES = (503, 404)
 
     _SITE_FINGERPRINT_URL = "http://rutracker.org/forum/index.php"
-    _SITE_FINGERPRINT_TEXT = "href=\"http://static.rutracker.cc/favicon.ico\" type=\"image/x-icon\""
+    _SITE_FINGERPRINT_TEXT = "href=\"//static.t-ru.org/favicon.ico\" type=\"image/x-icon\""
 
     _COMMENT_REGEXP = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
 

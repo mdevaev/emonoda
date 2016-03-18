@@ -1,8 +1,8 @@
 {
     "fingerprint": {
         "encoding": "cp1251",
-        "text": "href=\"http://static.rutracker.cc/favicon.ico\" type=\"image/x-icon\"",
+        "text": "href=\"//static.t-ru.org/favicon.ico\" type=\"image/x-icon\"",
         "url": "http://rutracker.org/forum/index.php"
     },
-    "version": 2
+    "version": 3
 }
