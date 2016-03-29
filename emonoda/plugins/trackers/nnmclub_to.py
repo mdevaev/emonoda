@@ -27,15 +27,15 @@ from . import WithFetchByDownloadId
 
 # =====
 class Plugin(BaseTracker, WithLogin, WithCheckScrape, WithFetchByDownloadId):
-    PLUGIN_NAME = _NNM_DOMAIN = "nnm-club.me"
+    PLUGIN_NAME = _NNM_DOMAIN = "nnmclub.to"
 
     _SITE_VERSION = 1
     _SITE_ENCODING = "cp1251"
 
     _SITE_FINGERPRINT_URL = "http://{}".format(_NNM_DOMAIN)
-    _SITE_FINGERPRINT_TEXT = "<link rel=\"canonical\" href=\"http://nnm-club.me/\">"
+    _SITE_FINGERPRINT_TEXT = "<link rel=\"canonical\" href=\"http://nnmclub.to/\">"
 
-    _COMMENT_REGEXP = re.compile(r"http://nnm-club\.(me|ru)/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://(nnm-club\.(me|ru)|nnmclub\.to)/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
     _TORRENT_SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_NNM_DOMAIN)
 
