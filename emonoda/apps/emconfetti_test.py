@@ -32,7 +32,7 @@ class Tracker:
 
 
 def main():
-    (parent_parser, argv, config) = init() # pylint: disable=unused-variable
+    (parent_parser, argv, config) = init()  # pylint: disable=unused-variable
     with get_configured_log(config, False, sys.stderr) as log_stderr:
         results = {
             "affected": {
