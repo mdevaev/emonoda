@@ -60,6 +60,7 @@ if __name__ == "__main__":
                 "emload = emonoda.apps.emload:main",
                 "emfind = emonoda.apps.emfind:main",
                 "emrm = emonoda.apps.emrm:main",
+                "emconfetti_test = emonoda.apps.emconfetti_test:main"
             ],
         },
 
