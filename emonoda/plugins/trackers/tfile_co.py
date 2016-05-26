@@ -33,7 +33,7 @@ class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchByDownloadId):
     _SITE_ENCODING = "cp1251"
 
     _SITE_FINGERPRINT_URL = "http://tfile.co"
-    _SITE_FINGERPRINT_TEXT = "href=\"http://tfile.co/opensearch.xml\""
+    _SITE_FINGERPRINT_TEXT = "href=\"http://tfile.me/opensearch.xml\""
 
     _COMMENT_REGEXP = re.compile(r"http://tfile\.(me|ru|co)/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
