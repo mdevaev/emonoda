@@ -39,7 +39,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
     _SITE_FINGERPRINT_URL = "http://rutracker.org/forum/index.php"
     _SITE_FINGERPRINT_TEXT = "href=\"//static.t-ru.org/favicon.ico\" type=\"image/x-icon\""
 
-    _COMMENT_REGEXP = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"https?://rutracker\.org/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
 
     _TORRENT_HASH_URL = "http://rutracker.org/forum/viewtopic.php?t={torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-fA-F0-9]{40})</span>")
