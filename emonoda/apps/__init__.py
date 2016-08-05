@@ -182,7 +182,6 @@ def get_configured_trackers(config, captcha_decoder, only, exclude, log):
             if config.emupdate.fail_bad_tracker:
                 raise
             else:
-                log.error(traceback.format_exc())
                 continue
 
         trackers.append(tracker)
