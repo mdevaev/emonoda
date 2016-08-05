@@ -179,7 +179,7 @@ def get_configured_trackers(config, captcha_decoder, only, exclude, log):
             log.info("Tracker {blue}%s{reset} is {green}ready{reset}", (name,))
         except Exception as err:
             log.error("Can't init tracker {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
-            if config.fail_bad_tracker:
+            if config.emupdate.fail_bad_tracker:
                 raise
             else:
                 log.error(traceback.format_exc())
