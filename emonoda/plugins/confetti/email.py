@@ -39,7 +39,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     PLUGIN_NAME = "email"
 
     def __init__(self,  # pylint: disable=super-init-not-called,too-many-arguments
-                 to, cc, subject, sender, html, server, port, ssl, user, passwd, **kwargs):
+                 to, cc, subject, sender, html, server, port, ssl, user, passwd, template, **kwargs):
         self._init_bases(**kwargs)
 
         self._to = to
@@ -53,21 +53,23 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         self._ssl = ssl
         self._user = user
         self._passwd = passwd
+        self._template_name = template
 
     @classmethod
     def get_options(cls):
         return cls._get_merged_options({
-            "to":      Option(default=["root@localhost"], type=as_string_list, help="Destination email address"),
-            "cc":      Option(default=[], type=as_string_list, help="Email 'CC' field"),
-            "subject": Option(default="{source} report: you have {affected} new torrents ^_^", help="Email subject"),
-            "sender":  Option(default="root@localhost", help="Email 'From' field"),
-            "html":    Option(default=True, help="HTML or plaintext email body"),
+            "to":       Option(default=["root@localhost"], type=as_string_list, help="Destination email address"),
+            "cc":       Option(default=[], type=as_string_list, help="Email 'CC' field"),
+            "subject":  Option(default="{source} report: you have {affected} new torrents ^_^", help="Email subject"),
+            "sender":   Option(default="root@localhost", help="Email 'From' field"),
+            "html":     Option(default=True, help="HTML or plaintext email body"),
 
-            "server":  Option(default="localhost", help="Hostname of SMTP server"),
-            "port":    Option(default=0, help="Port of SMTP server"),
-            "ssl":     Option(default=False, help="Use SMTPS"),
-            "user":    Option(default=None, type=as_string_or_none, help="Account on SMTP server"),
-            "passwd":  Option(default=None, type=as_string_or_none, help="Passwd for account on SMTP server"),
+            "server":   Option(default="localhost", help="Hostname of SMTP server"),
+            "port":     Option(default=0, help="Port of SMTP server"),
+            "ssl":      Option(default=False, help="Use SMTPS"),
+            "user":     Option(default=None, type=as_string_or_none, help="Account on SMTP server"),
+            "passwd":   Option(default=None, type=as_string_or_none, help="Passwd for account on SMTP server"),
+            "template": Option(default=None, type=as_string_or_none, help="Mako template file name")
         })
 
     # ===
@@ -98,6 +100,9 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         return self._make_message(
             subject=self._subject.format(**subject_placeholders),
             body=templated("email.{ctype}.{source}.mako".format(
+                ctype=("html" if self._html else "plain"),
+                source=source,
+            ), self._template_name.format(
                 ctype=("html" if self._html else "plain"),
                 source=source,
             ), source=source, results=results),
