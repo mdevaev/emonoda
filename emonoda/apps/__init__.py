@@ -19,6 +19,7 @@
 
 import sys
 import os
+import traceback
 import contextlib
 import argparse
 
@@ -178,7 +179,10 @@ def get_configured_trackers(config, captcha_decoder, only, exclude, log):
             log.info("Tracker {blue}%s{reset} is {green}ready{reset}", (name,))
         except Exception as err:
             log.error("Can't init tracker {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
-            raise
+            if config.emupdate.fail_bad_tracker:
+                raise
+            else:
+                continue
 
         trackers.append(tracker)
 
@@ -220,6 +224,7 @@ def _get_config_scheme():
             "show_unknown":  Option(default=False, help="Show the torrents with unknown tracker in the log"),
             "show_passed":   Option(default=False, help="Show the torrents without changes"),
             "show_diff":     Option(default=True, help="Show diff between old and updated torrent files"),
+            "fail_bad_tracker": Option(default=True, help="Fail on trackers with invalid configuration"),
         },
 
         "emfile": {
