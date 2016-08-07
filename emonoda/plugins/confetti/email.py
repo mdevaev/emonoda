@@ -29,6 +29,7 @@ import time
 from ...optconf import Option
 from ...optconf.converters import as_string_or_none
 from ...optconf.converters import as_string_list
+from ...optconf.converters import as_path_or_none
 
 from . import BaseConfetti
 from . import templated
@@ -47,13 +48,13 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         self._subject = subject
         self._sender = sender
         self._html = html
+        self._template_path = template
 
         self._server = server
         self._port = port
         self._ssl = ssl
         self._user = user
         self._passwd = passwd
-        self._template_name = template
 
     @classmethod
     def get_options(cls):
@@ -63,13 +64,13 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             "subject":  Option(default="{source} report: you have {affected} new torrents ^_^", help="Email subject"),
             "sender":   Option(default="root@localhost", help="Email 'From' field"),
             "html":     Option(default=True, help="HTML or plaintext email body"),
+            "template": Option(default=None, type=as_path_or_none, help="Mako template file name"),
 
             "server":   Option(default="localhost", help="Hostname of SMTP server"),
             "port":     Option(default=0, help="Port of SMTP server"),
             "ssl":      Option(default=False, help="Use SMTPS"),
             "user":     Option(default=None, type=as_string_or_none, help="Account on SMTP server"),
             "passwd":   Option(default=None, type=as_string_or_none, help="Passwd for account on SMTP server"),
-            "template": Option(default=None, type=as_string_or_none, help="Mako template file name")
         })
 
     # ===
@@ -97,15 +98,18 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     def _format_message(self, source, results):
         subject_placeholders = {field: len(items) for (field, items) in results.items()}
         subject_placeholders["source"] = source
+        built_in = (self._template_path is None)
         return self._make_message(
             subject=self._subject.format(**subject_placeholders),
-            body=templated("email.{ctype}.{source}.mako".format(
-                ctype=("html" if self._html else "plain"),
+            body=templated(
+                name=("email.{ctype}.{source}.mako" if built_in else self._template_path).format(
+                    ctype=("html" if self._html else "plain"),
+                    source=source,
+                ),
+                built_in=built_in,
                 source=source,
-            ), self._template_name.format(
-                ctype=("html" if self._html else "plain"),
-                source=source,
-            ), source=source, results=results),
+                results=results,
+            ),
         )
 
     def _make_message(self, subject, body):
