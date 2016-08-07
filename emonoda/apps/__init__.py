@@ -19,7 +19,6 @@
 
 import sys
 import os
-import traceback
 import contextlib
 import argparse
 
@@ -181,8 +180,7 @@ def get_configured_trackers(config, captcha_decoder, only, exclude, log):
             log.error("Can't init tracker {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
             if config.emupdate.fail_bad_tracker:
                 raise
-            else:
-                continue
+            continue
 
         trackers.append(tracker)
 
@@ -232,8 +230,8 @@ def _get_config_scheme():
         },
 
         "emload": {
-            "mkdir_mode":   Option(default=None, type=as_8int_or_none, help="Permission for new directories"),
-            "set_customs":  Option(default={}, type=as_key_value, help="Set client custom fileds after update if supports")
+            "mkdir_mode":  Option(default=None, type=as_8int_or_none, help="Permission for new directories"),
+            "set_customs": Option(default={}, type=as_key_value, help="Set client custom fileds after update if supports")
         },
 
         "emfind": {
