@@ -33,19 +33,19 @@ from . import WithFetchByTorrentId
 class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId):
     PLUGIN_NAME = "pornolab.net"
 
-    _SITE_VERSION = 1
+    _SITE_VERSION = 2
     _SITE_ENCODING = "cp1251"
 
-    _SITE_FINGERPRINT_URL = "http://pornolab.net/forum/index.php"
-    _SITE_FINGERPRINT_TEXT = "title=\"Поиск на Pornolab.net\" href=\"http://static.pornolab.net/opensearch.xml\""
+    _SITE_FINGERPRINT_URL = "https://pornolab.net/forum/index.php"
+    _SITE_FINGERPRINT_TEXT = "title=\"Поиск на Pornolab.net\" href=\"//static.pornolab.net/opensearch.xml\""
 
-    _COMMENT_REGEXP = re.compile(r"http://pornolab\.net/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"https?://pornolab\.net/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
 
-    _TIMEZONE_URL = "http://pornolab.net/forum/index.php"
+    _TIMEZONE_URL = "https://pornolab.net/forum/index.php"
     _TIMEZONE_REGEXP = re.compile(r"<p>Часовой пояс: <span class='tz_time'>(?P<timezone>GMT [+-] \d{1,2})</span></p>")
     _TIMEZONE_PREFIX = "Etc/"
 
-    _DOWNLOAD_URL = "http://pornolab.net/forum/dl.php?t={torrent_id}"
+    _DOWNLOAD_URL = "https://pornolab.net/forum/dl.php?t={torrent_id}"
     _DOWNLOAD_PAYLOAD = b""
 
     # ===
@@ -87,7 +87,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
         }
         page = self._read_login(post)
 
-        cap_static_regexp = re.compile(r"\"(http://static\.pornolab\.net/captcha/[^\"]+)\"")
+        cap_static_regexp = re.compile(r"\"(https?://static\.pornolab\.net/captcha/[^\"]+)\"")
         cap_static_match = cap_static_regexp.search(page)
         if cap_static_match is not None:
             cap_sid_match = re.search(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"", page)
@@ -102,6 +102,6 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
 
     def _read_login(self, post):
         return self._decode(self._read_url(
-            url="http://pornolab.net/forum/login.php",
+            url="https://pornolab.net/forum/login.php",
             data=self._encode(urllib.parse.urlencode(post)),
         ))

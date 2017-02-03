@@ -35,7 +35,7 @@ SOCKS_PORT = 1080
 
 
 # =====
-class SocksHandler(urllib.request.HTTPHandler):
+class SocksHandler(urllib.request.HTTPHandler, urllib.request.HTTPSHandler):
     def __init__(self, *args, **kwargs):
         self._args = args
         self._kwargs = kwargs
@@ -43,13 +43,29 @@ class SocksHandler(urllib.request.HTTPHandler):
 
     def http_open(self, request):
         def build(host, port=None, strict=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):  # pylint: disable=protected-access
-            return _SocksConnection(*self._args, host=host, port=port, strict=strict, timeout=timeout, **self._kwargs)
+            connection = _SocksConnection(host, port=port, strict=strict, timeout=timeout, **self._kwargs)
+            connection.make_proxy_args(*self._args, **self._kwargs)
+            return connection
+        return self.do_open(build, request)
+
+    def https_open(self, request):
+        def build(host, port=None, strict=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):  # pylint: disable=protected-access
+            connection = _SocksSecureConnection(host, port=port, strict=strict, timeout=timeout, **self._kwargs)
+            connection.make_proxy_args(*self._args, **self._kwargs)
+            return connection
         return self.do_open(build, request)
 
 
 # =====
 class _SocksConnection(http.client.HTTPConnection):
-    def __init__(
+    def __init__(self, *args, **kwargs):
+        kwargs.pop("strict", None)  # XXX: Fix for "TypeError: __init__() got an unexpected keyword argument 'strict'"
+        kwargs.pop("proxy_url", None)  # XXX: Fix for "TypeError: __init__() got an unexpected keyword argument 'proxy_url'"
+        super().__init__(*args, **kwargs)
+        self._proxy_args = None
+
+    # XXX: because proxy args/kwargs break super
+    def make_proxy_args(
         self,
         proxy_url=None,
         proxy_type=None,
@@ -57,13 +73,8 @@ class _SocksConnection(http.client.HTTPConnection):
         proxy_port=None,
         proxy_user=None,
         proxy_passwd=None,
-        rdns=True,
-        *args,
-        **kwargs
+        rdns=True
     ):
-        kwargs.pop("strict", None)  # XXX: Fix for "TypeError: __init__() got an unexpected keyword argument 'strict'"
-        super().__init__(*args, **kwargs)
-
         if proxy_url is not None:
             parsed = urllib.parse.urlparse(proxy_url)
             scheme = parsed.scheme
@@ -78,8 +89,18 @@ class _SocksConnection(http.client.HTTPConnection):
         self._proxy_args = (proxy_type, proxy_host, proxy_port, rdns, proxy_user, proxy_passwd)
 
     def connect(self):
+        if self._proxy_args is None:
+            raise RuntimeError("Proxy args weren't initialized")
         self.sock = socks.socksocket()
         self.sock.setproxy(*self._proxy_args)
         if self.timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:  # pylint: disable=protected-access
             self.sock.settimeout(self.timeout)
         self.sock.connect((self.host, self.port))
+
+
+# =====
+class _SocksSecureConnection(http.client.HTTPSConnection, _SocksConnection):
+    def __init__(self, *args, **kwargs):
+        kwargs.pop("strict", None)  # XXX: Fix for "TypeError: __init__() got an unexpected keyword argument 'strict'"
+        kwargs.pop("proxy_url", None)  # XXX: Fix for "TypeError: __init__() got an unexpected keyword argument 'proxy_url'"
+        super().__init__(*args, **kwargs)

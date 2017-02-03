@@ -178,7 +178,9 @@ def get_configured_trackers(config, captcha_decoder, only, exclude, log):
             log.info("Tracker {blue}%s{reset} is {green}ready{reset}", (name,))
         except Exception as err:
             log.error("Can't init tracker {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
-            raise
+            if config.emupdate.fail_bad_tracker:
+                raise
+            continue
 
         trackers.append(tracker)
 
@@ -220,6 +222,7 @@ def _get_config_scheme():
             "show_unknown":  Option(default=False, help="Show the torrents with unknown tracker in the log"),
             "show_passed":   Option(default=False, help="Show the torrents without changes"),
             "show_diff":     Option(default=True, help="Show diff between old and updated torrent files"),
+            "fail_bad_tracker": Option(default=True, help="Fail on trackers with invalid configuration"),
         },
 
         "emfile": {
@@ -227,8 +230,8 @@ def _get_config_scheme():
         },
 
         "emload": {
-            "mkdir_mode":   Option(default=None, type=as_8int_or_none, help="Permission for new directories"),
-            "set_customs":  Option(default={}, type=as_key_value, help="Set client custom fileds after update if supports")
+            "mkdir_mode":  Option(default=None, type=as_8int_or_none, help="Permission for new directories"),
+            "set_customs": Option(default={}, type=as_key_value, help="Set client custom fileds after update if supports")
         },
 
         "emfind": {

@@ -42,4 +42,6 @@ class _YamlLoader(yaml.loader.Loader):  # pylint: disable=too-many-ancestors
         # Logger which supports include-files
         file_path = os.path.join(self._root, self.construct_scalar(node))  # pylint: disable=no-member
         return load_file(file_path)
+
+
 _YamlLoader.add_constructor("!include", _YamlLoader.include)  # pylint: disable=no-member

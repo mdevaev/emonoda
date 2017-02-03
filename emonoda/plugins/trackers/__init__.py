@@ -303,6 +303,9 @@ class WithCheckScrape(BaseExtension):
             url=self._TORRENT_SCRAPE_URL.format(scrape_hash=torrent.get_scrape_hash()),
             headers={"User-Agent": self._client_agent},
         )
+
+        msg = "Received an invalid scrape data: {} ...".format(repr(data[:20]))
+        self._assert_logic(tfile.is_valid_data(data), msg)  # pylint: disable=no-member
         return (len(tfile.decode_data(data).get("files", {})) != 0)
 
 

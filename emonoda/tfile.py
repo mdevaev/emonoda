@@ -26,16 +26,24 @@ import itertools
 
 import chardet
 
-from .thirdparty.bcoding import bdecode as decode_data
+from .thirdparty.bcoding import bdecode as _inner_decode_data
 from .thirdparty.bcoding import bencode as encode_struct
 
 
 # =====
 def is_valid_data(data):
     try:
-        return isinstance(decode_data(data), dict)  # Must be a True
-    except TypeError:
+        decode_data(data)
+        return True
+    except (TypeError, ValueError):
         return False
+
+
+def decode_data(data):
+    result = _inner_decode_data(data)
+    if not isinstance(result, dict):
+        raise ValueError("Toplevel structure must be a dict")
+    return result
 
 
 def is_hash(text):

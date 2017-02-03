@@ -31,9 +31,13 @@ from .. import BaseExtension
 
 
 # =====
-def templated(name, **kwargs):
-    data = pkgutil.get_data(__name__, os.path.join("templates", name))
-    template = textwrap.dedent(data.decode()).strip()
+def templated(name, built_in=True, **kwargs):
+    if built_in:
+        data = pkgutil.get_data(__name__, os.path.join("templates", name)).decode()
+    else:
+        with open(name) as template_file:
+            data = template_file.read()
+    template = textwrap.dedent(data).strip()
     return mako.template.Template(template).render(**kwargs).strip()
 
 

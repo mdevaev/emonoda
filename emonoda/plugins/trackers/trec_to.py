@@ -30,23 +30,23 @@ from . import WithFetchByDownloadId
 
 # =====
 class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByDownloadId):
-    PLUGIN_NAME = "torrent.rus.ec"
+    PLUGIN_NAME = "trec.to"
 
-    _SITE_VERSION = 0
+    _SITE_VERSION = 1
     _SITE_ENCODING = "utf-8"
 
-    _SITE_FINGERPRINT_URL = "http://torrent.rus.ec"
-    _SITE_FINGERPRINT_TEXT = "var cookieDomain  = \"torrent.rus.ec\";"
+    _SITE_FINGERPRINT_URL = "http://trec.to"
+    _SITE_FINGERPRINT_TEXT = "var cookieDomain  = \"trec.to\";"
 
-    _COMMENT_REGEXP = re.compile(r"http://torrent\.rus\.ec/viewtopic\.php\?p=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://(torrent\.rus\.ec|trec\.to)/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
-    _TIMEZONE_URL = "http://torrent.rus.ec"
+    _TIMEZONE_URL = "http://trec.to"
     _TIMEZONE_REGEXP = re.compile(r"<p>Часовой пояс: <span class=\"tz_time\">(?P<timezone>GMT [+-] \d{1,2})</span></p>")
     _TIMEZONE_PREFIX = "Etc/"
 
-    _DOWNLOAD_ID_URL = "http://torrent.rus.ec/viewtopic.php?p={torrent_id}"
+    _DOWNLOAD_ID_URL = "http://trec.to/viewtopic.php?p={torrent_id}"
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(?P<download_id>\d+)\" class=\"(leech|seed|gen)med\">")
-    _DOWNLOAD_URL = "http://torrent.rus.ec/download.php?id={download_id}"
+    _DOWNLOAD_URL = "http://trec.to/download.php?id={download_id}"
 
     # ===
 
@@ -60,7 +60,8 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByDown
 
     def fetch_time(self, torrent):
         self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
+        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
+        page = self._decode(self._read_url("http://trec.to/viewtopic.php?p={}".format(torrent_id)))
 
         date_match = re.search(r"<td width=\"70%\">\s*Зарегистрирован &nbsp;\s*\[ <span title=\"\">"
                                r"(\d\d-\d\d-\d\d\d\d \d\d:\d\d)</span> ]\s*</td>", page)
@@ -72,7 +73,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByDown
 
     def login(self):
         self._login_using_post(
-            url="http://torrent.rus.ec/login.php",
+            url="http://trec.to/login.php",
             post={
                 "login_username": self._encode(self._user),
                 "login_password": self._encode(self._passwd),

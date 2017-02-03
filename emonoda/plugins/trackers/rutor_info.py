@@ -28,21 +28,21 @@ from . import WithFetchByTorrentId
 
 # =====
 class Plugin(BaseTracker, WithCheckHash, WithFetchByTorrentId):
-    PLUGIN_NAME = "rutor.org"
+    PLUGIN_NAME = "rutor.info"
 
-    _SITE_VERSION = 4
+    _SITE_VERSION = 5
     _SITE_ENCODING = "utf-8"
 
-    _SITE_FINGERPRINT_URL = "http://fast-bit.org"
-    _SITE_FINGERPRINT_TEXT = "<a href=\"/\"><img src=\"/s/logo.jpg\" alt=\"rutor.info logo\" /></a>"
+    _SITE_FINGERPRINT_URL = "http://rutor.info"
+    _SITE_FINGERPRINT_TEXT = "<a href=\"/\"><img src=\"http://s.rutor.info/logo.jpg\" alt=\"rutor.info logo\" /></a>"
 
-    _COMMENT_REGEXP = re.compile(r"^http://rutor\.org/torrent/(?P<torrent_id>\d+)$")
+    _COMMENT_REGEXP = re.compile(r"^http://rutor\.(info|org|is)/torrent/(?P<torrent_id>\d+)$")
 
-    _TORRENT_HASH_URL = "http://fast-bit.org/torrent/{torrent_id}"
+    _TORRENT_HASH_URL = "http://rutor.info/torrent/{torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<div id=\"download\">\s+<a href=\"magnet:"
                                       r"\?xt=urn:btih:(?P<torrent_hash>[a-fA-F0-9]{40})")
 
-    _DOWNLOAD_URL = "http://fast-bit.org/download/{torrent_id}"
+    _DOWNLOAD_URL = "http://rutor.info/download/{torrent_id}"
 
     # ===
 
