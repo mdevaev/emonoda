@@ -36,12 +36,12 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
     _SITE_ENCODING = "cp1251"
     _SITE_RETRY_CODES = (503, 404)
 
-    _SITE_FINGERPRINT_URL = "http://rutracker.org/forum/index.php"
+    _SITE_FINGERPRINT_URL = "https://rutracker.org/forum/index.php"
     _SITE_FINGERPRINT_TEXT = "href=\"//static.t-ru.org/favicon.ico\" type=\"image/x-icon\""
 
-    _COMMENT_REGEXP = re.compile(r"http://rutracker\.org/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"https?://rutracker\.org/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
 
-    _TORRENT_HASH_URL = "http://rutracker.org/forum/viewtopic.php?t={torrent_id}"
+    _TORRENT_HASH_URL = "https://rutracker.org/forum/viewtopic.php?t={torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-fA-F0-9]{40})</span>")
 
     def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
@@ -68,7 +68,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
             domain_initial_dot=False,
             path="/forum/",
             path_specified=True,
-            secure=False,
+            secure=True,
             expires=None,
             discard=True,
             comment=None,
@@ -77,11 +77,11 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
             rfc2109=False,
         ))
         data = self._read_url(
-            url="http://dl.rutracker.org/forum/dl.php?t={}".format(torrent_id),
+            url="https://dl.rutracker.org/forum/dl.php?t={}".format(torrent_id),
             data=b"",
             headers={
-                "Referer": "http://rutracker.org/forum/viewtopic.php?t={}".format(torrent_id),
-                "Origin":  "http://rutracker.org",
+                "Referer": "https://rutracker.org/forum/viewtopic.php?t={}".format(torrent_id),
+                "Origin":  "https://rutracker.org",
             }
         )
         self._assert_valid_data(data)
@@ -112,6 +112,6 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
 
     def _read_login(self, post):
         return self._decode(self._read_url(
-            url="http://login.rutracker.org/forum/login.php",
+            url="https://rutracker.org/forum/login.php",
             data=self._encode(urllib.parse.urlencode(post)),
         ))
