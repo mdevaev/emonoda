@@ -56,6 +56,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
+        print("Hey!\nHay!\nNew data!\nYay~")
         torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
         self._cookie_jar.set_cookie(http.cookiejar.Cookie(
             version=0,
@@ -77,7 +78,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
             rfc2109=False,
         ))
         data = self._read_url(
-            url="https://dl.rutracker.org/forum/dl.php?t={}".format(torrent_id),
+            url="https://rutracker.org/forum/dl.php?t={}".format(torrent_id),
             data=b"",
             headers={
                 "Referer": "https://rutracker.org/forum/viewtopic.php?t={}".format(torrent_id),
