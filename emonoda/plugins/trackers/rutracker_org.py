@@ -56,7 +56,6 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        print("Hey!\nHay!\nNew data!\nYay~")
         torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
         self._cookie_jar.set_cookie(http.cookiejar.Cookie(
             version=0,
