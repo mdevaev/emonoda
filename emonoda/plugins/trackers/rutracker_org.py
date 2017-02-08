@@ -32,7 +32,7 @@ from . import WithFetchCustom
 class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom):
     PLUGIN_NAME = "rutracker.org"
 
-    _SITE_VERSION = 3
+    _SITE_VERSION = 4
     _SITE_ENCODING = "cp1251"
     _SITE_RETRY_CODES = (503, 404)
 
