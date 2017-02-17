@@ -97,7 +97,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
         }
         page = self._read_login(post)
 
-        cap_static_regexp = re.compule(r"\"//(static\.t-ru\.org/captcha/[^\"]+)\"")
+        cap_static_regexp = re.compile(r"\"//(static\.t-ru\.org/captcha/[^\"]+)\"")
         cap_static_match = cap_static_regexp.search(page)
         if cap_static_match is not None:
             cap_sid_match = re.search(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"", page)
