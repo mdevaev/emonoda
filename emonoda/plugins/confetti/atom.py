@@ -116,6 +116,6 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             ))
         os.chmod(self._path, 0o664)
         os.chown(self._path, self._user, self._group)
-        del results["ctime"]
         with open(self._history_path, "w") as f:
             f.write(yaml.dump(results_set))
+        del results["ctime"]
