@@ -1,6 +1,9 @@
 """
     Emonoda -- A set of tools to organize and manage your torrents
     Copyright (C) 2015  Devaev Maxim <mdevaev@gmail.com>
+    
+    atom.py -- produce atom feed file of recent torrent updates
+    Copyright (C) 2017  Pavel Pletenev <cpp.create@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
