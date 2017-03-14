@@ -1,7 +1,7 @@
 """
     Emonoda -- A set of tools to organize and manage your torrents
     Copyright (C) 2015  Devaev Maxim <mdevaev@gmail.com>
-    
+
     atom.py -- produce atom feed file of recent torrent updates
     Copyright (C) 2017  Pavel Pletenev <cpp.create@gmail.com>
 
@@ -38,11 +38,14 @@ import os
 import yaml
 import traceback
 
+
 def uid(user):
     return pwd.getpwnam(user)[2]
 
+
 def gid(group):
     return grp.getgrnam(group)[2]
+
 
 def user_groups(user):
     groups = [g.gr_name for g in grp.getgrall() if user in g.gr_mem]
@@ -50,14 +53,16 @@ def user_groups(user):
     groups.append(grp.getgrgid(gid).gr_name)
     return [grp.getgrnam(x).gr_gid for x in groups]
 
+
 class UserError(Exception):
     pass
+
 
 # =====
 class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     PLUGIN_NAME = "atom"
 
-    def __init__(self, # pylint: disable=super-init-not-called,too-many-arguments
+    def __init__(self,  # pylint: disable=super-init-not-called,too-many-arguments
                  history_path, path, url, user, group, template, html, **kwargs):
         self._init_bases(**kwargs)
 
