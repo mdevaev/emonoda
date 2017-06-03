@@ -31,21 +31,21 @@ from . import WithFetchByDownloadId
 class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
     PLUGIN_NAME = "booktracker.org"
 
-    _SITE_VERSION = 0
+    _SITE_VERSION = 1
     _SITE_ENCODING = "utf-8"
 
-    _SITE_FINGERPRINT_URL = "http://booktracker.org"
-    _SITE_FINGERPRINT_TEXT = "var cookieDomain  = \"booktracker.org\";"
+    _SITE_FINGERPRINT_URL = "https://booktracker.org"
+    _SITE_FINGERPRINT_TEXT = "<meta name='yandex-verification' content='57e66f92f305434b' />"
 
-    _COMMENT_REGEXP = re.compile(r"http://booktracker\.org/viewtopic\.php\?p=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"https?://booktracker\.org/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
-    _TIMEZONE_URL = "http://booktracker.org/profile.php?mode=editprofile"
+    _TIMEZONE_URL = "https://booktracker.org/profile.php?mode=editprofile"
     _TIMEZONE_REGEXP = re.compile(r"<option value=\"[\.\d+-]\" selected=\"selected\">(?P<timezone>GMT [+-] [\d\.]+)[\s<\(]")
     _TIMEZONE_PREFIX = "Etc/"
 
-    _DOWNLOAD_ID_URL = "http://booktracker.org/viewtopic.php?p={torrent_id}"
+    _DOWNLOAD_ID_URL = "https://booktracker.org/viewtopic.php?p={torrent_id}"
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(?P<download_id>\d+)\" class=\"\">")
-    _DOWNLOAD_URL = "http://booktracker.org/download.php?id={download_id}"
+    _DOWNLOAD_URL = "https://booktracker.org/download.php?id={download_id}"
 
     # ===
 
@@ -71,7 +71,7 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
 
     def login(self):
         self._login_using_post(
-            url="http://booktracker.org/login.php",
+            url="https://booktracker.org/login.php",
             post={
                 "login_username": self._encode(self._user),
                 "login_password": self._encode(self._passwd),
