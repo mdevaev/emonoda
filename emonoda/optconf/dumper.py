@@ -17,6 +17,9 @@
 """
 
 
+# pylint: skip-file
+# infinite recursion
+
 import operator
 
 import yaml

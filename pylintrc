@@ -27,6 +27,8 @@ disable =
 	redundant-keyword-arg,
 	wrong-import-order,
 	too-many-ancestors,
+	no-else-return,
+	len-as-condition,
 
 [REPORTS]
 msg-template={symbol} -- {path}:{line}({obj}): {msg}
