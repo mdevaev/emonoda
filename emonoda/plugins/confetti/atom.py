@@ -20,38 +20,41 @@
 """
 
 
-import contextlib
+import os
+import getpass
+import pwd
+import grp
+import traceback
 import time
+
+import yaml
 
 from ...optconf import Option
 from ...optconf.converters import as_string_or_none
-from ...optconf.converters import as_string_list
 from ...optconf.converters import as_path_or_none
 
 from . import BaseConfetti
 from . import templated
-import getpass
-import time
-import pwd
-import grp
-import os
-import yaml
-import traceback
 
 
-def uid(user):
+# =====
+def get_uid(user):
     return pwd.getpwnam(user)[2]
 
 
-def gid(group):
+def get_gid(group):
     return grp.getgrnam(group)[2]
 
 
-def user_groups(user):
-    groups = [g.gr_name for g in grp.getgrall() if user in g.gr_mem]
+def get_user_groups(user):
+    groups = [
+        group.gr_name
+        for group in grp.getgrall()
+        if user in group.gr_mem
+    ]
     gid = pwd.getpwnam(user).pw_gid
     groups.append(grp.getgrgid(gid).gr_name)
-    return [grp.getgrnam(x).gr_gid for x in groups]
+    return [grp.getgrnam(group).gr_gid for group in groups]
 
 
 class UserError(Exception):
@@ -69,18 +72,13 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         self._history_path = history_path
         self._path = path
         self._url = url
-        self._user = uid(user) if user else -1
-        self._group = gid(group) if group else -1
+        self._user = (get_uid(user) if user else -1)
+        self._group = (get_gid(group) if group else -1)
         if self._group != -1:
-            if self._group not in user_groups(getpass.getuser()):
+            if self._group not in get_user_groups(getpass.getuser()):
                 raise UserError(
-                    "I wouldn't be able to edit {path} with" +
-                    " current user if I chown it for" +
-                    " uid {uid} and gid {gid}".format(
-                        history_path=path,
-                        uid=self._user,
-                        gid=self._group
-                    )
+                    "I wouldn't be able to edit {path} with current user if I chown it for"
+                    " uid {uid} and gid {gid}".format(path=path, uid=self._user, gid=self._group),
                 )
         self._template_path = template
         self._html = html
@@ -102,16 +100,16 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     def send_results(self, source, results):
         results_set = []
         try:
-            with open(self._history_path) as f:
-                results_set = yaml.load(f)
-        except:
+            with open(self._history_path) as history_file:
+                results_set = yaml.load(history_file)
+        except Exception:
             traceback.print_exc()
         results["ctime"] = time.time()
         results_set.insert(0, results)
         results_set = results_set[:20]
         built_in = (self._template_path is None)
-        with open(self._path, "w") as f:
-            f.write(templated(
+        with open(self._path, "w") as atom_file:
+            atom_file.write(templated(
                 name=("atom.{ctype}.{source}.mako" if built_in else self._template_path).format(
                     ctype=("html" if self._html else "plain"),
                     source=source,
@@ -124,6 +122,6 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             ))
         os.chmod(self._path, 0o664)
         os.chown(self._path, self._user, self._group)
-        with open(self._history_path, "w") as f:
-            f.write(yaml.dump(results_set))
+        with open(self._history_path, "w") as history_file:
+            history_file.write(yaml.dump(results_set))
         del results["ctime"]

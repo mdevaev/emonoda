@@ -41,19 +41,19 @@ class SocksHandler(urllib.request.HTTPHandler, urllib.request.HTTPSHandler):
         self._kwargs = kwargs
         super().__init__(debuglevel=kwargs.pop("debuglevel", 0))
 
-    def http_open(self, request):
+    def http_open(self, req):
         def build(host, port=None, strict=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):  # pylint: disable=protected-access
             connection = _SocksConnection(host, port=port, strict=strict, timeout=timeout, **self._kwargs)
             connection.make_proxy_args(*self._args, **self._kwargs)
             return connection
-        return self.do_open(build, request)
+        return self.do_open(build, req)
 
-    def https_open(self, request):
+    def https_open(self, req):
         def build(host, port=None, strict=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):  # pylint: disable=protected-access
             connection = _SocksSecureConnection(host, port=port, strict=strict, timeout=timeout, **self._kwargs)
             connection.make_proxy_args(*self._args, **self._kwargs)
             return connection
-        return self.do_open(build, request)
+        return self.do_open(build, req)
 
 
 # =====

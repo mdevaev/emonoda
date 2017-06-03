@@ -141,5 +141,5 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             timeout=self._timeout,
         )) as client:
             if self._user is not None:
-                client.login(self._user, self._passwd)
-            client.send_message(msg)
+                client.login(self._user, self._passwd)  # pylint: disable=no-member
+            client.send_message(msg)  # pylint: disable=no-member
