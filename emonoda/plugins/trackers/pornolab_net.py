@@ -33,7 +33,7 @@ from . import WithFetchByTorrentId
 class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId):
     PLUGIN_NAME = "pornolab.net"
 
-    _SITE_VERSION = 2
+    _SITE_VERSION = 3
     _SITE_ENCODING = "cp1251"
 
     _SITE_FINGERPRINT_URL = "https://pornolab.net/forum/index.php"
@@ -61,7 +61,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
     def fetch_time(self, torrent):
         self._assert_match(torrent)
         page = self._decode(self._read_url(torrent.get_comment()))
-        date_match = re.search(r"<span title=\"Зарегистрирован\">\[ (\d\d-([а-яА-Я]{3})-\d\d \d\d:\d\d) \]</span>", page)
+        date_match = re.search(r"<span title=\"Зарегистрирован\">\[ (\d\d-([а-яА-Я]{3})-\d\d \d\d:\d\d:\d\d) \]</span>", page)
         self._assert_logic(date_match is not None, "Upload date not found")
         date = date_match.group(1)
         date_month = date_match.group(2)
@@ -74,7 +74,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
         }[date_month])  # TODO: Send shitbeam to datetime authors
         date += " " + datetime.now(self._tzinfo).strftime("%z")
 
-        upload_time = int(datetime.strptime(date, "%d-%m-%y %H:%M %z").strftime("%s"))
+        upload_time = int(datetime.strptime(date, "%d-%m-%y %H:%M:%S %z").strftime("%s"))
         return upload_time
 
     def login(self):
