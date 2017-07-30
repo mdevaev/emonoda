@@ -24,6 +24,8 @@ import re
 from colorama import Fore
 from colorama import Style
 
+from . import fmt
+
 
 # =====
 _COLORS = {
@@ -56,6 +58,10 @@ class Log:
 
     def error(self, text, *args, **kwargs):
         self.print("# {red}E{reset}: " + text, *args, **kwargs)
+
+    def progress(self, value, limit, text, placeholders=(), length=20):
+        (pg, pg_placeholders) = fmt.format_progress_bar(value, limit, length)
+        self.print("# {green}I{reset}: %s :: " % (pg) + text, pg_placeholders + placeholders, one_line=True)
 
     def print(self, text="", placeholders=(), one_line=False, no_nl=False):
         if not self._quiet:

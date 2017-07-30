@@ -24,19 +24,21 @@ from .. import tfile
 
 
 # =====
-def load_from_dir(path, name_filter, log):
+def load_from_dir(path, name_filter, calculate, log):
     if not log.isatty():
         log.info("Loading torrents from {cyan}%s/{yellow}%s{reset} ...", (path, name_filter))
 
+    names = sorted(os.listdir(path))
     torrents = {}
-    for name in sorted(os.listdir(path)):
+    for (number, name) in enumerate(names):
         if fnmatch.fnmatch(name, name_filter):
             file_path = os.path.abspath(os.path.join(path, name))
             if log.isatty():
-                log.info("Loading torrents from {cyan}%s/{yellow}%s{reset} -- {yellow}%s{reset} ...",
-                         (path, name_filter, name), one_line=True)
+                log.progress(number, len(names), "Loading torrents from {cyan}%s/{yellow}%s{reset}", (path, name_filter))
             try:
                 torrents[name] = tfile.Torrent(path=file_path)
+                if calculate:
+                    torrents[name].get_hash()
             except ValueError:
                 log.error("Found broken torrent: {cyan}%s/{yellow}%s{reset}", (path, name))
                 torrents[name] = None

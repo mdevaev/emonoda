@@ -198,16 +198,18 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
             self._stop_fan.clear()
 
     def _format_fail(self, color, sign, error):
+        (progress, placeholders) = self._format_progress()
         return (
-            "[{" + color + "}%s{reset}] %s {" + color + "}%s {cyan}%s{reset}",
-            (sign, self._format_progress(), error, self._current_file_name),
+            "[{" + color + "}%s{reset}] " + progress + " {" + color + "}%s {cyan}%s{reset}",
+            (sign, *placeholders, error, self._current_file_name),
         )
 
     def _format_status(self, color, sign):
+        (progress, placeholders) = self._format_progress()
         return (
-            "[{" + color + "}%s{reset}] %s {" + color + "}%s {cyan}%s{reset} -- %s",
+            "[{" + color + "}%s{reset}] " + progress + " {" + color + "}%s {cyan}%s{reset} -- %s",
             (
-                sign, self._format_progress(), self._current_tracker.PLUGIN_NAME,
+                sign, *placeholders, self._current_tracker.PLUGIN_NAME,
                 self._current_file_name, (self._current_torrent.get_comment() or ""),
             ),
         )
@@ -395,6 +397,7 @@ def main():
             torrents = tcollection.load_from_dir(
                 path=config.core.torrents_dir,
                 name_filter=(options.name_filter or config.emupdate.name_filter),
+                calculate=True,
                 log=log_stderr,
             )
 

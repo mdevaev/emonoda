@@ -77,19 +77,18 @@ def _update(cache, client, path, name_filter, log):
     to_add = tuple(sorted(set(hashes).difference(cache["torrents"])))
     added = 0
     if len(to_add) != 0:
-        torrents = tcollection.load_from_dir(path, name_filter, log)
+        torrents = tcollection.load_from_dir(path, name_filter, True, log)
         torrents = tcollection.by_hash(torrents)
 
         if not log.isatty():
             log.info("Adding files for the new {yellow}%d{reset} hashes ...", (len(to_add),))
-        for torrent_hash in to_add:
+        for (number, torrent_hash) in enumerate(to_add):
             torrent = torrents.get(torrent_hash)
             if torrent is not None:
-                name = os.path.basename(torrent.get_path())
                 if log.isatty():
-                    log.info("Adding files for {yellow}%s{reset} ...", (name,), one_line=True)
+                    log.progress(number, len(to_add), "Adding files ...")
                 cache["torrents"][torrent_hash] = {
-                    # "name":      name,
+                    # "name":      os.path.basename(torrent.get_path()),
                     # "is_single": torrent.is_single_file(),
                     "files":     torrent.get_files(),
                     "prefix":    client.get_data_prefix(torrent),

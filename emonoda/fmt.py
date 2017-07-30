@@ -47,7 +47,13 @@ def format_size(size):
 
 
 def format_progress(value, limit):
-    return (("%%%dd/" % (len(str(limit)))) + "%d") % (value, limit)
+    return (("{cyan}%%%dd/{yellow}" % (len(str(limit)))) + "%d{reset}", (value, limit))
+
+
+def format_progress_bar(value, limit, length):
+    (text, placeholders) = format_progress(value, limit)
+    pg = (" {red}[%-" + str(length) + "s]{reset}") % ("=" * int(value / limit * length))
+    return (text + pg, placeholders)
 
 
 def format_now(text):

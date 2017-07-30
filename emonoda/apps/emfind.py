@@ -52,9 +52,10 @@ def build_used_files(cache, data_roots):
     return files
 
 
-def build_all_files(data_root_path):
+def build_all_files(data_root_path, log):
     files = {}
-    for (prefix, _, local_files) in os.walk(data_root_path):
+    plain_tree = list(os.walk(data_root_path))
+    for (number, (prefix, _, local_files)) in enumerate(plain_tree):
         files[tools.get_decoded_path(prefix)] = None
         for name in local_files:
             path = os.path.join(prefix, name)
@@ -63,6 +64,8 @@ def build_all_files(data_root_path):
             except FileNotFoundError:
                 continue
             files[tools.get_decoded_path(path)] = size
+        log.progress(number, len(plain_tree), "Scanning directory {cyan}%s{reset} ... ", (data_root_path,))
+    log.info("Scanned directory {cyan}%s{reset}", (data_root_path,))
     return files
 
 
@@ -70,8 +73,7 @@ def build_all_files(data_root_path):
 def print_orphaned_files(cache, data_roots, reduce_dirs, log_stdout, log_stderr):
     all_files = {}
     for data_root_path in data_roots:
-        log_stderr.info("Scanning directory {cyan}%s{reset} ... ", (data_root_path,))
-        all_files.update(build_all_files(data_root_path))
+        all_files.update(build_all_files(data_root_path, log_stderr))
 
     log_stderr.info("Transposing the cache: by-hashes -> files ...")
     used_files = build_used_files(cache, data_roots)
@@ -98,7 +100,7 @@ def print_orphaned_files(cache, data_roots, reduce_dirs, log_stdout, log_stderr)
 
 
 def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
-    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, log_stderr)
+    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr)
     torrents = tcollection.by_hash(torrents)
 
     log_stderr.info("Fetching all hashes from client ...")
@@ -115,7 +117,7 @@ def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_
 
 
 def print_missing_torrents(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
-    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, log_stderr)
+    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr)
     torrents = tcollection.by_hash(torrents)
 
     log_stderr.info("Fetching all hashes from client ...")
@@ -132,7 +134,7 @@ def print_missing_torrents(client, torrents_dir_path, name_filter, log_stdout, l
 
 
 def print_duplicate_torrents(torrents_dir_path, name_filter, log_stdout, log_stderr):
-    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, log_stderr)
+    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr)
     torrents = tcollection.by_hash_with_dups(torrents)
     torrents = {
         torrent_hash: variants
