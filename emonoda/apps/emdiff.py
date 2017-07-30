@@ -26,11 +26,13 @@ from .. import tfile
 from .. import fmt
 
 from . import init
+from . import wrap_main
 from . import get_configured_log
 from . import get_configured_client
 
 
 # ===== Main =====
+@wrap_main
 def main():
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(

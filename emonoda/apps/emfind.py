@@ -28,6 +28,7 @@ from .. import fmt
 from .. import tools
 
 from . import init
+from . import wrap_main
 from . import get_configured_log
 from . import get_configured_client
 
@@ -148,6 +149,7 @@ def print_duplicate_torrents(torrents_dir_path, name_filter, log_stdout, log_std
 
 
 # ===== Main =====
+@wrap_main
 def main():
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(

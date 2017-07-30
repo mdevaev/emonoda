@@ -106,6 +106,15 @@ def init():
     return (args_parser, remaining, config)
 
 
+def wrap_main(method):
+    def wrap():
+        try:
+            return method()
+        except (SystemExit, KeyboardInterrupt):
+            sys.exit(1)
+    return wrap
+
+
 def _merge_dicts(dest, src, path=None):
     if path is None:
         path = []

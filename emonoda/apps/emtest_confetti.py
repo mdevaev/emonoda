@@ -22,6 +22,7 @@ import sys
 from ..helpers import surprise
 
 from . import init
+from . import wrap_main
 from . import get_configured_log
 from . import get_configured_confetti
 
@@ -37,6 +38,7 @@ class _FakeTracker:
 
 
 # ===== Main =====
+@wrap_main
 def main():
     (parent_parser, argv, config) = init()  # pylint: disable=unused-variable
     with get_configured_log(config, False, sys.stderr) as log_stderr:

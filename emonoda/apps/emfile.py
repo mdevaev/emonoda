@@ -33,6 +33,7 @@ from .. import fmt
 from .. import tools
 
 from . import init
+from . import wrap_main
 from . import get_configured_log
 from . import get_configured_client
 
@@ -163,6 +164,7 @@ def print_value(header, value, without_headers, log):
 
 
 # ===== Main =====
+@wrap_main
 def main():  # pylint: disable=too-many-locals
     options = config = None  # Makes pylint happy
     actions = [
