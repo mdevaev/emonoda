@@ -77,6 +77,9 @@ class Log:
                     cut = view_len - max_len
                     rendered = self._cut_line(rendered, cut)
 
+            if view_len - cut < self._fill:
+                self.finish()
+
             self._output.write(rendered)
             if one_line and self.isatty():
                 self._output.write("\r")
