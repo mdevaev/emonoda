@@ -82,11 +82,14 @@ def _update(cache, client, path, name_filter, log):
 
         if not log.isatty():
             log.info("Adding files for the new {yellow}%d{reset} hashes ...", (len(to_add),))
-        for (number, torrent_hash) in enumerate(to_add):
+
+        for torrent_hash in log.progress(
+            to_add,
+            ("Adding files ...", ()),
+            ("Added {magenta}%d{reset} new hashes from client", (lambda: added,))
+        ):
             torrent = torrents.get(torrent_hash)
             if torrent is not None:
-                if log.isatty():
-                    log.progress(number, len(to_add), "Adding files ...")
                 cache["torrents"][torrent_hash] = {
                     # "name":      os.path.basename(torrent.get_path()),
                     # "is_single": torrent.is_single_file(),
@@ -97,7 +100,8 @@ def _update(cache, client, path, name_filter, log):
             else:
                 log.error("Not cached - missing torrent for: {red}%s{reset} -- %s",
                           (torrent_hash, client.get_file_name(torrent_hash)))
-        if added != 0:
+
+        if not log.isatty() and added != 0:
             log.info("Added {magenta}%d{reset} new hashes from client", (added,))
 
     return bool(len(to_remove) or added)

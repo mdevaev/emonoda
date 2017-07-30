@@ -28,13 +28,14 @@ def load_from_dir(path, name_filter, calculate, log):
     if not log.isatty():
         log.info("Loading torrents from {cyan}%s/{yellow}%s{reset} ...", (path, name_filter))
 
-    names = sorted(os.listdir(path))
     torrents = {}
-    for (number, name) in enumerate(names):
+    for name in log.progress(
+        sorted(os.listdir(path)),
+        ("Loading torrents from {cyan}%s/{yellow}%s{reset}", (path, name_filter)),
+        ("Loaded {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}", (lambda: len(torrents), path, name_filter)),
+    ):
         if fnmatch.fnmatch(name, name_filter):
             file_path = os.path.abspath(os.path.join(path, name))
-            if log.isatty():
-                log.progress(number, len(names), "Loading torrents from {cyan}%s/{yellow}%s{reset}", (path, name_filter))
             try:
                 torrents[name] = tfile.Torrent(path=file_path)
                 if calculate:
@@ -46,8 +47,9 @@ def load_from_dir(path, name_filter, calculate, log):
                 log.error("Can't process torrent: {cyan}%s/{yellow}%s{reset}", (path, name))
                 raise
 
-    log.info("Loaded {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}",
-             (len(torrents), path, name_filter))
+    if not log.isatty():
+        log.info("Loaded {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}",
+                 (len(torrents), path, name_filter))
     return torrents
 
 

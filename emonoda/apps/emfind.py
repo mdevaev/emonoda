@@ -53,9 +53,15 @@ def build_used_files(cache, data_roots):
 
 
 def build_all_files(data_root_path, log):
+    if not log.isatty():
+        log.info("Scanning directory {cyan}%s{reset} ...", (data_root_path,))
+
     files = {}
-    plain_tree = list(os.walk(data_root_path))
-    for (number, (prefix, _, local_files)) in enumerate(plain_tree):
+    for (prefix, _, local_files) in log.progress(
+        os.walk(data_root_path),
+        ("Scanning directory {cyan}%s{reset} ...", (data_root_path,)),
+        ("Scanned directory {cyan}%s{reset}", (data_root_path,))
+    ):
         files[tools.get_decoded_path(prefix)] = None
         for name in local_files:
             path = os.path.join(prefix, name)
@@ -64,8 +70,9 @@ def build_all_files(data_root_path, log):
             except FileNotFoundError:
                 continue
             files[tools.get_decoded_path(path)] = size
-        log.progress(number, len(plain_tree), "Scanning directory {cyan}%s{reset} ... ", (data_root_path,))
-    log.info("Scanned directory {cyan}%s{reset}", (data_root_path,))
+
+    if not log.isatty():
+        log.info("Scanned directory {cyan}%s{reset}", (data_root_path,))
     return files
 
 

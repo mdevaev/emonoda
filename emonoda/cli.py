@@ -59,10 +59,6 @@ class Log:
     def error(self, text, *args, **kwargs):
         self.print("# {red}E{reset}: " + text, *args, **kwargs)
 
-    def progress(self, value, limit, text, placeholders=(), length=20):
-        (pg, pg_placeholders) = fmt.format_progress_bar(value, limit, length)
-        self.print("# {green}I{reset}: %s :: " % (pg) + text, pg_placeholders + placeholders, one_line=True)
-
     def print(self, text="", placeholders=(), one_line=False, no_nl=False):
         if not self._quiet:
             self.finish()
@@ -89,6 +85,19 @@ class Log:
                 self._fill = 0
             self._output.flush()
 
+    def progress(self, iterable, wip, finish, length=20):
+        if self.isatty():
+            items = list(iterable)
+            for (number, item) in enumerate(items, 1):
+                yield item
+                (pg, pg_placeholders) = fmt.format_progress_bar(number, len(items), length)
+                if number < len(items):
+                    self.info(("%s :: " % (pg) + wip[0]), pg_placeholders + wip[1], one_line=True)
+                else:
+                    self.info(("%s :: " % (pg) + finish[0]), pg_placeholders + finish[1])
+        else:
+            yield from iterable
+
     def finish(self):
         if self._fill:
             self._output.write((" " * self._fill) + "\r")
@@ -106,7 +115,10 @@ class Log:
 
     def _format_text(self, text, placeholders, colored):
         text = text.format(**(_COLORS if colored else _NO_COLORS))
-        text = text % placeholders
+        text = text % tuple(
+            (placeholder() if callable(placeholder) else placeholder)
+            for placeholder in placeholders
+        )
         return text
 
     def _cut_line(self, text, cut):
