@@ -20,6 +20,7 @@
 import sys
 import os
 import re
+import threading
 
 from colorama import Fore
 from colorama import Style
@@ -61,8 +62,6 @@ class Log:
 
     def print(self, text="", placeholders=(), one_line=False, no_nl=False):
         if not self._quiet:
-            self.finish()
-
             rendered = self._format_text(text, placeholders, self._colored)
             view_len = len(self._format_text(text, placeholders, False) if self._colored else rendered)
 
@@ -85,16 +84,34 @@ class Log:
                 self._fill = 0
             self._output.flush()
 
-    def progress(self, iterable, wip, finish, length=20):
+    def progress(self, iterable, wip, finish, length=20, refresh=0.1):
         if self.isatty():
             items = list(iterable)
-            for (number, item) in enumerate(items, 1):
-                yield item
-                (pg, pg_placeholders) = fmt.format_progress_bar(number, len(items), length)
+
+            def print_pb(number):
+                (pb, pb_placeholders) = fmt.format_progress_bar(number, len(items), length)
                 if number < len(items):
-                    self.info(("%s :: " % (pg) + wip[0]), pg_placeholders + wip[1], one_line=True)
+                    self.info("{} :: {}".format(pb, wip[0]), pb_placeholders + wip[1], one_line=True)
                 else:
-                    self.info(("%s :: " % (pg) + finish[0]), pg_placeholders + finish[1])
+                    self.info("{} :: {}".format(pb, finish[0]), pb_placeholders + finish[1])
+
+            current = 0
+            stop_pb_thread = threading.Event()
+
+            def refresh_pb():
+                print_pb(current)
+                while not stop_pb_thread.wait(refresh):
+                    print_pb(current)
+                print_pb(current)
+
+            pb_thread = threading.Thread(target=refresh_pb)
+            pb_thread.daemon = True
+            pb_thread.start()
+
+            for (current, item) in enumerate(items, 1):
+                yield item
+
+            stop_pb_thread.set()
         else:
             yield from iterable
 
