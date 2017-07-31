@@ -52,8 +52,17 @@ def format_progress(value, limit):
 
 def format_progress_bar(value, limit, length):
     (text, placeholders) = format_progress(value, limit)
-    pg = (" {red}[%-" + str(length) + "s]{reset}") % ("=" * int(value / limit * length))
-    return (text + pg, placeholders)
+    if value != limit:
+        color = "red"
+    else:
+        color = "green"
+    fill = int(value / limit * length)
+    pb = " {{{color}}}[{bar}{{reset}}{fill}{{{color}}}]{{reset}}".format(
+        color=color,
+        bar=("\u2588" * fill),
+        fill=("\u00b7" * (length - fill)),
+    )  # https://en.wikipedia.org/wiki/Code_page_437
+    return (text + pb, placeholders)
 
 
 def format_now(text):
