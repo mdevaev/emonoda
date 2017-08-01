@@ -86,11 +86,9 @@ class Log:
 
     def progress(self, iterable, wip, finish, length=20, refresh=0.1):
         if self.isatty():
-            items = list(iterable)
-
-            def print_pb(number):
-                (pb, pb_placeholders) = fmt.format_progress_bar(number, len(items), length)
-                if number < len(items):
+            def print_pb(value, limit):
+                (pb, pb_placeholders) = fmt.format_progress_bar(value, limit, length)
+                if value < limit:
                     self.info("{} :: {}".format(pb, wip[0]), pb_placeholders + wip[1], one_line=True)
                 else:
                     self.info("{} :: {}".format(pb, finish[0]), pb_placeholders + finish[1])
@@ -98,11 +96,14 @@ class Log:
             current = 0
             stop_pb_thread = threading.Event()
 
+            print_pb(0, 1)
+            items = list(iterable)
+
             def refresh_pb():
-                print_pb(current)
+                print_pb(current, len(items))
                 while not stop_pb_thread.wait(refresh):
-                    print_pb(current)
-                print_pb(current)
+                    print_pb(current, len(items))
+                print_pb(current, len(items))
 
             pb_thread = threading.Thread(target=refresh_pb)
             pb_thread.daemon = True

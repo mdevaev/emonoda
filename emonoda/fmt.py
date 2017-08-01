@@ -51,18 +51,20 @@ def format_progress(value, limit):
 
 
 def format_progress_bar(value, limit, length):
-    (text, placeholders) = format_progress(value, limit)
+    (progress, placeholders) = format_progress(value, limit)
     if value != limit:
         color = "red"
     else:
         color = "green"
     fill = int(value / limit * length)
-    pb = " {{{color}}}[{bar}{{reset}}{fill}{{{color}}}]{{reset}}".format(
+    pb = "{{cyan}}{percent:5.1f}%% {{{color}}}[{bar}{{reset}}{fill}{{{color}}}]{{reset}} {progress}".format(
+        percent=value / limit * 100,
         color=color,
-        bar=("\u2588" * fill),
-        fill=("\u00b7" * (length - fill)),
+        bar="\u2588" * fill,
+        fill="\u00b7" * (length - fill),
+        progress=progress,
     )  # https://en.wikipedia.org/wiki/Code_page_437
-    return (text + pb, placeholders)
+    return (pb, placeholders)
 
 
 def format_now(text):
