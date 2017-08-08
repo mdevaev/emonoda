@@ -1,0 +1,42 @@
+site_name: emonoda! documentation
+site_url: https://pythonhosted.org/emonoda/
+theme : material
+
+extra:
+  font:
+    text: 'Ubuntu'
+    code: 'Hack'
+  social:
+    - type: 'github-alt'
+      link: 'https://github.com/mdevaev/emonoda'
+  feature:
+    tabs: true
+  palette:
+    primary: 'blue grey'
+    accent: 'pink'
+# Repository
+repo_name: mdevaev/emonoda
+repo_url: https://github.com/mdevaev/emonoda
+
+markdown_extensions:
+  - fontawesome_markdown  
+  - toc(permalink=true)
+  - admonition
+  - codehilite(guess_lang=false, linenums=true)
+
+pages:
+  - 'Emonoda -- 得物だ': index.md
+  - 'Базовая настройка': config.md
+  - 'Базовая настройка':
+    - 'Интеграция с торрент-клиентом': clients.md
+    - 'Настройка трекеров для обновления торрентов': trackers.md
+    - 'Настройка оповещений об обновлениях': confetti.md
+  - Команды:
+    - 'emupdate - обновление торрентов': emupdate.md
+    - 'emfile - просмотр информации о торрент-файле': emfile.md
+    - 'emdiff - сравнение торрент-файлов': emdiff.md
+    - 'emload - добавление торрента в клиент': emload.md
+    - 'emrm - удаление торрента из клиента': emrm.md
+    - 'emfind - запросы к клиенту для обслуживания коллекции': emfind.md
+  - 'Спецкостыли для разных клиентов': hooks.md
+                    

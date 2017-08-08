@@ -26,12 +26,16 @@ push:
 	git push
 	git push --tags
 
+mkdocs:
+	mkdocs build
+
 pypi:
 	python setup.py register
 	python setup.py sdist upload
+	python setup.py upload_docs --upload-dir=site
 
 clean:
-	rm -rf build dist pkg src *.egg-info emonoda-*.tar.gz
+	rm -rf build site dist pkg src *.egg-info emonoda-*.tar.gz
 	find -name __pycache__ | xargs rm -rf
 
 clean-all: clean
