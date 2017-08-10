@@ -19,10 +19,9 @@ repo_name: mdevaev/emonoda
 repo_url: https://github.com/mdevaev/emonoda
 
 markdown_extensions:
-  - fontawesome_markdown  
   - toc(permalink=true)
   - admonition
-  - codehilite(guess_lang=false, linenums=true)
+  - codehilite(guess_lang=false)
 
 pages:
   - 'Emonoda -- 得物だ': index.md
