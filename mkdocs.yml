@@ -1,7 +1,7 @@
 site_name: emonoda! documentation
 site_url: https://pythonhosted.org/emonoda/
 theme : material
-
+theme_dir: 'docs/theme'
 extra:
   font:
     text: 'Ubuntu'
@@ -10,7 +10,7 @@ extra:
     - type: 'github-alt'
       link: 'https://github.com/mdevaev/emonoda'
   feature:
-    tabs: true
+    tabs: false
   palette:
     primary: 'blue grey'
     accent: 'pink'
@@ -19,15 +19,14 @@ repo_name: mdevaev/emonoda
 repo_url: https://github.com/mdevaev/emonoda
 
 markdown_extensions:
-  - fontawesome_markdown  
   - toc(permalink=true)
   - admonition
-  - codehilite(guess_lang=false, linenums=true)
+  - codehilite(guess_lang=false)
 
 pages:
   - 'Emonoda -- 得物だ': index.md
-  - 'Базовая настройка': config.md
   - 'Базовая настройка':
+    - 'Конфигурация': config.md
     - 'Интеграция с торрент-клиентом': clients.md
     - 'Настройка трекеров для обновления торрентов': trackers.md
     - 'Настройка оповещений об обновлениях': confetti.md
