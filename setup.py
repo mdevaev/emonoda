@@ -77,8 +77,7 @@ if __name__ == "__main__":
         classifiers=[
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
             "Development Status :: 5 - Production/Stable",
-            "Programming Language :: Python :: 3.4",
-            "Programming Language :: Python :: 3.5",
+            "Programming Language :: Python :: 3.6",
             "Topic :: Software Development :: Libraries :: Python Modules",
             "Topic :: Utilities",
             "Operating System :: OS Independent",
