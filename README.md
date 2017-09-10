@@ -33,10 +33,10 @@
 
 ### [Поддерживаемые трекеры](https://github.com/mdevaev/emonoda/wiki/trackers) ###
 * http://rutracker.org
-* http://nnmclub.to
-* http://ipv6.nnmclub.to
-* http://rutor.org
-* http://tfile.me
+* http://nnm-club.name
+* http://ipv6.nnm-club.name
+* http://rutor.info
+* http://tfile.cc
 * http://pravtor.ru
 * http://tr.anidub.com
 * http://pornolab.net
@@ -56,6 +56,7 @@
 * **E-mail** -- в виде плейнтекста или HTML, на ваш выбор. Посылаются в виде дайджеста по всем обновленным раздачам.
 * [Notify My Android](http://notifymyandroid.com/) -- короткие push-нотификации на андроид, по одной на обновленную раздачу.
 * [Pushover](https://pushover.net/) -- push-нотификации на айфон и андроид, по одной на раздачу, без подробностей.
+* Генерация ленты обновлений в формате Atom.
 
 ***
 
@@ -68,7 +69,7 @@
 pip install --user --upgrade emonoda
 ```
 ##### Пакет для Arch Linux ####
-Актуальный PKGBUILD находится в [AUR`е](https://aur4.archlinux.org/packages/emonoda/):
+Актуальный PKGBUILD находится в [AUR`е](https://aur.archlinux.org/packages/emonoda/):
 ```
 packer -S emonoda
 ```
