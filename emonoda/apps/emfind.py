@@ -117,7 +117,7 @@ def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_
     if len(not_in_client) != 0:
         log_stderr.info("Not in client:")
         for torrent_hash in not_in_client:
-            log_stdout.print("%s", torrents[torrent_hash].get_path())
+            log_stdout.print("%s", (torrents[torrent_hash].get_path(),))
         log_stderr.info("Found {red}%d{reset} unregistered torrents", (len(not_in_client),))
     else:
         log_stderr.info("No unregistered files found")
