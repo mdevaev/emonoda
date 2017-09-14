@@ -27,24 +27,24 @@ from . import WithFetchByDownloadId
 
 # =====
 class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchByDownloadId):
-    PLUGIN_NAME = "tfile.co"
+    PLUGIN_NAME = "tfile.cc"
 
-    _SITE_VERSION = 4
+    _SITE_VERSION = 5
     _SITE_ENCODING = "cp1251"
 
-    _SITE_FINGERPRINT_URL = "http://tfile.co"
-    _SITE_FINGERPRINT_TEXT = "href=\"http://tfile.co/opensearch.xml\""
+    _SITE_FINGERPRINT_URL = "http://tfile.cc"
+    _SITE_FINGERPRINT_TEXT = "href=\"http://tfile.cc/opensearch.xml\""
 
-    _COMMENT_REGEXP = re.compile(r"http://tfile\.(me|ru|co)/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://tfile\.(me|ru|co|cc)/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
-    _TORRENT_HASH_URL = "http://tfile.co/forum/viewtopic.php?p={torrent_id}"
+    _TORRENT_HASH_URL = "http://tfile.cc/forum/viewtopic.php?p={torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<td style=\"color:darkgreen\">Info hash:</td>"
                                       r"<td><strong>(?P<torrent_hash>[a-fA-F0-9]{40})</strong></td>")
 
-    _DOWNLOAD_ID_URL = "http://tfile.co/forum/viewtopic.php?p={torrent_id}"
+    _DOWNLOAD_ID_URL = "http://tfile.cc/forum/viewtopic.php?p={torrent_id}"
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download.php\?id=(?P<download_id>\d+)\""
                                      r" style=\"background:url\(/blueGene/images/topic\.jpg\)")
-    _DOWNLOAD_URL = "http://tfile.co/forum/download.php?id={download_id}"
+    _DOWNLOAD_URL = "http://tfile.cc/forum/download.php?id={download_id}"
 
     # ===
 
@@ -58,7 +58,7 @@ class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchByDownloadId):
 
     def login(self):
         self._login_using_post(
-            url="http://tfile.co/login/",
+            url="http://tfile.cc/login/",
             post={
                 "username":  self._encode(self._user),
                 "password":  self._encode(self._passwd),
