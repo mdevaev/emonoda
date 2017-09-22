@@ -31,11 +31,11 @@ from . import WithFetchByDownloadId
 class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
     PLUGIN_NAME = "booktracker.org"
 
-    _SITE_VERSION = 1
+    _SITE_VERSION = 2
     _SITE_ENCODING = "utf-8"
 
     _SITE_FINGERPRINT_URL = "https://booktracker.org"
-    _SITE_FINGERPRINT_TEXT = "<meta name='yandex-verification' content='57e66f92f305434b' />"
+    _SITE_FINGERPRINT_TEXT = "<meta name=\"google-site-verification\" content=\"L85kL3qg3y9JS1ER3BNhcpcqdDZBgrxzZpBm6Jzb1iQ\" />"
 
     _COMMENT_REGEXP = re.compile(r"https?://booktracker\.org/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
