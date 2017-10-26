@@ -152,7 +152,7 @@ def print_duplicate_torrents(torrents_dir_path, name_filter, log_stdout, log_std
         for (torrent_hash, variants) in torrents.items():
             log_stdout.print(torrent_hash)
             for torrent in variants:
-                log_stdout.print("\t%s", torrent.get_path())
+                log_stdout.print("\t%s", (torrent.get_path(),))
     else:
         log_stderr.info("No duplicate torrents found")
 
