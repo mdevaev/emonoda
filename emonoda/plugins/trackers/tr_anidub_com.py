@@ -36,13 +36,13 @@ from . import WithFetchCustom
 class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
     PLUGIN_NAME = "tr.anidub.com"
 
-    _SITE_VERSION = 0
+    _SITE_VERSION = 1
     _SITE_ENCODING = "utf-8"
 
-    _SITE_FINGERPRINT_URL = "http://tr.anidub.com"
-    _SITE_FINGERPRINT_TEXT = "href=\"http://tr.anidub.com/engine/opensearch.php\" title=\"AniDUB Tracker\""
+    _SITE_FINGERPRINT_URL = "https://tr.anidub.com"
+    _SITE_FINGERPRINT_TEXT = "href=\"https://tr.anidub.com/engine/opensearch.php\" title=\"AniDUB Tracker\""
 
-    _COMMENT_REGEXP = re.compile(r"http://tr\.anidub\.com/\?newsid=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"https?://tr\.anidub\.com/\?newsid=(?P<torrent_id>\d+)")
 
     _TIMEZONE_STATIC = "Etc/GMT+4"
 
@@ -77,12 +77,12 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
 
     def fetch_new_data(self, torrent):
         self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
+        page = self._decode(self._read_url(torrent.get_comment().replace("http://", "https://")))
         downloads = set(map(int, re.findall(r"<a href=\"/engine/download.php\?id=(\d+)\" class=\" \">", page)))
         candidates = {}
         for download_id in downloads:
             data = self._read_url(
-                url="http://tr.anidub.com/engine/download.php?id={}".format(download_id),
+                url="https://tr.anidub.com/engine/download.php?id={}".format(download_id),
                 headers={"Referer": torrent.get_comment()},
             )
             self._assert_valid_data(data)
@@ -100,11 +100,11 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
 
     def login(self):
         self._login_using_post(
-            url="http://tr.anidub.com/",
+            url="https://tr.anidub.com/",
             post={
                 "login_name":      self._encode(self._user),
                 "login_password":  self._encode(self._passwd),
                 "login":           b"submit",
             },
-            ok_text="<li><a href=\"http://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
+            ok_text="<li><a href=\"https://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
         )
