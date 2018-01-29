@@ -36,11 +36,12 @@ from . import WithFetchCustom
 class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
     PLUGIN_NAME = "tr.anidub.com"
 
-    _SITE_VERSION = 1
+    _SITE_VERSION = 2
     _SITE_ENCODING = "utf-8"
 
     _SITE_FINGERPRINT_URL = "https://tr.anidub.com"
-    _SITE_FINGERPRINT_TEXT = "href=\"https://tr.anidub.com/engine/opensearch.php\" title=\"AniDUB Tracker\""
+    _SITE_FINGERPRINT_TEXT = ("<link rel=\"search\" type=\"application/opensearchdescription+xml\""
+                              " href=\"https://tr.anidub.com/engine/opensearch.php\"")
 
     _COMMENT_REGEXP = re.compile(r"https?://tr\.anidub\.com/\?newsid=(?P<torrent_id>\d+)")
 
