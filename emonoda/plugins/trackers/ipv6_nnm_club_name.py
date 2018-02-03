@@ -19,17 +19,18 @@
 
 import re
 
-from . import nnm_club_name
+from . import nnm_club_me
 
 
 # =====
-class Plugin(nnm_club_name.Plugin):
+class Plugin(nnm_club_me.Plugin):
     PLUGIN_NAME = _NNM_DOMAIN = "ipv6.nnm-club.name"
 
     _SITE_VERSION = 1
     _SITE_FINGERPRINT_URL = "http://{}".format(_NNM_DOMAIN)
 
-    _COMMENT_REGEXP = re.compile(r"http://ipv6\.(nnm-club\.(me|ru|name)|nnmclub\.to)/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://ipv6\.(nnm-club\.(me|ru|name|tv|lib)|nnmclub\.to)"
+                                 r"/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
     _TORRENT_SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_NNM_DOMAIN)
 

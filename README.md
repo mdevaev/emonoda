@@ -33,7 +33,7 @@
 
 ### [Поддерживаемые трекеры](https://github.com/mdevaev/emonoda/wiki/trackers) ###
 * http://rutracker.org
-* http://nnm-club.name
+* http://nnm-club.me
 * http://ipv6.nnm-club.name
 * http://rutor.info
 * http://tfile.cc
