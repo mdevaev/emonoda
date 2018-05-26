@@ -137,7 +137,14 @@ class Plugin(BaseClient, WithCustoms):
     @hash_or_torrent
     @_catch_unknown_torrent
     def get_full_path(self, torrent_hash):
-        return self._server.d.get_base_path(torrent_hash)
+        mc = xmlrpc.client.MultiCall(self._server)
+        mc.d.get_directory(torrent_hash)
+        mc.d.get_name(torrent_hash)
+        mc.d.is_multi_file(torrent_hash)
+        (path, name, is_multi_file) = mc()
+        if is_multi_file:
+            return path
+        return os.path.join(path, name)
 
     @hash_or_torrent
     @_catch_unknown_torrent
