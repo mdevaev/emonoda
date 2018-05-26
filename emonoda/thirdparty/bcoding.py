@@ -214,3 +214,4 @@ def bencode(data, f=None):
         return f.getvalue()
     else:
         _bencode_to_file(data, f)
+        return None

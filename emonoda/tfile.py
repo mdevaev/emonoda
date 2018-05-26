@@ -210,7 +210,7 @@ class Torrent:
 
     # ===
 
-    def _decode(self, value, surrogate_escape=False):
+    def _decode(self, value, surrogate_escape=False):  # pylint: disable=inconsistent-return-statements
         if isinstance(value, bytes):
             if surrogate_escape:
                 # https://www.python.org/dev/peps/pep-0383
