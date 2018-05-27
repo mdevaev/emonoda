@@ -246,5 +246,6 @@ def _get_config_scheme():
         "emfind": {
             "cache_file":  Option(default="~/.cache/emfind.json", type=as_path, help="Torrents cache"),
             "name_filter": Option(default="*.torrent", help="Cache only filtered torrent files"),
+            "ignore_orphans": Option(default=[], type=as_paths_list, help="Ignore these paths on the final analyse"),
         },
     }

@@ -34,7 +34,7 @@ disable =
 msg-template={symbol} -- {path}:{line}({obj}): {msg}
 
 [FORMAT]
-max-line-length=130
+max-line-length=140
 
 [BASIC]
 # List of builtins function names that should not be used, separated by a comma

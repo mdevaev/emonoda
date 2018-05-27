@@ -25,7 +25,7 @@ def as_key_value(values):
 
 
 def as_path(value):
-    return os.path.abspath(os.path.expanduser(value))
+    return os.path.normpath(os.path.abspath(os.path.expanduser(value)))
 
 
 def as_paths_list(values):

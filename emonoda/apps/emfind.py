@@ -77,7 +77,7 @@ def build_all_files(data_root_path, log):
 
 
 # =====
-def print_orphaned_files(cache, data_roots, reduce_dirs, log_stdout, log_stderr):
+def print_orphaned_files(cache, data_roots, ignore_orphans, reduce_dirs, log_stdout, log_stderr):  # pylint: disable=too-many-locals
     all_files = {}
     for data_root_path in data_roots:
         all_files.update(build_all_files(data_root_path, log_stderr))
@@ -86,6 +86,12 @@ def print_orphaned_files(cache, data_roots, reduce_dirs, log_stdout, log_stderr)
     used_files = build_used_files(cache, data_roots)
 
     files = set(all_files).difference(used_files)
+    for path in list(files):
+        for ignored_path in ignore_orphans:
+            if path == ignored_path or path.startswith(ignored_path + os.path.sep):
+                files.remove(path)
+                break
+
     if len(files) != 0:
         log_stderr.info("Orhpaned files:")
         size = 0
@@ -223,6 +229,7 @@ def main():
                 print_orphaned_files(
                     cache=get_cache(False),
                     data_roots=(config.core.data_root_dir,) + tuple(config.core.another_data_root_dirs),
+                    ignore_orphans=config.emfind.ignore_orphans,
                     reduce_dirs=(not options.no_reduce_dirs),
                     log_stdout=log_stdout,
                     log_stderr=log_stderr,
