@@ -21,51 +21,103 @@ import os
 import pkgutil
 import textwrap
 
+from typing import List
+from typing import Dict
+from typing import NamedTuple
+from typing import Optional
+from typing import Union
+from typing import Type
+from typing import Any
+
 import mako.template
 
 from ...optconf import Option
-from ...optconf.converters import as_string_or_none
 
-from .. import BasePlugin
+from ...plugins.trackers import BaseTracker  # FIXME
+
+from ...tfile import TorrentsDiff
+from ...tfile import Torrent
+
 from .. import BaseExtension
+from .. import BasePlugin
+from .. import get_classes
 
 
 # =====
-def templated(name, built_in=True, **kwargs):
+def templated(name: str, built_in: bool=True, **kwargs: Any) -> str:
     if built_in:
-        data = pkgutil.get_data(__name__, os.path.join("templates", name)).decode()
+        data = pkgutil.get_data(__name__, os.path.join("templates", name))
+        assert data, (data, name, __name__)
+        text = data.decode()
     else:
         with open(name) as template_file:
-            data = template_file.read()
-    template = textwrap.dedent(data).strip()
+            text = template_file.read()
+    template = textwrap.dedent(text).strip()
     return mako.template.Template(template).render(**kwargs).strip()
 
 
 # =====
+class _InnerUpdateResult(NamedTuple):
+    torrent: Optional[Torrent]
+    tracker: Optional[BaseTracker]
+    diff: TorrentsDiff
+    err_name: str
+    err_msg: str
+    tb_lines: List[str]
+
+
+class UpdateResult(_InnerUpdateResult):
+    @staticmethod
+    def new(
+        torrent: Optional[Torrent]=None,
+        tracker: Optional[BaseTracker]=None,
+        diff: Optional[TorrentsDiff]=None,
+        err_name: str="",
+        err_msg: str="",
+        tb_lines: Optional[List[str]]=None,
+    ) -> "UpdateResult":
+
+        return UpdateResult(
+            torrent=torrent,
+            tracker=tracker,
+            diff=(diff or TorrentsDiff.new()),
+            err_name=err_name,
+            err_msg=err_msg,
+            tb_lines=(tb_lines or []),
+        )
+
+
+ResultsType = Dict[str, Dict[str, UpdateResult]]
+
+
 class BaseConfetti(BasePlugin):
-    def __init__(self, timeout, retries, retries_sleep, **_):
+    def __init__(self, timeout: float, retries: int, retries_sleep: float, **_: Any) -> None:
         self._timeout = timeout
         self._retries = retries
         self._retries_sleep = retries_sleep
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return {
             "timeout":       Option(default=10.0, help="Network timeout"),
             "retries":       Option(default=5, help="Retries for failed attempts"),
             "retries_sleep": Option(default=1.0, help="Sleep interval between failed attempts"),
         }
 
-    def send_results(self, source, results):
+    def send_results(self, source: str, results: ResultsType) -> None:
         raise NotImplementedError
 
 
 class WithProxy(BaseExtension):
-    def __init__(self, proxy_url, **_):
+    def __init__(self, proxy_url: str, **_: Any) -> None:
         self._proxy_url = proxy_url
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return {
-            "proxy_url": Option(default=None, type=as_string_or_none, help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
+            "proxy_url": Option(default="", help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
         }
+
+
+def get_confetti_class(name: str) -> Type[BaseConfetti]:
+    return get_classes("confetti")[name]  # type: ignore

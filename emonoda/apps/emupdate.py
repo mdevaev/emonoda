@@ -26,16 +26,37 @@ import traceback
 import threading
 import operator
 import argparse
+import types
+
+from typing import Tuple
+from typing import List
+from typing import Dict
+from typing import Generator
+from typing import Callable
+from typing import Optional
+from typing import Type
+from typing import Any
+
+from ..plugins.clients import BaseClient
 
 from ..plugins.trackers import TrackerError
 from ..plugins.trackers import WithCheckHash
 from ..plugins.trackers import WithCheckScrape
 from ..plugins.trackers import WithCheckTime
+from ..plugins.trackers import BaseTracker
+
+from ..plugins.confetti import UpdateResult
+from ..plugins.confetti import ResultsType
 
 from ..helpers import tcollection
 from ..helpers import surprise
 
-from .. import tfile
+from ..tfile import TorrentsDiff
+from ..tfile import Torrent
+from ..tfile import get_torrents_difference
+
+from ..cli import Log
+
 from .. import fmt
 from .. import tools
 
@@ -49,39 +70,67 @@ from . import get_configured_confetti
 
 # =====
 class OpContext:
-    def __init__(self, torrent, tracker):
+    def __init__(self, torrent: Torrent, tracker: BaseTracker) -> None:
         self.torrent = torrent
         self.tracker = tracker
 
-        self._status = None
-        self._attrs = {}
+        self._status = ""
+        self._result: Optional[UpdateResult] = None
 
-    def done_not_in_client(self):
+    def done_not_in_client(self) -> None:
         self._status = "not_in_client"
 
-    def done_affected(self, diff):
+    def done_affected(self, diff: TorrentsDiff) -> None:
         self._status = "affected"
-        self._attrs = {"diff": diff}
+        self._result = UpdateResult.new(
+            torrent=self.torrent,
+            tracker=self.tracker,
+            diff=diff,
+        )
 
-    def __enter__(self):
+    def __enter__(self) -> None:
         pass
 
-    def __exit__(self, exc_type, exc, tb):
+    def __exit__(
+        self,
+        exc_type: Type[BaseException],
+        exc: BaseException,
+        tb: types.TracebackType,
+    ) -> None:
+
         if isinstance(exc, TrackerError):
             self._status = "tracker_error"
-            self._attrs = {
-                "err_name": type(exc).__name__,
-                "err_msg": str(exc),
-            }
+            self._result = UpdateResult.new(
+                torrent=self.torrent,
+                tracker=self.tracker,
+                err_name=type(exc).__name__,
+                err_msg=str(exc),
+            )
         elif exc is not None:
             self._status = "unhandled_error"
-            self._attrs = {"tb_lines": "".join(traceback.format_exception(exc_type, exc, tb)).strip().split("\n")}
-        if self._status is None:
+            self._result = UpdateResult.new(
+                torrent=self.torrent,
+                tracker=self.tracker,
+                err_name=type(exc).__name__,
+                err_msg=str(exc),
+                tb_lines="".join(traceback.format_exception(exc_type, exc, tb)).strip().split("\n"),
+            )
+        if not self._status:
             self._status = "passed"
 
 
 class Feeder:  # pylint: disable=too-many-instance-attributes
-    def __init__(self, trackers, torrents, show_unknown, show_passed, show_diff, log_stdout, log_stderr):
+    def __init__(
+        self,
+        trackers: List[BaseTracker],
+        torrents: Dict[str, Optional[Torrent]],
+        show_unknown: bool,
+        show_passed: bool,
+        show_diff: bool,
+        log_stdout: Log,
+        log_stderr: Log,
+    ) -> None:
+
         self._trackers = trackers
         self._torrents = torrents
         self._show_unknown = show_unknown
@@ -91,15 +140,15 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         self._log_stderr = log_stderr
 
         self._current_count = 0
-        self._current_file_name = None
-        self._current_torrent = None
-        self._current_tracker = None
+        self._current_file_name = ""
+        self._current_torrent: Optional[Torrent] = None
+        self._current_tracker: Optional[BaseTracker] = None
 
         self._fan = fmt.make_fan()
-        self._fan_thread = None
+        self._fan_thread: Optional[threading.Thread] = None
         self._stop_fan = threading.Event()
 
-        self._status_mapping = {
+        self._status_mapping: Dict[str, Callable[[UpdateResult], None]] = {
             "invalid":         self._done_invalid,
             "not_in_client":   self._done_not_in_client,
             "unknown":         self._done_unknown,
@@ -109,81 +158,82 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
             "unhandled_error": self._done_unhandled_error,
         }
 
-        self._results = {status: {} for status in self._status_mapping}
+        self._results: ResultsType = {status: {} for status in self._status_mapping}
 
-    def get_ops(self):
+    def get_ops(self) -> Generator[OpContext, None, None]:
         for (self._current_count, (self._current_file_name, self._current_torrent)) in enumerate(
             sorted(self._torrents.items(), key=operator.itemgetter(0))
         ):
             self._current_tracker = None
 
             if self._current_torrent is None:
-                self._done("invalid", {})
+                self._done("invalid")
                 continue
 
             self._current_tracker = self._select_tracker()
             if self._current_tracker is None:
-                self._done("unknown", {})
+                self._done("unknown")
                 continue
 
             op = OpContext(self._current_torrent, self._current_tracker)
             self._start_op()
             yield op
             self._stop_op()
-            self._done(op._status, op._attrs)  # pylint: disable=protected-access
+            self._done(op._status, op._result)  # pylint: disable=protected-access
 
         self._log_stdout.finish()
 
-    def get_results(self):
+    def get_results(self) -> ResultsType:
         return self._results
 
-    def _select_tracker(self):
+    def _select_tracker(self) -> Optional[BaseTracker]:
+        assert self._current_torrent
         for tracker in self._trackers:
             if tracker.is_matched_for(self._current_torrent):
                 return tracker
         return None
 
-    def _done(self, status, attrs):
-        self._status_mapping[status](attrs)
-        result = {
-            "torrent": self._current_torrent,
-            "tracker": self._current_tracker,
-        }
-        result.update(attrs)
+    def _done(self, status: str, result: Optional[UpdateResult]=None) -> None:
+        if result is None:
+            result = UpdateResult.new(
+                torrent=self._current_torrent,
+                tracker=self._current_tracker,
+            )
+        self._status_mapping[status](result)
         self._results[status][self._current_file_name] = result
 
-    def _done_invalid(self, _):
+    def _done_invalid(self, _: Any) -> None:
         self._log_stdout.print(*self._format_fail("red", "!", "INVALID_TORRENT"))
 
-    def _done_unknown(self, _):
+    def _done_unknown(self, _: Any) -> None:
         one_line = (not self._show_unknown and self._log_stdout.isatty())
         self._log_stdout.print(*self._format_fail("yellow", " ", "UNKNOWN"), one_line=one_line)
 
-    def _done_passed(self, _):
+    def _done_passed(self, _: Any) -> None:
         one_line = (not self._show_passed and self._log_stdout.isatty())
         self._log_stdout.print(*self._format_status("blue", " "), one_line=one_line)
 
-    def _done_affected(self, attrs):
+    def _done_affected(self, result: UpdateResult) -> None:
         self._log_stdout.print(*self._format_status("green", "+"))
         if self._show_diff:
-            self._log_stdout.print(*fmt.format_torrents_diff(attrs["diff"], "\t"))
+            self._log_stdout.print(*fmt.format_torrents_diff(result.diff, "\t"))
 
-    def _done_not_in_client(self, _):
+    def _done_not_in_client(self, _: Any) -> None:
         self._log_stdout.print(*self._format_fail("red", "!", "NOT_IN_CLIENT"))
 
-    def _done_tracker_error(self, attrs):
+    def _done_tracker_error(self, result: UpdateResult) -> None:
         (line, placeholders) = self._format_status("red", "-")
         line += " :: {red}%s({reset}%s{red}){reset}"
-        placeholders += (attrs["err_name"], attrs["err_msg"])
+        placeholders += (result.err_name, result.err_msg)
         self._log_stdout.print(line, placeholders)
 
-    def _done_unhandled_error(self, attrs):
+    def _done_unhandled_error(self, result: UpdateResult) -> None:
         self._log_stdout.print(*self._format_status("red", "-"))
-        self._log_stdout.print("%s", ("\n".join("\t" + row for row in attrs["tb_lines"]),))
+        self._log_stdout.print("%s", ("\n".join("\t" + row for row in result.tb_lines),))
 
-    def _start_op(self):
+    def _start_op(self) -> None:
         if self._log_stdout.isatty():
-            def loop():
+            def loop() -> None:
                 while not self._stop_fan.wait(timeout=0.1):
                     self._log_stdout.print(*self._format_status("magenta", next(self._fan)), one_line=True)
             self._fan_thread = threading.Thread(target=loop, daemon=True)
@@ -191,41 +241,49 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         else:
             self._log_stdout.print(*self._format_status("magenta", " "))
 
-    def _stop_op(self):
+    def _stop_op(self) -> None:
         if self._fan_thread is not None:
             self._stop_fan.set()
             self._fan_thread.join()
             self._stop_fan.clear()
 
-    def _format_fail(self, color, sign, error):
+    def _format_fail(self, color: str, sign: str, error: str) -> Tuple[str, Tuple[Any, ...]]:
         (progress, placeholders) = self._format_progress()
         return (
             "[{" + color + "}%s{reset}] " + progress + " {" + color + "}%s {cyan}%s{reset}",
             (sign, *placeholders, error, self._current_file_name),
         )
 
-    def _format_status(self, color, sign):
+    def _format_status(self, color: str, sign: str) -> Tuple[str, Tuple[Any, ...]]:
+        assert self._current_tracker
+        assert self._current_torrent
         (progress, placeholders) = self._format_progress()
         return (
             "[{" + color + "}%s{reset}] " + progress + " {" + color + "}%s {cyan}%s{reset} -- %s",
             (
                 sign, *placeholders, self._current_tracker.PLUGIN_NAME,
-                self._current_file_name, (self._current_torrent.get_comment() or ""),
+                self._current_file_name, self._current_torrent.get_comment(),
             ),
         )
 
-    def _format_progress(self):
+    def _format_progress(self) -> Tuple[str, Tuple[int, int]]:
         return fmt.format_progress(self._current_count + 1, len(self._torrents))
 
 
-def backup_torrent(torrent, backup_dir_path, backup_suffix):
+def backup_torrent(torrent: Torrent, backup_dir_path: str, backup_suffix: str) -> None:
     backup_suffix = fmt.format_now(backup_suffix)
     backup_file_path = os.path.join(backup_dir_path, os.path.basename(torrent.get_path()) + backup_suffix)
     shutil.copyfile(torrent.get_path(), backup_file_path)
 
 
 @contextlib.contextmanager
-def client_hooks(client, torrent, to_save_customs, to_set_customs):
+def client_hooks(
+    client: Optional[BaseClient],
+    torrent: Torrent,
+    to_save_customs: List[str],
+    to_set_customs: Dict[str, str],
+) -> Generator[None, None, None]:
+
     if client is not None:
         prefix = client.get_data_prefix(torrent)
         if len(to_save_customs) != 0:
@@ -253,7 +311,14 @@ def client_hooks(client, torrent, to_save_customs, to_set_customs):
         os.remove(meta_file_path)
 
 
-def update_torrent(client, torrent, new_data, to_save_customs, to_set_customs):
+def update_torrent(
+    client: Optional[BaseClient],
+    torrent: Torrent,
+    new_data: bytes,
+    to_save_customs: List[str],
+    to_set_customs: Dict[str, str],
+) -> None:
+
     data_file_path = tools.make_sub_name(torrent.get_path(), ".", ".newdata")
     with open(data_file_path, "wb") as data_file:
         data_file.write(new_data)
@@ -263,34 +328,35 @@ def update_torrent(client, torrent, new_data, to_save_customs, to_set_customs):
 
 
 class TorrentTimeInfo:
-    def __init__(self, torrent):
+    def __init__(self, torrent: Torrent) -> None:
         self._torrent = torrent
         self._time_file_path = tools.make_sub_name(self._torrent.get_path(), ".", ".time")
 
-    def check_and_fill(self):
+    def check_and_fill(self) -> "TorrentTimeInfo":
         if not os.path.exists(self._time_file_path):
             self.write(int(os.stat(self._torrent.get_path()).st_mtime))
         return self
 
-    def read(self):
+    def read(self) -> int:
         with open(self._time_file_path) as time_file:
             return int(time_file.read().strip())
 
-    def write(self, value):
+    def write(self, value: int) -> None:
         with open(self._time_file_path, "w") as time_file:
             time_file.write(str(int(value)))
 
 
 def update(  # pylint: disable=too-many-branches,too-many-locals
-    feeder,
-    client,
-    backup_dir_path,
-    backup_suffix,
-    to_save_customs,
-    to_set_customs,
-    noop,
-    test_mode,
-):
+    feeder: Feeder,
+    client: Optional[BaseClient],
+    backup_dir_path: str,
+    backup_suffix: str,
+    to_save_customs: List[str],
+    to_set_customs: Dict[str, str],
+    noop: bool,
+    test_mode: bool,
+) -> None:
+
     hashes = (client.get_hashes() if client is not None else [])
     for op in feeder.get_ops():
         try:
@@ -316,11 +382,11 @@ def update(  # pylint: disable=too-many-branches,too-many-locals
                     RuntimeError("Invalid tracker {}: missing method of check".format(op.tracker))
 
                 if need_update or test_mode:
-                    tmp_torrent = tfile.Torrent(data=op.tracker.fetch_new_data(op.torrent))
+                    tmp_torrent = Torrent(data=op.tracker.fetch_new_data(op.torrent))
                     if op.torrent.get_hash() != tmp_torrent.get_hash() or test_mode:
-                        diff = tfile.get_difference(op.torrent, tmp_torrent)
+                        diff = get_torrents_difference(op.torrent, tmp_torrent)
                         if not noop:
-                            if backup_dir_path is not None:
+                            if backup_dir_path:
                                 backup_torrent(op.torrent, backup_dir_path, backup_suffix)
                             update_torrent(client, op.torrent, tmp_torrent.get_data(), to_save_customs, to_set_customs)
                             if WithCheckTime in tracker_bases:
@@ -332,8 +398,8 @@ def update(  # pylint: disable=too-many-branches,too-many-locals
             pass
 
 
-def print_results(results, log):
-    for (msg, field) in (
+def print_results(results: ResultsType, log: Log) -> None:
+    for (msg, field) in [
         ("Updated:          %d", "affected"),
         ("Passed:           %d", "passed"),
         ("Not in client:    %d", "not_in_client"),
@@ -341,20 +407,20 @@ def print_results(results, log):
         ("Invalid torrents: %d", "invalid"),
         ("Tracker errors:   %d", "tracker_error"),
         ("Unhandled errors: %d", "unhandled_error"),
-    ):
+    ]:
         log.info(msg, (len(results[field]),))
 
 
 # ===== Main =====
 @wrap_main
-def main():
+def main() -> None:
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
         prog="emupdate",
         description="Update torrent files from popular trackers",
         parents=[parent_parser],
     )
-    args_parser.add_argument("-f", "--name-filter", default=None, metavar="<wildcard_pattern>")
+    args_parser.add_argument("-f", "--name-filter", default="", metavar="<wildcard_pattern>")
     args_parser.add_argument("-y", "--only-trackers", default=[], nargs="+", metavar="<tracker>")
     args_parser.add_argument("-x", "--exclude-trackers", default=[], nargs="+", metavar="<tracker>")
     args_parser.add_argument("--noop", action="store_true")
@@ -369,11 +435,11 @@ def main():
             client = get_configured_client(
                 config=config,
                 required=False,
-                with_customs=(len(config.emupdate.save_customs) or len(config.emupdate.set_customs)),
+                with_customs=bool(len(config.emupdate.save_customs) or len(config.emupdate.set_customs)),
                 log=log_stderr,
             )
 
-            def read_captcha(url):
+            def read_captcha(url: str) -> str:
                 if options.fail_on_captcha:
                     raise RuntimeError("Required decoding of captcha but '--fail-on-captcha' specified")
                 else:

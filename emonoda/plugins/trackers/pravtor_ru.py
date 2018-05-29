@@ -20,6 +20,13 @@
 import http.cookiejar
 import re
 
+from typing import Dict
+from typing import Any
+
+from ...optconf import Option
+
+from ...tfile import Torrent
+
 from . import BaseTracker
 from . import WithLogin
 from . import WithCheckHash
@@ -43,24 +50,24 @@ class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchCustom):
 
     # ===
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
 
-    def fetch_new_data(self, torrent):
-        self._assert_match(torrent)
-        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
+    def fetch_new_data(self, torrent: Torrent) -> bytes:
+        torrent_id = self._assert_match(torrent)
 
-        page = self._decode(self._read_url(torrent.get_comment()))
-        dl_id_match = re.search(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">", page)
-        self._assert_logic(dl_id_match is not None, "Torrent-ID not found")
-        dl_id = int(dl_id_match.group(1))
+        dl_id = self._assert_logic_re_search(
+            regexp=re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">"),
+            text=self._decode(self._read_url(torrent.get_comment())),
+            msg="Torrent-ID not found",
+        ).group(1)
 
-        cookie = http.cookiejar.Cookie(
+        self._cookie_jar.set_cookie(http.cookiejar.Cookie(  # type: ignore
             version=0,
             name="bb_dl",
             value=torrent_id,
@@ -78,21 +85,18 @@ class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchCustom):
             comment_url=None,
             rest={"HttpOnly": None},
             rfc2109=False,
-        )
-        self._cookie_jar.set_cookie(cookie)
+        ))
 
-        data = self._read_url(
+        return self._assert_valid_data(self._read_url(
             url="http://pravtor.ru/download.php?id={}".format(dl_id),
             data=b"",
             headers={
                 "Referer": "http://pravtor.ru/viewtopic.php?t={}".format(torrent_id),
                 "Origin":  "http://pravtor.ru",
             }
-        )
-        self._assert_valid_data(data)
-        return data
+        ))
 
-    def login(self):
+    def login(self) -> None:
         self._login_using_post(
             url="http://pravtor.ru/login.php",
             post={

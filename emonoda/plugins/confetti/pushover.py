@@ -19,11 +19,16 @@
 
 import urllib.parse
 
+from typing import List
+from typing import Dict
+from typing import Any
+
 from ...optconf import Option
 from ...optconf.converters import as_string_list
 
 from ... import web
 
+from . import ResultsType
 from . import BaseConfetti
 from . import WithProxy
 
@@ -32,7 +37,14 @@ from . import WithProxy
 class Plugin(BaseConfetti, WithProxy):
     PLUGIN_NAME = "pushover"
 
-    def __init__(self, user_key, api_key, devices, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(  # pylint: disable=super-init-not-called
+        self,
+        user_key: str,
+        api_key: str,
+        devices: List[str],
+        **kwargs: Any,
+    ) -> None:
+
         self._init_bases(**kwargs)
 
         self._user_key = user_key
@@ -40,25 +52,25 @@ class Plugin(BaseConfetti, WithProxy):
         self._devices = devices
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options({
-            "user_key": Option(default="CHANGE_ME", type=str, help="User key"),
-            "api_key":  Option(default="CHANGE_ME", type=str, help="API/Application key"),
+            "user_key": Option(default="CHANGE_ME", help="User key"),
+            "api_key":  Option(default="CHANGE_ME", help="API/Application key"),
             "devices":  Option(default=[], type=as_string_list, help="Devices list (empty for all)"),
         })
 
     # ===
 
-    def send_results(self, source, results):
+    def send_results(self, source: str, results: ResultsType) -> None:
         for result in results["affected"].values():
             self._notify(
                 title="Emonoda ({})".format(source),
-                message=result["torrent"].get_name(),
+                message=result.torrent.get_name(),  # type: ignore
             )
 
     # ===
 
-    def _notify(self, title, message):
+    def _notify(self, title: str, message: str) -> None:
         # https://pushover.net/api
         post = {
             "token":   self._api_key,

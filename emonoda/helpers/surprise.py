@@ -19,9 +19,22 @@
 
 import traceback
 
+from typing import List
+
+from ..cli import Log
+
+from ..plugins.confetti import ResultsType
+from ..plugins.confetti import BaseConfetti
+
 
 # =====
-def deploy_surprise(source, results, confetti, log):
+def deploy_surprise(
+    source: str,
+    results: ResultsType,
+    confetti: List[BaseConfetti],
+    log: Log,
+) -> bool:
+
     ok = True
     for sender in confetti:
         log.info("Sending {blue}%s{reset} ...", (sender.PLUGIN_NAME,), one_line=True)

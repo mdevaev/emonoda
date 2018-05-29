@@ -19,6 +19,9 @@
 
 import re
 
+from typing import Dict
+from typing import Any
+
 from ...optconf import Option
 
 from . import BaseTracker
@@ -46,12 +49,12 @@ class Plugin(BaseTracker, WithCheckHash, WithFetchByTorrentId):
 
     # ===
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=False)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options({
             "user_agent": Option(default="Googlebot/2.1", help="User-agent for site"),
         })

@@ -18,12 +18,17 @@
 
 
 import os
+
+from typing import IO
+from typing import Any
+
 import yaml
 import yaml.loader
+import yaml.nodes
 
 
 # =====
-def load_file(file_path):
+def load_file(file_path: str) -> Any:
     with open(file_path) as yaml_file:
         try:
             return yaml.load(yaml_file, _YamlLoader)
@@ -34,11 +39,11 @@ def load_file(file_path):
 
 # =====
 class _YamlLoader(yaml.loader.Loader):  # pylint: disable=too-many-ancestors
-    def __init__(self, yaml_file):
+    def __init__(self, yaml_file: IO) -> None:
         yaml.loader.Loader.__init__(self, yaml_file)
         self._root = os.path.dirname(yaml_file.name)
 
-    def include(self, node):
+    def include(self, node: yaml.nodes.Node) -> str:
         # Logger which supports include-files
         file_path = os.path.join(self._root, self.construct_scalar(node))  # pylint: disable=no-member
         return load_file(file_path)

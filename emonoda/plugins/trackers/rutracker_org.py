@@ -21,6 +21,13 @@ import urllib.parse
 import http.cookiejar
 import re
 
+from typing import Dict
+from typing import Any
+
+from ...optconf import Option
+
+from ...tfile import Torrent
+
 from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
@@ -34,7 +41,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
 
     _SITE_VERSION = 5
     _SITE_ENCODING = "cp1251"
-    _SITE_RETRY_CODES = (503, 404)
+    _SITE_RETRY_CODES = [503, 404]
 
     _SITE_FINGERPRINT_URL = "https://rutracker.org/forum/index.php"
     _SITE_FINGERPRINT_TEXT = ("<link rel=\"search\" type=\"application/opensearchdescription+xml\""
@@ -45,20 +52,19 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
     _TORRENT_HASH_URL = "https://rutracker.org/forum/viewtopic.php?t={torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-fA-F0-9]{40})</span>")
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
 
     # ===
 
-    def fetch_new_data(self, torrent):
-        self._assert_match(torrent)
-        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
-        self._cookie_jar.set_cookie(http.cookiejar.Cookie(
+    def fetch_new_data(self, torrent: Torrent) -> bytes:
+        torrent_id = self._assert_match(torrent)
+        self._cookie_jar.set_cookie(http.cookiejar.Cookie(  # type: ignore
             version=0,
             name="bb_dl",
             value=torrent_id,
@@ -77,18 +83,16 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
             rest={"HttpOnly": None},
             rfc2109=False,
         ))
-        data = self._read_url(
+        return self._assert_valid_data(self._read_url(
             url="https://rutracker.org/forum/dl.php?t={}".format(torrent_id),
             data=b"",
             headers={
                 "Referer": "https://rutracker.org/forum/viewtopic.php?t={}".format(torrent_id),
                 "Origin":  "https://rutracker.org",
             }
-        )
-        self._assert_valid_data(data)
-        return data
+        ))
 
-    def login(self):
+    def login(self) -> None:
         self._assert_required_user_passwd()
 
         post = {
@@ -101,17 +105,25 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom
         cap_static_regexp = re.compile(r"\"//(static\.t-ru\.org/captcha/[^\"]+)\"")
         cap_static_match = cap_static_regexp.search(page)
         if cap_static_match is not None:
-            cap_sid_match = re.search(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"", page)
-            cap_code_match = re.search(r"name=\"(cap_code_[a-zA-Z0-9]+)\"", page)
-            self._assert_auth(cap_sid_match is not None, "Unknown cap_sid")
-            self._assert_auth(cap_code_match is not None, "Unknown cap_code")
+            cap_sid = self._assert_auth_re_search(
+                regexp=re.compile(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\""),
+                text=page,
+                msg="Unknown cap_sid",
+            ).group(1)
 
-            post[cap_code_match.group(1)] = self._captcha_decoder("https://{}".format(cap_static_match.group(1)))
-            post["cap_sid"] = cap_sid_match.group(1)
+            cap_code = self._assert_auth_re_search(
+                regexp=re.compile(r"name=\"(cap_code_[a-zA-Z0-9]+)\""),
+                text=page,
+                msg="Unknown cap_code",
+            ).group(1)
+
+            post[cap_code] = self._encode(self._captcha_decoder("https://{}".format(cap_static_match.group(1))))
+            post["cap_sid"] = self._encode(cap_sid)
+
             page = self._read_login(post)
             self._assert_auth(cap_static_regexp.search(page) is None, "Invalid user, password or captcha")
 
-    def _read_login(self, post):
+    def _read_login(self, post: Dict[str, bytes]) -> str:
         return self._decode(self._read_url(
             url="https://rutracker.org/forum/login.php",
             data=self._encode(urllib.parse.urlencode(post)),

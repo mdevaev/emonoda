@@ -21,6 +21,13 @@ import re
 
 from datetime import datetime
 
+from typing import Dict
+from typing import Any
+
+from ...optconf import Option
+
+from ...tfile import Torrent
+
 from . import BaseTracker
 from . import WithLogin
 from . import WithCheckTime
@@ -32,7 +39,6 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
     PLUGIN_NAME = "booktracker.org"
 
     _SITE_VERSION = 2
-    _SITE_ENCODING = "utf-8"
 
     _SITE_FINGERPRINT_URL = "https://booktracker.org"
     _SITE_FINGERPRINT_TEXT = "<meta name=\"google-site-verification\" content=\"L85kL3qg3y9JS1ER3BNhcpcqdDZBgrxzZpBm6Jzb1iQ\" />"
@@ -49,27 +55,27 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
 
     # ===
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
 
-    def fetch_time(self, torrent):
+    def fetch_time(self, torrent: Torrent) -> int:
         self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
-
-        date_match = re.search(r"Зарегистрирован &nbsp;\s*\[ <span title=\"[\w\s]+\">"
-                               r"(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span> ]", page)
-        self._assert_logic(date_match is not None, "Upload date not found")
-        date = date_match.group(1)
+        date = self._assert_logic_re_search(
+            regexp=re.compile(r"Зарегистрирован &nbsp;\s*\[ <span title=\"[\w\s]+\">"
+                              r"(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span> ]"),
+            text=self._decode(self._read_url(torrent.get_comment())),
+            msg="Upload date not found",
+        ).group(1)
         date += " " + datetime.now(self._tzinfo).strftime("%z")
         upload_time = int(datetime.strptime(date, "%Y-%m-%d %H:%M %z").strftime("%s"))
         return upload_time
 
-    def login(self):
+    def login(self) -> None:
         self._login_using_post(
             url="https://booktracker.org/login.php",
             post={

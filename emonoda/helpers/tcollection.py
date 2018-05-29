@@ -20,15 +20,23 @@
 import os
 import fnmatch
 
-from .. import tfile
+from typing import List
+from typing import Dict
+from typing import Optional
+from typing import Union
+
+from ..tfile import Torrent
+from ..tfile import is_torrent_hash
+
+from ..cli import Log
 
 
 # =====
-def load_from_dir(path, name_filter, calculate, log):
+def load_from_dir(path: str, name_filter: str, calculate: bool, log: Log) -> Dict[str, Optional[Torrent]]:
     if not log.isatty():
         log.info("Loading torrents from {cyan}%s/{yellow}%s{reset} ...", (path, name_filter))
 
-    torrents = {}
+    torrents: Dict[str, Optional[Torrent]] = {}
     for name in log.progress(
         sorted(os.listdir(path)),
         ("Loading torrents from {cyan}%s/{yellow}%s{reset}", (path, name_filter)),
@@ -37,9 +45,9 @@ def load_from_dir(path, name_filter, calculate, log):
         if fnmatch.fnmatch(name, name_filter):
             file_path = os.path.abspath(os.path.join(path, name))
             try:
-                torrents[name] = tfile.Torrent(path=file_path)
+                torrents[name] = Torrent(path=file_path)
                 if calculate:
-                    torrents[name].get_hash()
+                    torrents[name].get_hash()  # type: ignore
             except ValueError:
                 log.error("Found broken torrent: {cyan}%s/{yellow}%s{reset}", (path, name))
                 torrents[name] = None
@@ -53,15 +61,15 @@ def load_from_dir(path, name_filter, calculate, log):
     return torrents
 
 
-def by_hash(torrents):
+def by_hash(torrents: Dict[str, Optional[Torrent]]) -> Dict[str, Torrent]:
     return {
         torrent.get_hash(): torrent
         for torrent in filter(None, torrents.values())
     }
 
 
-def by_hash_with_dups(torrents):
-    with_dups = {}
+def by_hash_with_dups(torrents: Dict[str, Optional[Torrent]]) -> Dict[str, List[Torrent]]:
+    with_dups: Dict[str, List[Torrent]] = {}  # noqa: E701
     for torrent in filter(None, torrents.values()):
         with_dups.setdefault(torrent.get_hash(), [])
         with_dups[torrent.get_hash()].append(torrent)
@@ -69,17 +77,21 @@ def by_hash_with_dups(torrents):
 
 
 # =====
-def find(path, items, pass_hash):
-    return [_find_torrent(path, item, pass_hash) for item in items]
+def find_torrents(path: str, items: str) -> List[Torrent]:
+    return [_find_torrent_or_hash(path, item, False) for item in items]  # type: ignore
 
 
-def _find_torrent(path, item, pass_hash):
+def find_torrents_or_hashes(path: str, items: str) -> List[Union[Torrent, str]]:
+    return [_find_torrent_or_hash(path, item, True) for item in items]
+
+
+def _find_torrent_or_hash(path: str, item: str, pass_hash: bool) -> Union[Torrent, str]:
     if os.path.exists(item):
-        return tfile.Torrent(path=os.path.abspath(item))
+        return Torrent(path=os.path.abspath(item))
     if os.path.sep not in item:
         full_path = os.path.join(path, item)
         if os.path.exists(full_path):
-            return tfile.Torrent(path=full_path)
-    if pass_hash and tfile.is_hash(item.strip()):
+            return Torrent(path=full_path)
+    if pass_hash and is_torrent_hash(item.strip()):
         return item.strip()
     raise RuntimeError("Can't find torrent: {}".format(item))

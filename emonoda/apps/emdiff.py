@@ -20,9 +20,15 @@
 import sys
 import argparse
 
+from typing import Optional
+
+from ..plugins.clients import BaseClient
+
 from ..helpers import tcollection
 
-from .. import tfile
+from ..tfile import Torrent
+from ..tfile import get_torrents_difference
+
 from .. import fmt
 
 from . import init
@@ -33,7 +39,7 @@ from . import get_configured_client
 
 # ===== Main =====
 @wrap_main
-def main():
+def main() -> None:
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
         prog="emdiff",
@@ -44,14 +50,14 @@ def main():
     args_parser.add_argument("torrents", type=str, nargs=2, metavar="<path/hash>")
     options = args_parser.parse_args(argv[1:])
 
-    torrents = tcollection.find(config.core.torrents_dir, options.torrents, True)
+    torrents = tcollection.find_torrents_or_hashes(config.core.torrents_dir, options.torrents)
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
-            client = None
+            client: Optional[BaseClient] = None
             lists = []
             for item in torrents:
-                if isinstance(item, tfile.Torrent):
+                if isinstance(item, Torrent):
                     lists.append(item.get_files())
                 else:  # Hash
                     if client is None:
@@ -61,8 +67,9 @@ def main():
                             with_customs=False,
                             log=log_stderr,
                         )
-                    lists.append(client.get_files(item))
-            diff = tfile.get_difference(*lists)  # pylint: disable=no-value-for-parameter
+                    lists.append(client.get_files(item))  # type: ignore
+            assert len(lists) == 2
+            diff = get_torrents_difference(lists[0], lists[1])
             log_stdout.print(*fmt.format_torrents_diff(diff, " "))
 
 

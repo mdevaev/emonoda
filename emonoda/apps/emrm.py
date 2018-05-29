@@ -21,10 +21,11 @@ import sys
 import argparse
 
 from ..plugins.clients import NoSuchTorrentError
+from ..plugins.clients import BaseClient
 
 from ..helpers import tcollection
 
-from .. import tfile
+from ..tfile import Torrent
 
 from . import init
 from . import wrap_main
@@ -34,7 +35,7 @@ from . import get_configured_client
 
 # ===== Main =====
 @wrap_main
-def main():
+def main() -> None:
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
         prog="emrm",
@@ -47,7 +48,7 @@ def main():
 
     with get_configured_log(config, (not options.verbose), sys.stdout) as log_stdout:
         with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:
-            client = get_configured_client(
+            client: BaseClient = get_configured_client(  # type: ignore
                 config=config,
                 required=True,
                 with_customs=False,
@@ -55,8 +56,8 @@ def main():
             )
 
             hashes = []
-            for item in tcollection.find(config.core.torrents_dir, options.torrents, True):
-                torrent_hash = (item.get_hash() if isinstance(item, tfile.Torrent) else item)
+            for item in tcollection.find_torrents_or_hashes(config.core.torrents_dir, options.torrents):
+                torrent_hash = (item.get_hash() if isinstance(item, Torrent) else item)
                 try:
                     hashes.append((torrent_hash, client.get_file_name(torrent_hash)))
                 except NoSuchTorrentError:

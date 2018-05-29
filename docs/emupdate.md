@@ -59,7 +59,7 @@ trackers:
 
 * **`emupdate/name_filter='*.torrent'`**
     * Шаблон, которому должны соответствовать файлы из каталога `core/torrents_dir`. Переопределяется опцией `--name-filter`.
-* **`emupdate/backup_dir=null`**
+* **`emupdate/backup_dir=""`**
     * Каталог для бекапов старых торрент-файлов. В конце имени сохраненного файла дописывается время его помещения в бекап (либо что-то, что вы можете настроить параметром `emupdate/backup_suffix`.
 * **`emupdate/backup_suffix=.%Y.%m.%d-%H:%M:%S.bak`**
     * К имени забекапленного торрента дописывается этот суффикс. Например, если торрент назывался `archlinux.torrent`, то имя бекапа с суффиксом по умолчанию будет выглядеть так: `archlinux.torrent.2015.10.21-22:46:26.bak`. Список доступных форматтеров смотрите [тут](http://docs.python.org/3/library/datetime.html#strftime-strptime-behavior).

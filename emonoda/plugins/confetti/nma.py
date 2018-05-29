@@ -19,12 +19,19 @@
 
 import urllib.parse
 
+from typing import List
+from typing import Dict
+from typing import Any
+
 from ...optconf import Option
 from ...optconf.converters import as_string_list
+
+from ...tfile import TorrentsDiff
 
 from ... import web
 from ... import tools
 
+from . import ResultsType
 from . import BaseConfetti
 from . import WithProxy
 
@@ -33,37 +40,42 @@ from . import WithProxy
 class Plugin(BaseConfetti, WithProxy):
     PLUGIN_NAME = "nma"
 
-    def __init__(self, api_keys, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(  # pylint: disable=super-init-not-called
+        self,
+        api_keys: List[str],
+        **kwargs: Any,
+    ) -> None:
+
         self._init_bases(**kwargs)
 
         self._api_keys = api_keys
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options({
             "api_keys": Option(default=["CHANGE_ME"], type=as_string_list, help="API keys (or one key as string)"),
         })
 
     # ===
 
-    def send_results(self, source, results):
+    def send_results(self, source: str, results: ResultsType) -> None:
         for result in results["affected"].values():
             self._notify(
                 app="Emonoda ({})".format(source),
-                event="{}".format(result["torrent"].get_name()),
-                description=self._format_description(result["diff"]),
+                event="{}".format(result.torrent.get_name()),  # type: ignore
+                description=self._format_description(result.diff),
             )
 
     # ===
 
-    def _format_description(self, diff):
+    def _format_description(self, diff: TorrentsDiff) -> str:
         description_lines = []
-        for (sign, items) in (
-            ("+", diff["added"]),
-            ("-", diff["removed"]),
-            ("~", diff["modified"]),
-            ("?", diff["type_modified"]),
-        ):
+        for (sign, items) in [
+            ("+", diff.added),
+            ("-", diff.removed),
+            ("~", diff.modified),
+            ("?", diff.type_modified),
+        ]:
             for item in tools.sorted_paths(items):
                 description_lines.append("[{}] {}".format(sign, item))
         description = "Affected {} files\n".format(len(description_lines)) + "\n".join(description_lines)
@@ -71,7 +83,7 @@ class Plugin(BaseConfetti, WithProxy):
             description = description[:9995] + "..."
         return description
 
-    def _notify(self, app, event, description):
+    def _notify(self, app: str, event: str, description: str) -> None:
         # http://www.notifymyandroid.com/api.jsp
         post = {
             "apikey":       ",".join(self._api_keys),

@@ -22,9 +22,16 @@ import operator
 
 from datetime import datetime
 
+from typing import Tuple
+from typing import List
+from typing import Dict
+from typing import Any
+
 from dateutil.relativedelta import relativedelta
 
-from ... import tfile
+from ...optconf import Option
+
+from ...tfile import Torrent
 
 from . import BaseTracker
 from . import WithLogin
@@ -37,7 +44,6 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
     PLUGIN_NAME = "tr.anidub.com"
 
     _SITE_VERSION = 2
-    _SITE_ENCODING = "utf-8"
 
     _SITE_FINGERPRINT_URL = "https://tr.anidub.com"
     _SITE_FINGERPRINT_TEXT = ("<link rel=\"search\" type=\"application/opensearchdescription+xml\""
@@ -49,20 +55,22 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
 
     # ===
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
 
-    def fetch_time(self, torrent):
+    def fetch_time(self, torrent: Torrent) -> int:
         self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
-        date_match = re.search(r"<li><b>Дата:</b> ([^,\s]+, \d\d:\d\d)</li>", page)
-        self._assert_logic(date_match is not None, "Upload date not found")
-        date = date_match.group(1)
+
+        date = self._assert_logic_re_search(
+            regexp=re.compile(r"<li><b>Дата:</b> ([^,\s]+, \d\d:\d\d)</li>"),
+            text=self._decode(self._read_url(torrent.get_comment())),
+            msg="Upload date not found",
+        ).group(1)
 
         now = datetime.now(self._tzinfo)
         day_template = "{date.day:02d}-{date.month:02d}-{date.year}"
@@ -76,18 +84,17 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
         upload_time = int(datetime.strptime(date, "%d-%m-%Y, %H:%M %z").strftime("%s"))
         return upload_time
 
-    def fetch_new_data(self, torrent):
+    def fetch_new_data(self, torrent: Torrent) -> bytes:
         self._assert_match(torrent)
         page = self._decode(self._read_url(torrent.get_comment().replace("http://", "https://")))
         downloads = set(map(int, re.findall(r"<a href=\"/engine/download.php\?id=(\d+)\" class=\" \">", page)))
-        candidates = {}
+        candidates: Dict[str, List[Tuple[Torrent, str]]] = {}
         for download_id in downloads:
-            data = self._read_url(
+            data = self._assert_valid_data(self._read_url(
                 url="https://tr.anidub.com/engine/download.php?id={}".format(download_id),
                 headers={"Referer": torrent.get_comment()},
-            )
-            self._assert_valid_data(data)
-            candidate = tfile.Torrent(data=data)
+            ))
+            candidate = Torrent(data=data)
 
             name = candidate.get_name()
             candidates.setdefault(name, [])
@@ -99,7 +106,7 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
                                                        ", ".join(map(operator.itemgetter(1), candidates[name]))))
         return candidates[name][0][0].get_data()
 
-    def login(self):
+    def login(self) -> None:
         self._login_using_post(
             url="https://tr.anidub.com/",
             post={

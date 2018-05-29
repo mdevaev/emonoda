@@ -26,11 +26,16 @@ import email.utils
 import contextlib
 import time
 
-from ...optconf import Option
-from ...optconf.converters import as_string_or_none
-from ...optconf.converters import as_string_list
-from ...optconf.converters import as_path_or_none
+from typing import List
+from typing import Dict
+from typing import Union
+from typing import Any
 
+from ...optconf import Option
+from ...optconf.converters import as_string_list
+from ...optconf.converters import as_path_or_empty
+
+from . import ResultsType
 from . import BaseConfetti
 from . import templated
 
@@ -39,8 +44,22 @@ from . import templated
 class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     PLUGIN_NAME = "email"
 
-    def __init__(self,  # pylint: disable=super-init-not-called,too-many-arguments
-                 to, cc, subject, sender, html, server, port, ssl, user, passwd, template, **kwargs):
+    def __init__(  # pylint: disable=super-init-not-called,too-many-arguments
+        self,
+        to: str,
+        cc: List[str],
+        subject: str,
+        sender: str,
+        html: bool,
+        server: str,
+        port: int,
+        ssl: bool,
+        user: str,
+        passwd: str,
+        template: str,
+        **kwargs: Any,
+    ) -> None:
+
         self._init_bases(**kwargs)
 
         self._to = to
@@ -57,25 +76,25 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         self._passwd = passwd
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options({
             "to":       Option(default=["root@localhost"], type=as_string_list, help="Destination email address"),
             "cc":       Option(default=[], type=as_string_list, help="Email 'CC' field"),
             "subject":  Option(default="{source} report: you have {affected} new torrents ^_^", help="Email subject"),
             "sender":   Option(default="root@localhost", help="Email 'From' field"),
             "html":     Option(default=True, help="HTML or plaintext email body"),
-            "template": Option(default=None, type=as_path_or_none, help="Mako template file name"),
+            "template": Option(default="", type=as_path_or_empty, help="Mako template file name"),
 
             "server":   Option(default="localhost", help="Hostname of SMTP server"),
             "port":     Option(default=0, help="Port of SMTP server"),
             "ssl":      Option(default=False, help="Use SMTPS"),
-            "user":     Option(default=None, type=as_string_or_none, help="Account on SMTP server"),
-            "passwd":   Option(default=None, type=as_string_or_none, help="Passwd for account on SMTP server"),
+            "user":     Option(default="", help="Account on SMTP server"),
+            "passwd":   Option(default="", help="Passwd for account on SMTP server"),
         })
 
     # ===
 
-    def send_results(self, source, results):
+    def send_results(self, source: str, results: ResultsType) -> None:
         msg = self._format_message(source, results)
         retries = self._retries
         while True:
@@ -95,24 +114,26 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
 
     # ===
 
-    def _format_message(self, source, results):
-        subject_placeholders = {field: len(items) for (field, items) in results.items()}
+    def _format_message(self, source: str, results: ResultsType) -> email.mime.multipart.MIMEMultipart:
+        subject_placeholders: Dict[str, Union[str, int]] = {
+            field: len(items)
+            for (field, items) in results.items()
+        }
         subject_placeholders["source"] = source
-        built_in = (self._template_path is None)
         return self._make_message(
             subject=self._subject.format(**subject_placeholders),
             body=templated(
-                name=("email.{ctype}.{source}.mako" if built_in else self._template_path).format(
+                name=(self._template_path if self._template_path else "email.{ctype}.{source}.mako").format(
                     ctype=("html" if self._html else "plain"),
                     source=source,
                 ),
-                built_in=built_in,
+                built_in=(not self._template_path),
                 source=source,
                 results=results,
             ),
         )
 
-    def _make_message(self, subject, body):
+    def _make_message(self, subject: str, body: str) -> email.mime.multipart.MIMEMultipart:
         email_headers = {
             "From":    self._sender,
             "To":      ", ".join(self._to),
@@ -124,22 +145,22 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
 
         msg = email.mime.multipart.MIMEMultipart()
         for (key, value) in email_headers.items():
-            msg[key] = value
+            msg[key] = value  # type: ignore
 
-        msg.attach(email.mime.text.MIMEText(
+        msg.attach(email.mime.text.MIMEText(  # type: ignore
             _text=body.encode("utf-8"),
             _subtype=("html" if self._html else "plain"),
             _charset="utf-8",
         ))
         return msg
 
-    def _send_message(self, msg):
+    def _send_message(self, msg: email.mime.multipart.MIMEMultipart) -> None:
         smtp_class = (smtplib.SMTP_SSL if self._ssl else smtplib.SMTP)
         with contextlib.closing(smtp_class(
             host=self._server,
             port=self._port,
             timeout=self._timeout,
         )) as client:
-            if self._user is not None:
+            if self._user:
                 client.login(self._user, self._passwd)  # pylint: disable=no-member
             client.send_message(msg)  # pylint: disable=no-member

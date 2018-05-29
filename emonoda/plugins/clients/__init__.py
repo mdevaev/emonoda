@@ -19,10 +19,20 @@
 
 import os
 
-from ... import tfile
+from typing import Tuple
+from typing import List
+from typing import Dict
+from typing import Callable
+from typing import Union
+from typing import Type
+from typing import Any
+
+from ...tfile import TorrentEntryAttrs
+from ...tfile import Torrent
 
 from .. import BasePlugin
 from .. import BaseExtension
+from .. import get_classes
 
 
 # =====
@@ -31,99 +41,103 @@ class NoSuchTorrentError(Exception):
 
 
 # =====
-def build_files(prefix, flist):
-    files = {}
-    for (path, size) in flist:
-        path_list = path.split(os.path.sep)
-        name = None
-        for index in range(len(path_list)):
-            name = os.path.join(prefix, os.path.sep.join(path_list[0:index + 1]))
-            files[name] = None
-        assert name is not None
-        files[name] = {"size": size}
-    return files
-
-
-def hash_or_torrent(method):
-    def wrap(self, torrent, *args, **kwargs):
-        torrent_hash = (torrent.get_hash() if isinstance(torrent, tfile.Torrent) else torrent)
+def hash_or_torrent(method: Callable) -> Callable:
+    def wrap(self: "BaseClient", torrent: Union[Torrent, str], *args: Any, **kwargs: Any) -> Any:
+        torrent_hash = (torrent.get_hash() if isinstance(torrent, Torrent) else torrent)
         return method(self, torrent_hash, *args, **kwargs)
     return wrap
 
 
-def check_torrent_accessible(method):
-    def wrap(self, torrent, prefix=None):
+def check_torrent_accessible(method: Callable) -> Callable:
+    def wrap(self: "BaseClient", torrent: Torrent, prefix: str="") -> Any:
         path = torrent.get_path()
         assert path is not None, "Required Torrent() with local file"
         open(path, "rb").close()  # Check accessible file
-        if prefix is not None:
+        if prefix:
             os.listdir(prefix)  # Check accessible prefix
         return method(self, torrent, prefix)
     return wrap
 
 
-# =====
+def build_files(prefix: str, flist: List[Tuple[str, int]]) -> Dict[str, TorrentEntryAttrs]:
+    files: Dict[str, TorrentEntryAttrs] = {}
+    for (path, size) in flist:
+        path_list = path.split(os.path.sep)
+        name = None
+        for index in range(len(path_list)):
+            name = os.path.join(prefix, os.path.sep.join(path_list[0:index + 1]))
+            files[name] = TorrentEntryAttrs.new_dir()
+        assert name is not None
+        files[name] = TorrentEntryAttrs.new_file(size)
+    return files
+
+
 class BaseClient(BasePlugin):
-    def __init__(self, **_):
+    def __init__(self, **_: Any) -> None:
         pass
 
     @hash_or_torrent
-    def remove_torrent(self, torrent_hash):
+    def remove_torrent(self, torrent_hash: str) -> None:
         raise NotImplementedError
 
     @check_torrent_accessible
-    def load_torrent(self, torrent, prefix=None):
+    def load_torrent(self, torrent: Torrent, prefix: str="") -> None:
         raise NotImplementedError
 
-    def get_hashes(self):
-        raise NotImplementedError
-
-    @hash_or_torrent
-    def has_torrent(self, torrent_hash):
+    def get_hashes(self) -> List[str]:
         raise NotImplementedError
 
     @hash_or_torrent
-    def get_torrent_path(self, torrent_hash):
+    def has_torrent(self, torrent_hash: str) -> bool:
         raise NotImplementedError
 
     @hash_or_torrent
-    def get_data_prefix(self, torrent_hash):
+    def get_torrent_path(self, torrent_hash: str) -> str:
         raise NotImplementedError
 
-    def get_data_prefix_default(self):
+    @hash_or_torrent
+    def get_data_prefix(self, torrent_hash: str) -> str:
+        raise NotImplementedError
+
+    def get_data_prefix_default(self) -> str:
         raise NotImplementedError
 
     # ===
 
     @hash_or_torrent
-    def get_full_path(self, torrent_hash):
+    def get_full_path(self, torrent_hash: str) -> str:
         raise NotImplementedError
 
     @hash_or_torrent
-    def get_file_name(self, torrent_hash):
+    def get_file_name(self, torrent_hash: str) -> str:
         raise NotImplementedError
 
     @hash_or_torrent
-    def is_single_file(self, torrent_hash):
+    def is_single_file(self, torrent_hash: str) -> bool:
         raise NotImplementedError
 
     @hash_or_torrent
-    def get_files(self, torrent_hash, on_fs=False):
+    def get_files(self, torrent_hash: str, on_fs: bool=False) -> Dict[str, TorrentEntryAttrs]:
         raise NotImplementedError
 
 
 class WithCustoms(BaseExtension):
-    def __init__(self, **_):
+    def __init__(self, **_: Any) -> None:
         pass
 
     @classmethod
-    def get_custom_keys(cls):
+    def get_custom_keys(cls) -> List[str]:
         raise NotImplementedError
 
     @hash_or_torrent
-    def set_customs(self, torrent_hash, customs):  # pylint: disable=unused-argument
+    def set_customs(self, torrent_hash: str, customs: Dict[str, str]) -> None:
         raise NotImplementedError
 
     @hash_or_torrent
-    def get_customs(self, torrent_hash, keys):  # pylint: disable=unused-argument
+    def get_customs(self, torrent_hash: str, keys: List[str]) -> Dict[str, str]:
         raise NotImplementedError
+
+
+# =====
+def get_client_class(name: str) -> Type[BaseClient]:
+    return get_classes("clients")[name]  # type: ignore

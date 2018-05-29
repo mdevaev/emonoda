@@ -17,22 +17,29 @@
 """
 
 
-import urllib.request
+from urllib.request import BaseHandler
+from urllib.request import Request
+
+from urllib.response import addinfo  # type: ignore
+from urllib.response import addinfourl
+
 import gzip
+
+from typing import Union
 
 
 # =====
-class GzipHandler(urllib.request.BaseHandler):
-    def http_request(self, request):
+class GzipHandler(BaseHandler):
+    def http_request(self, request: Request) -> Request:
         request.add_header("Accept-Encoding", "gzip")
         return request
 
-    def http_response(self, request, response):  # pylint: disable=unused-argument
+    def http_response(self, request: Request, response: addinfo) -> Union[addinfo, addinfourl]:  # pylint: disable=unused-argument
         if response.headers.get("Content-Encoding") == "gzip":
             gzip_file = gzip.GzipFile(fileobj=response, mode="r")
-            old = response
-            response = urllib.request.addinfourl(gzip_file, old.headers, old.url, old.code)
-            response.msg = old.msg
+            new_response = addinfourl(gzip_file, response.headers, response.url, response.code)  # type: ignore
+            new_response.msg = response.msg  # type: ignore
+            return new_response
         return response
 
     https_request = http_request

@@ -21,6 +21,13 @@ import re
 
 from datetime import datetime
 
+from typing import Dict
+from typing import Any
+
+from ...optconf import Option
+
+from ...tfile import Torrent
+
 from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
@@ -50,28 +57,27 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByDown
 
     # ===
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
 
-    def fetch_time(self, torrent):
-        self._assert_match(torrent)
-        torrent_id = self._COMMENT_REGEXP.match(torrent.get_comment()).group("torrent_id")
-        page = self._decode(self._read_url("http://trec.to/viewtopic.php?p={}".format(torrent_id)))
-
-        date_match = re.search(r"<td width=\"70%\">\s*Зарегистрирован &nbsp;\s*\[ <span title=\"\">"
-                               r"(\d\d-\d\d-\d\d\d\d \d\d:\d\d)</span> ]\s*</td>", page)
-        self._assert_logic(date_match is not None, "Upload date not found")
-        date = date_match.group(1)
+    def fetch_time(self, torrent: Torrent) -> int:
+        torrent_id = self._assert_match(torrent)
+        date = self._assert_logic_re_search(
+            regexp=re.compile(r"<td width=\"70%\">\s*Зарегистрирован &nbsp;\s*\[ <span title=\"\">"
+                              r"(\d\d-\d\d-\d\d\d\d \d\d:\d\d)</span> ]\s*</td>"),
+            text=self._decode(self._read_url("http://trec.to/viewtopic.php?p={}".format(torrent_id))),
+            msg="Upload date not found",
+        ).group(1)
         date += " " + datetime.now(self._tzinfo).strftime("%z")
         upload_time = int(datetime.strptime(date, "%d-%m-%Y %H:%M %z").strftime("%s"))
         return upload_time
 
-    def login(self):
+    def login(self) -> None:
         self._login_using_post(
             url="http://trec.to/login.php",
             post={

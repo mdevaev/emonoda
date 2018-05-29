@@ -19,29 +19,35 @@
 
 import os
 
+from typing import List
+from typing import Sequence
+from typing import Iterable
+from typing import Optional
+from typing import Any
+
 import chardet
 
 
 # =====
-def make_sub_name(path, prefix, suffix):
+def make_sub_name(path: str, prefix: str, suffix: str) -> str:
     return os.path.join(
         os.path.dirname(path),
         prefix + os.path.basename(path) + suffix,
     )
 
 
-def sorted_paths(paths, get=None):
+def sorted_paths(paths: Iterable, get: Optional[Any]=None) -> List:
     if get is None:
         # def for speed
-        def get_path_nulled(path):
+        def get_path_nulled(path: str) -> str:
             return path.replace(os.path.sep, "\0")
     else:
-        def get_path_nulled(item):
+        def get_path_nulled(item: Sequence) -> str:  # type: ignore
             return item[get].replace(os.path.sep, "\0")
     return sorted(paths, key=get_path_nulled)
 
 
-def get_decoded_path(path):
+def get_decoded_path(path: str) -> str:
     try:
         path.encode()
         return path

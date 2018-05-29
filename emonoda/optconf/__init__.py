@@ -19,12 +19,19 @@
 
 import json
 
+from typing import Tuple
+from typing import List
+from typing import Dict
+from typing import Callable
+from typing import Optional
+from typing import Any
+
 
 # =====
-def build_raw_from_options(options):
-    raw = {}
+def build_raw_from_options(options: List[str]) -> Dict[str, Any]:
+    raw: Dict[str, Any] = {}
     for option in options:
-        (key, value) = (option.split("=", 1) + [None])[:2]
+        (key, value) = (option.split("=", 1) + [None])[:2]  # type: ignore
         if len(key.strip()) == 0:
             raise ValueError("Empty option key (required 'key=value' instead of '{}')".format(option))
         if value is None:
@@ -39,27 +46,71 @@ def build_raw_from_options(options):
     return raw
 
 
-def _parse_value(value):
+def _parse_value(value: str) -> Any:
     value = value.strip()
     if (
         not value.isdigit()
-        and value not in ("true", "false", "null")
-        and not value.startswith("{")
-        and not value.startswith("[")
-        and not value.startswith("\"")
+        and value not in ["true", "false", "null"]
+        and not value.startswith(("{", "[", "\""))
     ):
         value = "\"{}\"".format(value)
     return json.loads(value)
 
 
 # =====
-def make_config(raw, scheme, keys=()):
+class Section(dict):
+    def __init__(self) -> None:
+        dict.__init__(self)
+        self._meta: Dict[str, Dict[str, Any]] = {}
+
+    def _set_meta(self, name: str, secret: bool, default: Any, help: str) -> None:  # pylint: disable=redefined-builtin
+        self._meta[name] = {
+            "secret":  secret,
+            "default": default,
+            "help":    help,
+        }
+
+    def _is_secret(self, name: str) -> bool:
+        return self._meta[name]["secret"]
+
+    def _get_default(self, name: str) -> Any:
+        return self._meta[name]["default"]
+
+    def _get_help(self, name: str) -> str:
+        return self._meta[name]["help"]
+
+    def __getattribute__(self, name: str) -> Any:
+        if name in self:
+            return self[name]
+        else:  # For pickling
+            return dict.__getattribute__(self, name)
+
+
+_type = type
+
+
+class Option:
+    def __init__(self, default: Any, help: str, type: Optional[Callable[[Any], Any]]=None) -> None:  # pylint: disable=redefined-builtin
+        self.default = default
+        self.help = help
+        self.type: Callable[[Any], Any] = (type or (_type(default) if default is not None else str))  # type: ignore
+
+    def __repr__(self) -> str:
+        return "<Option(default={self.default}, type={self.type}, help={self.help})>".format(self=self)
+
+
+class SecretOption(Option):
+    pass
+
+
+# =====
+def make_config(raw: Dict[str, Any], scheme: Dict[str, Any], _keys: Tuple[str, ...]=()) -> Section:
     if not isinstance(raw, dict):
-        raise ValueError("The node '{}' must be a dictionary".format("/".join(keys) or "/"))
+        raise ValueError("The node '{}' must be a dictionary".format("/".join(_keys) or "/"))
 
     config = Section()
     for (key, option) in scheme.items():
-        full_key = keys + (key,)
+        full_key = _keys + (key,)
         full_name = "/".join(full_key)
 
         if isinstance(option, Option):
@@ -81,48 +132,3 @@ def make_config(raw, scheme, keys=()):
             raise RuntimeError("Incorrect scheme definition for key '{}':"
                                " the value is {}, not dict or [Secret]Option()".format(full_name, type(option)))
     return config
-
-
-class Section(dict):
-    def __init__(self, *args, **kwargs):
-        dict.__init__(self, *args, **kwargs)
-        self._meta = {}
-
-    def _set_meta(self, name, secret, default, help):  # pylint: disable=redefined-builtin
-        self._meta[name] = {
-            "secret":  secret,
-            "default": default,
-            "help":    help,
-        }
-
-    def _is_secret(self, name):
-        return self._meta[name]["secret"]
-
-    def _get_default(self, name):
-        return self._meta[name]["default"]
-
-    def _get_help(self, name):
-        return self._meta[name]["help"]
-
-    def __getattribute__(self, name):
-        if name in self:
-            return self[name]
-        else:  # For pickling
-            return dict.__getattribute__(self, name)
-
-
-_type = type
-
-
-class Option:
-    def __init__(self, default, help, type=None):  # pylint: disable=redefined-builtin
-        self.default = default
-        self.help = help
-        self.type = type or (_type(default) if default is not None else str)
-
-    def __repr__(self):
-        return "<Option(default={self.default}, type={self.type}, help={self.help})>".format(self=self)
-
-
-class SecretOption(Option):
-    pass

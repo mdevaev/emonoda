@@ -22,9 +22,11 @@ import socket
 import xmlrpc.client
 import argparse
 
+from typing import List
+
 
 # =====
-def manage_trackers(client_url, to_enable, to_disable):
+def manage_trackers(client_url: str, to_enable: List[str], to_disable: List[str]) -> None:
     server = xmlrpc.client.ServerProxy(client_url)
 
     multicall = xmlrpc.client.MultiCall(server)
@@ -48,7 +50,7 @@ def manage_trackers(client_url, to_enable, to_disable):
 
 
 # ===== Main =====
-def main():
+def main() -> None:
     args_parser = argparse.ArgumentParser(description="Manage trackers (rtorrent only)")
     args_parser.add_argument("--enable", nargs="+", metavar="<pattern>")
     args_parser.add_argument("--disable", nargs="+", metavar="<pattern>")

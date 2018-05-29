@@ -19,7 +19,15 @@
 
 import sys
 
+from ..plugins.trackers import BaseTracker
+
+from ..plugins.confetti import UpdateResult
+from ..plugins.confetti import ResultsType
+
 from ..helpers import surprise
+
+from ..tfile import TorrentsDiff
+from ..tfile import Torrent
 
 from . import init
 from . import wrap_main
@@ -28,42 +36,46 @@ from . import get_configured_confetti
 
 
 # =====
-class _FakeTorrent:
-    def get_comment(self):
+class _FakeTorrent(Torrent):
+    def __init__(self) -> None:  # pylint: disable=super-init-not-called
+        pass
+
+    def get_comment(self) -> str:
         return "Test, test, test"
 
 
-class _FakeTracker:
+class _FakeTracker(BaseTracker):
     PLUGIN_NAME = "example.org"
+
+    def __init__(self) -> None:  # pylint: disable=super-init-not-called
+        pass
 
 
 # ===== Main =====
 @wrap_main
-def main():
-    (parent_parser, argv, config) = init()  # pylint: disable=unused-variable
+def main() -> None:
+    (_, _, config) = init()
     with get_configured_log(config, False, sys.stderr) as log_stderr:
-        results = {
+        results: ResultsType = {
             "affected": {
-                "test.torrent": {
-                    "diff": {
-                        "added":         ("nya.mkv", "nya.srt"),
-                        "removed":       ("nyaa.srt", "nyaa.mkv"),
-                        "modified":      (),
-                        "type_modified": ("list.lst",),
-                    },
-                    "torrent": _FakeTorrent(),
-                    "tracker": _FakeTracker(),
-                },
-                "test1.torrent": {
-                    "diff": {
-                        "added":         ("nya.mkv", "nya.srt"),
-                        "removed":       ("nyaa.srt", "nyaa.mkv"),
-                        "modified":      (),
-                        "type_modified": ("list.lst",),
-                    },
-                    "torrent": _FakeTorrent(),
-                    "tracker": _FakeTracker(),
-                }
+                "test1.torrent": UpdateResult.new(
+                    torrent=_FakeTorrent(),
+                    tracker=_FakeTracker(),
+                    diff=TorrentsDiff.new(
+                        added=set(["nya.mkv", "nya.srt"]),
+                        removed=set(["nyaa.srt", "nyaa.mkv"]),
+                        type_modified=set(["list.lst"]),
+                    ),
+                ),
+                "test2.torrent": UpdateResult.new(
+                    torrent=_FakeTorrent(),
+                    tracker=_FakeTracker(),
+                    diff=TorrentsDiff.new(
+                        added=set(["nya.mkv", "nya.srt"]),
+                        removed=set(["nyaa.srt", "nyaa.mkv"]),
+                        type_modified=set(["list.lst"]),
+                    ),
+                ),
             },
             "passed":          {},
             "not_in_client":   {},

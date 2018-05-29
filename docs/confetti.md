@@ -35,9 +35,9 @@ confetti:
     * Порт подключения серверу. Значение по умолчанию определяется автоматически в зависимости от параметра `confetti/email/ssl`. Используется `25` порт для незащищенного соединения и `465` для SSL.
 * **`confetti/email/ssl=false`**
     * Использовать ли SSL для SMTP. Так же влияет на номер порта по умолчанию.
-* **`confetti/email/user=null`**
+* **`confetti/email/user=""`**
     * Имя пользователя для авторизации на сервере.
-* **`confetti/email/passwd=null`**
+* **`confetti/email/passwd=""`**
     * Пароль для авторизации на сервере.
 * **`confetti/email/timeout=10.0`**
     * Сетевой таймаут в секундах.
@@ -53,7 +53,7 @@ confetti:
 
 * **`confetti/nma/api_keys=[CHANGE_ME]`**
     * Ключ для отправки уведомлений, один или несколько.
-* **`confetti/nma/proxy_url=null`**
+* **`confetti/nma/proxy_url=""`**
     Прокси до сервиса. Поддерживаются HTTP(S)-прокси и SOCKS4/5. Этот параметр можно использовать так: `trackers/rutracker.org/proxy_url=socks5://localhost:5000` (вместе с [SOCKS-проксированием по SSH](https://ru.wikibooks.org/wiki/SSH_%D1%82%D1%83%D0%BD%D0%BD%D0%B5%D0%BB%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5)). Формат - `scheme://username:passwd@host:port`. Вместо `scheme` нужно указать `socks4`, `socks5`, `http` или `https`.
 * **`confetti/nma/timeout=10.0`**
     * Сетевой таймаут в секундах.
@@ -74,7 +74,7 @@ confetti:
     * Ключ пользователя.
 * **`confetti/pushover/devices=[]`**
     * Список устройств пользователя, на которые нужно отправить оповещение. Пустой список - все устройства.
-* **`confetti/pushover/proxy_url=null`**
+* **`confetti/pushover/proxy_url=""`**
     Прокси до сервиса. Поддерживаются HTTP(S)-прокси и SOCKS4/5. Этот параметр можно использовать так: `trackers/rutracker.org/proxy_url=socks5://localhost:5000` (вместе с [SOCKS-проксированием по SSH](https://ru.wikibooks.org/wiki/SSH_%D1%82%D1%83%D0%BD%D0%BD%D0%B5%D0%BB%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5)). Формат - `scheme://username:passwd@host:port`. Вместо `scheme` нужно указать `socks4`, `socks5`, `http` или `https`.
 * **`confetti/pushover/timeout=10.0`**
     * Сетевой таймаут в секундах.

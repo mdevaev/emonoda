@@ -24,11 +24,22 @@ import itertools
 import argparse
 import datetime
 
+from typing import Tuple
+from typing import List
+from typing import Dict
+from typing import Callable
+from typing import Optional
+from typing import Any
+
 from ..plugins.clients import NoSuchTorrentError
+from ..plugins.clients import BaseClient
 
 from ..helpers import tcollection
 
-from .. import tfile
+from ..tfile import Torrent
+
+from ..cli import Log
+
 from .. import fmt
 from .. import tools
 
@@ -39,91 +50,86 @@ from . import get_configured_client
 
 
 # =====
-def format_size_pretty(torrent):
+def format_size_pretty(torrent: Torrent) -> str:
     return fmt.format_size(torrent.get_size())
 
 
-def format_announce(torrent):
+def format_announce(torrent: Torrent) -> str:
     return (torrent.get_announce() or "")
 
 
-def format_announce_list(torrent):
+def format_announce_list(torrent: Torrent) -> List[str]:
     return list(itertools.chain.from_iterable(torrent.get_announce_list()))
 
 
-def format_announce_list_pretty(torrent):
+def format_announce_list_pretty(torrent: Torrent) -> str:
     return " ".join(format_announce_list(torrent))
 
 
-def format_creation_date(torrent):
-    return (torrent.get_creation_date() or "")
+def format_creation_date(torrent: Torrent) -> str:
+    return str(torrent.get_creation_date() or "")
 
 
-def format_creation_date_pretty(torrent):
+def format_creation_date_pretty(torrent: Torrent) -> str:
     date = torrent.get_creation_date()
-    return str(datetime.datetime.utcfromtimestamp(date) if date is not None else "")
+    return str(datetime.datetime.utcfromtimestamp(date) if date else "")
 
 
-def format_created_by(torrent):
+def format_created_by(torrent: Torrent) -> str:
     return (torrent.get_created_by() or "")
 
 
-def format_provides(torrent):
+def format_provides(torrent: Torrent) -> List[str]:
     return tools.sorted_paths(torrent.get_files())
 
 
-def format_is_private(torrent):
+def format_is_private(torrent: Torrent) -> str:
     return str(int(torrent.is_private()))
 
 
-def format_is_private_pretty(torrent):
+def format_is_private_pretty(torrent: Torrent) -> str:
     return ("yes" if torrent.is_private() else "no")
 
 
-def format_comment(torrent):
-    return (torrent.get_comment() or "")
-
-
-def _format_client_method(torrent, client, method_name, *args, **kwargs):
-    assert client is not None, "Required a client"
+def _format_client_method(torrent: Torrent, client: Optional[BaseClient], method_name: str, *args: Any, **kwargs: Any) -> str:
+    assert client is not None, "Required client"
     try:
-        return getattr(client, method_name)(torrent, *args, **kwargs)
+        return str(getattr(client, method_name)(torrent, *args, **kwargs))
     except NoSuchTorrentError:
         return ""
 
 
-def format_client_path(torrent, client):
+def format_client_path(torrent: Torrent, client: Optional[BaseClient]) -> str:
     return _format_client_method(torrent, client, "get_full_path")
 
 
-def format_client_prefix(torrent, client):
+def format_client_prefix(torrent: Torrent, client: Optional[BaseClient]) -> str:
     return _format_client_method(torrent, client, "get_data_prefix")
 
 
-def format_client_customs(torrent, client, to_show_customs):
-    assert client is not None, "Required a client"
-    if len(to_show_customs) == 0:
-        return ""
-    try:
-        customs = client.get_customs(torrent, to_show_customs)
-    except NoSuchTorrentError:
-        return ""
-    return " ".join(sorted(
-        "{}={}".format(key, shlex.quote(str(value or "")))
-        for (key, value) in customs.items()
-    ))
+def format_client_customs(torrent: Torrent, client: Optional[BaseClient], customs: List[str]) -> str:
+    assert client is not None, "Required client"
+    if len(customs) != 0:
+        try:
+            return " ".join(sorted(
+                "{}={}".format(key, shlex.quote(str(value or "")))
+                for (key, value) in client.get_customs(torrent, customs).items()
+            ))
+        except NoSuchTorrentError:
+            pass
+    return ""
 
 
-def _make_formatted_tree(files, depth=0, prefix="    "):
+def _make_formatted_tree(files: Dict, _depth: int=0, _prefix: str="    ") -> str:
     text = ""
     for (name, sub) in tools.sorted_paths(files.items(), 0):
-        text += prefix + "*   " * depth + name + "\n"
-        text += _make_formatted_tree(sub, depth + 1)
+        text += _prefix + "*   " * _depth + name + "\n"
+        text += _make_formatted_tree(sub, _depth + 1)
     return text
 
 
-def format_files_tree(torrent):
-    tree = {}
+def format_files_tree(torrent: Torrent) -> str:
+    tree: Dict = {}
     for path in torrent.get_files():
         parts = os.path.normpath(path).split(os.path.sep)
         local = tree
@@ -135,7 +141,7 @@ def format_files_tree(torrent):
     return _make_formatted_tree(tree)
 
 
-def print_pretty_meta(torrent, client, to_show_customs, log):
+def print_pretty_meta(torrent: Torrent, client: Optional[BaseClient], customs: List[str], log: Log) -> None:
     log.print("{blue}Path:{reset}           %s", (torrent.get_path(),))
     log.print("{blue}Name:{reset}           %s", (torrent.get_name(),))
     log.print("{blue}Hash:{reset}           %s", (torrent.get_hash(),))
@@ -145,36 +151,36 @@ def print_pretty_meta(torrent, client, to_show_customs, log):
     log.print("{blue}Creation date:{reset}  %s", (format_creation_date_pretty(torrent),))
     log.print("{blue}Created by:{reset}     %s", (format_created_by(torrent),))
     log.print("{blue}Private:{reset}        %s", (format_is_private_pretty(torrent),))
-    log.print("{blue}Comment:{reset}        %s", (format_comment(torrent),))
+    log.print("{blue}Comment:{reset}        %s", (torrent.get_comment(),))
     if client is not None:
         log.print("{blue}Client path:{reset}    %s", (format_client_path(torrent, client),))
-        if len(to_show_customs) != 0:
-            log.print("{blue}Client customs:{reset} %s", (format_client_customs(torrent, client, to_show_customs),))
+        if len(customs) != 0:
+            log.print("{blue}Client customs:{reset} %s", (format_client_customs(torrent, client, customs),))
     if torrent.is_single_file():
         log.print("{blue}Provides:{reset}       %s", (tuple(torrent.get_files())[0],))
     else:
         log.print("{blue}Provides:{reset}\n%s", (format_files_tree(torrent),))
 
 
-def print_value(header, value, without_headers, log):
+def print_value(header: str, value: Any, without_headers: bool, log: Log) -> None:
     if without_headers:
-        log.print("%s", str(value))
+        log.print("%s", (str(value or ""),))
     else:
-        log.print("{blue}%s:{reset} %s", (header, str(value)))
+        log.print("{blue}%s:{reset} %s", (header, str(value or "")))
 
 
 # ===== Main =====
 @wrap_main
-def main():  # pylint: disable=too-many-locals
-    options = config = None  # Makes pylint happy
-    actions = [
+def main() -> None:  # pylint: disable=too-many-locals
+    options = config = client = None  # Makes pylint happy
+    actions: List[Tuple[str, str, Callable[[Torrent], Any]]] = [
         (option, option[2:].replace("-", "_"), method)
-        for (option, method) in (
-            ("--path",                 tfile.Torrent.get_path),
-            ("--name",                 tfile.Torrent.get_name),
-            ("--hash",                 tfile.Torrent.get_hash),
-            ("--comment",              format_comment),
-            ("--size",                 tfile.Torrent.get_size),
+        for (option, method) in [
+            ("--path",                 lambda torrent: Torrent.get_path(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
+            ("--name",                 lambda torrent: Torrent.get_name(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
+            ("--hash",                 lambda torrent: Torrent.get_hash(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
+            ("--comment",              lambda torrent: Torrent.get_comment(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
+            ("--size",                 lambda torrent: Torrent.get_size(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
             ("--size-pretty",          format_size_pretty),
             ("--announce",             format_announce),
             ("--announce-list",        format_announce_list),
@@ -187,9 +193,9 @@ def main():  # pylint: disable=too-many-locals
             ("--is-private-pretty",    format_is_private_pretty),
             ("--client-path",          lambda torrent: format_client_path(torrent, client)),
             ("--client-prefix",        lambda torrent: format_client_prefix(torrent, client)),
-            ("--client-customs",       lambda torrent: format_client_customs(torrent, client, config.emfile.show_customs)),
-            ("--make-magnet",          lambda torrent: torrent.make_magnet(options.magnet_fields)),
-        )
+            ("--client-customs",       lambda torrent: format_client_customs(torrent, client, config.emfile.show_customs)),  # type: ignore
+            ("--make-magnet",          lambda torrent: torrent.make_magnet(options.magnet_fields)),  # type: ignore
+        ]
     ]
 
     (parent_parser, argv, config) = init()
@@ -201,7 +207,7 @@ def main():  # pylint: disable=too-many-locals
     for (option, dest, _) in actions:
         args_parser.add_argument(option, dest=dest, action="store_true")
     args_parser.add_argument("--without-headers", action="store_true")
-    args_parser.add_argument("--magnet-fields", nargs="+", default=(), metavar="<fields>", choices=("names", "trackers", "size"))
+    args_parser.add_argument("--magnet-fields", nargs="+", default=[], metavar="<fields>", choices=["names", "trackers", "size"])
     args_parser.add_argument("-v", "--verbose", action="store_true")
     args_parser.add_argument("torrents", nargs="+", metavar="<path>")
     options = args_parser.parse_args(argv[1:])
@@ -211,7 +217,7 @@ def main():  # pylint: disable=too-many-locals
         for (option, dest, method) in actions
         if getattr(options, dest)
     ]
-    torrents = tcollection.find(config.core.torrents_dir, options.torrents, False)
+    torrents = tcollection.find_torrents(config.core.torrents_dir, options.torrents)
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, (not options.verbose), sys.stderr) as log_stderr:

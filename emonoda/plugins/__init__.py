@@ -21,71 +21,64 @@ import importlib
 import functools
 import os
 
+from typing import Tuple
+from typing import List
+from typing import Dict
+from typing import Optional
+from typing import Type
+from typing import Any
 
-# =====
-def get_client_class(name):
-    return _get_classes()["clients"][name]
-
-
-def get_tracker_class(name):
-    return _get_classes()["trackers"][name]
-
-
-def get_confetti_class(name):
-    return _get_classes()["confetti"][name]
-
-
-@functools.lru_cache()
-def _get_classes():
-    classes = {}
-    for sub in ("clients", "trackers", "confetti"):
-        classes.setdefault(sub, {})
-        sub_path = os.path.join(os.path.dirname(__file__), sub)
-        for file_name in os.listdir(sub_path):
-            if not file_name.startswith("__") and file_name.endswith(".py"):
-                module_name = file_name[:-3]
-                module = importlib.import_module("emonoda.plugins.{}.{}".format(sub, module_name))
-                plugin_class = getattr(module, "Plugin")
-                classes[sub][plugin_class.PLUGIN_NAME] = plugin_class
-    return classes
+from ..optconf import Option
 
 
 # =====
-def _get_bases(mro):
-    return tuple(
-        cls for cls in mro
-        if set(cls.__bases__).intersection((BasePlugin, BaseExtension))
-    )
-
-
-class BasePlugin:
-    PLUGIN_NAME = None
-
+class _PluginEntity:
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return {}
 
-    @classmethod
-    def get_bases(cls):
-        return _get_bases(cls.__mro__)
 
-    # ===
-
-    def _init_bases(self, **kwargs):
-        assert self.PLUGIN_NAME is not None
-        for parent in _get_bases(self.__class__.__mro__):
-            parent.__init__(self, **kwargs)
+class BasePlugin(_PluginEntity):
+    PLUGIN_NAME = ""
 
     @classmethod
-    def _get_merged_options(cls, params=None):
-        merged = {}
-        for parent in _get_bases(cls.__mro__):
+    def get_bases(cls) -> List[Type[_PluginEntity]]:
+        return cls.__get_bases(cls.__mro__)
+
+    def _init_bases(self, **kwargs: Any) -> None:
+        assert self.PLUGIN_NAME
+        for parent in self.__get_bases(self.__class__.__mro__):
+            parent.__init__(self, **kwargs)  # type: ignore
+
+    @classmethod
+    def _get_merged_options(cls, params: Optional[Dict[str, Option]]=None) -> Dict[str, Option]:
+        merged: Dict[str, Option] = {}
+        for parent in cls.__get_bases(cls.__mro__):
             merged.update(parent.get_options())
         merged.update(params or {})
         return merged
 
+    @staticmethod
+    def __get_bases(mro: Tuple[Type, ...]) -> List[Type[_PluginEntity]]:
+        return [
+            cls for cls in mro
+            if set(cls.__bases__).intersection((BasePlugin, BaseExtension))
+        ]
 
-class BaseExtension:
-    @classmethod
-    def get_options(cls):
-        return {}
+
+class BaseExtension(_PluginEntity):
+    pass
+
+
+# =====
+@functools.lru_cache()
+def get_classes(sub: str) -> Dict[str, Type[BasePlugin]]:
+    classes: Dict[str, Type[BasePlugin]] = {}  # noqa: E701
+    sub_path = os.path.join(os.path.dirname(__file__), sub)
+    for file_name in os.listdir(sub_path):
+        if not file_name.startswith("__") and file_name.endswith(".py"):
+            module_name = file_name[:-3]
+            module = importlib.import_module("emonoda.plugins.{}.{}".format(sub, module_name))
+            plugin_class = getattr(module, "Plugin")
+            classes[plugin_class.PLUGIN_NAME] = plugin_class
+    return classes

@@ -19,6 +19,15 @@
 
 import os
 
+from typing import List
+from typing import Dict
+from typing import Any
+
+from ...optconf import Option
+
+from ...tfile import TorrentEntryAttrs
+from ...tfile import Torrent
+
 from . import BaseClient
 from . import NoSuchTorrentError
 from . import hash_or_torrent
@@ -35,7 +44,7 @@ except ImportError:
 class Plugin(BaseClient):
     PLUGIN_NAME = "ktorrent"
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
 
         if dbus is None:
@@ -46,63 +55,63 @@ class Plugin(BaseClient):
         self._settings = self._bus.get_object("org.ktorrent.ktorrent", "/settings")
 
         if self._settings.useSaveDir():
-            raise RuntimeError("Turn off the path by default in the settings of KTorrent")
+            raise RuntimeError("Turn off the 'path by default' in KTorrent settings")
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
 
     # ===
 
     @hash_or_torrent
-    def remove_torrent(self, torrent_hash):
+    def remove_torrent(self, torrent_hash: str) -> None:
         self._get_torrent_obj(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
         self._core.remove(torrent_hash, False)
 
     @check_torrent_accessible
-    def load_torrent(self, torrent, prefix=None):
-        if prefix is not None:
+    def load_torrent(self, torrent: Torrent, prefix: str="") -> None:
+        if prefix:
             self._settings.setLastSaveDir(prefix)
         self._core.loadSilently(torrent.get_path(), "")
 
     @hash_or_torrent
-    def has_torrent(self, torrent_hash):
+    def has_torrent(self, torrent_hash: str) -> bool:
         try:
             self._get_torrent_obj(torrent_hash)
             return True
         except NoSuchTorrentError:
             return False
 
-    def get_hashes(self):
+    def get_hashes(self) -> List[str]:
         return list(map(str.lower, self._core.torrents()))
 
     @hash_or_torrent
-    def get_torrent_path(self, torrent_hash):
+    def get_torrent_path(self, torrent_hash: str) -> str:
         raise RuntimeError("KTorrent can not return a path of the torrent file")
 
     @hash_or_torrent
-    def get_data_prefix(self, torrent_hash):
+    def get_data_prefix(self, torrent_hash: str) -> str:
         return str(self._get_torrent_obj(torrent_hash).dataDir())
 
-    def get_data_prefix_default(self):
+    def get_data_prefix_default(self) -> str:
         raise RuntimeError("KTorrent can not return a default data path")
 
     # ===
 
     @hash_or_torrent
-    def get_full_path(self, torrent_hash):
+    def get_full_path(self, torrent_hash: str) -> str:
         return str(self._get_torrent_obj(torrent_hash).pathOnDisk())
 
     @hash_or_torrent
-    def get_file_name(self, torrent_hash):
+    def get_file_name(self, torrent_hash: str) -> str:
         return str(self._get_torrent_obj(torrent_hash).name())
 
     @hash_or_torrent
-    def is_single_file(self, torrent_hash):
+    def is_single_file(self, torrent_hash: str) -> bool:
         return (self._get_torrent_obj(torrent_hash).numFiles() == 0)
 
     @hash_or_torrent
-    def get_files(self, torrent_hash, on_fs=False):
+    def get_files(self, torrent_hash: str, on_fs: bool=False) -> Dict[str, TorrentEntryAttrs]:
         torrent_obj = self._get_torrent_obj(torrent_hash)
         prefix = (str(torrent_obj.pathOnDisk()) if on_fs else "")
         count = torrent_obj.numFiles()
@@ -122,7 +131,7 @@ class Plugin(BaseClient):
 
     # ===
 
-    def _get_torrent_obj(self, torrent_hash):
+    def _get_torrent_obj(self, torrent_hash: str) -> Any:
         if torrent_hash not in self.get_hashes():
             raise NoSuchTorrentError("Unknown torrent hash")
         try:

@@ -4,7 +4,8 @@
 /build
 /dist
 /emonoda.egg-info
-/.tox
+/.tox/
+/.mypy_cache/
 /emonoda-*.tar.gz
 *.pyc
 *.swp

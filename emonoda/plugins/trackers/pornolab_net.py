@@ -22,6 +22,13 @@ import re
 
 from datetime import datetime
 
+from typing import Dict
+from typing import Any
+
+from ...optconf import Option
+
+from ...tfile import Torrent
+
 from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
@@ -50,26 +57,29 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
 
     # ===
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
 
-    def fetch_time(self, torrent):
+    def fetch_time(self, torrent: Torrent) -> int:
         self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
-        date_match = re.search(r"<span title=\"Зарегистрирован\">\[ (\d\d-([а-яА-Я]{3})-\d\d \d\d:\d\d:\d\d) \]</span>", page)
-        self._assert_logic(date_match is not None, "Upload date not found")
+
+        date_match = self._assert_logic_re_search(
+            regexp=re.compile(r"<span title=\"Зарегистрирован\">\[ (\d\d-([а-яА-Я]{3})-\d\d \d\d:\d\d:\d\d) \]</span>"),
+            text=self._decode(self._read_url(torrent.get_comment())),
+            msg="Upload date not found",
+        )
         date = date_match.group(1)
         date_month = date_match.group(2)
 
         date = date.replace(date_month, {
             month: str(number) for (number, month) in enumerate(
-                ("Янв", "Фев", "Мар", "Апр", "Май", "Июн",
-                 "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"), 1
+                ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                 "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"], 1
             )
         }[date_month])  # TODO: Send shitbeam to datetime authors
         date += " " + datetime.now(self._tzinfo).strftime("%z")
@@ -77,7 +87,7 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
         upload_time = int(datetime.strptime(date, "%d-%m-%y %H:%M:%S %z").strftime("%s"))
         return upload_time
 
-    def login(self):
+    def login(self) -> None:
         self._assert_required_user_passwd()
 
         post = {
@@ -90,17 +100,25 @@ class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorr
         cap_static_regexp = re.compile(r"\"(https?://static\.pornolab\.net/captcha/[^\"]+)\"")
         cap_static_match = cap_static_regexp.search(page)
         if cap_static_match is not None:
-            cap_sid_match = re.search(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\"", page)
-            cap_code_match = re.search(r"name=\"(cap_code_[a-zA-Z0-9]+)\"", page)
-            self._assert_auth(cap_sid_match is not None, "Unknown cap_sid")
-            self._assert_auth(cap_code_match is not None, "Unknown cap_code")
+            cap_sid = self._assert_auth_re_search(
+                regexp=re.compile(r"name=\"cap_sid\" value=\"([a-zA-Z0-9]+)\""),
+                text=page,
+                msg="Unknown cap_sid",
+            ).group(1)
 
-            post[cap_code_match.group(1)] = self._captcha_decoder(cap_static_match.group(1))
-            post["cap_sid"] = cap_sid_match.group(1)
+            cap_code = self._assert_auth_re_search(
+                regexp=re.compile(r"name=\"(cap_code_[a-zA-Z0-9]+)\""),
+                text=page,
+                msg="Unknown cap_code",
+            ).group(1)
+
+            post[cap_code] = self._encode(self._captcha_decoder(cap_static_match.group(1)))
+            post["cap_sid"] = self._encode(cap_sid)
+
             page = self._read_login(post)
             self._assert_auth(cap_static_regexp.search(page) is None, "Invalid user, password or captcha")
 
-    def _read_login(self, post):
+    def _read_login(self, post: Dict[str, bytes]) -> str:
         return self._decode(self._read_url(
             url="https://pornolab.net/forum/login.php",
             data=self._encode(urllib.parse.urlencode(post)),

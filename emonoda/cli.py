@@ -22,6 +22,13 @@ import os
 import re
 import threading
 
+from typing import TextIO
+from typing import Tuple
+from typing import Iterable
+from typing import Generator
+from typing import Optional
+from typing import Any
+
 from colorama import Fore
 from colorama import Style
 
@@ -44,23 +51,30 @@ _NO_COLORS = dict.fromkeys(list(_COLORS), "")
 
 # =====
 class Log:
-    def __init__(self, use_colors=True, force_colors=False, quiet=False, output=sys.stdout):
+    def __init__(
+        self,
+        use_colors: bool=True,
+        force_colors: bool=False,
+        quiet: bool=False,
+        output: TextIO=sys.stdout,
+    ) -> None:
+
         self._quiet = quiet
         self._output = output
         self._fill = 0
         self._colored = (use_colors and (self.isatty() or force_colors))
         self._ansi_regexp = re.compile(r"(\x1b[^m]*m)")
 
-    def isatty(self):
+    def isatty(self) -> bool:
         return self._output.isatty()
 
-    def info(self, text, *args, **kwargs):
-        self.print("# {green}I{reset}: " + text, *args, **kwargs)
+    def info(self, text: str, placeholders: Tuple=(), one_line: bool=False, no_nl: bool=False) -> None:
+        self.print("# {green}I{reset}: " + text, placeholders, one_line, no_nl)
 
-    def error(self, text, *args, **kwargs):
-        self.print("# {red}E{reset}: " + text, *args, **kwargs)
+    def error(self, text: str, placeholders: Tuple=(), one_line: bool=False, no_nl: bool=False) -> None:
+        self.print("# {red}E{reset}: " + text, placeholders, one_line, no_nl)
 
-    def print(self, text="", placeholders=(), one_line=False, no_nl=False):
+    def print(self, text: str="", placeholders: Tuple=(), one_line: bool=False, no_nl: bool=False) -> None:
         if not self._quiet:
             rendered = self._format_text(text, placeholders, self._colored)
             view_len = len(self._format_text(text, placeholders, False) if self._colored else rendered)
@@ -84,9 +98,17 @@ class Log:
                 self._fill = 0
             self._output.flush()
 
-    def progress(self, iterable, wip, finish, length=20, refresh=0.1):
+    def progress(
+        self,
+        iterable: Iterable[Any],
+        wip: Tuple[str, Tuple],
+        finish: Tuple[str, Tuple],
+        length: int=20,
+        refresh: float=0.1,
+    ) -> Generator[Any, None, None]:
+
         if self.isatty():
-            def print_pb(value, limit):
+            def print_pb(value: int, limit: int) -> None:
                 (pb, pb_placeholders) = fmt.format_progress_bar(value, limit, length)
                 if value < limit:
                     self.info("{} :: {}".format(pb, wip[0]), pb_placeholders + wip[1], one_line=True)
@@ -99,7 +121,7 @@ class Log:
             print_pb(0, 1)
             items = list(iterable)
 
-            def refresh_pb():
+            def refresh_pb() -> None:
                 print_pb(current, len(items))
                 while not stop_pb_thread.wait(refresh):
                     print_pb(current, len(items))
@@ -116,13 +138,13 @@ class Log:
         else:
             yield from iterable
 
-    def finish(self):
+    def finish(self) -> None:
         if self._fill:
             self._output.write((" " * self._fill) + "\r")
             self._fill = 0
             self._output.flush()
 
-    def _get_term_width(self):
+    def _get_term_width(self) -> Optional[int]:
         try:
             return int(os.environ["COLUMNS"])
         except (KeyError, ValueError):
@@ -131,7 +153,7 @@ class Log:
             except OSError:
                 return None
 
-    def _format_text(self, text, placeholders, colored):
+    def _format_text(self, text: str, placeholders: Tuple, colored: bool) -> str:
         text = text.format(**(_COLORS if colored else _NO_COLORS))
         text = text % tuple(
             (placeholder() if callable(placeholder) else placeholder)
@@ -139,7 +161,7 @@ class Log:
         )
         return text
 
-    def _cut_line(self, text, cut):
+    def _cut_line(self, text: str, cut: int) -> str:
         parts = self._ansi_regexp.split(text)
         for index in reversed(range(len(parts))):
             if cut <= 0:

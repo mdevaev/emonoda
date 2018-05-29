@@ -26,9 +26,12 @@ import math
 import time
 import argparse
 
+from typing import List
+from typing import Dict
+
 
 # =====
-def get_summary(server, hashes):
+def get_summary(server: xmlrpc.client.ServerProxy, hashes: List[str]) -> Dict[str, int]:
     mapping = (
         ("get_peers_accounted",  "leechers"),
         ("is_hash_checking",     "is_checking"),
@@ -37,17 +40,17 @@ def get_summary(server, hashes):
         ("get_size_chunks",      "size_chunks"),
         ("get_message",          "msg"),
     )
-    multicall = xmlrpc.client.MultiCall(server)
+    mc = xmlrpc.client.MultiCall(server)
     for torrent_hash in hashes:
         for (method_name, _) in mapping:
-            getattr(multicall.d, method_name)(torrent_hash)
-    rows = tuple(multicall())
-    rows = tuple(
+            getattr(mc.d, method_name)(torrent_hash)
+    rows = list(mc())
+    rows = list(
         dict(zip(map(operator.itemgetter(1), mapping), rows[count:count + len(mapping)]))
         for count in range(0, len(rows), len(mapping))
     )
 
-    summary = dict.fromkeys(("total", "dn", "up", "errors"), 0)
+    summary = dict.fromkeys(["total", "dn", "up", "errors"], 0)
     for row in rows:
         if row["leechers"]:
             summary["up"] += 1
@@ -61,19 +64,19 @@ def get_summary(server, hashes):
     return summary
 
 
-def print_stat(client_url, host, interval, with_dht, with_summary):
+def print_stat(client_url: str, host: str, interval: float, with_dht: bool, with_summary: bool) -> None:
     server = xmlrpc.client.ServerProxy(client_url)
     while True:
-        multicall = xmlrpc.client.MultiCall(server)
-        multicall.get_down_rate()  # Download rate
-        multicall.get_download_rate()  # Download rate limit
-        multicall.get_down_total()  # Downloaded
-        multicall.get_up_rate()  # Upload rate
-        multicall.get_upload_rate()  # Upload rate limit
-        multicall.get_up_total()  # Uploaded
-        multicall.dht_statistics()
-        multicall.download_list()
-        values = tuple(multicall())
+        mc = xmlrpc.client.MultiCall(server)
+        mc.get_down_rate()  # Download rate
+        mc.get_download_rate()  # Download rate limit
+        mc.get_down_total()  # Downloaded
+        mc.get_up_rate()  # Upload rate
+        mc.get_upload_rate()  # Upload rate limit
+        mc.get_up_total()  # Uploaded
+        mc.dht_statistics()
+        mc.download_list()
+        values = list(mc())
 
         metrics = [
             ("gauge-dn_rate",       values[0]),
@@ -115,7 +118,7 @@ def print_stat(client_url, host, interval, with_dht, with_summary):
 
 
 # ===== Main =====
-def main():
+def main() -> None:
     args_parser = argparse.ArgumentParser(description="Prints collectd stat in plaintext protocol")
     args_parser.add_argument("--with-dht", action="store_true")
     args_parser.add_argument("--with-summary", action="store_true")

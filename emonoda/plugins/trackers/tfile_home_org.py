@@ -19,6 +19,11 @@
 
 import re
 
+from typing import Dict
+from typing import Any
+
+from ...optconf import Option
+
 from . import BaseTracker
 from . import WithLogin
 from . import WithCheckHash
@@ -48,15 +53,15 @@ class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchByDownloadId):
 
     # ===
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
 
-    def login(self):
+    def login(self) -> None:
         self._login_using_post(
             url="http://tfile-home.org/login/",
             post={

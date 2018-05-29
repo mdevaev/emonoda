@@ -21,8 +21,17 @@ import sys
 import os
 import argparse
 
+from typing import List
+from typing import Dict
+
+from ..plugins.clients import BaseClient
+
 from ..helpers import tcollection
 from ..helpers import datacache
+
+from ..tfile import TorrentEntryAttrs
+
+from ..cli import Log
 
 from .. import fmt
 from .. import tools
@@ -34,42 +43,42 @@ from . import get_configured_client
 
 
 # =====
-def build_used_files(cache, data_roots):
-    files = dict.fromkeys(data_roots, None)
-    for info in cache["torrents"].values():
-        prefix = os.path.normpath(info["prefix"])
+def build_used_files(cache: datacache.TorrentsCache, data_roots: List[str]) -> Dict[str, TorrentEntryAttrs]:
+    files: Dict[str, TorrentEntryAttrs] = dict.fromkeys(data_roots, TorrentEntryAttrs.new_dir())
+    for c_attrs in cache.torrents.values():
+        prefix = os.path.normpath(c_attrs.prefix)
 
-        for (path, meta) in info["files"].items():
-            files[os.path.join(prefix, path)] = (meta or {}).get("size")
+        for (path, f_attrs) in c_attrs.files.items():
+            files[os.path.join(prefix, path)] = f_attrs
 
         for data_root_path in data_roots:
             if prefix.startswith(data_root_path):
-                parts = list(filter(None, prefix[len(data_root_path):].split(os.path.sep)))
+                parts: List[str] = list(filter(None, prefix[len(data_root_path):].split(os.path.sep)))
                 for index in range(len(parts)):
                     path = os.path.join(*([data_root_path] + parts[:index + 1]))
-                    files[path] = None
+                    files[path] = TorrentEntryAttrs.new_dir()
                 break
     return files
 
 
-def build_all_files(data_root_path, log):
+def build_all_files(data_root_path: str, log: Log) -> Dict[str, TorrentEntryAttrs]:
     if not log.isatty():
         log.info("Scanning directory {cyan}%s{reset} ...", (data_root_path,))
 
-    files = {}
+    files: Dict[str, TorrentEntryAttrs] = {}
     for (prefix, _, local_files) in log.progress(
         os.walk(data_root_path),
         ("Scanning directory {cyan}%s{reset} ...", (data_root_path,)),
         ("Scanned directory {cyan}%s{reset}", (data_root_path,))
     ):
-        files[tools.get_decoded_path(prefix)] = None
+        files[tools.get_decoded_path(prefix)] = TorrentEntryAttrs.new_dir()
         for name in local_files:
             path = os.path.join(prefix, name)
             try:
                 size = os.path.getsize(path)
             except FileNotFoundError:
                 continue
-            files[tools.get_decoded_path(path)] = size
+            files[tools.get_decoded_path(path)] = TorrentEntryAttrs.new_file(size)
 
     if not log.isatty():
         log.info("Scanned directory {cyan}%s{reset}", (data_root_path,))
@@ -77,7 +86,15 @@ def build_all_files(data_root_path, log):
 
 
 # =====
-def print_orphaned_files(cache, data_roots, ignore_orphans, reduce_dirs, log_stdout, log_stderr):  # pylint: disable=too-many-locals
+def print_orphaned_files(  # pylint: disable=too-many-locals
+    cache: datacache.TorrentsCache,
+    data_roots: List[str],
+    ignore_orphans: List[str],
+    reduce_dirs: bool,
+    log_stdout: Log,
+    log_stderr: Log,
+) -> None:
+
     all_files = {}
     for data_root_path in data_roots:
         all_files.update(build_all_files(data_root_path, log_stderr))
@@ -97,14 +114,13 @@ def print_orphaned_files(cache, data_roots, ignore_orphans, reduce_dirs, log_std
         size = 0
         common_root = "\0"
         for path in tools.sorted_paths(files):
-            is_dir = (all_files[path] is None)
-            size += (all_files[path] or 0)
+            size += all_files[path].size
             if reduce_dirs:
                 if path.startswith(common_root + os.path.sep):
                     continue
                 else:
-                    common_root = (path if is_dir else "\0")
-            line = ("{blue}D" if is_dir else "{magenta}F") + "{reset} %s"
+                    common_root = (path if all_files[path].is_dir else "\0")
+            line = ("{blue}D" if all_files[path].is_dir else "{magenta}F") + "{reset} %s"
             log_stdout.print(line, (path,))
         log_stderr.info("Found {red}%d{reset} orphaned files = {red}%s{reset}",
                         (len(files), fmt.format_size(size)))
@@ -112,7 +128,14 @@ def print_orphaned_files(cache, data_roots, ignore_orphans, reduce_dirs, log_std
         log_stderr.info("No orphaned files found")
 
 
-def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
+def print_not_in_client(
+    client: BaseClient,
+    torrents_dir_path: str,
+    name_filter: str,
+    log_stdout: Log,
+    log_stderr: Log,
+) -> None:
+
     torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr)
     torrents = tcollection.by_hash(torrents)
 
@@ -129,7 +152,14 @@ def print_not_in_client(client, torrents_dir_path, name_filter, log_stdout, log_
         log_stderr.info("No unregistered files found")
 
 
-def print_missing_torrents(client, torrents_dir_path, name_filter, log_stdout, log_stderr):
+def print_missing_torrents(
+    client: BaseClient,
+    torrents_dir_path: str,
+    name_filter: str,
+    log_stdout: Log,
+    log_stderr: Log,
+) -> None:
+
     torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr)
     torrents = tcollection.by_hash(torrents)
 
@@ -146,12 +176,18 @@ def print_missing_torrents(client, torrents_dir_path, name_filter, log_stdout, l
         log_stderr.info("No torrents without torrent-files found")
 
 
-def print_duplicate_torrents(torrents_dir_path, name_filter, log_stdout, log_stderr):
-    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr)
-    torrents = tcollection.by_hash_with_dups(torrents)
+def print_duplicate_torrents(
+    torrents_dir_path: str,
+    name_filter: str,
+    log_stdout: Log,
+    log_stderr: Log,
+) -> None:
+
     torrents = {
         torrent_hash: variants
-        for (torrent_hash, variants) in torrents.items()
+        for (torrent_hash, variants) in tcollection.by_hash_with_dups(
+            tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr),
+        ).items()
         if len(variants) > 1
     }
     if len(torrents) != 0:
@@ -165,7 +201,7 @@ def print_duplicate_torrents(torrents_dir_path, name_filter, log_stdout, log_std
 
 # ===== Main =====
 @wrap_main
-def main():
+def main() -> None:
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
         prog="emfind",
@@ -204,7 +240,7 @@ def main():
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, False, sys.stderr) as log_stderr:
 
-            def get_client():
+            def get_client() -> BaseClient:
                 return get_configured_client(
                     config=config,
                     required=True,
@@ -212,7 +248,7 @@ def main():
                     log=log_stderr,
                 )
 
-            def get_cache(force_rebuild):
+            def get_cache(force_rebuild: bool) -> datacache.TorrentsCache:
                 return datacache.get_cache(
                     cache_path=config.emfind.cache_file,
                     force_rebuild=force_rebuild,
@@ -228,14 +264,14 @@ def main():
             elif options.cmd == "orphans":
                 print_orphaned_files(
                     cache=get_cache(False),
-                    data_roots=(config.core.data_root_dir,) + tuple(config.core.another_data_root_dirs),
+                    data_roots=[config.core.data_root_dir] + config.core.another_data_root_dirs,
                     ignore_orphans=config.emfind.ignore_orphans,
                     reduce_dirs=(not options.no_reduce_dirs),
                     log_stdout=log_stdout,
                     log_stderr=log_stderr,
                 )
 
-            elif options.cmd in ("not-in-client", "missing-torrents"):
+            elif options.cmd in ["not-in-client", "missing-torrents"]:
                 {
                     "not-in-client":    print_not_in_client,
                     "missing-torrents": print_missing_torrents,

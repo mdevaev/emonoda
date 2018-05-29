@@ -19,6 +19,9 @@
 
 import re
 
+from typing import Dict
+from typing import Any
+
 from ...optconf import Option
 
 from . import BaseTracker
@@ -48,17 +51,17 @@ class Plugin(BaseTracker, WithLogin, WithCheckScrape, WithFetchByDownloadId):
 
     # ===
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options({
             "timeout": Option(default=20.0, help="Timeout for HTTP client"),
         })
 
-    def login(self):
+    def login(self) -> None:
         self._login_using_post(
             url="https://{}/forum/login.php".format(self._NNM_DOMAIN),
             post={

@@ -20,22 +20,33 @@
 import socket
 import urllib.request
 import urllib.parse
+import urllib.error
 import http.client
+import http.cookiejar
 import time
+
+from typing import List
+from typing import Dict
+from typing import Type
+from typing import Optional
 
 from . import gziphandler
 from . import sockshandler
 
 
 # =====
-def build_opener(proxy_url=None, cookie_jar=None):
-    handlers = [gziphandler.GzipHandler]
+def build_opener(
+    proxy_url: str="",
+    cookie_jar: Optional[http.cookiejar.CookieJar]=None,
+) -> urllib.request.OpenerDirector:
 
-    if proxy_url is not None:
+    handlers: List[urllib.request.BaseHandler] = [gziphandler.GzipHandler()]
+
+    if proxy_url:
         scheme = (urllib.parse.urlparse(proxy_url).scheme or "").lower()
-        if scheme in ("http", "https"):
+        if scheme in ["http", "https"]:
             handlers.append(urllib.request.ProxyHandler({scheme: proxy_url}))
-        elif scheme in ("socks4", "socks5"):
+        elif scheme in ["socks4", "socks5"]:
             handlers.append(sockshandler.SocksHandler(proxy_url=proxy_url))
         else:
             raise RuntimeError("Invalid proxy protocol: {}".format(scheme))
@@ -47,16 +58,20 @@ def build_opener(proxy_url=None, cookie_jar=None):
 
 
 def read_url(
-    opener,
-    url,
-    data=None,
-    headers=None,
-    timeout=10,
-    retries=10,
-    retries_sleep=1,
-    retry_codes=(500, 502, 503),
-    retry_timeout=True,
-):
+    opener: urllib.request.OpenerDirector,
+    url: str,
+    data: Optional[bytes]=None,
+    headers: Optional[Dict[str, str]]=None,
+    timeout: float=10.0,
+    retries: int=10,
+    retries_sleep: float=1.0,
+    retry_codes: Optional[List[int]]=None,
+    retry_timeout: bool=True,
+) -> bytes:
+
+    if retry_codes is None:
+        retry_codes = [500, 502, 503]
+
     while True:
         try:
             request = urllib.request.Request(url, data, (headers or {}))
@@ -76,5 +91,6 @@ def read_url(
         except (http.client.IncompleteRead, http.client.BadStatusLine, ConnectionResetError) as err:
             if retries == 0:
                 raise
+
         time.sleep(retries_sleep)
         retries -= 1

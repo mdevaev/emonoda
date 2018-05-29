@@ -22,6 +22,14 @@ import os
 import contextlib
 import argparse
 
+from typing import TextIO
+from typing import Tuple
+from typing import List
+from typing import Dict
+from typing import Callable
+from typing import Generator
+from typing import Optional
+
 import pygments
 import pygments.lexers.data
 import pygments.formatters
@@ -33,30 +41,30 @@ from ..optconf import Option
 from ..optconf import build_raw_from_options
 from ..optconf.dumper import make_config_dump
 from ..optconf.loader import load_file as load_yaml_file
-from ..optconf.converters import (
-    as_string_or_none,
-    as_string_list,
-    as_key_value,
-    as_path,
-    as_paths_list,
-    as_path_or_none,
-    as_8int_or_none,
-)
+from ..optconf.converters import as_string_list
+from ..optconf.converters import as_key_value
+from ..optconf.converters import as_path
+from ..optconf.converters import as_paths_list
+from ..optconf.converters import as_path_or_empty
+from ..optconf.converters import as_8int
 
-from ..plugins import get_client_class
-from ..plugins import get_tracker_class
-from ..plugins import get_confetti_class
+from ..plugins.clients import get_client_class
+from ..plugins.trackers import get_tracker_class
+from ..plugins.confetti import get_confetti_class
 
+from ..plugins.trackers import BaseTracker
 from ..plugins.trackers import WithLogin as F_WithLogin
 from ..plugins.trackers import WithCaptcha as F_WithCaptcha
 from ..plugins.trackers import WithCheckTime as F_WithCheckTime
+from ..plugins.clients import BaseClient
 from ..plugins.clients import WithCustoms as C_WithCustoms
+from ..plugins.confetti import BaseConfetti
 
-from .. import cli
+from ..cli import Log
 
 
 # =====
-def init():
+def init() -> Tuple[argparse.ArgumentParser, List[str], Section]:
     args_parser = argparse.ArgumentParser(add_help=False)
     args_parser.add_argument("-c", "--config", dest="config_file_path", default="~/.config/emonoda.yaml", metavar="<file>")
     args_parser.add_argument("-o", "--set-options", dest="set_options", default=[], nargs="+")
@@ -72,7 +80,7 @@ def init():
     scheme = _get_config_scheme()
     config = make_config(raw_config, scheme)
 
-    if config.core.client is not None:
+    if config.core.client:
         client_scheme = get_client_class(config.core.client).get_options()
         scheme["client"] = client_scheme
 
@@ -106,39 +114,37 @@ def init():
     return (args_parser, remaining, config)
 
 
-def wrap_main(method):
-    def wrap():
+def wrap_main(method: Callable[..., None]) -> Callable[..., None]:
+    def wrap() -> None:
         try:
-            return method()
+            method()
         except (SystemExit, KeyboardInterrupt):
             sys.exit(1)
     return wrap
 
 
-def _merge_dicts(dest, src, path=None):
-    if path is None:
-        path = []
+def _merge_dicts(dest: Dict, src: Dict) -> None:
     for key in src:
         if key in dest:
             if isinstance(dest[key], dict) and isinstance(src[key], dict):
-                _merge_dicts(dest[key], src[key], list(path) + [str(key)])
+                _merge_dicts(dest[key], src[key])
                 continue
         dest[key] = src[key]
 
 
 # =====
 @contextlib.contextmanager
-def get_configured_log(config, quiet, output):
-    log = cli.Log(config.core.use_colors, config.core.force_colors, quiet, output)
+def get_configured_log(config: Section, quiet: bool, output: TextIO) -> Generator[Log, None, None]:
+    log = Log(config.core.use_colors, config.core.force_colors, quiet, output)
     try:
         yield log
     finally:
         log.finish()
 
 
-def get_configured_client(config, required, with_customs, log):
+def get_configured_client(config: Section, required: bool, with_customs: bool, log: Log) -> Optional[BaseClient]:
     name = config.core.client
-    if name is not None:
+    if name:
         log.info("Enabling the client {blue}%s{reset} ...", (name,), one_line=True)
         try:
             cls = get_client_class(name)
@@ -156,7 +162,14 @@ def get_configured_client(config, required, with_customs, log):
         return None
 
 
-def get_configured_trackers(config, captcha_decoder, only, exclude, log):
+def get_configured_trackers(
+    config: Section,
+    captcha_decoder: Callable[[str], str],
+    only: List[str],
+    exclude: List[str],
+    log: Log,
+) -> List[BaseTracker]:
+
     to_init = set(config.trackers).difference(exclude)
     if len(only) != 0:
         to_init = to_init.intersection(only)
@@ -196,8 +209,8 @@ def get_configured_trackers(config, captcha_decoder, only, exclude, log):
     return trackers
 
 
-def get_configured_confetti(config, log):
-    senders = []
+def get_configured_confetti(config: Section, log: Log) -> List[BaseConfetti]:
+    senders: List[BaseConfetti] = []
     for name in sorted(config.confetti):
         log.info("Enabling the confetti {blue}%s{reset} ...", (name,), one_line=True)
         cls = get_confetti_class(name)
@@ -211,12 +224,12 @@ def get_configured_confetti(config, log):
 
 
 # =====
-def _get_config_scheme():
+def _get_config_scheme() -> Dict:
     return {
         "core": {
-            "client":        Option(default=None, type=as_string_or_none, help="The name of plugin for torrent client"),
+            "client":        Option(default="", help="The name of plugin for torrent client"),
             "torrents_dir":  Option(default=".", type=as_path, help="Path to directory with torrent files"),
-            "data_root_dir": Option(default="~/Downloads", type=as_path, help="Path to root directory with data of torrents"),
+            "data_root_dir": Option(default="~/Downloads", type=as_path_or_empty, help="Path to root directory with data of torrents"),
             "another_data_root_dirs": Option(default=[], type=as_paths_list, help="Paths to another data directories"),
             "use_colors":    Option(default=True, help="Enable colored output"),
             "force_colors":  Option(default=False, help="Always use the coloring"),
@@ -224,7 +237,7 @@ def _get_config_scheme():
 
         "emupdate": {
             "name_filter":   Option(default="*.torrent", help="Update only filtered torrent files"),
-            "backup_dir":    Option(default=None, type=as_path_or_none, help="Backup old torrent files after update here"),
+            "backup_dir":    Option(default="", type=as_path_or_empty, help="Backup old torrent files after update here"),
             "backup_suffix": Option(default=".%Y.%m.%d-%H:%M:%S.bak", help="Append this suffix to backuped file"),
             "save_customs":  Option(default=[], type=as_string_list, help="Save client custom fields after update if supports"),
             "set_customs":   Option(default={}, type=as_key_value, help="Set client custom fileds after update if supports"),
@@ -239,12 +252,12 @@ def _get_config_scheme():
         },
 
         "emload": {
-            "mkdir_mode":  Option(default=None, type=as_8int_or_none, help="Permission for new directories"),
+            "mkdir_mode":  Option(default=-1, type=as_8int, help="Permission for new directories"),
             "set_customs": Option(default={}, type=as_key_value, help="Set client custom fileds after update if supports")
         },
 
         "emfind": {
-            "cache_file":  Option(default="~/.cache/emfind.json", type=as_path, help="Torrents cache"),
+            "cache_file":  Option(default="~/.cache/emfind.pk", type=as_path, help="Torrents cache"),
             "name_filter": Option(default="*.torrent", help="Cache only filtered torrent files"),
             "ignore_orphans": Option(default=[], type=as_paths_list, help="Ignore these paths on the final analyse"),
         },

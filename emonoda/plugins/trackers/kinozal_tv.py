@@ -21,6 +21,13 @@ import re
 
 from datetime import datetime
 
+from typing import Dict
+from typing import Any
+
+from ...optconf import Option
+
+from ...tfile import Torrent
+
 from . import BaseTracker
 from . import WithLogin
 from . import WithCheckTime
@@ -48,15 +55,15 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
 
     # ===
 
-    def __init__(self, **kwargs):  # pylint: disable=super-init-not-called
+    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
 
     @classmethod
-    def get_options(cls):
+    def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
 
-    def init_tzinfo(self):
+    def init_tzinfo(self) -> None:
         timezone = None
         page = self._decode(self._read_url(self._TIMEZONE_URL))
         delta_match = self._TIMEZONE_REGEXP.search(page)
@@ -68,49 +75,44 @@ class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
                 timezone = self._TIMEZONE_PREFIX + str(timezone_gmt_number)
         self._tzinfo = self._select_tzinfo(timezone)
 
-    def fetch_time(self, torrent):
+    def fetch_time(self, torrent: Torrent) -> int:
         self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment()))
-
-        for label in ("Обновлен", "Залит"):
-            date_match = re.search(r"<li>%s<span class=\"floatright green n\">"
-                                   r"(\d{1,2}) ([А-Яа-я]{3,8}) (\d{4}) в (\d{2}:\d{2})"
-                                   r"</span></li>" % (label), page)
-            if date_match is not None:
-                break
-        self._assert_logic(date_match is not None, "Upload date not found")
-
-        months = {
-            "января":   "01",
-            "февраля":  "02",
-            "марта":    "03",
-            "апреля":   "04",
-            "мая":      "05",
-            "июня":     "06",
-            "июля":     "07",
-            "августа":  "08",
-            "сентября": "09",
-            "октября":  "10",
-            "ноября":   "11",
-            "декабря":  "12",
-        }
+        date_match = self._assert_logic_re_search(
+            regexp=re.compile(r"<li>(Обновлен|Залит)<span class=\"floatright green n\">"
+                              r"(\d{1,2}) ([А-Яа-я]{3,8}) (\d{4}) в (\d{2}:\d{2})</span></li>"),
+            text=self._decode(self._read_url(torrent.get_comment())),
+            msg="Upload date not found",
+        )
         date_str = "%s %s %s %s %s" % (
-            date_match.group(1),  # Day
-            months[date_match.group(2)],  # Month
-            date_match.group(3),  # Year
-            date_match.group(4),  # Time
+            date_match.group(2),  # Day
+            {
+                "января":   "01",
+                "февраля":  "02",
+                "марта":    "03",
+                "апреля":   "04",
+                "мая":      "05",
+                "июня":     "06",
+                "июля":     "07",
+                "августа":  "08",
+                "сентября": "09",
+                "октября":  "10",
+                "ноября":   "11",
+                "декабря":  "12",
+            }[date_match.group(3)],  # Month
+            date_match.group(4),  # Year
+            date_match.group(5),  # Time
             datetime.now(self._tzinfo).strftime("%z")  # Timezone offset
         )
         upload_time = int(datetime.strptime(date_str, "%d %m %Y %H:%M %z").strftime("%s"))
         return upload_time
 
-    def login(self):
+    def login(self) -> None:
         self._login_using_post(
             url="http://kinozal.tv/takelogin.php",
             post={
                 "username": self._encode(self._user),
                 "password": self._encode(self._passwd),
-                "returnto": "",
+                "returnto": b"",
             },
             ok_text="href=\"/my.php\"",
         )

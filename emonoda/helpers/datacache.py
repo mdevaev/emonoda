@@ -18,13 +18,40 @@
 
 
 import os
-import json
+import pickle
+
+from typing import Dict
+from typing import NamedTuple
+
+from ..plugins.clients import BaseClient
+
+from ..tfile import TorrentEntryAttrs
+
+from ..cli import Log
 
 from . import tcollection
 
 
 # =====
-def get_cache(cache_path, force_rebuild, client, torrents_dir_path, name_filter, log):
+class CacheEntryAttrs(NamedTuple):
+    files: Dict[str, TorrentEntryAttrs]
+    prefix: str
+
+
+class TorrentsCache(NamedTuple):
+    version: int
+    torrents: Dict[str, CacheEntryAttrs]
+
+
+def get_cache(
+    cache_path: str,
+    force_rebuild: bool,
+    client: BaseClient,
+    torrents_dir_path: str,
+    name_filter: str,
+    log: Log,
+) -> TorrentsCache:
+
     cache = _read(cache_path, force_rebuild, log)
     if _update(cache, client, torrents_dir_path, name_filter, log):
         _write(cache, cache_path, log)
@@ -32,53 +59,58 @@ def get_cache(cache_path, force_rebuild, client, torrents_dir_path, name_filter,
 
 
 # =====
-def _read(path, force_rebuild, log):
-    fallback = {
-        "version":  0,
-        "torrents": {},
-    }
+def _read(path: str, force_rebuild: bool, log: Log) -> TorrentsCache:
+    fallback = TorrentsCache(
+        version=0,
+        torrents={},
+    )
     if force_rebuild or not os.path.exists(path):
         return fallback
 
     log.info("Reading the cache from {cyan}%s{reset} ...", (path,))
-    with open(path) as cache_file:
+    with open(path, "rb") as cache_file:
         try:
-            cache = json.loads(cache_file.read())
-            if cache["version"] != fallback["version"]:
+            cache_low = pickle.load(cache_file)
+            if cache_low["version"] != fallback.version:
                 return fallback
             else:
-                return cache
-        except (KeyError, ValueError):
-            log.error("The cache was damaged - ingored: {red}%s{reset}", (path,))
+                return TorrentsCache(
+                    version=cache_low["version"],
+                    torrents=pickle.loads(cache_low["torrents_pk"]),
+                )
+        except (KeyError, ValueError, pickle.UnpicklingError):
+            log.error("Can't unpickle cache file - ingored: {red}%s{reset}", (path,))
             return fallback
 
 
-def _write(cache, path, log):
+def _write(cache: TorrentsCache, path: str, log: Log) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     log.info("Writing the cache to {cyan}%s{reset} ...", (path,))
-    with open(path, "w") as cache_file:
-        cache_file.write(json.dumps(cache))
+    with open(path, "wb") as cache_file:
+        pickle.dump({
+            "version": cache.version,
+            "torrents_pk": pickle.dumps(cache.torrents),
+        }, cache_file)
 
 
-def _update(cache, client, path, name_filter, log):
+def _update(cache: TorrentsCache, client: BaseClient, path: str, name_filter: str, log: Log) -> bool:
     log.info("Fetching all hashes from client ...")
     hashes = client.get_hashes()
 
     log.info("Validating the cache ...")
 
     # --- Old ---
-    to_remove = tuple(sorted(set(cache["torrents"]).difference(hashes)))
+    to_remove = sorted(set(cache.torrents).difference(hashes))
     if len(to_remove) != 0:
         for torrent_hash in to_remove:
-            cache["torrents"].pop(torrent_hash)
+            cache.torrents.pop(torrent_hash)
         log.info("Removed {magenta}%d{reset} obsolete hashes from cache", (len(to_remove),))
 
     # --- New ---
-    to_add = tuple(sorted(set(hashes).difference(cache["torrents"])))
+    to_add = sorted(set(hashes).difference(cache.torrents))
     added = 0
     if len(to_add) != 0:
-        torrents = tcollection.load_from_dir(path, name_filter, True, log)
-        torrents = tcollection.by_hash(torrents)
+        torrents = tcollection.by_hash(tcollection.load_from_dir(path, name_filter, True, log))
 
         if not log.isatty():
             log.info("Adding files for the new {yellow}%d{reset} hashes ...", (len(to_add),))
@@ -90,12 +122,10 @@ def _update(cache, client, path, name_filter, log):
         ):
             torrent = torrents.get(torrent_hash)
             if torrent is not None:
-                cache["torrents"][torrent_hash] = {
-                    # "name":      os.path.basename(torrent.get_path()),
-                    # "is_single": torrent.is_single_file(),
-                    "files":     torrent.get_files(),
-                    "prefix":    client.get_data_prefix(torrent),
-                }
+                cache.torrents[torrent_hash] = CacheEntryAttrs(
+                    files=torrent.get_files(),
+                    prefix=client.get_data_prefix(torrent),
+                )
                 added += 1
             else:
                 log.error("Not cached - missing torrent for: {red}%s{reset} -- %s",
