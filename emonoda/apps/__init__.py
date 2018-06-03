@@ -193,10 +193,10 @@ def get_configured_trackers(
             tracker.test()
             if T_WithLogin in bases:
                 log.info("Enabling the tracker {blue}%s{reset}: {yellow}logging in{reset} ...", (name,), one_line=True)
-                tracker.login()
+                tracker.login()  # type: ignore
             if T_WithCheckTime in bases:
                 log.info("Enabling the tracker {blue}%s{reset}: {yellow}configuring timezone{reset} ...", (name,), one_line=True)
-                tracker.init_tzinfo()
+                tracker.init_tzinfo()  # type: ignore
             log.info("Tracker {blue}%s{reset} is {green}ready{reset}", (name,))
         except Exception as err:
             log.error("Can't init tracker {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))

@@ -35,11 +35,10 @@ from ...tfile import Torrent
 
 from . import WithLogin
 from . import WithCheckTime
-from . import WithFetchCustom
 
 
 # =====
-class Plugin(WithLogin, WithCheckTime, WithFetchCustom):
+class Plugin(WithLogin, WithCheckTime):
     PLUGIN_NAME = "tr.anidub.com"
 
     _SITE_VERSION = 2

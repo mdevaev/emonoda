@@ -136,8 +136,12 @@ def print_not_in_client(
     log_stderr: Log,
 ) -> None:
 
-    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr)
-    torrents = tcollection.by_hash(torrents)
+    torrents = tcollection.by_hash(tcollection.load_from_dir(
+        path=torrents_dir_path,
+        name_filter=name_filter,
+        precalculate_hashes=True,
+        log=log_stderr,
+    ))
 
     log_stderr.info("Fetching all hashes from client ...")
     client_hashes = client.get_hashes()
@@ -160,8 +164,12 @@ def print_missing_torrents(
     log_stderr: Log,
 ) -> None:
 
-    torrents = tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr)
-    torrents = tcollection.by_hash(torrents)
+    torrents = tcollection.by_hash(tcollection.load_from_dir(
+        path=torrents_dir_path,
+        name_filter=name_filter,
+        precalculate_hashes=True,
+        log=log_stderr,
+    ))
 
     log_stderr.info("Fetching all hashes from client ...")
     client_hashes = client.get_hashes()
@@ -185,9 +193,12 @@ def print_duplicate_torrents(
 
     torrents = {
         torrent_hash: variants
-        for (torrent_hash, variants) in tcollection.by_hash_with_dups(
-            tcollection.load_from_dir(torrents_dir_path, name_filter, True, log_stderr),
-        ).items()
+        for (torrent_hash, variants) in tcollection.by_hash_with_dups(tcollection.load_from_dir(
+            path=torrents_dir_path,
+            name_filter=name_filter,
+            precalculate_hashes=True,
+            log=log_stderr,
+        )).items()
         if len(variants) > 1
     }
     if len(torrents) != 0:
@@ -241,7 +252,7 @@ def main() -> None:
         with get_configured_log(config, False, sys.stderr) as log_stderr:
 
             def get_client() -> BaseClient:
-                return get_configured_client(
+                return get_configured_client(  # type: ignore
                     config=config,
                     required=True,
                     with_customs=False,

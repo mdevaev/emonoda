@@ -32,7 +32,7 @@ from ..cli import Log
 
 
 # =====
-def load_from_dir(path: str, name_filter: str, calculate: bool, log: Log) -> Dict[str, Optional[Torrent]]:
+def load_from_dir(path: str, name_filter: str, precalculate_hashes: bool, log: Log) -> Dict[str, Optional[Torrent]]:
     if not log.isatty():
         log.info("Loading torrents from {cyan}%s/{yellow}%s{reset} ...", (path, name_filter))
 
@@ -46,7 +46,7 @@ def load_from_dir(path: str, name_filter: str, calculate: bool, log: Log) -> Dic
             file_path = os.path.abspath(os.path.join(path, name))
             try:
                 torrents[name] = Torrent(path=file_path)
-                if calculate:
+                if precalculate_hashes:
                     torrents[name].get_hash()  # type: ignore
             except ValueError:
                 log.error("Found broken torrent: {cyan}%s/{yellow}%s{reset}", (path, name))

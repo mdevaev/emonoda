@@ -44,7 +44,7 @@ class _FakeTorrent(Torrent):
         return "Test, test, test"
 
 
-class _FakeTracker(BaseTracker):
+class _FakeTracker(BaseTracker):  # pylint: disable=abstract-method
     PLUGIN_NAME = "example.org"
 
     def __init__(self) -> None:  # pylint: disable=super-init-not-called

@@ -31,11 +31,10 @@ from ...tfile import Torrent
 from . import WithLogin
 from . import WithCaptcha
 from . import WithCheckHash
-from . import WithFetchCustom
 
 
 # =====
-class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom):
+class Plugin(WithLogin, WithCaptcha, WithCheckHash):
     PLUGIN_NAME = "rutracker.org"
 
     _SITE_VERSION = 5

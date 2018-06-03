@@ -38,6 +38,7 @@ from typing import Type
 from typing import Any
 
 from ..plugins.clients import BaseClient
+from ..plugins.clients import WithCustoms
 
 from ..plugins.trackers import TrackerError
 from ..plugins.trackers import WithCheckHash
@@ -286,8 +287,8 @@ def client_hooks(
 
     if client is not None:
         prefix = client.get_data_prefix(torrent)
-        if len(to_save_customs) != 0:
-            customs = client.get_customs(torrent, to_save_customs)
+        if WithCustoms in client.get_bases() and len(to_save_customs) != 0:
+            customs = client.get_customs(torrent, to_save_customs)  # type: ignore
         else:
             customs = {}
         meta_file_path = tools.make_sub_name(torrent.get_path(), ".", ".meta")
@@ -307,7 +308,7 @@ def client_hooks(
             for (key, value) in to_set_customs.items()
         })
         if len(customs) != 0:
-            client.set_customs(torrent, customs)
+            client.set_customs(torrent, customs)  # type: ignore
         os.remove(meta_file_path)
 
 
@@ -368,14 +369,14 @@ def update(  # pylint: disable=too-many-branches,too-many-locals
                 tracker_bases = op.tracker.get_bases()
 
                 if WithCheckHash in tracker_bases:
-                    need_update = (op.tracker.fetch_hash(op.torrent) != op.torrent.get_hash())
+                    need_update = (op.tracker.fetch_hash(op.torrent) != op.torrent.get_hash())  # type: ignore
 
                 elif WithCheckScrape in tracker_bases:
-                    need_update = (not op.tracker.is_registered(op.torrent))
+                    need_update = (not op.tracker.is_registered(op.torrent))  # type: ignore
 
                 elif WithCheckTime in tracker_bases:
                     time_info = TorrentTimeInfo(op.torrent).check_and_fill()
-                    tracker_time = op.tracker.fetch_time(op.torrent)
+                    tracker_time = op.tracker.fetch_time(op.torrent)  # type: ignore
                     need_update = (tracker_time > time_info.read())
 
                 else:
@@ -463,7 +464,7 @@ def main() -> None:
             torrents = tcollection.load_from_dir(
                 path=config.core.torrents_dir,
                 name_filter=(options.name_filter or config.emupdate.name_filter),
-                calculate=True,
+                precalculate_hashes=True,
                 log=log_stderr,
             )
 

@@ -25,6 +25,7 @@ from typing import List
 from typing import Dict
 
 from ..plugins.clients import BaseClient
+from ..plugins.clients import WithCustoms
 
 from ..helpers import tcollection
 
@@ -93,8 +94,8 @@ def load_torrents(
             link_data(torrent, data_dir_path, link_to_path, mkdir_mode)
 
         client.load_torrent(torrent, data_dir_path)
-        if len(customs) != 0:
-            client.set_customs(torrent, {
+        if WithCustoms in client.get_bases() and len(customs) != 0:
+            client.set_customs(torrent, {  # type: ignore
                 key: fmt.format_now(value)
                 for (key, value) in customs.items()
             })

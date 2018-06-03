@@ -29,11 +29,10 @@ from ...tfile import Torrent
 
 from . import WithLogin
 from . import WithCheckHash
-from . import WithFetchCustom
 
 
 # =====
-class Plugin(WithLogin, WithCheckHash, WithFetchCustom):
+class Plugin(WithLogin, WithCheckHash):
     PLUGIN_NAME = "pravtor.ru"
 
     _SITE_VERSION = 0

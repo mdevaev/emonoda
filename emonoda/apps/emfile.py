@@ -33,6 +33,7 @@ from typing import Any
 
 from ..plugins.clients import NoSuchTorrentError
 from ..plugins.clients import BaseClient
+from ..plugins.clients import WithCustoms
 
 from ..helpers import tcollection
 
@@ -107,8 +108,8 @@ def format_client_prefix(torrent: Torrent, client: Optional[BaseClient]) -> str:
     return _format_client_method(torrent, client, "get_data_prefix")
 
 
-def format_client_customs(torrent: Torrent, client: Optional[BaseClient], customs: List[str]) -> str:
-    assert client is not None, "Required client"
+def format_client_customs(torrent: Torrent, client: Optional[WithCustoms], customs: List[str]) -> str:
+    assert client and WithCustoms in client.get_bases(), "Required client with custom data fields"
     if len(customs) != 0:
         try:
             return " ".join(sorted(
@@ -154,8 +155,8 @@ def print_pretty_meta(torrent: Torrent, client: Optional[BaseClient], customs: L
     log.print("{blue}Comment:{reset}        %s", (torrent.get_comment(),))
     if client is not None:
         log.print("{blue}Client path:{reset}    %s", (format_client_path(torrent, client),))
-        if len(customs) != 0:
-            log.print("{blue}Client customs:{reset} %s", (format_client_customs(torrent, client, customs),))
+        if WithCustoms in client.get_bases() and len(customs) != 0:
+            log.print("{blue}Client customs:{reset} %s", (format_client_customs(torrent, client, customs),))  # type: ignore
     if torrent.is_single_file():
         log.print("{blue}Provides:{reset}       %s", (tuple(torrent.get_files())[0],))
     else:

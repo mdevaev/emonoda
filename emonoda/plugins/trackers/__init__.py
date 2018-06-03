@@ -140,6 +140,9 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def is_matched_for(self, torrent: Torrent) -> bool:
         return (self._COMMENT_REGEXP.match(torrent.get_comment()) is not None)
 
+    def fetch_new_data(self, torrent: Torrent) -> bytes:
+        raise NotImplementedError
+
     # ===
 
     def _encode(self, arg: str) -> bytes:
@@ -302,13 +305,13 @@ class WithLogin(BaseTracker):
         return match  # type: ignore
 
 
-class WithCaptcha(BaseTracker):
+class WithCaptcha(BaseTracker):  # pylint: disable=abstract-method
     def __init__(self, captcha_decoder: Callable[[str], str], **_: Any) -> None:  # pylint: disable=super-init-not-called
         self._captcha_decoder = captcha_decoder
 
 
 # =====
-class WithCheckHash(BaseTracker):
+class WithCheckHash(BaseTracker):  # pylint: disable=abstract-method
     _TORRENT_HASH_URL = __D_TORRENT_HASH_URL = "{torrent_id}"
     _TORRENT_HASH_REGEXP = __D_TORRENT_HASH_REGEXP = re.compile(r"(?P<torrent_hash>.*)")
 
@@ -325,7 +328,7 @@ class WithCheckHash(BaseTracker):
         ).group("torrent_hash").strip().lower()
 
 
-class WithCheckScrape(BaseTracker):
+class WithCheckScrape(BaseTracker):  # pylint: disable=abstract-method
     _TORRENT_SCRAPE_URL = __D_TORRENT_SCRAPE_URL = "{scrape_hash}"
 
     def __init__(self, client_agent: str, **_: Any) -> None:  # pylint: disable=super-init-not-called
@@ -443,14 +446,6 @@ class WithFetchByDownloadId(BaseTracker):
             url=self._DOWNLOAD_URL.format(download_id=dl_id),
             data=self._DOWNLOAD_PAYLOAD,
         ))
-
-
-class WithFetchCustom(BaseTracker):
-    def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
-        pass
-
-    def fetch_new_data(self, torrent: Torrent) -> bytes:
-        raise NotImplementedError
 
 
 # =====

@@ -107,7 +107,8 @@ class Torrent:
 
     # ===
 
-    def get_path(self) -> Optional[str]:
+    def get_path(self) -> str:
+        assert self._path, self
         return self._path
 
     def get_data(self) -> bytes:
