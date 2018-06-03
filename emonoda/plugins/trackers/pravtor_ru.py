@@ -27,14 +27,13 @@ from ...optconf import Option
 
 from ...tfile import Torrent
 
-from . import BaseTracker
 from . import WithLogin
 from . import WithCheckHash
 from . import WithFetchCustom
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchCustom):
+class Plugin(WithLogin, WithCheckHash, WithFetchCustom):
     PLUGIN_NAME = "pravtor.ru"
 
     _SITE_VERSION = 0

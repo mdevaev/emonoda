@@ -28,7 +28,6 @@ from ...optconf import Option
 
 from ...tfile import Torrent
 
-from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
 from . import WithCheckTime
@@ -36,7 +35,7 @@ from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByDownloadId):
+class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByDownloadId):
     PLUGIN_NAME = "trec.to"
 
     _SITE_VERSION = 1

@@ -32,12 +32,11 @@ from ... import web
 from ... import tools
 
 from . import ResultsType
-from . import BaseConfetti
 from . import WithProxy
 
 
 # =====
-class Plugin(BaseConfetti, WithProxy):
+class Plugin(WithProxy):
     PLUGIN_NAME = "nma"
 
     def __init__(  # pylint: disable=super-init-not-called

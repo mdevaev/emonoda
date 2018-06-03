@@ -28,7 +28,6 @@ from ...optconf import Option
 
 from ...tfile import Torrent
 
-from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
 from . import WithCheckHash
@@ -36,7 +35,7 @@ from . import WithFetchCustom
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom):
+class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithFetchCustom):
     PLUGIN_NAME = "rutracker.org"
 
     _SITE_VERSION = 5

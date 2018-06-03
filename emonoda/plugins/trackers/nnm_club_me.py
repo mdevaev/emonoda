@@ -24,14 +24,13 @@ from typing import Any
 
 from ...optconf import Option
 
-from . import BaseTracker
 from . import WithLogin
 from . import WithCheckScrape
 from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCheckScrape, WithFetchByDownloadId):
+class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId):
     PLUGIN_NAME = _NNM_DOMAIN = "nnm-club.me"
 
     _SITE_VERSION = 4

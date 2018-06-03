@@ -53,9 +53,9 @@ from ..plugins.trackers import get_tracker_class
 from ..plugins.confetti import get_confetti_class
 
 from ..plugins.trackers import BaseTracker
-from ..plugins.trackers import WithLogin as F_WithLogin
-from ..plugins.trackers import WithCaptcha as F_WithCaptcha
-from ..plugins.trackers import WithCheckTime as F_WithCheckTime
+from ..plugins.trackers import WithLogin as T_WithLogin
+from ..plugins.trackers import WithCaptcha as T_WithCaptcha
+from ..plugins.trackers import WithCheckTime as T_WithCheckTime
 from ..plugins.clients import BaseClient
 from ..plugins.clients import WithCustoms as C_WithCustoms
 from ..plugins.confetti import BaseConfetti
@@ -184,17 +184,17 @@ def get_configured_trackers(
         cls = get_tracker_class(name)
         bases = cls.get_bases()
         kwargs = dict(config.trackers[name])
-        if F_WithCaptcha in cls.get_bases():
+        if T_WithCaptcha in cls.get_bases():
             kwargs["captcha_decoder"] = captcha_decoder
         tracker = cls(**kwargs)
 
         try:
             log.info("Enabling the tracker {blue}%s{reset}: {yellow}testing{reset} ...", (name,), one_line=True)
             tracker.test()
-            if F_WithLogin in bases:
+            if T_WithLogin in bases:
                 log.info("Enabling the tracker {blue}%s{reset}: {yellow}logging in{reset} ...", (name,), one_line=True)
                 tracker.login()
-            if F_WithCheckTime in bases:
+            if T_WithCheckTime in bases:
                 log.info("Enabling the tracker {blue}%s{reset}: {yellow}configuring timezone{reset} ...", (name,), one_line=True)
                 tracker.init_tzinfo()
             log.info("Tracker {blue}%s{reset} is {green}ready{reset}", (name,))

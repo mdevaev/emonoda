@@ -32,17 +32,18 @@ from ..optconf import Option
 
 
 # =====
-class _PluginEntity:
+class BasePlugin:
+    PLUGIN_NAME = ""
+
+    def __init__(self, **_: Any) -> None:
+        pass
+
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
         return {}
 
-
-class BasePlugin(_PluginEntity):
-    PLUGIN_NAME = ""
-
     @classmethod
-    def get_bases(cls) -> List[Type[_PluginEntity]]:
+    def get_bases(cls) -> "List[Type[BasePlugin]]":
         return cls.__get_bases(cls.__mro__)
 
     def _init_bases(self, **kwargs: Any) -> None:
@@ -59,15 +60,11 @@ class BasePlugin(_PluginEntity):
         return merged
 
     @staticmethod
-    def __get_bases(mro: Tuple[Type, ...]) -> List[Type[_PluginEntity]]:
+    def __get_bases(mro: Tuple[Type, ...]) -> "List[Type[BasePlugin]]":
         return [
             cls for cls in mro
-            if set(cls.__bases__).intersection((BasePlugin, BaseExtension))
-        ]
-
-
-class BaseExtension(_PluginEntity):
-    pass
+            if issubclass(cls, BasePlugin)
+        ][1:]
 
 
 # =====

@@ -24,13 +24,12 @@ from typing import Any
 
 from ...optconf import Option
 
-from . import BaseTracker
 from . import WithCheckHash
 from . import WithFetchByTorrentId
 
 
 # =====
-class Plugin(BaseTracker, WithCheckHash, WithFetchByTorrentId):
+class Plugin(WithCheckHash, WithFetchByTorrentId):
     PLUGIN_NAME = "rutor.info"
 
     _SITE_VERSION = 5

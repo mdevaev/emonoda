@@ -47,7 +47,6 @@ from ...tfile import decode_torrent_data
 from ... import web
 
 from .. import BasePlugin
-from .. import BaseExtension
 from .. import get_classes
 
 
@@ -89,7 +88,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     _COMMENT_REGEXP = __D_COMMENT_REGEXP = re.compile(r"(?P<torrent_id>.*)")
 
-    def __init__(
+    def __init__(  # pylint: disable=super-init-not-called
         self,
         timeout: float,
         retries: int,
@@ -270,8 +269,8 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         )
 
 
-class WithLogin(BaseExtension):
-    def __init__(self, user: str, passwd: str, **_: Any) -> None:
+class WithLogin(BaseTracker):
+    def __init__(self, user: str, passwd: str, **_: Any) -> None:  # pylint: disable=super-init-not-called
         self._user = user
         self._passwd = passwd
 
@@ -287,7 +286,7 @@ class WithLogin(BaseExtension):
 
     def _login_using_post(self, url: str, post: Dict[str, bytes], ok_text: str) -> None:
         self._assert_required_user_passwd()
-        page = self._decode(self._read_url(url, data=self._encode(urllib.parse.urlencode(post))))  # pylint: disable=no-member
+        page = self._decode(self._read_url(url, data=self._encode(urllib.parse.urlencode(post))))
         self._assert_auth(ok_text in page, "Invalid user or password")
 
     def _assert_auth(self, *args: Any) -> None:
@@ -303,22 +302,21 @@ class WithLogin(BaseExtension):
         return match  # type: ignore
 
 
-class WithCaptcha(BaseExtension):
-    def __init__(self, captcha_decoder: Callable[[str], str], **_: Any) -> None:
+class WithCaptcha(BaseTracker):
+    def __init__(self, captcha_decoder: Callable[[str], str], **_: Any) -> None:  # pylint: disable=super-init-not-called
         self._captcha_decoder = captcha_decoder
 
 
 # =====
-class WithCheckHash(BaseExtension):
+class WithCheckHash(BaseTracker):
     _TORRENT_HASH_URL = __D_TORRENT_HASH_URL = "{torrent_id}"
     _TORRENT_HASH_REGEXP = __D_TORRENT_HASH_REGEXP = re.compile(r"(?P<torrent_hash>.*)")
 
-    def __init__(self, **_: Any) -> None:
+    def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
         assert self._TORRENT_HASH_URL != self.__D_TORRENT_HASH_URL
         assert self._TORRENT_HASH_REGEXP.pattern != self.__D_TORRENT_HASH_REGEXP.pattern
 
     def fetch_hash(self, torrent: Torrent) -> str:
-        # pylint: disable=no-member
         torrent_id = self._assert_match(torrent)
         return self._assert_logic_re_search(
             regexp=self._TORRENT_HASH_REGEXP,
@@ -327,10 +325,10 @@ class WithCheckHash(BaseExtension):
         ).group("torrent_hash").strip().lower()
 
 
-class WithCheckScrape(BaseExtension):
+class WithCheckScrape(BaseTracker):
     _TORRENT_SCRAPE_URL = __D_TORRENT_SCRAPE_URL = "{scrape_hash}"
 
-    def __init__(self, client_agent: str, **_: Any) -> None:
+    def __init__(self, client_agent: str, **_: Any) -> None:  # pylint: disable=super-init-not-called
         assert self._TORRENT_SCRAPE_URL != self.__D_TORRENT_SCRAPE_URL
 
         self._client_agent = client_agent
@@ -343,22 +341,22 @@ class WithCheckScrape(BaseExtension):
 
     def is_registered(self, torrent: Torrent) -> bool:
         # https://wiki.theory.org/BitTorrentSpecification#Tracker_.27scrape.27_Convention
-        self._assert_match(torrent)  # pylint: disable=no-member
-        data = self._assert_valid_data(self._read_url(  # pylint: disable=no-member
+        self._assert_match(torrent)
+        data = self._assert_valid_data(self._read_url(
             url=self._TORRENT_SCRAPE_URL.format(scrape_hash=torrent.get_scrape_hash()),
             headers={"User-Agent": self._client_agent},
         ), target="scrape")
         return (len(decode_torrent_data(data).get("files", {})) != 0)
 
 
-class WithCheckTime(BaseExtension):
+class WithCheckTime(BaseTracker):
     _TIMEZONE_URL = __D_TIMEZONE_URL = ""
     _TIMEZONE_REGEXP = __D_TIMEZONE_REGEXP = re.compile(r"(?P<torrent_hash>.*)")
     _TIMEZONE_PREFIX = __D_TIMEZONE_PREFIX = ""
 
     _TIMEZONE_STATIC = __D_TIMEZONE_STATIC = ""
 
-    def __init__(self, timezone: str, **_: Any) -> None:
+    def __init__(self, timezone: str, **_: Any) -> None:  # pylint: disable=super-init-not-called
         assert (
             self._TIMEZONE_URL != self.__D_TIMEZONE_URL
             and self._TIMEZONE_REGEXP.pattern != self.__D_TIMEZONE_REGEXP.pattern
@@ -382,7 +380,7 @@ class WithCheckTime(BaseExtension):
         if self._TIMEZONE_STATIC:
             timezone = self._TIMEZONE_STATIC
         else:
-            page = self._decode(self._read_url(self._TIMEZONE_URL))  # pylint: disable=no-member
+            page = self._decode(self._read_url(self._TIMEZONE_URL))
             timezone_match = self._TIMEZONE_REGEXP.search(page)
             if timezone_match is not None:
                 timezone = self._TIMEZONE_PREFIX + timezone_match.group("timezone").replace(" ", "")
@@ -401,20 +399,19 @@ class WithCheckTime(BaseExtension):
 
     def _get_default_tzinfo(self) -> datetime.tzinfo:
         msg = "Can't determine timezone of site, your must configure it manually"
-        self._assert_logic(bool(self._default_timezone), msg)  # pylint: disable=no-member
+        self._assert_logic(bool(self._default_timezone), msg)
         return pytz.timezone(self._default_timezone)
 
 
 # =====
-class WithFetchByTorrentId(BaseExtension):
+class WithFetchByTorrentId(BaseTracker):
     _DOWNLOAD_URL = __D_DOWNLOAD_URL = "{torrent_id}"
     _DOWNLOAD_PAYLOAD: Optional[bytes] = None
 
-    def __init__(self, **_: Any) -> None:
+    def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
         assert self._DOWNLOAD_URL != self.__D_DOWNLOAD_URL
 
     def fetch_new_data(self, torrent: Torrent) -> bytes:
-        # pylint: disable=no-member
         torrent_id = self._assert_match(torrent)
         return self._assert_valid_data(self._read_url(
             url=self._DOWNLOAD_URL.format(torrent_id=torrent_id),
@@ -422,19 +419,18 @@ class WithFetchByTorrentId(BaseExtension):
         ))
 
 
-class WithFetchByDownloadId(BaseExtension):
+class WithFetchByDownloadId(BaseTracker):
     _DOWNLOAD_ID_URL = __D_DOWNLOAD_ID_URL = "{torrent_id}"
     _DOWNLOAD_ID_REGEXP = __D_DOWNLOAD_ID_REGEXP = re.compile(r"(?P<download_id>.*)")
     _DOWNLOAD_URL = __D_DOWNLOAD_URL = "{download_id}"
     _DOWNLOAD_PAYLOAD: Optional[bytes] = None
 
-    def __init__(self, **_: Any) -> None:
+    def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
         assert self._DOWNLOAD_ID_URL != self.__D_DOWNLOAD_ID_URL
         assert self._DOWNLOAD_ID_REGEXP.pattern != self.__D_DOWNLOAD_ID_REGEXP.pattern
         assert self._DOWNLOAD_URL != self.__D_DOWNLOAD_URL
 
     def fetch_new_data(self, torrent: Torrent) -> bytes:
-        # pylint: disable=no-member
         torrent_id = self._assert_match(torrent)
 
         dl_id = self._assert_logic_re_search(
@@ -449,8 +445,8 @@ class WithFetchByDownloadId(BaseExtension):
         ))
 
 
-class WithFetchCustom(BaseExtension):
-    def __init__(self, **_: Any) -> None:
+class WithFetchCustom(BaseTracker):
+    def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
         pass
 
     def fetch_new_data(self, torrent: Torrent) -> bytes:

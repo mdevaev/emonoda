@@ -29,12 +29,11 @@ from ...optconf.converters import as_string_list
 from ... import web
 
 from . import ResultsType
-from . import BaseConfetti
 from . import WithProxy
 
 
 # =====
-class Plugin(BaseConfetti, WithProxy):
+class Plugin(WithProxy):
     PLUGIN_NAME = "pushover"
 
     def __init__(  # pylint: disable=super-init-not-called

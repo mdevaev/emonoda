@@ -33,14 +33,13 @@ from ...optconf import Option
 
 from ...tfile import Torrent
 
-from . import BaseTracker
 from . import WithLogin
 from . import WithCheckTime
 from . import WithFetchCustom
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchCustom):
+class Plugin(WithLogin, WithCheckTime, WithFetchCustom):
     PLUGIN_NAME = "tr.anidub.com"
 
     _SITE_VERSION = 2

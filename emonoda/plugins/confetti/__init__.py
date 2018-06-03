@@ -38,7 +38,6 @@ from ...plugins.trackers import BaseTracker  # FIXME
 from ...tfile import TorrentsDiff
 from ...tfile import Torrent
 
-from .. import BaseExtension
 from .. import BasePlugin
 from .. import get_classes
 
@@ -91,7 +90,7 @@ ResultsType = Dict[str, Dict[str, UpdateResult]]
 
 
 class BaseConfetti(BasePlugin):
-    def __init__(self, timeout: float, retries: int, retries_sleep: float, **_: Any) -> None:
+    def __init__(self, timeout: float, retries: int, retries_sleep: float, **_: Any) -> None:  # pylint: disable=super-init-not-called
         self._timeout = timeout
         self._retries = retries
         self._retries_sleep = retries_sleep
@@ -108,8 +107,8 @@ class BaseConfetti(BasePlugin):
         raise NotImplementedError
 
 
-class WithProxy(BaseExtension):
-    def __init__(self, proxy_url: str, **_: Any) -> None:
+class WithProxy(BaseConfetti):  # pylint: disable=abstract-method
+    def __init__(self, proxy_url: str, **_: Any) -> None:  # pylint: disable=super-init-not-called
         self._proxy_url = proxy_url
 
     @classmethod

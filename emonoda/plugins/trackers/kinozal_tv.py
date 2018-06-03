@@ -28,14 +28,13 @@ from ...optconf import Option
 
 from ...tfile import Torrent
 
-from . import BaseTracker
 from . import WithLogin
 from . import WithCheckTime
 from . import WithFetchByTorrentId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByTorrentId):
+class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId):
     PLUGIN_NAME = "kinozal.tv"
 
     _SITE_VERSION = 0

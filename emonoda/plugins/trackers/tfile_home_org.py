@@ -24,14 +24,13 @@ from typing import Any
 
 from ...optconf import Option
 
-from . import BaseTracker
 from . import WithLogin
 from . import WithCheckHash
 from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCheckHash, WithFetchByDownloadId):
+class Plugin(WithLogin, WithCheckHash, WithFetchByDownloadId):
     PLUGIN_NAME = "tfile-home.org"
 
     _SITE_VERSION = 6

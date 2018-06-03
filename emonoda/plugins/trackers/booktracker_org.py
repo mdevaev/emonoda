@@ -28,14 +28,13 @@ from ...optconf import Option
 
 from ...tfile import Torrent
 
-from . import BaseTracker
 from . import WithLogin
 from . import WithCheckTime
 from . import WithFetchByDownloadId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCheckTime, WithFetchByDownloadId):
+class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId):
     PLUGIN_NAME = "booktracker.org"
 
     _SITE_VERSION = 2

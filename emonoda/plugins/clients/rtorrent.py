@@ -31,7 +31,6 @@ from ...optconf import Option
 from ...tfile import TorrentEntryAttrs
 from ...tfile import Torrent
 
-from . import BaseClient
 from . import WithCustoms
 from . import NoSuchTorrentError
 from . import hash_or_torrent
@@ -45,7 +44,7 @@ _XMLRPC_UNKNOWN_HASH = -501
 
 # =====
 def _catch_unknown_torrent(method: Callable) -> Callable:
-    def wrap(self: BaseClient, *args: Any, **kwargs: Any) -> Any:
+    def wrap(self: WithCustoms, *args: Any, **kwargs: Any) -> Any:
         try:
             return method(self, *args, **kwargs)
         except xmlrpc.client.Fault as err:
@@ -55,7 +54,7 @@ def _catch_unknown_torrent(method: Callable) -> Callable:
     return wrap
 
 
-class Plugin(BaseClient, WithCustoms):
+class Plugin(WithCustoms):
     # API description: http://code.google.com/p/gi-torrent/wiki/rTorrent_XMLRPC_reference
 
     PLUGIN_NAME = "rtorrent"

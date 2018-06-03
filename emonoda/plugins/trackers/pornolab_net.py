@@ -29,7 +29,6 @@ from ...optconf import Option
 
 from ...tfile import Torrent
 
-from . import BaseTracker
 from . import WithLogin
 from . import WithCaptcha
 from . import WithCheckTime
@@ -37,7 +36,7 @@ from . import WithFetchByTorrentId
 
 
 # =====
-class Plugin(BaseTracker, WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId):
+class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId):
     PLUGIN_NAME = "pornolab.net"
 
     _SITE_VERSION = 3

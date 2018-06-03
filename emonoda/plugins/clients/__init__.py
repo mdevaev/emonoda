@@ -31,7 +31,6 @@ from ...tfile import TorrentEntryAttrs
 from ...tfile import Torrent
 
 from .. import BasePlugin
-from .. import BaseExtension
 from .. import get_classes
 
 
@@ -73,7 +72,7 @@ def build_files(prefix: str, flist: List[Tuple[str, int]]) -> Dict[str, TorrentE
 
 
 class BaseClient(BasePlugin):
-    def __init__(self, **_: Any) -> None:
+    def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
         pass
 
     @hash_or_torrent
@@ -121,8 +120,8 @@ class BaseClient(BasePlugin):
         raise NotImplementedError
 
 
-class WithCustoms(BaseExtension):
-    def __init__(self, **_: Any) -> None:
+class WithCustoms(BaseClient):
+    def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
         pass
 
     @classmethod
