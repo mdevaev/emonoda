@@ -25,7 +25,7 @@ import setuptools
 if __name__ == "__main__":
     setuptools.setup(
         name="emonoda",
-        version="2.0.50",
+        version="2.0.51",
         url="https://github.com/mdevaev/emonoda",
         license="GPLv3",
         author="Devaev Maxim",
