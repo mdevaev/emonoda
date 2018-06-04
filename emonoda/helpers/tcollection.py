@@ -38,22 +38,21 @@ def load_from_dir(path: str, name_filter: str, precalculate_hashes: bool, log: L
 
     torrents: Dict[str, Optional[Torrent]] = {}
     for name in log.progress(
-        sorted(os.listdir(path)),
+        sorted(name for name in os.listdir(path) if fnmatch.fnmatch(name, name_filter)),
         ("Loading torrents from {cyan}%s/{yellow}%s{reset}", (path, name_filter)),
         ("Loaded {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}", (lambda: len(torrents), path, name_filter)),
     ):
-        if fnmatch.fnmatch(name, name_filter):
-            file_path = os.path.abspath(os.path.join(path, name))
-            try:
-                torrents[name] = Torrent(path=file_path)
-                if precalculate_hashes:
-                    torrents[name].get_hash()  # type: ignore
-            except ValueError:
-                log.error("Found broken torrent: {cyan}%s/{yellow}%s{reset}", (path, name))
-                torrents[name] = None
-            except Exception:
-                log.error("Can't process torrent: {cyan}%s/{yellow}%s{reset}", (path, name))
-                raise
+        file_path = os.path.abspath(os.path.join(path, name))
+        try:
+            torrents[name] = Torrent(path=file_path)
+            if precalculate_hashes:
+                torrents[name].get_hash()  # type: ignore
+        except ValueError:
+            log.error("Found broken torrent: {cyan}%s/{yellow}%s{reset}", (path, name))
+            torrents[name] = None
+        except Exception:
+            log.error("Can't process torrent: {cyan}%s/{yellow}%s{reset}", (path, name))
+            raise
 
     if not log.isatty():
         log.info("Loaded {magenta}%d{reset} torrents from {cyan}%s/{yellow}%s{reset}",
