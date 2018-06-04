@@ -82,7 +82,7 @@ def load_torrents(
         if client.has_torrent(torrent):
             raise RuntimeError("{}: already loaded".format(torrent.get_path()))
 
-    if data_root_path:
+    if not data_root_path:
         data_root_path = client.get_data_prefix_default()
 
     for torrent in torrents:
