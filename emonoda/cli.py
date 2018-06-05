@@ -20,7 +20,7 @@
 import sys
 import os
 import re
-import threading
+import time
 
 from typing import TextIO
 from typing import Tuple
@@ -108,33 +108,21 @@ class Log:
     ) -> Generator[Any, None, None]:
 
         if self.isatty():
-            def print_pb(value: int, limit: int) -> None:
-                (pb, pb_placeholders) = fmt.format_progress_bar(value, limit, length)
-                if value < limit:
-                    self.info("{} :: {}".format(pb, wip[0]), pb_placeholders + wip[1], one_line=True)
-                else:
-                    self.info("{} :: {}".format(pb, finish[0]), pb_placeholders + finish[1])
-
-            current = 0
-            stop_pb_thread = threading.Event()
-
-            print_pb(0, 1)
             items = list(iterable)
 
-            def refresh_pb() -> None:
-                print_pb(current, len(items))
-                while not stop_pb_thread.wait(refresh):
-                    print_pb(current, len(items))
-                print_pb(current, len(items))
-
-            pb_thread = threading.Thread(target=refresh_pb)
-            pb_thread.daemon = True
-            pb_thread.start()
-
+            current = 0
+            prev = 0.0
             for (current, item) in enumerate(items, 1):
+                now = time.time()
+                if prev + refresh < now:
+                    (pb, pb_placeholders) = fmt.format_progress_bar(current, len(items), length)
+                    self.info("{} :: {}".format(pb, wip[0]), pb_placeholders + wip[1], one_line=True)
+                    prev = now
                 yield item
 
-            stop_pb_thread.set()
+            (pb, pb_placeholders) = fmt.format_progress_bar(current, len(items), length)
+            self.info("{} :: {}".format(pb, finish[0]), pb_placeholders + finish[1])
+
         else:
             yield from iterable
 
