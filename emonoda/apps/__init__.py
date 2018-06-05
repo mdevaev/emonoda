@@ -167,6 +167,7 @@ def get_configured_trackers(
     captcha_decoder: Callable[[str], str],
     only: List[str],
     exclude: List[str],
+    fail_bad_tracker: bool,
     log: Log,
 ) -> List[BaseTracker]:
 
@@ -200,7 +201,7 @@ def get_configured_trackers(
             log.info("Tracker {blue}%s{reset} is {green}ready{reset}", (name,))
         except Exception as err:
             log.error("Can't init tracker {red}%s{reset}: {red}%s{reset}(%s)", (name, type(err).__name__, err))
-            if config.emupdate.fail_bad_tracker:
+            if fail_bad_tracker:
                 raise
             continue
 

@@ -452,6 +452,7 @@ def main() -> None:
                 captcha_decoder=read_captcha,
                 only=options.only_trackers,
                 exclude=options.exclude_trackers,
+                fail_bad_tracker=config.emupdate.fail_bad_tracker,
                 log=log_stderr,
             )
 
