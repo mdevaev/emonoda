@@ -89,8 +89,13 @@ if __name__ == "__main__":
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
             "Development Status :: 5 - Production/Stable",
             "Programming Language :: Python :: 3.6",
+            "Programming Language :: Cython",
             "Topic :: Software Development :: Libraries :: Python Modules",
+            "Topic :: Communications :: File Sharing",
+            "Topic :: Internet :: WWW/HTTP",
             "Topic :: Utilities",
             "Operating System :: OS Independent",
+            "Intended Audience :: System Administrators",
+            "Intended Audience :: End Users/Desktop",
         ],
     )
