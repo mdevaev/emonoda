@@ -46,9 +46,9 @@ class Plugin(WithProxy):
 
         self._init_bases(**kwargs)
 
-        self._user_key = user_key
-        self._api_key = api_key
-        self._devices = devices
+        self.__user_key = user_key
+        self.__api_key = api_key
+        self.__devices = devices
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
@@ -62,18 +62,18 @@ class Plugin(WithProxy):
 
     def send_results(self, source: str, results: ResultsType) -> None:
         for result in results["affected"].values():
-            self._notify(
+            self.__notify(
                 title="Emonoda ({})".format(source),
                 message=result.torrent.get_name(),  # type: ignore
             )
 
     # ===
 
-    def _notify(self, title: str, message: str) -> None:
+    def __notify(self, title: str, message: str) -> None:
         # https://pushover.net/api
         post = {
-            "token":   self._api_key,
-            "user":    self._user_key,
+            "token":   self.__api_key,
+            "user":    self.__user_key,
             "title":   title,
             "message": message,
         }

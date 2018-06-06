@@ -39,7 +39,7 @@ from . import build_files
 
 
 # =====
-_XMLRPC_UNKNOWN_HASH = -501
+__XMLRPC_UNKNOWN_HASH = -501
 
 
 # =====
@@ -48,7 +48,7 @@ def _catch_unknown_torrent(method: Callable) -> Callable:
         try:
             return method(self, *args, **kwargs)
         except xmlrpc.client.Fault as err:
-            if err.faultCode == _XMLRPC_UNKNOWN_HASH:
+            if err.faultCode == __XMLRPC_UNKNOWN_HASH:
                 raise NoSuchTorrentError("Unknown torrent hash")
             raise
     return wrap
@@ -70,10 +70,10 @@ class Plugin(WithCustoms):
 
         self._init_bases(**kwargs)
 
-        self._load_retries = load_retries
-        self._retries_sleep = retries_sleep
-        self._server = xmlrpc.client.ServerProxy(url)
-        self._server.set_xmlrpc_size_limit(xmlrpc_size_limit)
+        self.__load_retries = load_retries
+        self.__retries_sleep = retries_sleep
+        self.__server = xmlrpc.client.ServerProxy(url)
+        self.__server.set_xmlrpc_size_limit(xmlrpc_size_limit)
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
@@ -89,54 +89,54 @@ class Plugin(WithCustoms):
     @hash_or_torrent
     @_catch_unknown_torrent
     def remove_torrent(self, torrent_hash: str) -> None:
-        self._server.d.erase(torrent_hash)
+        self.__server.d.erase(torrent_hash)
 
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str="") -> None:
         torrent_hash = torrent.get_hash()
         # XXX: https://github.com/rakshasa/rtorrent/issues/22
         # All load_* calls re asynchronous, so we need to wait until the load of torrent files is complete.
-        self._server.load_raw(torrent.get_data())
-        retries = self._load_retries
+        self.__server.load_raw(torrent.get_data())
+        retries = self.__load_retries
         while True:
             try:
-                assert self._server.d.get_hash(torrent_hash).lower() == torrent_hash
+                assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
                 break
             except xmlrpc.client.Fault as err:
-                if err.faultCode != _XMLRPC_UNKNOWN_HASH:
+                if err.faultCode != __XMLRPC_UNKNOWN_HASH:
                     raise
                 if retries == 0:
                     raise RuntimeError("Timed out torrent uploads after {} seconds".format(
-                        self._load_retries * self._retries_sleep))
+                        self.__load_retries * self.__retries_sleep))
                 retries -= 1
-                time.sleep(self._retries_sleep)
+                time.sleep(self.__retries_sleep)
 
         if prefix:
-            self._server.d.set_directory(torrent_hash, prefix)
-        self._server.d.start(torrent_hash)
+            self.__server.d.set_directory(torrent_hash, prefix)
+        self.__server.d.start(torrent_hash)
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
         try:
-            assert self._server.d.get_hash(torrent_hash).lower() == torrent_hash
+            assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
             return True
         except xmlrpc.client.Fault as err:
-            if err.faultCode != _XMLRPC_UNKNOWN_HASH:
+            if err.faultCode != __XMLRPC_UNKNOWN_HASH:
                 raise
         return False
 
     def get_hashes(self) -> List[str]:
-        return list(map(str.lower, self._server.download_list()))
+        return list(map(str.lower, self.__server.download_list()))
 
     @hash_or_torrent
     @_catch_unknown_torrent
     def get_torrent_path(self, torrent_hash: str) -> str:
-        return self._server.d.get_loaded_file(torrent_hash)
+        return self.__server.d.get_loaded_file(torrent_hash)
 
     @hash_or_torrent
     @_catch_unknown_torrent
     def get_data_prefix(self, torrent_hash: str) -> str:
-        mc = xmlrpc.client.MultiCall(self._server)
+        mc = xmlrpc.client.MultiCall(self.__server)
         mc.d.get_directory(torrent_hash)
         mc.d.is_multi_file(torrent_hash)
         (path, is_multi_file) = mc()
@@ -145,14 +145,14 @@ class Plugin(WithCustoms):
         return path
 
     def get_data_prefix_default(self) -> str:
-        return self._server.get_directory()
+        return self.__server.get_directory()
 
     # ===
 
     @hash_or_torrent
     @_catch_unknown_torrent
     def get_full_path(self, torrent_hash: str) -> str:
-        mc = xmlrpc.client.MultiCall(self._server)
+        mc = xmlrpc.client.MultiCall(self.__server)
         mc.d.get_directory(torrent_hash)
         mc.d.get_name(torrent_hash)
         mc.d.is_multi_file(torrent_hash)
@@ -164,17 +164,17 @@ class Plugin(WithCustoms):
     @hash_or_torrent
     @_catch_unknown_torrent
     def get_file_name(self, torrent_hash: str) -> str:
-        return self._server.d.get_name(torrent_hash)
+        return self.__server.d.get_name(torrent_hash)
 
     @hash_or_torrent
     @_catch_unknown_torrent
     def is_single_file(self, torrent_hash: str) -> bool:
-        return (not self._server.d.is_multi_file(torrent_hash))
+        return (not self.__server.d.is_multi_file(torrent_hash))
 
     @hash_or_torrent
     @_catch_unknown_torrent
     def get_files(self, torrent_hash: str, on_fs: bool=False) -> Dict[str, TorrentEntryAttrs]:
-        mc = xmlrpc.client.MultiCall(self._server)
+        mc = xmlrpc.client.MultiCall(self.__server)
         mc.d.get_base_path(torrent_hash)
         mc.d.get_base_filename(torrent_hash)
         mc.d.is_multi_file(torrent_hash)
@@ -186,7 +186,7 @@ class Plugin(WithCustoms):
         if not is_multi_file:
             return {base: TorrentEntryAttrs.new_file(first_file_size)}
 
-        mc = xmlrpc.client.MultiCall(self._server)
+        mc = xmlrpc.client.MultiCall(self.__server)
         for index in range(count):
             mc.f.get_path(torrent_hash, index)
             mc.f.get_size_bytes(torrent_hash, index)
@@ -207,7 +207,7 @@ class Plugin(WithCustoms):
     @_catch_unknown_torrent
     def set_customs(self, torrent_hash: str, customs: Dict[str, str]) -> None:
         assert len(customs) != 0, "Empty customs dict"
-        mc = xmlrpc.client.MultiCall(self._server)
+        mc = xmlrpc.client.MultiCall(self.__server)
         for (key, value) in customs.items():
             getattr(mc.d, "set_custom{}".format(key[1:]))(torrent_hash, value)
         mc()
@@ -217,7 +217,7 @@ class Plugin(WithCustoms):
     def get_customs(self, torrent_hash: str, keys: List[str]) -> Dict[str, str]:
         assert len(keys) != 0, "Empty customs keys list"
         keys = list(set(keys))
-        mc = xmlrpc.client.MultiCall(self._server)
+        mc = xmlrpc.client.MultiCall(self.__server)
         for key in keys:
             getattr(mc.d, "get_custom{}".format(key[1:]))(torrent_hash)
         return dict(zip(keys, list(mc())))

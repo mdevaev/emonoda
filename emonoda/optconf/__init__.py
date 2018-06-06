@@ -61,23 +61,23 @@ def _parse_value(value: str) -> Any:
 class Section(dict):
     def __init__(self) -> None:
         dict.__init__(self)
-        self._meta: Dict[str, Dict[str, Any]] = {}
+        self.__meta: Dict[str, Dict[str, Any]] = {}
 
     def _set_meta(self, name: str, secret: bool, default: Any, help: str) -> None:  # pylint: disable=redefined-builtin
-        self._meta[name] = {
+        self.__meta[name] = {
             "secret":  secret,
             "default": default,
             "help":    help,
         }
 
     def _is_secret(self, name: str) -> bool:
-        return self._meta[name]["secret"]
+        return self.__meta[name]["secret"]
 
     def _get_default(self, name: str) -> Any:
-        return self._meta[name]["default"]
+        return self.__meta[name]["default"]
 
     def _get_help(self, name: str) -> str:
-        return self._meta[name]["help"]
+        return self.__meta[name]["help"]
 
     def __getattribute__(self, name: str) -> Any:
         if name in self:
@@ -86,14 +86,14 @@ class Section(dict):
             return dict.__getattribute__(self, name)
 
 
-_type = type
+__type = type
 
 
 class Option:
     def __init__(self, default: Any, help: str, type: Optional[Callable[[Any], Any]]=None) -> None:  # pylint: disable=redefined-builtin
         self.default = default
         self.help = help
-        self.type: Callable[[Any], Any] = (type or (_type(default) if default is not None else str))  # type: ignore
+        self.type: Callable[[Any], Any] = (type or (__type(default) if default is not None else str))  # type: ignore
 
     def __repr__(self) -> str:
         return "<Option(default={self.default}, type={self.type}, help={self.help})>".format(self=self)

@@ -103,7 +103,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
             "login_password": self._encode(self._passwd),
             "login":          b"\xc2\xf5\xee\xe4",
         }
-        page = self._read_login(post)
+        page = self.__read_login(post)
 
         cap_static_regexp = re.compile(r"\"//(static\.t-ru\.org/captcha/[^\"]+)\"")
         cap_static_match = cap_static_regexp.search(page)
@@ -123,10 +123,10 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
             post[cap_code] = self._encode(self._captcha_decoder("https://{}".format(cap_static_match.group(1))))
             post["cap_sid"] = self._encode(cap_sid)
 
-            page = self._read_login(post)
+            page = self.__read_login(post)
             self._assert_auth(cap_static_regexp.search(page) is None, "Invalid user, password or captcha")
 
-    def _read_login(self, post: Dict[str, bytes]) -> str:
+    def __read_login(self, post: Dict[str, bytes]) -> str:
         return self._decode(self._read_url(
             url="https://rutracker.org/forum/login.php",
             data=self._encode(urllib.parse.urlencode(post)),

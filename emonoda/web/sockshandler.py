@@ -45,11 +45,11 @@ SOCKS_PORT = 1080
 
 
 # =====
-class _SocksConnection(HTTPConnection):
+class __SocksConnection(HTTPConnection):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.pop("proxy_url", None)  # XXX: Fix for "TypeError: __init__() got an unexpected keyword argument 'proxy_url'"
         super().__init__(*args, **kwargs)
-        self._proxy_args: Optional[Tuple[
+        self.__proxy_args: Optional[Tuple[
             Optional[int],
             Optional[str],
             Optional[int],
@@ -81,18 +81,18 @@ class _SocksConnection(HTTPConnection):
             if proxy_type is None:
                 raise RuntimeError("Invalid SOCKS protocol: {}".format(scheme))
 
-        self._proxy_args = (proxy_type, proxy_host, proxy_port, rdns, proxy_user, proxy_passwd)
+        self.__proxy_args = (proxy_type, proxy_host, proxy_port, rdns, proxy_user, proxy_passwd)
 
     def connect(self) -> None:
-        assert self._proxy_args is not None, "Proxy args weren't initialized"
+        assert self.__proxy_args is not None, "Proxy args weren't initialized"
         self.sock = socks.socksocket()
-        self.sock.setproxy(*self._proxy_args)
+        self.sock.setproxy(*self.__proxy_args)
         if self.timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:  # type: ignore  # pylint: disable=protected-access
             self.sock.settimeout(self.timeout)  # type: ignore
         self.sock.connect((self.host, self.port))  # type: ignore
 
 
-class _SocksSecureConnection(HTTPSConnection, _SocksConnection):
+class __SocksSecureConnection(HTTPSConnection, __SocksConnection):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs.pop("proxy_url", None)  # XXX: Fix for "TypeError: __init__() got an unexpected keyword argument 'proxy_url'"
         super().__init__(*args, **kwargs)
@@ -101,8 +101,8 @@ class _SocksSecureConnection(HTTPSConnection, _SocksConnection):
 # =====
 class SocksHandler(HTTPHandler, HTTPSHandler):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self._args = args
-        self._kwargs = kwargs
+        self.__args = args
+        self.__kwargs = kwargs
         super().__init__(debuglevel=kwargs.pop("debuglevel", 0))
 
     def http_open(self, req: Request) -> HTTPResponse:
@@ -110,10 +110,10 @@ class SocksHandler(HTTPHandler, HTTPSHandler):
             host: str,
             port: Optional[int]=None,
             timeout: int=socket._GLOBAL_DEFAULT_TIMEOUT,  # pylint: disable=protected-access
-        ) -> _SocksConnection:
+        ) -> __SocksConnection:
 
-            connection = _SocksConnection(host, port=port, timeout=timeout, **self._kwargs)
-            connection.make_proxy_args(*self._args, **self._kwargs)
+            connection = __SocksConnection(host, port=port, timeout=timeout, **self.__kwargs)
+            connection.make_proxy_args(*self.__args, **self.__kwargs)
             return connection
 
         return self.do_open(build, req)  # type: ignore
@@ -123,10 +123,10 @@ class SocksHandler(HTTPHandler, HTTPSHandler):
             host: str,
             port: Optional[int]=None,
             timeout: int=socket._GLOBAL_DEFAULT_TIMEOUT,  # pylint: disable=protected-access
-        ) -> _SocksSecureConnection:
+        ) -> __SocksSecureConnection:
 
-            connection = _SocksSecureConnection(host, port=port, timeout=timeout, **self._kwargs)
-            connection.make_proxy_args(*self._args, **self._kwargs)
+            connection = __SocksSecureConnection(host, port=port, timeout=timeout, **self.__kwargs)
+            connection.make_proxy_args(*self.__args, **self.__kwargs)
             return connection
 
         return self.do_open(build, req)  # type: ignore

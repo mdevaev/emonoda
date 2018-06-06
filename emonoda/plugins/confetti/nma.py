@@ -47,7 +47,7 @@ class Plugin(WithProxy):
 
         self._init_bases(**kwargs)
 
-        self._api_keys = api_keys
+        self.__api_keys = api_keys
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
@@ -59,15 +59,15 @@ class Plugin(WithProxy):
 
     def send_results(self, source: str, results: ResultsType) -> None:
         for result in results["affected"].values():
-            self._notify(
+            self.__notify(
                 app="Emonoda ({})".format(source),
                 event="{}".format(result.torrent.get_name()),  # type: ignore
-                description=self._format_description(result.diff),
+                description=self.__format_description(result.diff),
             )
 
     # ===
 
-    def _format_description(self, diff: TorrentsDiff) -> str:
+    def __format_description(self, diff: TorrentsDiff) -> str:
         description_lines = []
         for (sign, items) in [
             ("+", diff.added),
@@ -82,10 +82,10 @@ class Plugin(WithProxy):
             description = description[:9995] + "..."
         return description
 
-    def _notify(self, app: str, event: str, description: str) -> None:
+    def __notify(self, app: str, event: str, description: str) -> None:
         # http://www.notifymyandroid.com/api.jsp
         post = {
-            "apikey":       ",".join(self._api_keys),
+            "apikey":       ",".join(self.__api_keys),
             "application":  app,
             "event":        event,
             "description":  description,

@@ -84,19 +84,19 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
 
         self._init_bases(**kwargs)
 
-        self._history_path = history_path
-        self._path = path
-        self._url = url
-        self._uid = (get_uid(user) if user else -1)
-        self._gid = (get_gid(group) if group else -1)
-        if self._gid > -1:
-            if self._gid not in get_user_groups(getpass.getuser()):
+        self.__history_path = history_path
+        self.__path = path
+        self.__url = url
+        self.__uid = (get_uid(user) if user else -1)
+        self.__gid = (get_gid(group) if group else -1)
+        if self.__gid > -1:
+            if self.__gid not in get_user_groups(getpass.getuser()):
                 raise UserError(
                     "I wouldn't be able to edit {path} with current user if I chown it for "
-                    "uid={uid} and gid={gid}".format(path=path, uid=self._uid, gid=self._gid),
+                    "uid={uid} and gid={gid}".format(path=path, uid=self.__uid, gid=self.__gid),
                 )
-        self._template_path = template
-        self._html = html
+        self.__template_path = template
+        self.__html = html
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
@@ -115,27 +115,27 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     def send_results(self, source: str, results: ResultsType) -> None:
         results_set: List[ResultsType] = []
         try:
-            with open(self._history_path) as history_file:
+            with open(self.__history_path) as history_file:
                 results_set = yaml.load(history_file)
         except Exception:
             traceback.print_exc()
         results["ctime"] = time.time()  # type: ignore
         results_set.insert(0, results)
         results_set = results_set[:20]
-        with open(self._path, "w") as atom_file:
+        with open(self.__path, "w") as atom_file:
             atom_file.write(templated(
-                name=(self._template_path if self._template_path else "atom.{ctype}.{source}.mako").format(
-                    ctype=("html" if self._html else "plain"),
+                name=(self.__template_path if self.__template_path else "atom.{ctype}.{source}.mako").format(
+                    ctype=("html" if self.__html else "plain"),
                     source=source,
                     results_set=results_set,
                 ),
-                built_in=(not self._template_path),
+                built_in=(not self.__template_path),
                 source=source,
                 results_set=results_set,
-                settings=dict(url=self._url)
+                settings=dict(url=self.__url)
             ))
-        os.chmod(self._path, 0o664)
-        os.chown(self._path, self._uid, self._gid)
-        with open(self._history_path, "w") as history_file:
+        os.chmod(self.__path, 0o664)
+        os.chown(self.__path, self.__uid, self.__gid)
+        with open(self.__history_path, "w") as history_file:
             history_file.write(yaml.dump(results_set))
         del results["ctime"]

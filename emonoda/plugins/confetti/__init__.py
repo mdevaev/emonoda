@@ -56,7 +56,7 @@ def templated(name: str, built_in: bool=True, **kwargs: Any) -> str:
 
 
 # =====
-class _InnerUpdateResult(NamedTuple):
+class __InnerUpdateResult(NamedTuple):
     torrent: Optional[Torrent]
     tracker: Optional[BaseTracker]
     diff: TorrentsDiff
@@ -65,7 +65,7 @@ class _InnerUpdateResult(NamedTuple):
     tb_lines: List[str]
 
 
-class UpdateResult(_InnerUpdateResult):
+class UpdateResult(__InnerUpdateResult):
     @staticmethod
     def new(
         torrent: Optional[Torrent]=None,

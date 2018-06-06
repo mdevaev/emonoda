@@ -50,11 +50,11 @@ class Plugin(BaseClient):
         if dbus is None:
             raise RuntimeError("Required module dbus")
 
-        self._bus = dbus.SessionBus()
-        self._core = self._bus.get_object("org.ktorrent.ktorrent", "/core")
-        self._settings = self._bus.get_object("org.ktorrent.ktorrent", "/settings")
+        self.__bus = dbus.SessionBus()
+        self.__core = self.__bus.get_object("org.ktorrent.ktorrent", "/core")
+        self.__settings = self.__bus.get_object("org.ktorrent.ktorrent", "/settings")
 
-        if self._settings.useSaveDir():
+        if self.__settings.useSaveDir():
             raise RuntimeError("Turn off the 'path by default' in KTorrent settings")
 
     @classmethod
@@ -65,25 +65,25 @@ class Plugin(BaseClient):
 
     @hash_or_torrent
     def remove_torrent(self, torrent_hash: str) -> None:
-        self._get_torrent_obj(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
-        self._core.remove(torrent_hash, False)
+        self.__get_torrent_obj(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
+        self.__core.remove(torrent_hash, False)
 
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str="") -> None:
         if prefix:
-            self._settings.setLastSaveDir(prefix)
-        self._core.loadSilently(torrent.get_path(), "")
+            self.__settings.setLastSaveDir(prefix)
+        self.__core.loadSilently(torrent.get_path(), "")
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
         try:
-            self._get_torrent_obj(torrent_hash)
+            self.__get_torrent_obj(torrent_hash)
             return True
         except NoSuchTorrentError:
             return False
 
     def get_hashes(self) -> List[str]:
-        return list(map(str.lower, self._core.torrents()))
+        return list(map(str.lower, self.__core.torrents()))
 
     @hash_or_torrent
     def get_torrent_path(self, torrent_hash: str) -> str:
@@ -91,7 +91,7 @@ class Plugin(BaseClient):
 
     @hash_or_torrent
     def get_data_prefix(self, torrent_hash: str) -> str:
-        return str(self._get_torrent_obj(torrent_hash).dataDir())
+        return str(self.__get_torrent_obj(torrent_hash).dataDir())
 
     def get_data_prefix_default(self) -> str:
         raise RuntimeError("KTorrent can not return a default data path")
@@ -100,19 +100,19 @@ class Plugin(BaseClient):
 
     @hash_or_torrent
     def get_full_path(self, torrent_hash: str) -> str:
-        return str(self._get_torrent_obj(torrent_hash).pathOnDisk())
+        return str(self.__get_torrent_obj(torrent_hash).pathOnDisk())
 
     @hash_or_torrent
     def get_file_name(self, torrent_hash: str) -> str:
-        return str(self._get_torrent_obj(torrent_hash).name())
+        return str(self.__get_torrent_obj(torrent_hash).name())
 
     @hash_or_torrent
     def is_single_file(self, torrent_hash: str) -> bool:
-        return (self._get_torrent_obj(torrent_hash).numFiles() == 0)
+        return (self.__get_torrent_obj(torrent_hash).numFiles() == 0)
 
     @hash_or_torrent
     def get_files(self, torrent_hash: str, on_fs: bool=False) -> Dict[str, TorrentEntryAttrs]:
-        torrent_obj = self._get_torrent_obj(torrent_hash)
+        torrent_obj = self.__get_torrent_obj(torrent_hash)
         prefix = (str(torrent_obj.pathOnDisk()) if on_fs else "")
         count = torrent_obj.numFiles()
         name = str(torrent_obj.name())
@@ -131,11 +131,11 @@ class Plugin(BaseClient):
 
     # ===
 
-    def _get_torrent_obj(self, torrent_hash: str) -> Any:
+    def __get_torrent_obj(self, torrent_hash: str) -> Any:
         if torrent_hash not in self.get_hashes():
             raise NoSuchTorrentError("Unknown torrent hash")
         try:
-            torrent_obj = self._bus.get_object("org.ktorrent.ktorrent", "/torrent/" + torrent_hash)
+            torrent_obj = self.__bus.get_object("org.ktorrent.ktorrent", "/torrent/" + torrent_hash)
             assert str(torrent_obj.infoHash()) == torrent_hash
             return torrent_obj
         except dbus.exceptions.DBusException as err:

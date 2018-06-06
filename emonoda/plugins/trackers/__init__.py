@@ -106,16 +106,17 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
         assert self._COMMENT_REGEXP.pattern != self.__D_COMMENT_REGEXP.pattern
 
-        self._timeout = timeout
-        self._retries = retries
-        self._retries_sleep = retries_sleep
-        self._user_agent = user_agent
-        self._proxy_url = proxy_url
-        self._check_version = check_version
-        self._check_fingerprint = check_fingerprint
+        self.__timeout = timeout
+        self.__retries = retries
+        self.__retries_sleep = retries_sleep
+        self.__user_agent = user_agent
+        self.__proxy_url = proxy_url
+        self.__check_version = check_version
+        self.__check_fingerprint = check_fingerprint
+
+        self.__opener: Optional[urllib.request.OpenerDirector] = None
 
         self._cookie_jar: Optional[http.cookiejar.CookieJar] = None
-        self._opener: Optional[urllib.request.OpenerDirector] = None
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
@@ -130,13 +131,13 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         }
 
     def test(self) -> None:
-        if self._check_fingerprint or self._check_version:
-            opener = web.build_opener(self._proxy_url)
-            info = self._get_upstream_info(opener)
-        if self._check_fingerprint:
-            self._test_fingerprint(info["fingerprint"], opener)
-        if self._check_version:
-            self._test_version(info["version"])
+        if self.__check_fingerprint or self.__check_version:
+            opener = web.build_opener(self.__proxy_url)
+            info = self.__get_upstream_info(opener)
+        if self.__check_fingerprint:
+            self.__test_fingerprint(info["fingerprint"], opener)
+        if self.__check_version:
+            self.__test_version(info["version"])
 
     def is_matched_for(self, torrent: Torrent) -> bool:
         return (self._COMMENT_REGEXP.match(torrent.get_comment()) is not None)
@@ -155,16 +156,16 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     # ===
 
     def _init_opener(self, with_cookies: bool) -> None:
+        assert not self.__opener
         if with_cookies:
             self._cookie_jar = http.cookiejar.CookieJar()
-            self._opener = web.build_opener(self._proxy_url, self._cookie_jar)
+            self.__opener = web.build_opener(self.__proxy_url, self._cookie_jar)
         else:
-            self._opener = web.build_opener(self._proxy_url)
+            self.__opener = web.build_opener(self.__proxy_url)
 
     def _read_url(self, *args: Any, **kwargs: Any) -> bytes:
-        assert self._opener
         try:
-            return self._read_url_nofe(*args, opener=self._opener, **kwargs)
+            return self.__read_url_nofe(*args, **kwargs)
         except (
             socket.timeout,
             urllib.error.HTTPError,
@@ -175,7 +176,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         ) as err:
             raise NetworkError(err)
 
-    def _read_url_nofe(
+    def __read_url_nofe(
         self,
         url: str,
         data: Optional[bytes]=None,
@@ -185,15 +186,15 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
         assert opener
         headers = (headers or {})
-        headers.setdefault("User-Agent", self._user_agent)
+        headers.setdefault("User-Agent", self.__user_agent)
         return web.read_url(
             opener=opener,
             url=url,
             data=data,
             headers=headers,
-            timeout=self._timeout,
-            retries=self._retries,
-            retries_sleep=self._retries_sleep,
+            timeout=self.__timeout,
+            retries=self.__retries,
+            retries_sleep=self.__retries_sleep,
             retry_codes=self._SITE_RETRY_CODES,
         )
 
@@ -226,9 +227,9 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     # ===
 
-    def _get_upstream_info(self, opener: urllib.request.OpenerDirector) -> Dict:
+    def __get_upstream_info(self, opener: urllib.request.OpenerDirector) -> Dict:
         try:
-            return json.loads(self._read_url_nofe(
+            return json.loads(self.__read_url_nofe(
                 url="https://raw.githubusercontent.com/mdevaev/emonoda/master/trackers/{}.json".format(self.PLUGIN_NAME),
                 opener=opener,
             ).decode("utf-8"))
@@ -238,7 +239,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             raise
 
     @classmethod
-    def _get_local_info(cls) -> Dict:
+    def _get_local_info(cls) -> Dict:  # Public for Makefile
         return {
             "version": cls._SITE_VERSION,
             "fingerprint": {
@@ -248,7 +249,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             },
         }
 
-    def _test_fingerprint(self, fingerprint: Dict[str, str], opener: urllib.request.OpenerDirector) -> None:
+    def __test_fingerprint(self, fingerprint: Dict[str, str], opener: urllib.request.OpenerDirector) -> None:
         data = self._read_url(fingerprint["url"], opener=opener)
         msg = "Invalid site body, maybe tracker is blocked"
         try:
@@ -257,7 +258,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             raise TrackerError(msg)
         _assert(TrackerError, fingerprint["text"] in page, msg)
 
-    def _test_version(self, upstream: int) -> None:
+    def __test_version(self, upstream: int) -> None:
         _assert(
             TrackerError,
             self._SITE_VERSION >= upstream,
@@ -390,13 +391,13 @@ class WithCheckTime(BaseTracker):
 
     def _select_tzinfo(self, site_timezone: Optional[str]) -> datetime.tzinfo:
         if not site_timezone or self._default_timezone:
-            return self._get_default_tzinfo()
+            return self.__get_default_tzinfo()
         try:
             return pytz.timezone(site_timezone)
         except pytz.UnknownTimeZoneError:  # type: ignore
-            return self._get_default_tzinfo()
+            return self.__get_default_tzinfo()
 
-    def _get_default_tzinfo(self) -> datetime.tzinfo:
+    def __get_default_tzinfo(self) -> datetime.tzinfo:
         msg = "Can't determine timezone of site, your must configure it manually"
         self._assert_logic(bool(self._default_timezone), msg)
         return pytz.timezone(self._default_timezone)
@@ -463,11 +464,11 @@ class WithStat(BaseTracker):  # pylint: disable=abstract-method
         torrent_id = self._assert_match(torrent)
         page = self._decode(self._read_url(self._STAT_URL.format(torrent_id=torrent_id)))
         return TrackerStat(
-            seeders=self._parse_stat_int(page, self._STAT_SEEDERS_REGEXP, "seeders"),
-            leechers=self._parse_stat_int(page, self._STAT_LEECHERS_REGEXP, "leechers"),
+            seeders=self.__parse_stat_int(page, self._STAT_SEEDERS_REGEXP, "seeders"),
+            leechers=self.__parse_stat_int(page, self._STAT_LEECHERS_REGEXP, "leechers"),
         )
 
-    def _parse_stat_int(self, page: str, regexp: Pattern, group: str) -> int:
+    def __parse_stat_int(self, page: str, regexp: Pattern, group: str) -> int:
         match = regexp.search(page)
         if match:
             return int(match.group(group))

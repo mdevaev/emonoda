@@ -31,22 +31,22 @@ import yaml.nodes
 def load_file(file_path: str) -> Any:
     with open(file_path) as yaml_file:
         try:
-            return yaml.load(yaml_file, _YamlLoader)
+            return yaml.load(yaml_file, __YamlLoader)
         except Exception:
             # Reraise internal exception as standard ValueError and show the incorrect file
             raise ValueError("Incorrect YAML syntax in file '{}'".format(file_path))
 
 
 # =====
-class _YamlLoader(yaml.loader.Loader):  # pylint: disable=too-many-ancestors
+class __YamlLoader(yaml.loader.Loader):  # pylint: disable=too-many-ancestors
     def __init__(self, yaml_file: IO) -> None:
         yaml.loader.Loader.__init__(self, yaml_file)
-        self._root = os.path.dirname(yaml_file.name)
+        self.__root = os.path.dirname(yaml_file.name)
 
     def include(self, node: yaml.nodes.Node) -> str:
         # Logger which supports include-files
-        file_path = os.path.join(self._root, self.construct_scalar(node))  # pylint: disable=no-member
+        file_path = os.path.join(self.__root, self.construct_scalar(node))  # pylint: disable=no-member
         return load_file(file_path)
 
 
-_YamlLoader.add_constructor("!include", _YamlLoader.include)  # pylint: disable=no-member
+__YamlLoader.add_constructor("!include", __YamlLoader.include)  # pylint: disable=no-member

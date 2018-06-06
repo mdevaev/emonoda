@@ -62,18 +62,18 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
 
         self._init_bases(**kwargs)
 
-        self._to = to
-        self._cc = cc
-        self._subject = subject
-        self._sender = sender
-        self._html = html
-        self._template_path = template
+        self.__to = to
+        self.__cc = cc
+        self.__subject = subject
+        self.__sender = sender
+        self.__html = html
+        self.__template_path = template
 
-        self._server = server
-        self._port = port
-        self._ssl = ssl
-        self._user = user
-        self._passwd = passwd
+        self.__server = server
+        self.__port = port
+        self.__ssl = ssl
+        self.__user = user
+        self.__passwd = passwd
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
@@ -95,11 +95,11 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     # ===
 
     def send_results(self, source: str, results: ResultsType) -> None:
-        msg = self._format_message(source, results)
+        msg = self.__format_message(source, results)
         retries = self._retries
         while True:
             try:
-                self._send_message(msg)
+                self.__send_message(msg)
                 break
             except (
                 smtplib.SMTPServerDisconnected,
@@ -114,34 +114,34 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
 
     # ===
 
-    def _format_message(self, source: str, results: ResultsType) -> email.mime.multipart.MIMEMultipart:
+    def __format_message(self, source: str, results: ResultsType) -> email.mime.multipart.MIMEMultipart:
         subject_placeholders: Dict[str, Union[str, int]] = {
             field: len(items)
             for (field, items) in results.items()
         }
         subject_placeholders["source"] = source
-        return self._make_message(
-            subject=self._subject.format(**subject_placeholders),
+        return self.__make_message(
+            subject=self.__subject.format(**subject_placeholders),
             body=templated(
-                name=(self._template_path if self._template_path else "email.{ctype}.{source}.mako").format(
-                    ctype=("html" if self._html else "plain"),
+                name=(self.__template_path if self.__template_path else "email.{ctype}.{source}.mako").format(
+                    ctype=("html" if self.__html else "plain"),
                     source=source,
                 ),
-                built_in=(not self._template_path),
+                built_in=(not self.__template_path),
                 source=source,
                 results=results,
             ),
         )
 
-    def _make_message(self, subject: str, body: str) -> email.mime.multipart.MIMEMultipart:
+    def __make_message(self, subject: str, body: str) -> email.mime.multipart.MIMEMultipart:
         email_headers = {
-            "From":    self._sender,
-            "To":      ", ".join(self._to),
+            "From":    self.__sender,
+            "To":      ", ".join(self.__to),
             "Date":    email.utils.formatdate(localtime=True),
             "Subject": email.header.Header(subject, "utf-8"),
         }
-        if len(self._cc) > 0:
-            email_headers["CC"] = ", ".join(self._cc)
+        if len(self.__cc) > 0:
+            email_headers["CC"] = ", ".join(self.__cc)
 
         msg = email.mime.multipart.MIMEMultipart()
         for (key, value) in email_headers.items():
@@ -149,18 +149,18 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
 
         msg.attach(email.mime.text.MIMEText(  # type: ignore
             _text=body.encode("utf-8"),
-            _subtype=("html" if self._html else "plain"),
+            _subtype=("html" if self.__html else "plain"),
             _charset="utf-8",
         ))
         return msg
 
-    def _send_message(self, msg: email.mime.multipart.MIMEMultipart) -> None:
-        smtp_class = (smtplib.SMTP_SSL if self._ssl else smtplib.SMTP)
+    def __send_message(self, msg: email.mime.multipart.MIMEMultipart) -> None:
+        smtp_class = (smtplib.SMTP_SSL if self.__ssl else smtplib.SMTP)
         with contextlib.closing(smtp_class(
-            host=self._server,
-            port=self._port,
+            host=self.__server,
+            port=self.__port,
             timeout=self._timeout,
         )) as client:
-            if self._user:
-                client.login(self._user, self._passwd)  # pylint: disable=no-member
+            if self.__user:
+                client.login(self.__user, self.__passwd)  # pylint: disable=no-member
             client.send_message(msg)  # pylint: disable=no-member

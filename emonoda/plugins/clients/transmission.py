@@ -66,7 +66,7 @@ class Plugin(BaseClient):
         if transmissionrpc is None:
             raise RuntimeError("Required module transmissionrpc")
 
-        self._client = transmissionrpc.Client(
+        self.__client = transmissionrpc.Client(
             address=url,
             user=(user or None),
             password=(passwd or None),
@@ -86,20 +86,20 @@ class Plugin(BaseClient):
 
     @hash_or_torrent
     def remove_torrent(self, torrent_hash: str) -> None:
-        self._get_torrent_obj(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
-        self._client.remove_torrent(torrent_hash)
+        self.__get_torrent_obj(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
+        self.__client.remove_torrent(torrent_hash)
 
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str="") -> None:
         kwargs: Dict[str, Union[bool, str]] = {"paused": False}
         if prefix:
             kwargs["download_dir"] = prefix
-        self._client.add_torrent(base64.b64encode(torrent.get_data()).decode("utf-8"), **kwargs)
+        self.__client.add_torrent(base64.b64encode(torrent.get_data()).decode("utf-8"), **kwargs)
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
         try:
-            self._get_torrent_obj(torrent_hash)
+            self.__get_torrent_obj(torrent_hash)
             return True
         except NoSuchTorrentError:
             return False
@@ -107,19 +107,19 @@ class Plugin(BaseClient):
     def get_hashes(self) -> List[str]:
         return [
             str(item.hashString.lower())
-            for item in self._client.get_torrents(arguments=("id", "hashString"))
+            for item in self.__client.get_torrents(arguments=("id", "hashString"))
         ]
 
     @hash_or_torrent
     def get_torrent_path(self, torrent_hash: str) -> str:
-        return self._get_torrent_prop(torrent_hash, "torrentFile")
+        return self.__get_torrent_prop(torrent_hash, "torrentFile")
 
     @hash_or_torrent
     def get_data_prefix(self, torrent_hash: str) -> str:
-        return self._get_torrent_prop(torrent_hash, "downloadDir")
+        return self.__get_torrent_prop(torrent_hash, "downloadDir")
 
     def get_data_prefix_default(self) -> str:
-        session = self._client.get_session()
+        session = self.__client.get_session()
         assert session is not None
         return session.download_dir
 
@@ -127,16 +127,16 @@ class Plugin(BaseClient):
 
     @hash_or_torrent
     def get_full_path(self, torrent_hash: str) -> str:
-        torrent_obj = self._get_torrent_obj(torrent_hash, ["name", "downloadDir"])
+        torrent_obj = self.__get_torrent_obj(torrent_hash, ["name", "downloadDir"])
         return os.path.join(torrent_obj.downloadDir, torrent_obj.name)
 
     @hash_or_torrent
     def get_file_name(self, torrent_hash: str) -> str:
-        return self._get_torrent_prop(torrent_hash, "name")
+        return self.__get_torrent_prop(torrent_hash, "name")
 
     @hash_or_torrent
     def is_single_file(self, torrent_hash: str) -> bool:
-        files = self._get_files(torrent_hash)
+        files = self.__get_files(torrent_hash)
         if len(files) > 1:
             return False
         return (os.path.sep not in list(files.values())[0]["name"])
@@ -146,19 +146,19 @@ class Plugin(BaseClient):
         prefix = (self.get_data_prefix(torrent_hash) if on_fs else "")
         flist = [
             (item["name"], item["size"])
-            for item in self._get_files(torrent_hash).values()
+            for item in self.__get_files(torrent_hash).values()
         ]
         return build_files(prefix, flist)
 
     # ===
 
-    def _get_torrent_prop(self, torrent_hash: str, prop: str) -> Any:
-        return getattr(self._get_torrent_obj(torrent_hash, [prop]), prop)
+    def __get_torrent_prop(self, torrent_hash: str, prop: str) -> Any:
+        return getattr(self.__get_torrent_obj(torrent_hash, [prop]), prop)
 
-    def _get_torrent_obj(self, torrent_hash: str, props: Optional[List[str]]=None) -> Any:
+    def __get_torrent_obj(self, torrent_hash: str, props: Optional[List[str]]=None) -> Any:
         props = list(set(props or []).union(["id", "hashString"]))
         try:
-            torrent_obj = self._client.get_torrent(torrent_hash, arguments=props)
+            torrent_obj = self.__client.get_torrent(torrent_hash, arguments=props)
         except KeyError as err:
             if str(err) == "\'Torrent not found in result\'":
                 raise NoSuchTorrentError("Unknown torrent hash")
@@ -166,8 +166,8 @@ class Plugin(BaseClient):
         assert str(torrent_obj.hashString).lower() == torrent_hash
         return torrent_obj
 
-    def _get_files(self, torrent_hash: str) -> Dict:
-        files = self._client.get_files(torrent_hash)
+    def __get_files(self, torrent_hash: str) -> Dict:
+        files = self.__client.get_files(torrent_hash)
         if len(files) == 0:
             raise NoSuchTorrentError("Unknown torrent hash")
         assert len(files) == 1

@@ -40,7 +40,7 @@ from . import fmt
 
 
 # =====
-_COLORS = {
+__COLORS = {
     "red":     Style.BRIGHT + Fore.RED,
     "green":   Style.BRIGHT + Fore.GREEN,
     "yellow":  Style.BRIGHT + Fore.YELLOW,
@@ -50,7 +50,7 @@ _COLORS = {
     "reset":   Fore.RESET,
 }
 
-_NO_COLORS = dict.fromkeys(list(_COLORS), "")
+__NO_COLORS = dict.fromkeys(list(__COLORS), "")
 
 
 # =====
@@ -75,14 +75,14 @@ class Log:
         output: TextIO=sys.stdout,
     ) -> None:
 
-        self._quiet = quiet
-        self._output = output
-        self._fill = 0
-        self._colored = (use_colors and (self.isatty() or force_colors))
-        self._ansi_regexp = re.compile(r"(\x1b[^m]*m)")
+        self.__quiet = quiet
+        self.__output = output
+        self.__fill = 0
+        self.__colored = (use_colors and (self.isatty() or force_colors))
+        self.__ansi_regexp = re.compile(r"(\x1b[^m]*m)")
 
     def isatty(self) -> bool:
-        return self._output.isatty()
+        return self.__output.isatty()
 
     def info(self, text: str, placeholders: Tuple=(), one_line: bool=False, no_nl: bool=False) -> None:
         self.print("# {green}I{reset}: " + text, placeholders, one_line, no_nl)
@@ -91,28 +91,28 @@ class Log:
         self.print("# {red}E{reset}: " + text, placeholders, one_line, no_nl)
 
     def print(self, text: str="", placeholders: Tuple=(), one_line: bool=False, no_nl: bool=False) -> None:
-        if not self._quiet:
-            rendered = self._format_text(text, placeholders, self._colored)
-            view_len = len(self._format_text(text, placeholders, False) if self._colored else rendered)
+        if not self.__quiet:
+            rendered = self.__format_text(text, placeholders, self.__colored)
+            view_len = len(self.__format_text(text, placeholders, False) if self.__colored else rendered)
 
             cut = 0
             if one_line and self.isatty():
-                max_len = self._get_term_width()
+                max_len = self.__get_term_width()
                 if max_len is not None and view_len > max_len:
                     cut = view_len - max_len
-                    rendered = self._cut_line(rendered, cut)
+                    rendered = self.__cut_line(rendered, cut)
 
-            if view_len - cut < self._fill:
+            if view_len - cut < self.__fill:
                 self.finish()
 
-            self._output.write(rendered)
+            self.__output.write(rendered)
             if one_line and self.isatty():
-                self._output.write("\r")
-                self._fill = view_len - cut
+                self.__output.write("\r")
+                self.__fill = view_len - cut
             elif not no_nl:
-                self._output.write("\n")
-                self._fill = 0
-            self._output.flush()
+                self.__output.write("\n")
+                self.__fill = 0
+            self.__output.flush()
 
     def print_table(self, header: List[Cell], table: List[List[Cell]]) -> None:
         assert len(header) >= 1
@@ -170,30 +170,30 @@ class Log:
             yield from iterable
 
     def finish(self) -> None:
-        if self._fill:
-            self._output.write((" " * self._fill) + "\r")
-            self._fill = 0
-            self._output.flush()
+        if self.__fill:
+            self.__output.write((" " * self.__fill) + "\r")
+            self.__fill = 0
+            self.__output.flush()
 
-    def _get_term_width(self) -> Optional[int]:
+    def __get_term_width(self) -> Optional[int]:
         try:
             return int(os.environ["COLUMNS"])
         except (KeyError, ValueError):
             try:
-                return os.get_terminal_size(self._output.fileno()).columns
+                return os.get_terminal_size(self.__output.fileno()).columns
             except OSError:
                 return None
 
-    def _format_text(self, text: str, placeholders: Tuple, colored: bool) -> str:
-        text = text.format(**(_COLORS if colored else _NO_COLORS))
+    def __format_text(self, text: str, placeholders: Tuple, colored: bool) -> str:
+        text = text.format(**(__COLORS if colored else __NO_COLORS))
         text = text % tuple(
             (placeholder() if callable(placeholder) else placeholder)
             for placeholder in placeholders
         )
         return text
 
-    def _cut_line(self, text: str, cut: int) -> str:
-        parts = self._ansi_regexp.split(text)
+    def __cut_line(self, text: str, cut: int) -> str:
+        parts = self.__ansi_regexp.split(text)
         for index in reversed(range(len(parts))):
             if cut <= 0:
                 break
@@ -205,6 +205,6 @@ class Log:
             else:
                 cut -= len(parts[index])
                 parts[index] = ""
-        if self._colored:
+        if self.__colored:
             parts.append(Fore.RESET)
         return "".join(parts)
