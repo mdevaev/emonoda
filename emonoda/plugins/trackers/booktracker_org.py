@@ -31,10 +31,11 @@ from ...tfile import Torrent
 from . import WithLogin
 from . import WithCheckTime
 from . import WithFetchByDownloadId
+from . import WithStat
 
 
 # =====
-class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId):
+class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
     PLUGIN_NAME = "booktracker.org"
 
     _SITE_VERSION = 2
@@ -42,7 +43,7 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId):
     _SITE_FINGERPRINT_URL = "https://booktracker.org"
     _SITE_FINGERPRINT_TEXT = "<meta name=\"google-site-verification\" content=\"L85kL3qg3y9JS1ER3BNhcpcqdDZBgrxzZpBm6Jzb1iQ\" />"
 
-    _COMMENT_REGEXP = re.compile(r"https?://booktracker\.org/viewtopic\.php\?p=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"https?://booktracker\.org(:443)?/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
     _TIMEZONE_URL = "https://booktracker.org/profile.php?mode=editprofile"
     _TIMEZONE_REGEXP = re.compile(r"<option value=\"[\.\d+-]\" selected=\"selected\">(?P<timezone>GMT [+-] [\d\.]+)[\s<\(]")
@@ -51,6 +52,10 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId):
     _DOWNLOAD_ID_URL = "https://booktracker.org/viewtopic.php?p={torrent_id}"
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(?P<download_id>\d+)\" class=\"\">")
     _DOWNLOAD_URL = "https://booktracker.org/download.php?id={download_id}"
+
+    _STAT_URL = "https://booktracker.org()/viewtopic.php?p={torrent_id}"
+    _STAT_SEEDERS_REGEXP = re.compile(r"<b>Раздают:\s+(?P<seeders>\d+)</b></span> &#0183;")
+    _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leechmed\" ><b>Качают:\s+(?P<leechers>\d+)</b></span>")
 
     # ===
 

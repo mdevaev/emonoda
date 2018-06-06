@@ -26,10 +26,11 @@ from ...optconf import Option
 
 from . import WithCheckHash
 from . import WithFetchByTorrentId
+from . import WithStat
 
 
 # =====
-class Plugin(WithCheckHash, WithFetchByTorrentId):
+class Plugin(WithCheckHash, WithFetchByTorrentId, WithStat):
     PLUGIN_NAME = "rutor.info"
 
     _SITE_VERSION = 5
@@ -45,6 +46,10 @@ class Plugin(WithCheckHash, WithFetchByTorrentId):
                                       r"\?xt=urn:btih:(?P<torrent_hash>[a-fA-F0-9]{40})")
 
     _DOWNLOAD_URL = "http://rutor.info/download/{torrent_id}"
+
+    _STAT_URL = _TORRENT_HASH_URL
+    _STAT_SEEDERS_REGEXP = re.compile(r"<tr><td class=\"header\">Раздают</td><td>(?P<seeders>\d+)</td></tr>")
+    _STAT_LEECHERS_REGEXP = re.compile(r"<tr><td class=\"header\">Качают</td><td>(?P<leechers>\d+)</td></tr>")
 
     # ===
 

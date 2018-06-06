@@ -33,10 +33,11 @@ from . import WithLogin
 from . import WithCaptcha
 from . import WithCheckTime
 from . import WithFetchByTorrentId
+from . import WithStat
 
 
 # =====
-class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId):
+class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId, WithStat):
     PLUGIN_NAME = "pornolab.net"
 
     _SITE_VERSION = 3
@@ -53,6 +54,10 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId):
 
     _DOWNLOAD_URL = "https://pornolab.net/forum/dl.php?t={torrent_id}"
     _DOWNLOAD_PAYLOAD = b""
+
+    _STAT_URL = "https://pornolab.net/forum/viewtopic.php?t={torrent_id}"
+    _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\">Сиды:&nbsp;\s+<b>(?P<seeders>\d+)</b>")
+    _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\">Личи:&nbsp;\s+<b>(?P<leechers>\d+)</b>")
 
     # ===
 

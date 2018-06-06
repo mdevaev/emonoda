@@ -22,8 +22,12 @@ import os
 import re
 import time
 
+from enum import Enum
+
 from typing import TextIO
 from typing import Tuple
+from typing import List
+from typing import NamedTuple
 from typing import Iterable
 from typing import Generator
 from typing import Optional
@@ -50,6 +54,18 @@ _NO_COLORS = dict.fromkeys(list(_COLORS), "")
 
 
 # =====
+class CellAlign(Enum):
+    LEFT = "ljust"
+    RIGHT = "rjust"
+    CENTER = "center"
+
+
+class Cell(NamedTuple):
+    data: str
+    colors: str = ""  # {red}
+    align: CellAlign = CellAlign.LEFT
+
+
 class Log:
     def __init__(
         self,
@@ -97,6 +113,33 @@ class Log:
                 self._output.write("\n")
                 self._fill = 0
             self._output.flush()
+
+    def print_table(self, header: List[Cell], table: List[List[Cell]]) -> None:
+        assert len(header) >= 1
+        widths = [len(cell.data) for cell in header]
+        for row in table:
+            for (cell_index, cell) in enumerate(row):
+                if len(cell.data) > widths[cell_index]:
+                    widths[cell_index] = len(cell.data)
+
+        text_rows: List[str] = []
+        for (row_index, row) in enumerate([header] + table):
+            text_cells: List[str] = []
+            for (cell_index, cell) in enumerate(row):
+                text_cells.append(
+                    cell.colors
+                    + getattr(cell.data, cell.align.value)(widths[cell_index])
+                    + ("{reset}" if cell.colors else "")
+                )
+            text_rows.append(" " + " | ".join(text_cells))
+
+            if row_index == 0:
+                text_rows.append("=" + "+".join(
+                    "=" * (width + (2 if 0 < width_index < len(widths) else 1))
+                    for (width_index, width) in enumerate(widths)
+                ))
+
+        self.print("\n".join(text_rows))
 
     def progress(
         self,

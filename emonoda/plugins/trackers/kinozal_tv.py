@@ -31,10 +31,11 @@ from ...tfile import Torrent
 from . import WithLogin
 from . import WithCheckTime
 from . import WithFetchByTorrentId
+from . import WithStat
 
 
 # =====
-class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId):
+class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId, WithStat):
     PLUGIN_NAME = "kinozal.tv"
 
     _SITE_VERSION = 0
@@ -51,6 +52,10 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId):
 
     _DOWNLOAD_URL = "http://dl.kinozal.tv/download.php?id={torrent_id}"
     _DOWNLOAD_PAYLOAD = b""
+
+    _STAT_URL = "http://kinozal.tv/details.php?id={torrent_id}"
+    _STAT_SEEDERS_REGEXP = re.compile(r"href=\"#\">Раздают<span class=\"floatright\">(?P<seeders>\d+)</span>")
+    _STAT_LEECHERS_REGEXP = re.compile(r"href=\"#\">Раздают<span class=\"floatright\">(?P<leechers>\d+)</span>")
 
     # ===
 

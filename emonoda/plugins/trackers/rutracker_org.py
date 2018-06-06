@@ -31,10 +31,11 @@ from ...tfile import Torrent
 from . import WithLogin
 from . import WithCaptcha
 from . import WithCheckHash
+from . import WithStat
 
 
 # =====
-class Plugin(WithLogin, WithCaptcha, WithCheckHash):
+class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
     PLUGIN_NAME = "rutracker.org"
 
     _SITE_VERSION = 5
@@ -49,6 +50,10 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash):
 
     _TORRENT_HASH_URL = "https://rutracker.org/forum/viewtopic.php?t={torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-fA-F0-9]{40})</span>")
+
+    _STAT_URL = _TORRENT_HASH_URL
+    _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\">Сиды:&nbsp;\s+<b>(?P<seeders>\d+)</b></span>")
+    _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\">Личи:&nbsp;\s+<b>(?P<leechers>\d+)</b></span>")
 
     def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)

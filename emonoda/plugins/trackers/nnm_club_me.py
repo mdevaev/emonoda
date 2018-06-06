@@ -27,10 +27,11 @@ from ...optconf import Option
 from . import WithLogin
 from . import WithCheckScrape
 from . import WithFetchByDownloadId
+from . import WithStat
 
 
 # =====
-class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId):
+class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId, WithStat):
     PLUGIN_NAME = _NNM_DOMAIN = "nnm-club.me"
 
     _SITE_VERSION = 4
@@ -48,7 +49,9 @@ class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId):
     _DOWNLOAD_ID_REGEXP = re.compile(r"filelst.php\?attach_id=(?P<download_id>[a-zA-Z0-9]+)")
     _DOWNLOAD_URL = "https://{}//forum/download.php?id={{download_id}}".format(_NNM_DOMAIN)
 
-    # ===
+    _STAT_URL = _DOWNLOAD_ID_URL
+    _STAT_SEEDERS_REGEXP = re.compile(r"align=\"center\"><span class=\"seed\">\[\s+<b>(?P<seeders>\d+)")
+    _STAT_LEECHERS_REGEXP = re.compile(r"align=\"center\"><span class=\"leech\">\[\s+<b>(?P<leechers>\d+)")
 
     def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
@@ -59,6 +62,8 @@ class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId):
         return cls._get_merged_options({
             "timeout": Option(default=20.0, help="Timeout for HTTP client"),
         })
+
+    # ===
 
     def login(self) -> None:
         self._login_using_post(

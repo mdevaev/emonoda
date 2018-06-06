@@ -32,10 +32,11 @@ from . import WithLogin
 from . import WithCaptcha
 from . import WithCheckTime
 from . import WithFetchByDownloadId
+from . import WithStat
 
 
 # =====
-class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByDownloadId):
+class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByDownloadId, WithStat):
     PLUGIN_NAME = "trec.to"
 
     _SITE_VERSION = 1
@@ -53,6 +54,10 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByDownloadId):
     _DOWNLOAD_ID_URL = "http://trec.to/viewtopic.php?p={torrent_id}"
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(?P<download_id>\d+)\" class=\"(leech|seed|gen)med\">")
     _DOWNLOAD_URL = "http://trec.to/download.php?id={download_id}"
+
+    _STAT_URL = "http://trec.to/viewtopic.php?p={torrent_id}"
+    _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\">Сидов:&nbsp;\s+<b>(?P<seeders>\d+)</b>")
+    _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\">Личеров:&nbsp;\s+<b>(?P<leechers>\d+)</b>")
 
     # ===
 

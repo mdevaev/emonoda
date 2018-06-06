@@ -36,3 +36,5 @@ class Plugin(nnm_club_me.Plugin):
 
     _DOWNLOAD_ID_URL = "http://{}/forum/viewtopic.php?p={{torrent_id}}".format(_NNM_DOMAIN)
     _DOWNLOAD_URL = "http://{}//forum/download.php?id={{download_id}}".format(_NNM_DOMAIN)
+
+    _STAT_URL = _DOWNLOAD_ID_URL

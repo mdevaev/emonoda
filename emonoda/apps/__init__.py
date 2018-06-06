@@ -29,6 +29,7 @@ from typing import Dict
 from typing import Callable
 from typing import Generator
 from typing import Optional
+from typing import Type
 
 import pygments
 import pygments.lexers.data
@@ -167,6 +168,7 @@ def get_configured_trackers(
     captcha_decoder: Callable[[str], str],
     only: List[str],
     exclude: List[str],
+    required_bases: List[Type[BaseTracker]],
     fail_bad_tracker: bool,
     log: Log,
 ) -> List[BaseTracker]:
@@ -174,6 +176,10 @@ def get_configured_trackers(
     to_init = set(config.trackers).difference(exclude)
     if len(only) != 0:
         to_init = to_init.intersection(only)
+
+    for name in list(to_init):
+        if not set(required_bases).issubset(get_tracker_class(name).get_bases()):
+            to_init.remove(name)
 
     if len(to_init) == 0:
         raise RuntimeError("No trackers to init")
@@ -245,6 +251,11 @@ def _get_config_scheme() -> Dict:
             "show_unknown":  Option(default=False, help="Show the torrents with unknown tracker in the log"),
             "show_passed":   Option(default=False, help="Show the torrents without changes"),
             "show_diff":     Option(default=True, help="Show diff between old and updated torrent files"),
+            "fail_bad_tracker": Option(default=True, help="Fail on trackers with invalid configuration"),
+        },
+
+        "emstat": {
+            "min_seeders":      Option(default=5, help="Minimal seeders to green color"),
             "fail_bad_tracker": Option(default=True, help="Fail on trackers with invalid configuration"),
         },
 

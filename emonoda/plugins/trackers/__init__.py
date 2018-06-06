@@ -31,6 +31,7 @@ from typing import Dict
 from typing import Pattern
 from typing import Match
 from typing import Callable
+from typing import NamedTuple
 from typing import Optional
 from typing import Type
 from typing import Any
@@ -446,6 +447,36 @@ class WithFetchByDownloadId(BaseTracker):
             url=self._DOWNLOAD_URL.format(download_id=dl_id),
             data=self._DOWNLOAD_PAYLOAD,
         ))
+
+
+class TrackerStat(NamedTuple):
+    seeders: int = 0
+    leechers: int = 0
+
+
+class WithStat(BaseTracker):  # pylint: disable=abstract-method
+    _STAT_URL = __D_STAT_URL = "{torrent_id}"
+    _STAT_SEEDERS_REGEXP = __D_STAT_SEEDERS_REGEXP = re.compile(r"(?P<seeders>.*)")
+    _STAT_LEECHERS_REGEXP = __D_STAT_LEECHERS_REGEXP = re.compile(r"(?P<leechers>.*)")
+
+    def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
+        assert self._STAT_URL != self.__D_STAT_URL
+        assert self._STAT_SEEDERS_REGEXP.pattern != self.__D_STAT_SEEDERS_REGEXP.pattern
+        assert self._STAT_LEECHERS_REGEXP.pattern != self.__D_STAT_LEECHERS_REGEXP.pattern
+
+    def fetch_stat(self, torrent: Torrent) -> TrackerStat:
+        torrent_id = self._assert_match(torrent)
+        page = self._decode(self._read_url(self._STAT_URL.format(torrent_id=torrent_id)))
+        return TrackerStat(
+            seeders=self._parse_stat_int(page, self._STAT_SEEDERS_REGEXP, "seeders"),
+            leechers=self._parse_stat_int(page, self._STAT_LEECHERS_REGEXP, "leechers"),
+        )
+
+    def _parse_stat_int(self, page: str, regexp: Pattern, group: str) -> int:
+        match = regexp.search(page)
+        if match:
+            return int(match.group(group))
+        return 0
 
 
 # =====

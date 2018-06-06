@@ -27,10 +27,11 @@ from ...optconf import Option
 from . import WithLogin
 from . import WithCheckHash
 from . import WithFetchByDownloadId
+from . import WithStat
 
 
 # =====
-class Plugin(WithLogin, WithCheckHash, WithFetchByDownloadId):
+class Plugin(WithLogin, WithCheckHash, WithFetchByDownloadId, WithStat):
     PLUGIN_NAME = "tfile-home.org"
 
     _SITE_VERSION = 6
@@ -49,6 +50,10 @@ class Plugin(WithLogin, WithCheckHash, WithFetchByDownloadId):
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download.php\?id=(?P<download_id>\d+)\""
                                      r" style=\"background:url\(/blueGene/images/topic\.jpg\)")
     _DOWNLOAD_URL = "http://tfile-home.org/forum/download.php?id={download_id}"
+
+    _STAT_URL = _TORRENT_HASH_URL
+    _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\" id=\"seedStats\"><b>(?P<seeders>\d+)</b>")
+    _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\" id=\"leechStats\"><b>(?P<leechers>\d+)</b>")
 
     # ===
 
