@@ -6,7 +6,12 @@ min-public-methods=0
 max-args=10
 
 [TYPECHECK]
-ignored-classes=pytest,pygments.lexers,pygments.formatters,AnsiCodes
+ignored-classes=
+	pygments.lexers,
+	pygments.formatters,
+
+extension-pkg-whitelist=
+	emonoda.thirdparty.bencoder,
 
 [MESSAGES CONTROL]
 disable =

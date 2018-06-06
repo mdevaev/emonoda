@@ -34,8 +34,7 @@ from typing import Any
 
 import chardet
 
-from .thirdparty.bcoding import bdecode as _inner_decode_data
-from .thirdparty.bcoding import bencode as encode_struct
+from .thirdparty import bencoder  # type: ignore
 
 
 # =====
@@ -115,50 +114,47 @@ class Torrent:
         assert self._data, self
         return self._data
 
-    def get_bencode(self) -> Dict:
-        assert self._bencode, self
-        return self._bencode
-
     # ===
 
     def get_name(self, surrogate_escape: bool=False) -> str:
         assert self._bencode, (self, self._bencode)
-        return self._decode(self._bencode["info"]["name"], surrogate_escape)
+        return self._decode(self._bencode[b"info"][b"name"], surrogate_escape)
 
     def get_comment(self) -> str:
         assert self._bencode, (self, self._bencode)
-        return self._decode(self._bencode.get("comment", "").strip())
-
-    # def get_encoding(self) -> Optional[str]:
-    #     assert self._bencode, (self, self._bencode)
-    #     return self._bencode.get("encoding")
+        return self._decode(self._bencode.get(b"comment", "").strip())
 
     def get_creation_date(self) -> int:
         assert self._bencode, (self, self._bencode)
-        return self._bencode.get("creation date", 0)
+        return self._bencode.get(b"creation date", 0)
 
     def get_created_by(self) -> Optional[str]:
         assert self._bencode, (self, self._bencode)
-        return self._bencode.get("created by")
+        created_by = self._bencode.get(b"created by")
+        return (self._decode(created_by) if created_by is not None else None)
 
     def get_announce(self) -> Optional[str]:
         assert self._bencode, (self, self._bencode)
-        return self._bencode.get("announce")
+        announce = self._bencode.get(b"announce")
+        return (self._decode(announce) if announce is not None else None)
 
-    def get_announce_list(self) -> List[str]:
+    def get_announce_list(self) -> List[List[str]]:
         assert self._bencode, (self, self._bencode)
-        return self._bencode.get("announce-list", [])
+        return [
+            list(map(self._decode, announce_list))
+            for announce_list in self._bencode.get(b"announce-list", [])
+        ]
 
     def is_private(self) -> bool:
         assert self._bencode, (self, self._bencode)
-        return bool(self._bencode["info"].get("private", 0))
+        return bool(self._bencode[b"info"].get(b"private", 0))
 
     # ===
 
     def get_hash(self) -> str:
         if not self._hash:
             assert self._bencode, (self, self._bencode)
-            self._hash = hashlib.sha1(encode_struct(self._bencode["info"])).hexdigest().lower()
+            self._hash = hashlib.sha1(bencoder.bencode(self._bencode[b"info"])).hexdigest().lower()
         return self._hash
 
     def get_scrape_hash(self) -> str:
@@ -173,7 +169,7 @@ class Torrent:
 
         assert self._bencode, (self, self._bencode)
         # http://stackoverflow.com/questions/12479570/given-a-torrent-file-how-do-i-generate-a-magnet-link-in-python
-        info_sha1 = hashlib.sha1(encode_struct(self._bencode["info"]))
+        info_sha1 = hashlib.sha1(bencoder.bencode(self._bencode[b"info"]))
         info_digest = info_sha1.digest()
         b32_hash = base64.b32encode(info_digest)
 
@@ -184,7 +180,7 @@ class Torrent:
             announces = self.get_announce_list()
             announce = self.get_announce()
             if announce:
-                announces.insert(0, announce)
+                announces.insert(0, [announce])
             for announce in set(itertools.chain.from_iterable(announces)):
                 magnet += "&tr={}".format(urllib.parse.quote_plus(announce))
         if "size" in extras:
@@ -196,31 +192,31 @@ class Torrent:
     def get_size(self) -> int:
         assert self._bencode, (self, self._bencode)
         if self.is_single_file():
-            return self._bencode["info"]["length"]
+            return self._bencode[b"info"][b"length"]
         else:
             size = 0
-            for fstruct in self._bencode["info"]["files"]:
-                size += fstruct["length"]
+            for fstruct in self._bencode[b"info"][b"files"]:
+                size += fstruct[b"length"]
             return size
 
     def is_single_file(self) -> bool:
         assert self._bencode, (self, self._bencode)
-        return ("files" not in self._bencode["info"])
+        return (b"files" not in self._bencode[b"info"])
 
     def get_files(self, prefix: str="") -> Dict[str, TorrentEntryAttrs]:
         assert self._bencode, (self, self._bencode)
         base = os.path.join(prefix, self.get_name())
         if self.is_single_file():
-            return {base: TorrentEntryAttrs.new_file(self._bencode["info"]["length"])}
+            return {base: TorrentEntryAttrs.new_file(self._bencode[b"info"][b"length"])}
         else:
             files = {base: TorrentEntryAttrs.new_dir()}
-            for fstruct in self._bencode["info"]["files"]:
+            for fstruct in self._bencode[b"info"][b"files"]:
                 name = None
-                for index in range(len(fstruct["path"])):
-                    name = os.path.join(base, os.path.sep.join(map(self._decode, fstruct["path"][0:index + 1])))
+                for index in range(len(fstruct[b"path"])):
+                    name = os.path.join(base, os.path.sep.join(map(self._decode, fstruct[b"path"][0:index + 1])))
                     files[name] = TorrentEntryAttrs.new_dir()
                 assert name is not None
-                files[name] = TorrentEntryAttrs.new_file(fstruct["length"])
+                files[name] = TorrentEntryAttrs.new_file(fstruct[b"length"])
             return files
 
     # ===
@@ -232,7 +228,7 @@ class Torrent:
                 # https://www.python.org/dev/peps/pep-0383
                 return value.decode("ascii", "surrogateescape")
 
-            for encoding in [self._bencode.get("encoding", "utf-8"), "cp1251"]:
+            for encoding in [self._bencode.get(b"encoding", b"utf-8").decode(), "cp1251"]:
                 try:
                     return value.decode(encoding)
                 except UnicodeDecodeError:
@@ -249,12 +245,15 @@ def is_valid_torrent_data(data: bytes) -> bool:
     try:
         decode_torrent_data(data)
         return True
-    except (TypeError, ValueError):
+    except ValueError:
         return False
 
 
 def decode_torrent_data(data: bytes) -> Dict:
-    result = _inner_decode_data(data)
+    try:
+        result = bencoder.bdecode(data)
+    except bencoder.BTFailure as err:
+        raise ValueError from err
     if not isinstance(result, dict):
         raise ValueError("Toplevel structure must be a dict")
     return result

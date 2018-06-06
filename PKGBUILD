@@ -23,7 +23,7 @@ optdepends=(
 	"python-transmissionrpc: Transmission support"
 	"python-dbus: KTorrent support"
 )
-makedepends=("python-setuptools" "wget")
+makedepends=("python-setuptools" "cython" "wget")
 
 
 build() {

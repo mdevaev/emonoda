@@ -18,12 +18,15 @@
 """
 
 
-import setuptools
+from setuptools import setup
+from setuptools.extension import Extension
+
+from Cython.Build import cythonize
 
 
 # =====
 if __name__ == "__main__":
-    setuptools.setup(
+    setup(
         name="emonoda",
         version="2.1.2",
         url="https://github.com/mdevaev/emonoda",
@@ -50,6 +53,7 @@ if __name__ == "__main__":
 
         package_data={
             "emonoda.plugins.confetti": ["templates/*.mako"],
+            "emonoda.thirdparty": ["bencoder.pyx"],
         },
 
         entry_points={
@@ -61,9 +65,15 @@ if __name__ == "__main__":
                 "emload = emonoda.apps.emload:main",
                 "emfind = emonoda.apps.emfind:main",
                 "emrm = emonoda.apps.emrm:main",
-                "emtest-confetti = emonoda.apps.emtest_confetti:main"
+                "emtest-confetti = emonoda.apps.emtest_confetti:main",
             ],
         },
+
+        ext_modules=cythonize(Extension(
+            "emonoda.thirdparty.bencoder",
+            ["emonoda/thirdparty/bencoder.pyx"],
+            extra_compile_args=["-O3"],
+        )),
 
         install_requires=[
             "chardet",
