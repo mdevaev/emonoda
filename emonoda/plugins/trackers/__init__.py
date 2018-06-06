@@ -161,12 +161,10 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         else:
             self._opener = web.build_opener(self._proxy_url)
 
-    def _build_opener(self) -> urllib.request.OpenerDirector:
-        return web.build_opener(self._proxy_url)
-
     def _read_url(self, *args: Any, **kwargs: Any) -> bytes:
+        assert self._opener
         try:
-            return self._read_url_nofe(*args, **kwargs)
+            return self._read_url_nofe(*args, opener=self._opener, **kwargs)
         except (
             socket.timeout,
             urllib.error.HTTPError,
@@ -185,12 +183,9 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         opener: urllib.request.OpenerDirector=None,
     ) -> bytes:
 
-        opener = (opener or self._opener)
-        assert opener is not None
-
+        assert opener
         headers = (headers or {})
         headers.setdefault("User-Agent", self._user_agent)
-
         return web.read_url(
             opener=opener,
             url=url,
