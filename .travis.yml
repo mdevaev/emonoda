@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.6"
-install: "pip install tox"
+    - "3.6"
+install: "pip install Cython tox"
 script: tox
 sudo: false
