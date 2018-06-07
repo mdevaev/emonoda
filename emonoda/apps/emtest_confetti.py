@@ -36,15 +36,18 @@ from . import get_configured_confetti
 
 
 # =====
-class __FakeTorrent(Torrent):
+class FakeTorrent(Torrent):
     def __init__(self) -> None:  # pylint: disable=super-init-not-called
         pass
+
+    def get_name(self, surrogate_escape: bool=False) -> str:
+        return "foobar"
 
     def get_comment(self) -> str:
         return "Test, test, test"
 
 
-class __FakeTracker(BaseTracker):  # pylint: disable=abstract-method
+class FakeTracker(BaseTracker):  # pylint: disable=abstract-method
     PLUGIN_NAME = "example.org"
 
     def __init__(self) -> None:  # pylint: disable=super-init-not-called
@@ -59,8 +62,8 @@ def main() -> None:
         results: ResultsType = {
             "affected": {
                 "test1.torrent": UpdateResult.new(
-                    torrent=__FakeTorrent(),
-                    tracker=__FakeTracker(),
+                    torrent=FakeTorrent(),
+                    tracker=FakeTracker(),
                     diff=TorrentsDiff.new(
                         added=set(["nya.mkv", "nya.srt"]),
                         removed=set(["nyaa.srt", "nyaa.mkv"]),
@@ -68,8 +71,8 @@ def main() -> None:
                     ),
                 ),
                 "test2.torrent": UpdateResult.new(
-                    torrent=__FakeTorrent(),
-                    tracker=__FakeTracker(),
+                    torrent=FakeTorrent(),
+                    tracker=FakeTracker(),
                     diff=TorrentsDiff.new(
                         added=set(["nya.mkv", "nya.srt"]),
                         removed=set(["nyaa.srt", "nyaa.mkv"]),

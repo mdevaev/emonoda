@@ -47,7 +47,7 @@ from . import get_configured_trackers
 
 
 # =====
-class __InnerStatRecord(NamedTuple):
+class _InnerStatRecord(NamedTuple):
     name: str
     status: str
     torrent: Optional[Torrent]
@@ -58,7 +58,7 @@ class __InnerStatRecord(NamedTuple):
     tb_lines: List[str]
 
 
-class StatRecord(__InnerStatRecord):
+class StatRecord(_InnerStatRecord):
     @staticmethod
     def new(
         name: str,

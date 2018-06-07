@@ -40,7 +40,7 @@ from . import fmt
 
 
 # =====
-__COLORS = {
+_COLORS = {
     "red":     Style.BRIGHT + Fore.RED,
     "green":   Style.BRIGHT + Fore.GREEN,
     "yellow":  Style.BRIGHT + Fore.YELLOW,
@@ -50,7 +50,7 @@ __COLORS = {
     "reset":   Fore.RESET,
 }
 
-__NO_COLORS = dict.fromkeys(list(__COLORS), "")
+_NO_COLORS = dict.fromkeys(list(_COLORS), "")
 
 
 # =====
@@ -185,7 +185,7 @@ class Log:
                 return None
 
     def __format_text(self, text: str, placeholders: Tuple, colored: bool) -> str:
-        text = text.format(**(__COLORS if colored else __NO_COLORS))
+        text = text.format(**(_COLORS if colored else _NO_COLORS))
         text = text % tuple(
             (placeholder() if callable(placeholder) else placeholder)
             for placeholder in placeholders

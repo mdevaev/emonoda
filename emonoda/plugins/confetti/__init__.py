@@ -59,7 +59,7 @@ def templated(name: str, built_in: bool=True, **kwargs: Any) -> str:
 
 
 # =====
-class __InnerUpdateResult(NamedTuple):
+class _InnerUpdateResult(NamedTuple):
     torrent: Optional[Torrent]
     tracker: Optional[BaseTracker]
     diff: TorrentsDiff
@@ -68,7 +68,7 @@ class __InnerUpdateResult(NamedTuple):
     tb_lines: List[str]
 
 
-class UpdateResult(__InnerUpdateResult):
+class UpdateResult(_InnerUpdateResult):
     @staticmethod
     def new(
         torrent: Optional[Torrent]=None,
@@ -93,19 +93,6 @@ ResultsType = Dict[str, Dict[str, UpdateResult]]
 
 
 class BaseConfetti(BasePlugin):
-    def __init__(self, timeout: float, retries: int, retries_sleep: float, **_: Any) -> None:  # pylint: disable=super-init-not-called
-        self._timeout = timeout
-        self._retries = retries
-        self._retries_sleep = retries_sleep
-
-    @classmethod
-    def get_options(cls) -> Dict[str, Option]:
-        return {
-            "timeout":       Option(default=10.0, help="Network timeout"),
-            "retries":       Option(default=5, help="Retries for failed attempts"),
-            "retries_sleep": Option(default=1.0, help="Sleep interval between failed attempts"),
-        }
-
     def send_results(self, source: str, results: ResultsType) -> None:
         raise NotImplementedError
 

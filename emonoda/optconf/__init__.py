@@ -86,14 +86,13 @@ class Section(dict):
             return dict.__getattribute__(self, name)
 
 
-__type = type
-
-
 class Option:
+    __type = type
+
     def __init__(self, default: Any, help: str, type: Optional[Callable[[Any], Any]]=None) -> None:  # pylint: disable=redefined-builtin
         self.default = default
         self.help = help
-        self.type: Callable[[Any], Any] = (type or (__type(default) if default is not None else str))  # type: ignore
+        self.type: Callable[[Any], Any] = (type or (self.__type(default) if default is not None else str))  # type: ignore
 
     def __repr__(self) -> str:
         return "<Option(default={self.default}, type={self.type}, help={self.help})>".format(self=self)

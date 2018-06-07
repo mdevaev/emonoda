@@ -38,12 +38,12 @@ from .thirdparty import bencoder  # type: ignore
 
 
 # =====
-class __InnerTorrentEntryAttrs(NamedTuple):
+class _InnerTorrentEntryAttrs(NamedTuple):
     is_dir: bool
     size: int
 
 
-class TorrentEntryAttrs(__InnerTorrentEntryAttrs):
+class TorrentEntryAttrs(_InnerTorrentEntryAttrs):
     @staticmethod
     def new_file(size: int) -> "TorrentEntryAttrs":
         return TorrentEntryAttrs(is_dir=False, size=size)
@@ -53,14 +53,14 @@ class TorrentEntryAttrs(__InnerTorrentEntryAttrs):
         return TorrentEntryAttrs(is_dir=True, size=0)
 
 
-class __InnerTorrentsDiff(NamedTuple):
+class _InnerTorrentsDiff(NamedTuple):
     added: Set[str]
     removed: Set[str]
     modified: Set[str]
     type_modified: Set[str]
 
 
-class TorrentsDiff(__InnerTorrentsDiff):
+class TorrentsDiff(_InnerTorrentsDiff):
     @staticmethod
     def new(
         added: Optional[Set[str]]=None,

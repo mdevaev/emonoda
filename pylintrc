@@ -62,6 +62,3 @@ variable-rgx=[a-z_][a-z0-9_]{1,30}$
 
 # Regular expression which should only match correct instance attribute names
 attr-rgx=[a-z_][a-z0-9_]{1,30}$
-
-# Class names
-class-rgx=_?[A-Z_][a-zA-Z0-9]+$

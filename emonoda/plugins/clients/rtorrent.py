@@ -39,21 +39,21 @@ from . import build_files
 
 
 # =====
-__XMLRPC_UNKNOWN_HASH = -501
+_XMLRPC_UNKNOWN_HASH = -501
 
 
-# =====
 def _catch_unknown_torrent(method: Callable) -> Callable:
     def wrap(self: WithCustoms, *args: Any, **kwargs: Any) -> Any:
         try:
             return method(self, *args, **kwargs)
         except xmlrpc.client.Fault as err:
-            if err.faultCode == __XMLRPC_UNKNOWN_HASH:
+            if err.faultCode == _XMLRPC_UNKNOWN_HASH:
                 raise NoSuchTorrentError("Unknown torrent hash")
             raise
     return wrap
 
 
+# =====
 class Plugin(WithCustoms):
     # API description: http://code.google.com/p/gi-torrent/wiki/rTorrent_XMLRPC_reference
 
@@ -103,7 +103,7 @@ class Plugin(WithCustoms):
                 assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
                 break
             except xmlrpc.client.Fault as err:
-                if err.faultCode != __XMLRPC_UNKNOWN_HASH:
+                if err.faultCode != _XMLRPC_UNKNOWN_HASH:
                     raise
                 if retries == 0:
                     raise RuntimeError("Timed out torrent uploads after {} seconds".format(
@@ -121,7 +121,7 @@ class Plugin(WithCustoms):
             assert self.__server.d.get_hash(torrent_hash).lower() == torrent_hash
             return True
         except xmlrpc.client.Fault as err:
-            if err.faultCode != __XMLRPC_UNKNOWN_HASH:
+            if err.faultCode != _XMLRPC_UNKNOWN_HASH:
                 raise
         return False
 

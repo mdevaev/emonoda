@@ -31,14 +31,14 @@ import yaml.nodes
 def load_file(file_path: str) -> Any:
     with open(file_path) as yaml_file:
         try:
-            return yaml.load(yaml_file, __YamlLoader)
+            return yaml.load(yaml_file, _YamlLoader)
         except Exception:
             # Reraise internal exception as standard ValueError and show the incorrect file
             raise ValueError("Incorrect YAML syntax in file '{}'".format(file_path))
 
 
 # =====
-class __YamlLoader(yaml.loader.Loader):  # pylint: disable=too-many-ancestors
+class _YamlLoader(yaml.loader.Loader):  # pylint: disable=too-many-ancestors
     def __init__(self, yaml_file: IO) -> None:
         yaml.loader.Loader.__init__(self, yaml_file)
         self.__root = os.path.dirname(yaml_file.name)
@@ -49,4 +49,4 @@ class __YamlLoader(yaml.loader.Loader):  # pylint: disable=too-many-ancestors
         return load_file(file_path)
 
 
-__YamlLoader.add_constructor("!include", __YamlLoader.include)  # pylint: disable=no-member
+_YamlLoader.add_constructor("!include", _YamlLoader.include)  # pylint: disable=no-member
