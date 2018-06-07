@@ -26,14 +26,12 @@ from typing import Any
 from ...optconf import Option
 from ...optconf.converters import as_string_list
 
-from ... import web
-
 from . import ResultsType
-from . import WithProxy
+from . import WithWeb
 
 
 # =====
-class Plugin(WithProxy):
+class Plugin(WithWeb):
     PLUGIN_NAME = "pushover"
 
     def __init__(  # pylint: disable=super-init-not-called
@@ -45,6 +43,7 @@ class Plugin(WithProxy):
     ) -> None:
 
         self._init_bases(**kwargs)
+        self._init_opener()
 
         self.__user_key = user_key
         self.__api_key = api_key
@@ -62,26 +61,12 @@ class Plugin(WithProxy):
 
     def send_results(self, source: str, results: ResultsType) -> None:
         for result in results["affected"].values():
-            self.__notify(
-                title="Emonoda ({})".format(source),
-                message=result.torrent.get_name(),  # type: ignore
+            self._read_url(
+                url="https://api.pushover.net/1/messages.json",
+                data=urllib.parse.urlencode({
+                    "token":   self.__api_key,
+                    "user":    self.__user_key,
+                    "title":   "Emonoda ({})".format(source),
+                    "message": result.torrent.get_name(),  # type: ignore
+                }).encode("utf-8"),
             )
-
-    # ===
-
-    def __notify(self, title: str, message: str) -> None:
-        # https://pushover.net/api
-        post = {
-            "token":   self.__api_key,
-            "user":    self.__user_key,
-            "title":   title,
-            "message": message,
-        }
-        web.read_url(
-            opener=web.build_opener(proxy_url=self._proxy_url),
-            url="https://api.pushover.net/1/messages.json",
-            data=urllib.parse.urlencode(post).encode("utf-8"),
-            timeout=self._timeout,
-            retries=self._retries,
-            retries_sleep=self._retries_sleep,
-        )

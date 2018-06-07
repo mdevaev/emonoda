@@ -28,15 +28,14 @@ from ...optconf.converters import as_string_list
 
 from ...tfile import TorrentsDiff
 
-from ... import web
 from ... import tools
 
 from . import ResultsType
-from . import WithProxy
+from . import WithWeb
 
 
 # =====
-class Plugin(WithProxy):
+class Plugin(WithWeb):
     PLUGIN_NAME = "nma"
 
     def __init__(  # pylint: disable=super-init-not-called
@@ -46,6 +45,7 @@ class Plugin(WithProxy):
     ) -> None:
 
         self._init_bases(**kwargs)
+        self._init_opener()
 
         self.__api_keys = api_keys
 
@@ -59,10 +59,15 @@ class Plugin(WithProxy):
 
     def send_results(self, source: str, results: ResultsType) -> None:
         for result in results["affected"].values():
-            self.__notify(
-                app="Emonoda ({})".format(source),
-                event="{}".format(result.torrent.get_name()),  # type: ignore
-                description=self.__format_description(result.diff),
+            self._read_url(
+                url="https://www.notifymyandroid.com/publicapi/notify",
+                data=urllib.parse.urlencode({
+                    "apikey":       ",".join(self.__api_keys),
+                    "application":  "Emonoda ({})".format(source),
+                    "event":        "{}".format(result.torrent.get_name()),  # type: ignore
+                    "description":  self.__format_description(result.diff),
+                    "Content-Type": "text/plain",
+                }).encode("utf-8"),
             )
 
     # ===
@@ -81,21 +86,3 @@ class Plugin(WithProxy):
         if len(description) > 9999:
             description = description[:9995] + "..."
         return description
-
-    def __notify(self, app: str, event: str, description: str) -> None:
-        # http://www.notifymyandroid.com/api.jsp
-        post = {
-            "apikey":       ",".join(self.__api_keys),
-            "application":  app,
-            "event":        event,
-            "description":  description,
-            "Content-Type": "text/plain",
-        }
-        web.read_url(
-            opener=web.build_opener(proxy_url=self._proxy_url),
-            url="https://www.notifymyandroid.com/publicapi/notify",
-            data=urllib.parse.urlencode(post).encode("utf-8"),
-            timeout=self._timeout,
-            retries=self._retries,
-            retries_sleep=self._retries_sleep,
-        )

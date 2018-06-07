@@ -20,6 +20,7 @@
 import os
 import pkgutil
 import textwrap
+import urllib.request
 
 from typing import List
 from typing import Dict
@@ -37,6 +38,8 @@ from ...plugins.trackers import BaseTracker  # FIXME
 
 from ...tfile import TorrentsDiff
 from ...tfile import Torrent
+
+from ... import web
 
 from .. import BasePlugin
 from .. import get_classes
@@ -107,15 +110,60 @@ class BaseConfetti(BasePlugin):
         raise NotImplementedError
 
 
-class WithProxy(BaseConfetti):  # pylint: disable=abstract-method
-    def __init__(self, proxy_url: str, **_: Any) -> None:  # pylint: disable=super-init-not-called
-        self._proxy_url = proxy_url
+class WithWeb(BaseConfetti):  # pylint: disable=abstract-method
+    _SITE_RETRY_CODES: List[int] = []
+
+    def __init__(  # pylint: disable=super-init-not-called
+        self,
+        timeout: float,
+        retries: int,
+        retries_sleep: float,
+        user_agent: str,
+        proxy_url: str,
+    ) -> None:
+
+        self.__timeout = timeout
+        self.__retries = retries
+        self.__retries_sleep = retries_sleep
+        self.__user_agent = user_agent
+        self.__proxy_url = proxy_url
+
+        self.__opener: Optional[urllib.request.OpenerDirector] = None
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
         return {
-            "proxy_url": Option(default="", help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
+            "timeout":       Option(default=10.0, help="Network timeout"),
+            "retries":       Option(default=5, help="Retries for failed attempts"),
+            "retries_sleep": Option(default=1.0, help="Sleep interval between failed attempts"),
+            "user_agent":    Option(default="Mozilla/5.0", help="User-Agent for site"),
+            "proxy_url":     Option(default="", help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
         }
+
+    def _init_opener(self) -> None:
+        assert not self.__opener
+        self.__opener = web.build_opener(self.__proxy_url)
+
+    def _read_url(
+        self,
+        url: str,
+        data: Optional[bytes]=None,
+        headers: Optional[Dict[str, str]]=None,
+    ) -> bytes:
+
+        assert self.__opener
+        headers = (headers or {})
+        headers.setdefault("User-Agent", self.__user_agent)
+        return web.read_url(
+            opener=self.__opener,
+            url=url,
+            data=data,
+            headers=headers,
+            timeout=self.__timeout,
+            retries=self.__retries,
+            retries_sleep=self.__retries_sleep,
+            retry_codes=self._SITE_RETRY_CODES,
+        )
 
 
 def get_confetti_class(name: str) -> Type[BaseConfetti]:

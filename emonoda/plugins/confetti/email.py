@@ -44,19 +44,22 @@ from . import templated
 class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     PLUGIN_NAME = "email"
 
-    def __init__(  # pylint: disable=super-init-not-called,too-many-arguments
+    def __init__(  # pylint: disable=super-init-not-called,too-many-arguments,too-many-locals
         self,
         to: str,
         cc: List[str],
         subject: str,
         sender: str,
         html: bool,
+        template: str,
         server: str,
         port: int,
         ssl: bool,
         user: str,
         passwd: str,
-        template: str,
+        timeout: float,
+        retries: int,
+        retries_sleep: float,
         **kwargs: Any,
     ) -> None:
 
@@ -75,6 +78,10 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         self.__user = user
         self.__passwd = passwd
 
+        self.__timeout = timeout
+        self.__retries = retries
+        self.__retries_sleep = retries_sleep
+
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options({
@@ -90,13 +97,17 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             "ssl":      Option(default=False, help="Use SMTPS"),
             "user":     Option(default="", help="Account on SMTP server"),
             "passwd":   Option(default="", help="Passwd for account on SMTP server"),
+
+            "timeout":       Option(default=10.0, help="Network timeout"),
+            "retries":       Option(default=5, help="Retries for failed attempts"),
+            "retries_sleep": Option(default=1.0, help="Sleep interval between failed attempts"),
         })
 
     # ===
 
     def send_results(self, source: str, results: ResultsType) -> None:
         msg = self.__format_message(source, results)
-        retries = self._retries
+        retries = self.__retries
         while True:
             try:
                 self.__send_message(msg)
@@ -109,7 +120,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             ):
                 if retries == 0:
                     raise
-                time.sleep(self._retries_sleep)
+                time.sleep(self.__retries_sleep)
                 retries -= 1
 
     # ===
@@ -159,7 +170,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         with contextlib.closing(smtp_class(
             host=self.__server,
             port=self.__port,
-            timeout=self._timeout,
+            timeout=self.__timeout,
         )) as client:
             if self.__user:
                 client.login(self.__user, self.__passwd)  # pylint: disable=no-member
