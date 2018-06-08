@@ -164,6 +164,8 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             self.__opener = web.build_opener(self.__proxy_url)
 
     def _read_url(self, *args: Any, **kwargs: Any) -> bytes:
+        if not kwargs.get("opener"):
+            kwargs["opener"] = self.__opener
         try:
             return self.__read_url_nofe(*args, **kwargs)
         except (
@@ -179,6 +181,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def __read_url_nofe(
         self,
         url: str,
+        *,
         data: Optional[bytes]=None,
         headers: Optional[Dict[str, str]]=None,
         opener: urllib.request.OpenerDirector=None,
