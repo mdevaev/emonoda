@@ -18,8 +18,9 @@ release:
 	make bump
 	make push
 	make pypi
+	make clean
 	make mkdocs
-	make mkdpcs-release
+	make mkdocs-release
 	make clean
 
 tox:
