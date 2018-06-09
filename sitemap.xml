@@ -60,4 +60,14 @@
      <lastmod>2018-06-09</lastmod>
      <changefreq>daily</changefreq>
     </url>
+    <url>
+     <loc>https://github.com/mdevaev/emonoda/rTorrent-XMLRPC-Reference/</loc>
+     <lastmod>2018-06-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    <url>
+     <loc>https://github.com/mdevaev/emonoda/rTorrent-system_multicall/</loc>
+     <lastmod>2018-06-09</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
 </urlset>

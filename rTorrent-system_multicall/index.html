@@ -13,7 +13,7 @@
         <meta name="description" content="A set of tools to organize and manage your torrents">
       
       
-        <link rel="canonical" href="https://github.com/mdevaev/emonoda/trackers/">
+        <link rel="canonical" href="https://github.com/mdevaev/emonoda/rTorrent-system_multicall/">
       
       
         <meta name="author" content="Maxim Devaev">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Настройка трекеров для обновления торрентов - Emonoda</title>
+        <title>rTorrent system_multicall - Emonoda</title>
       
     
     
@@ -99,7 +99,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
     
-      <a href="#_1" tabindex="1" class="md-skip">
+      <a href="#introduction" tabindex="1" class="md-skip">
         
       </a>
     
@@ -125,7 +125,7 @@
                 Emonoda
               </span>
               <span class="md-header-nav__topic">
-                Настройка трекеров для обновления торрентов
+                rTorrent system_multicall
               </span>
             
           
@@ -252,12 +252,10 @@
       
       
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+  <li class="md-nav__item md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
     
     <label class="md-nav__link" for="nav-2">
       Базовая настройка
@@ -297,45 +295,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="toc">
-        Настройка трекеров для обновления торрентов
-      </label>
-    
-    <a href="./" title="Настройка трекеров для обновления торрентов" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../trackers/" title="Настройка трекеров для обновления торрентов" class="md-nav__link">
       Настройка трекеров для обновления торрентов
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-  
-    <label class="md-nav__title" for="toc">Содержание</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#_1" title="Настройка трекеров" class="md-nav__link">
-    Настройка трекеров
-  </a>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -468,10 +432,12 @@
       
       
 
+  
 
-  <li class="md-nav__item md-nav__item--nested">
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
     
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5">
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
     
     <label class="md-nav__link" for="nav-5">
       Инфа для разработчиков
@@ -499,11 +465,52 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../rTorrent-system_multicall/" title="rTorrent system_multicall" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        rTorrent system_multicall
+      </label>
+    
+    <a href="./" title="rTorrent system_multicall" class="md-nav__link md-nav__link--active">
       rTorrent system_multicall
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="toc">Содержание</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" title="Introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#details" title="Details" class="md-nav__link">
+    Details
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -531,8 +538,15 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#_1" title="Настройка трекеров" class="md-nav__link">
-    Настройка трекеров
+  <a href="#introduction" title="Introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#details" title="Details" class="md-nav__link">
+    Details
   </a>
   
 </li>
@@ -553,142 +567,100 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/mdevaev/emonoda/edit/master/docs/trackers.md" title="Редактировать эту страницу" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/mdevaev/emonoda/edit/master/docs/rTorrent-system_multicall.md" title="Редактировать эту страницу" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                  <h1>Настройка трекеров для обновления торрентов</h1>
+                  <h1>rTorrent system_multicall</h1>
                 
-                <h3 id="_1">Настройка трекеров<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
-<p>Для того, чтобы активировать использование какого-либо трекера в <a href="../emupdate">emupdate</a>, вам нужно включить его плагин в <a href="../config">конфиге</a> и, если потребуется, указать свой логин и пароль для сайта. Кроме того, плагины имеют ряд параметров, таких как прокси и таймауты, которые вы можете настроить индивидуально для каждого трекера. Включение плагина осуществляется добавлением его в секцию <code>trackers</code>, как было указано ранее. Параметры передаются внутри секции с именем плагина, например <code>trackers/rutracker.org/timeout=5.0</code>.<br />
-Представленные ниже параметры доступны для всех трекерных плагинов; рутрекер используется лишь в качестве примера.</p>
-<ul>
-<li><strong><code>trackers/rutracker.org/check_fingerprint=true</code></strong><ul>
-<li>Перед логином на трекер, <strong>emupdate</strong> идет на <a href="https://github.com/mdevaev/emonoda/tree/master/trackers">гитхаб</a> и проверяет информацию о плагине. В ней содержится кодировка целевого сайта, кусочек текста с его главной страницы (fingerprint) и версия плагина в апстриме. Плагин трекера скачивает главную страницу сайта, а затем ищет в ней подстроку фингерпринта. Если таковой не находится, он делает вывод, что сайт заблокирован провайдером и отказывается работать дальше. Более надежным был бы метод проверки сертификатов, но на данный момент ни один из популярных трекеров не имеет нормально настроенного HTTPS.</li>
-</ul>
-</li>
-<li><strong><code>trackers/rutracker.org/check_version=true</code></strong><ul>
-<li>Этот параметр почти аналогичен предыдущей, но сравнивает локальную версию плагина с апстримовой. Если в апстриме версия выше, то плагин отказывается работать. Апстримовые версии повышаются только в том случае, если трекер меняет разметку страниц таким образом, что плагины перестают работать, а в апстриме уже есть исправление. Использование этого параметра подсказывает вам, что пора обновить <strong>Emonoda</strong>, чтобы плагин заработал вновь.</li>
-</ul>
-</li>
-<li><strong><code>trackers/rutracker.org/proxy_url=""</code></strong><ul>
-<li>Позволяет указать прокси для сайта. Поддерживаются HTTP(S)-прокси и SOCKS4/5. Этот параметр можно использовать так: <code>trackers/rutracker.org/proxy_url=socks5://localhost:5000</code> (вместе с <a href="https://ru.wikibooks.org/wiki/SSH_%D1%82%D1%83%D0%BD%D0%BD%D0%B5%D0%BB%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5">SOCKS-проксированием по SSH</a>). Формат - <code>scheme://username:passwd@host:port</code>. Вместо <code>scheme</code> нужно указать <code>socks4</code>, <code>socks5</code>, <code>http</code> или <code>https</code>.</li>
-</ul>
-</li>
-<li><strong><code>trackers/rutracker.org/retries=20</code></strong><ul>
-<li>Количество повторов при обращении к трекеру при возникновении таймаутов, пятисоток или специфичных для сайта ошибок (например, 404 у рутрекера при скачке торрент-файла не является критической ошибкой, т.к. иногда сайт отдает неправильный бекенд за балансером, и программе нужно просто несколько раз повторить свой запрос).</li>
-</ul>
-</li>
-<li><strong><code>trackers/rutracker.org/retries_sleep=1.0</code></strong><ul>
-<li>Пауза между повторами при использовании предыдущего параметра.</li>
-</ul>
-</li>
-<li><strong><code>trackers/rutracker.org/timeout=10.0</code></strong><ul>
-<li>Таймаут на сетевые операции с трекером.</li>
-</ul>
-</li>
-<li><strong><code>trackers/rutracker.org/user_agent=Mozilla/5.0</code></strong><ul>
-<li>Плагины прикидываются браузером при работе с трекерами. Для некоторых плагинов значение по умолчанию для этого параметра отличается (например, <code>Googlebot/2.1</code> для http://rutor.org позволяет обходить DDoS-фильтр CloudFlare).</li>
-</ul>
-</li>
-</ul>
-<p>Некоторые параметры применяются только для неанонимных трекеров, а так же для трекеров, к которым требуется выполнять SCRAPE-запрос. Например, <code>trackers/nnmclub.to/client_agent</code>. Здесь приведен полных их список с назначением, а так же таблица, где перечислены использующие их трекеры.</p>
-<ul>
-<li><strong><code>trackers/rutracker.org/user=""</code></strong><ul>
-<li>Имя пользователя на сайте, обязательно для неанонимных трекеров.</li>
-</ul>
-</li>
-<li><strong><code>trackers/rutracker.org/passwd=""</code></strong><ul>
-<li>Имя пользователя на сайте, обязательно для неанонимных трекеров.</li>
-</ul>
-</li>
-<li><strong><code>trackers/nnmclub.to/client_agent=rtorrent/0.9.2/0.13.2</code></strong><ul>
-<li>На некоторых трекерах отсутствует хеш раздачи на странице, но при этом можно выполнить SCRAPE-запрос, чтобы проверить, зарегистрирована ли раздача. Если не зарегистрирована, то это значит, что пора ее обновить. Этот параметр определяет юзерагент для SCRAPE-запросов, чтобы плагин трекера мог прикинуться торрент-клиентом.</li>
-</ul>
-</li>
-<li><strong><code>trackers/tr.anidub.com/timezone=""</code></strong><ul>
-<li>Если не доступны ни хеш раздачи, ни SCRAPE, то последнее, что остается делать - парсить страницу на предмет времени обновления раздачи. Этот параметр задает таймзону сайта. Обычно плагины определяют ее самостоятельно, заходя под вашим логином на личную страницу с настройками сайта. Такие плагины сравнивают последнее время обновления торрент-файла с новой датой и на основе этого выносят решение о необходимости нового обновления.<br />
-В таблице ниже дан список всех доступных плагинов и специфичных для них опций:</li>
-</ul>
-</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th>Плагин</th>
-<th>user, passwd</th>
-<th>client_agent</th>
-<th>timezone</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>rutracker.org</code></td>
-<td>Обязательно</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>nnm-club.me</code></td>
-<td>Обязательно</td>
-<td>Опционально</td>
-<td></td>
-</tr>
-<tr>
-<td><code>ipv6.nnm-club.name</code></td>
-<td>Обязательно</td>
-<td>Опционально</td>
-<td></td>
-</tr>
-<tr>
-<td><code>rutor.org</code></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>tfile-home.org</code></td>
-<td>Обязательно</td>
-<td></td>
-<td>Опционально</td>
-</tr>
-<tr>
-<td><code>pravtor.ru</code></td>
-<td>Обязательно</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><code>tr.anidub.com</code></td>
-<td>Обязательно</td>
-<td></td>
-<td>Опционально</td>
-</tr>
-<tr>
-<td><code>pornolab.net</code></td>
-<td>Обязательно</td>
-<td></td>
-<td>Опционально</td>
-</tr>
-<tr>
-<td><code>booktracker.org</code></td>
-<td>Обязательно</td>
-<td></td>
-<td>Опционально</td>
-</tr>
-<tr>
-<td><code>trec.to</code></td>
-<td>Обязательно</td>
-<td></td>
-<td>Опционально</td>
-</tr>
-<tr>
-<td><code>kinozal.tv</code></td>
-<td>Обязательно</td>
-<td></td>
-<td>Опционально</td>
-</tr>
-</tbody>
-</table>
+                <h3 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h3>
+<p>The syntax for using system.multicall to speed up the query of multiple variables.<br />
+I've picked up this document from <a href="https://code.google.com/p/gi-torrent">gi-torrent wiki</a>.<br />
+Copyright (c) Hans.Hasert@gmail.com</p>
+<h3 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h3>
+<p>The way to combine multiple queries is to use the <code>system.multicall</code> and specify which methods we want to call.
+The XML would look something like this:</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+<span class="nt">&lt;methodCall&gt;</span>
+<span class="nt">&lt;methodName</span> <span class="nt">/&gt;</span>                                <span class="nt">&lt;--</span> <span class="err">&quot;system.multicall&quot;</span>
+ <span class="err">&lt;params</span><span class="nt">&gt;</span>
+  <span class="nt">&lt;param&gt;</span>
+   <span class="nt">&lt;value&gt;</span>
+    <span class="nt">&lt;array&gt;</span>
+     <span class="nt">&lt;data&gt;</span>
+      <span class="nt">&lt;value&gt;</span>
+       <span class="nt">&lt;struct&gt;</span>
+        <span class="nt">&lt;member&gt;</span>
+         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>                             <span class="nt">&lt;--</span> <span class="err">&quot;methodName&quot;</span>
+         <span class="err">&lt;value</span><span class="nt">&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>            <span class="nt">&lt;--</span> <span class="err">the</span> <span class="err">1st</span> <span class="err">actual</span> <span class="err">method</span> <span class="err">to</span> <span class="err">be</span> <span class="err">called</span>
+        <span class="err">&lt;/member</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;member&gt;</span>
+         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>                             <span class="nt">&lt;--</span> <span class="err">&quot;params&quot;</span>
+         <span class="err">&lt;value</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;array&gt;</span>
+           <span class="nt">&lt;data&gt;</span>
+            <span class="nt">&lt;value&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>         <span class="nt">&lt;--</span> <span class="err">list</span> <span class="err">of</span> <span class="err">parameters</span>
+           <span class="err">&lt;/data</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;/array&gt;</span>
+         <span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/member&gt;</span>
+       <span class="nt">&lt;/struct&gt;</span>
+      <span class="nt">&lt;/value&gt;</span>
+      <span class="nt">&lt;value&gt;</span>
+       <span class="nt">&lt;struct&gt;</span>
+        <span class="nt">&lt;member&gt;</span>
+         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>                             <span class="nt">&lt;--</span> <span class="err">&quot;methodName&quot;</span>
+         <span class="err">&lt;value</span><span class="nt">&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>            <span class="nt">&lt;--</span> <span class="err">the</span> <span class="err">2nd</span> <span class="err">actual</span> <span class="err">method</span> <span class="err">to</span> <span class="err">be</span> <span class="err">called</span>
+        <span class="err">&lt;/member</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;member&gt;</span>
+         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>                             <span class="nt">&lt;--</span> <span class="err">&quot;params&quot;</span>
+         <span class="err">&lt;value</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;array&gt;</span>
+           <span class="nt">&lt;data&gt;</span>
+            <span class="nt">&lt;value&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>         <span class="nt">&lt;--</span> <span class="err">list</span> <span class="err">of</span> <span class="err">parameters</span>
+           <span class="err">&lt;/data</span><span class="nt">&gt;</span>
+          <span class="nt">&lt;/array&gt;</span>
+         <span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/member&gt;</span>
+       <span class="nt">&lt;/struct&gt;</span>
+      <span class="nt">&lt;/value&gt;</span>
+     <span class="nt">&lt;/data&gt;</span>
+    <span class="nt">&lt;/array&gt;</span>
+   <span class="nt">&lt;/value&gt;</span>
+  <span class="nt">&lt;/param&gt;</span>
+ <span class="nt">&lt;/params&gt;</span>
+<span class="nt">&lt;/methodCall&gt;</span>
+</pre></div>
+
+
+<p>This will invoke multiple xmlrpc methods to be called, the response looks like this:</p>
+<div class="codehilite"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="nt">&lt;methodResponse&gt;</span>
+ <span class="nt">&lt;params&gt;</span>
+  <span class="nt">&lt;param&gt;</span>
+   <span class="nt">&lt;value&gt;</span>
+    <span class="nt">&lt;array&gt;</span>
+     <span class="nt">&lt;data&gt;</span>
+      <span class="nt">&lt;value&gt;</span>
+       <span class="nt">&lt;array&gt;</span>
+        <span class="nt">&lt;data&gt;</span>
+         <span class="nt">&lt;value&gt;&lt;i8&gt;</span>123245<span class="nt">&lt;/i8&gt;&lt;/value&gt;</span>
+        <span class="nt">&lt;/data&gt;</span>
+       <span class="nt">&lt;/array&gt;</span>
+      <span class="nt">&lt;/value&gt;</span>
+      <span class="nt">&lt;value&gt;</span>
+       <span class="nt">&lt;array&gt;</span>
+        <span class="nt">&lt;data&gt;</span>
+         <span class="nt">&lt;value&gt;&lt;i8&gt;</span>12345<span class="nt">&lt;/i8&gt;&lt;/value&gt;</span>
+        <span class="nt">&lt;/data&gt;</span>
+       <span class="nt">&lt;/array&gt;</span>
+      <span class="nt">&lt;/value&gt;</span>
+     <span class="nt">&lt;/data&gt;</span>
+    <span class="nt">&lt;/array&gt;</span>
+   <span class="nt">&lt;/value&gt;</span>
+  <span class="nt">&lt;/param&gt;</span>
+ <span class="nt">&lt;/params&gt;</span>
+<span class="nt">&lt;/methodResponse&gt;</span>
+</pre></div>
                 
                   
                 
@@ -709,7 +681,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../clients/" title="Интеграция с торрент-клиентом" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../rTorrent-XMLRPC-Reference/" title="rTorrent XMLRPC Reference" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -718,25 +690,11 @@
                 <span class="md-footer-nav__direction">
                   Предыдущая страница
                 </span>
-                Интеграция с торрент-клиентом
+                rTorrent XMLRPC Reference
               </span>
             </div>
           </a>
         
-        
-          <a href="../confetti/" title="Настройка оповещений об обновлениях" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
-                  Следующая страница
-                </span>
-                Настройка оповещений об обновлениях
-              </span>
-            </div>
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
-            </div>
-          </a>
         
       </nav>
     </div>

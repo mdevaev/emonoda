@@ -1,0 +1,1220 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="ru" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="A set of tools to organize and manage your torrents">
+      
+      
+        <link rel="canonical" href="https://github.com/mdevaev/emonoda/rTorrent-XMLRPC-Reference/">
+      
+      
+        <meta name="author" content="Maxim Devaev">
+      
+      
+        <meta name="lang:clipboard.copy" content="">
+      
+        <meta name="lang:clipboard.copied" content="">
+      
+        <meta name="lang:search.language" content="">
+      
+        <meta name="lang:search.pipeline.stopwords" content="">
+      
+        <meta name="lang:search.pipeline.trimmer" content="">
+      
+        <meta name="lang:search.result.none" content="Нет совпадений">
+      
+        <meta name="lang:search.result.one" content="Совпадений: 1">
+      
+        <meta name="lang:search.result.other" content="Совпадений: #">
+      
+        <meta name="lang:search.tokenizer" content="">
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.4, mkdocs-material-2.7.3">
+    
+    
+      
+        <title>rTorrent XMLRPC Reference - Emonoda</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.8d40d89b.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.6079476c.css">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+    
+  </head>
+  
+    
+    
+    <body dir="" data-md-color-primary="blue-grey" data-md-color-accent="pink">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <a href="#introduction" tabindex="1" class="md-skip">
+        
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="https://github.com/mdevaev/emonoda" title="Emonoda" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                Emonoda
+              </span>
+              <span class="md-header-nav__topic">
+                rTorrent XMLRPC Reference
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Поиск" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Начните писать для начала поиска
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/mdevaev/emonoda/" title="Перейти к исходному коду" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      mdevaev/emonoda
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    <span class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </span>
+    Emonoda
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/mdevaev/emonoda/" title="Перейти к исходному коду" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      mdevaev/emonoda
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Emonoda -- 得物だ" class="md-nav__link">
+      Emonoda -- 得物だ
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Базовая настройка
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        Базовая настройка
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../config/" title="Конфигурация" class="md-nav__link">
+      Конфигурация
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../clients/" title="Интеграция с торрент-клиентом" class="md-nav__link">
+      Интеграция с торрент-клиентом
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../trackers/" title="Настройка трекеров для обновления торрентов" class="md-nav__link">
+      Настройка трекеров для обновления торрентов
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../confetti/" title="Настройка оповещений об обновлениях" class="md-nav__link">
+      Настройка оповещений об обновлениях
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      Команды
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        Команды
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emupdate/" title="emupdate - обновление торрентов" class="md-nav__link">
+      emupdate - обновление торрентов
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emfile/" title="emfile - просмотр информации о торрент-файле" class="md-nav__link">
+      emfile - просмотр информации о торрент-файле
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emdiff/" title="emdiff - сравнение торрент-файлов" class="md-nav__link">
+      emdiff - сравнение торрент-файлов
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emload/" title="emload - добавление торрента в клиент" class="md-nav__link">
+      emload - добавление торрента в клиент
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emrm/" title="emrm - удаление торрента из клиента" class="md-nav__link">
+      emrm - удаление торрента из клиента
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emfind/" title="emfind - запросы к клиенту для обслуживания коллекции" class="md-nav__link">
+      emfind - запросы к клиенту для обслуживания коллекции
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../hooks/" title="Спецкостыли для разных клиентов" class="md-nav__link">
+      Спецкостыли для разных клиентов
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-5" type="checkbox" id="nav-5" checked>
+    
+    <label class="md-nav__link" for="nav-5">
+      Инфа для разработчиков
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-5">
+        Инфа для разработчиков
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        rTorrent XMLRPC Reference
+      </label>
+    
+    <a href="./" title="rTorrent XMLRPC Reference" class="md-nav__link md-nav__link--active">
+      rTorrent XMLRPC Reference
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="toc">Содержание</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" title="Introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#details" title="Details" class="md-nav__link">
+    Details
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../rTorrent-system_multicall/" title="rTorrent system_multicall" class="md-nav__link">
+      rTorrent system_multicall
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="toc">Содержание</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#introduction" title="Introduction" class="md-nav__link">
+    Introduction
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#details" title="Details" class="md-nav__link">
+    Details
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/mdevaev/emonoda/edit/master/docs/rTorrent-XMLRPC-Reference.md" title="Редактировать эту страницу" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                  <h1>rTorrent XMLRPC Reference</h1>
+                
+                <h3 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h3>
+<p>Draft reference for XML-RPC commands for rTorrent.<br />
+I've picked up this document from <a href="https://code.google.com/p/gi-torrent">gi-torrent wiki</a>.<br />
+Copyright (c) Hans.Hasert@gmail.com</p>
+<h3 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h3>
+<p><strong>system.listMethods</strong></p>
+<p>Return an array of all available XML-RPC methods on the server.</p>
+<p><strong>system.methodSignature</strong></p>
+<p>Given the name of a method, return an array of legal signatures. Each signature is an array of strings.  The first item of each signature is the return type, and any others items are parameter types.</p>
+<p><strong>system.methodHelp</strong></p>
+<p>Given the name of a method, return a help string.</p>
+<p><strong>system.multicall</strong></p>
+<p>Process an array of calls, and return an array of results.  Calls should be structs of the form <code>{'methodName': string, 'params': array}</code>. Each result will either be a single-item array containg the result value, or a struct of the form <code>{'faultCode': int, 'faultString': string}</code>.  This is useful when you need to make lots of small calls without lots of round trips. See <a href="../rTorrent-system_multicall">rTorrent-system_multicall</a> for syntax.</p>
+<p><strong>system.shutdown</strong></p>
+<p>Shut down the server. Return code is always zero.</p>
+<p><strong>Managing Torrents</strong></p>
+<p>The commands that act on a torrent are prefixed with <code>d.</code>. They can be used separately (with the <code>hash</code> as the parameter that distinguishes the specific torrent) or together by using <code>d.multicall</code>.</p>
+<p><strong>d.multicall</strong></p>
+<p>Process an array of calls, and return an array of results. This is specific for a torrent listing, where the following arguments can be used to acquire information. The first argument is the type of view (f.i. <code>main</code>, <code>started</code>, <code>stopped</code>, <code>hashing</code>, <code>seeding</code>) that you want to get returned. The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents. Whenever in a multicall, the char <code>=</code> is added at the end.</p>
+<div class="codehilite"><pre><span></span>d.add_peer
+d.check_hash               Initiate a hash check
+d.close                    Stop the torrent
+d.create_link
+d.delete_link
+d.delete_tied
+d.erase                    Erase the torrent from the list
+d.get_base_filename
+d.get_base_path
+d.get_bitfield
+d.get_bytes_done
+d.get_chunk_size           Get the size of a block of data (chunk)
+d.get_chunks_hashed
+d.get_complete
+d.get_completed_bytes
+d.get_completed_chunks
+d.get_connection_current
+d.get_connection_leech
+d.get_connection_seed
+d.get_creation_date        Get the date the torrent was created
+d.get_custom1
+d.get_custom2
+d.get_custom3
+d.get_custom4
+d.get_custom5
+d.get_custom_throw
+d.get_directory
+d.get_directory_base
+d.get_down_rate             Get the speed in bytes/sec in which the torrent is downloading
+d.get_down_total
+d.get_free_diskspace
+d.get_hash                  Always query the hash, since it is the index for other calls.
+d.get_hashing
+d.get_hashing_failed
+d.get_ignore_commands
+d.get_left_bytes
+d.get_loaded_file
+d.get_local_id
+d.get_local_id_html
+d.get_max_file_size
+d.get_max_size_pex
+d.get_message
+d.get_mode
+d.get_name                  The name of the torrent.
+d.get_peer_exchange
+d.get_peers_accounted       The number of leechers
+d.get_peers_complete        The number of complete peers = seeders
+d.get_peers_connected
+d.get_peers_max
+d.get_peers_min
+d.get_peers_not_connected   Get the peers rtorrent sees but is not connected to
+d.get_priority              Get the priority (0=off, 1=low, 2=normal, 3=high)
+d.get_priority_str          Get the priority as a string (Off, Low, Normal, High)
+d.get_ratio                 Get the ratio (upload divided by download)
+d.get_size_bytes            Get the torrent size in bytes
+d.get_size_chunks           Get the size of the torrent in chunks
+d.get_size_files
+d.get_size_pex
+d.get_skip_rate
+d.get_skip_total
+d.get_state
+d.get_state_changed
+d.get_state_counter
+d.get_throttle_name
+d.get_tied_to_file
+d.get_tracker_focus
+d.get_tracker_numwant
+d.get_tracker_size
+d.get_up_rate              Get the speed in bytes/sec in which the torrent is uploading
+d.get_up_total
+d.get_uploads_max
+d.initialize_logs
+d.is_active                Get the active state (0=inactive, 1=active)
+d.is_hash_checked
+d.is_hash_checking         Get the hash state (0=not hash checking, 1=hash checking)
+d.is_multi_file
+d.is_open                  Get the state of the torrent (0=closed, 1=open)
+d.is_pex_active
+d.is_private               Get the privacy of the torrent (0=public, 1=private)
+d.open
+d.pause
+d.resume
+d.save_session
+d.set_connection_current
+d.set_custom1
+d.set_custom2
+d.set_custom3
+d.set_custom4
+d.set_custom5
+d.set_directory
+d.set_directory_base
+d.set_hashing_failed
+d.set_ignore_commands
+d.set_max_file_size
+d.set_message
+d.set_peer_exchange
+d.set_peers_max
+d.set_peers_min
+d.set_priority              Set the priority (0 = off (do not allocate up/down slots), 1=low, 2=normal, 3=high)
+d.set_throttle_name
+d.set_tied_to_file
+d.set_tracker_numwant
+d.set_uploads_max
+d.start                     Start the torrent
+d.stop                      Stop the torrent
+d.try_close
+d.try_start
+d.try_stop
+d.update_priorities         Update the torrent after changes to file priorities
+d.views
+d.views.has
+d.views.push_back
+d.views.push_back_unique
+d.views.remove
+</pre></div>
+
+
+<p><strong>Managing Files</strong></p>
+<p>The commands that act on a torrent are prefixed with <code>f.</code>. They can be used separately (with the 'hash and file number' as the parameter that distinguishes the specific torrent) or together by using <code>f.multicall</code>.</p>
+<p><strong>f.multicall</strong></p>
+<p>Process an array of calls, and return an array of results. This is specific for a file listing, where the following arguments can be used to acquire information. The first argument is the hash that you got from the previous torrent listing. Whenever in a multicall, the char '=' is added at the end of the individual commands.</p>
+<p>The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents and the file number to distinguish individual files. There are multiple ways to address a file, but for me the hash:f# method was the only working solution (see <a href="http://libtorrent.rakshasa.no/wiki/RTorrentXMLRPCGuide">rTorrent XML-RPC guide</a>)</p>
+<div class="codehilite"><pre><span></span>&#39;f.get_completed_chunks&#39;       Get the chunks that already downloaded
+&#39;f.get_frozen_path&#39;
+&#39;f.get_last_touched&#39;           Last time the file was touched in microseconds since 1970
+&#39;f.get_match_depth_next&#39;
+&#39;f.get_match_depth_prev&#39;
+&#39;f.get_offset&#39;
+&#39;f.get_path&#39;                   Get the path of the file
+&#39;f.get_path_components&#39;
+&#39;f.get_path_depth&#39;
+&#39;f.get_priority&#39;               Get the priority (0=do not download, 1=normal, 2=high)
+&#39;f.get_range_first&#39;            Get the chunk range start
+&#39;f.get_range_second&#39;           Get the chunk range end
+&#39;f.get_size_bytes&#39;             Get the size of the file in bytes
+&#39;f.get_size_chunks&#39;            Get the size of the file in chunks
+&#39;f.is_create_queued&#39;
+&#39;f.is_created&#39;
+&#39;f.is_open&#39;                    Get the state of the file (0=closed, 1=open)
+&#39;f.is_resize_queued&#39;
+&#39;f.set_create_queued&#39;
+&#39;f.set_priority&#39;               Set the priority for the file (0=do not download, 1=normal, 2=high)
+&#39;f.set_resize_queued&#39;
+&#39;f.unset_create_queued&#39;
+&#39;f.unset_resize_queued&#39;
+</pre></div>
+
+
+<p><strong>Managing Peers</strong></p>
+<p>The commands that act on a peer are prefixed with 'p.'. They can be used separately (with the 'hash' as the parameter that distinguishes the specific torrent) or together by using p.multicall.</p>
+<p><strong>p.multicall</strong></p>
+<p>Process an array of calls, and return an array of results. This is specific for a peer listing, where the following arguments can be used to acquire information. The first argument is the hash that you got from the previous torrent listing. Whenever in a multicall, the char '=' is added at the end of the individual commands.</p>
+<p>The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents.</p>
+<div class="codehilite"><pre><span></span>&#39;p.get_address&#39;             Get the peer ip address
+&#39;p.get_client_version&#39;      Get the client version
+&#39;p.get_completed_percent&#39;   Get the download state of the peer
+&#39;p.get_down_rate&#39;           Get the speed rTorrent is downloading for this peer
+&#39;p.get_down_total&#39;          Get the total bytes dowloaded from the peer
+&#39;p.get_id&#39;
+&#39;p.get_id_html&#39;
+&#39;p.get_options_str&#39;
+&#39;p.get_peer_rate&#39;           Get the total speed of the peer as reported by the peer
+&#39;p.get_peer_total&#39;          Get the total bytes of the peer as reported by the peer
+&#39;p.get_port&#39;                Get the port on which the peer is reached
+&#39;p.get_up_rate&#39;             Get the speed rTorrent is uploading to this peer
+&#39;p.get_up_total&#39;            Get the total bytes rTorrent uploaded to this peer
+&#39;p.is_encrypted&#39;            Get the encryption state (0=not, 1=encrypted)
+&#39;p.is_incoming&#39;             Get the directional state (0=outgoing, 1=incomming)
+&#39;p.is_obfuscated&#39;           Is the peer obfuscated (0=no, 1=yes)
+&#39;p.is_snubbed&#39;              Is the peer snubbed (0=no, 1=yes)
+</pre></div>
+
+
+<p><strong>Managing Trackers</strong></p>
+<p>The commands that act on a tracker are prefixed with 't.'. They can be used separately (with the 'hash' as the parameter that distinguishes the specific torrent) or together by using t.multicall.</p>
+<p><strong>t.multicall</strong></p>
+<p>Process an array of calls, and return an array of results. This is specific for a tracker listing, where the following arguments can be used to acquire information. The first argument is the hash that you got from the previous torrent listing. Whenever in a multicall, the char '=' is added at the end of the individual commands.</p>
+<p>The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents.</p>
+<div class="codehilite"><pre><span></span>&#39;t.get_group&#39;
+&#39;t.get_id&#39;
+&#39;t.get_min_interval&#39;
+&#39;t.get_normal_interval&#39;
+&#39;t.get_scrape_complete&#39;       Get the complete peers registered on the tracker
+&#39;t.get_scrape_downloaded&#39;
+&#39;t.get_scrape_incomplete&#39;     Get the incomplete peers registered on the tracker
+&#39;t.get_scrape_time_last&#39;
+&#39;t.get_type&#39;                  Get the tracker type (1=http, 2=udp, 3=dht)
+&#39;t.get_url&#39;                   Get the url for the tracker
+&#39;t.is_enabled&#39;                Get the status of the tracker (0=disabled, 1=enabled)
+&#39;t.is_open&#39;                   Get the status of the tracker (0=closed, 1=open)
+&#39;t.set_enabled&#39;               Enable the tracker
+</pre></div>
+
+
+<p>Note: rTorrent does not support explicit scrape, so the scrape values might be '0'.</p>
+<p><strong>dht_statistics</strong></p>
+<p>Delivers statistics on the dht component. Data is returned in the following structure :</p>
+<div class="codehilite"><pre><span></span>&lt;methodResponse&gt;
+ &lt;params&gt;
+  &lt;param&gt;
+   &lt;value&gt;
+    &lt;struct&gt;
+      &lt;member&gt;
+       &lt;name/&gt;
+       &lt;value&gt;&lt;i8/&gt;&lt;/value&gt;
+      &lt;/member&gt;
+      &lt;member&gt;
+       &lt;name/&gt;
+       &lt;value&gt;&lt;string/&gt;
+      &lt;/member&gt;
+     &lt;/struct&gt;
+    &lt;/value&gt;
+  &lt;/param&gt;
+ &lt;/params&gt;
+&lt;/methodResponse&gt;
+</pre></div>
+
+
+<p>Parameters returned are :</p>
+<div class="codehilite"><pre><span></span>active                      0 = inactive, 1 = active
+buckets
+bytes_read
+bytes_written
+cycle
+dht                         string; reflects setting in .rtorrentrc
+nodes
+peers                       peers tracked by dht
+peers_max                   the number of peers in the largest torrent for which DHT acts
+                            as tracker
+queries_received
+queries_sent
+replies_received
+torrents
+</pre></div>
+
+
+<p><strong>To functions</strong></p>
+<div class="codehilite"><pre><span></span>to_* functions operate on another command, the following operate on a unix timestamp :
+
+&#39;to_date&#39;                   convert the unix timestamp to a date string
+&#39;to_elapsed_time&#39;
+&#39;to_gm_date&#39;                convert the unix timestamp to a GM date string
+&#39;to_gm_time&#39;                convert the unix timestamp to a GM time string
+&#39;to_time&#39;                   convert the unix timestamp to a time string
+&#39;to_throttle&#39;
+
+Syntax is &#39;to_*=$.....&#39;. Example : &#39;to_date=$d.get_creation_date&#39;.
+
+&#39;to_kb&#39;                     convert to Kb
+&#39;to_mb&#39;                     convert to Mb
+&#39;to_xb&#39;
+</pre></div>
+
+
+<p><strong>Loading Torrents</strong></p>
+<p>The URL for a restricted site is <code>http://userid:password@Torrent.location.org.</code></p>
+<div class="codehilite"><pre><span></span>&#39;load&#39;                   Load/download a torrent URL/file
+&#39;load_raw&#39;               Load a torrent file content
+&#39;load_raw_start&#39;         Load a torrent file content and start it
+&#39;load_raw_verbose&#39;       Load a torrent file content and supply verbose info
+&#39;load_start&#39;             Load/download a torrent URL/file and start it
+&#39;load_start_verbose&#39;     Load/download a torrent URL/file, start it and supply verbose info
+&#39;load_verbose&#39;           Load/download a torrent URL/file and supply verbose info
+</pre></div>
+
+
+<p><strong>Other Commands</strong></p>
+<div class="codehilite"><pre><span></span>&#39;call_download&#39;
+&#39;cat&#39;                    Used to convert to a string, cat=$......
+&#39;close_low_diskspace&#39;
+&#39;close_on_ratio&#39;
+&#39;close_untied&#39;
+&#39;create_link&#39;
+&#39;delete_link&#39;
+&#39;dht&#39;
+&#39;dht_add_node&#39;
+&#39;download_list&#39;
+&#39;enable_trackers&#39;
+&#39;encoding_list&#39;
+&#39;encryption&#39;
+&#39;execute&#39;
+&#39;execute_capture&#39;
+&#39;execute_capture_nothrow&#39;
+&#39;execute_log&#39;
+&#39;execute_nothrow&#39;
+&#39;execute_raw&#39;
+&#39;execute_raw_nothrow&#39;
+&#39;event.download.closed&#39;
+&#39;event.download.erased&#39;
+&#39;event.download.finished&#39;
+&#39;event.download.hash_done&#39;
+&#39;event.download.hash_queued&#39;
+&#39;event.download.hash_removed&#39;
+&#39;event.download.inserted&#39;
+&#39;event.download.inserted_new&#39;
+&#39;event.download.inserted_session&#39;
+&#39;event.download.opened&#39;
+&#39;event.download.paused&#39;
+&#39;event.download.resumed&#39;
+&#39;false&#39;
+&#39;fi.get_filename_last&#39;
+&#39;fi.is_file&#39;
+&#39;get_bind&#39;
+&#39;get_check_hash&#39;
+&#39;get_connection_leech&#39;
+&#39;get_connection_seed&#39;
+&#39;get_dht_port&#39;              Get the port configured for Dht
+&#39;get_directory&#39;
+&#39;get_down_rate&#39;             Get the overall download speed in bytes/sec
+&#39;get_down_total&#39;
+&#39;get_download_rate&#39;         Get the max download speed in bytes/sec
+&#39;get_handshake_log&#39;
+&#39;get_hash_interval&#39;
+&#39;get_hash_max_tries&#39;
+&#39;get_hash_read_ahead&#39;
+&#39;get_http_cacert&#39;
+&#39;get_http_capath&#39;
+&#39;get_http_proxy&#39;
+&#39;get_ip&#39;
+&#39;get_key_layout&#39;
+&#39;get_max_downloads_div&#39;
+&#39;get_max_downloads_global&#39;
+&#39;get_max_file_size&#39;
+&#39;get_max_memory_usage&#39;
+&#39;get_max_open_files&#39;
+&#39;get_max_open_http&#39;
+&#39;get_max_open_sockets&#39;
+&#39;get_max_peers&#39;
+&#39;get_max_peers_seed&#39;
+&#39;get_max_uploads&#39;
+&#39;get_max_uploads_div&#39;
+&#39;get_max_uploads_global&#39;
+&#39;get_memory_usage&#39;
+&#39;get_min_peers&#39;
+&#39;get_min_peers_seed&#39;
+&#39;get_name&#39;
+&#39;get_peer_exchange&#39;
+&#39;get_port_open&#39;
+&#39;get_port_random&#39;
+&#39;get_port_range&#39;              Get the configured port range
+&#39;get_preload_min_size&#39;
+&#39;get_preload_required_rate&#39;
+&#39;get_preload_type&#39;
+&#39;get_proxy_address&#39;
+&#39;get_receive_buffer_size&#39;
+&#39;get_safe_free_diskspace&#39;
+&#39;get_safe_sync&#39;
+&#39;get_scgi_dont_route&#39;
+&#39;get_send_buffer_size&#39;
+&#39;get_session&#39;
+&#39;get_session_lock&#39;
+&#39;get_session_on_completion&#39;
+&#39;get_split_file_size&#39;
+&#39;get_split_suffix&#39;
+&#39;get_stats_not_preloaded&#39;
+&#39;get_stats_preloaded&#39;
+&#39;get_throttle_down_max&#39;
+&#39;get_throttle_down_rate&#39;
+&#39;get_throttle_up_max&#39;
+&#39;get_throttle_up_rate&#39;
+&#39;get_timeout_safe_sync&#39;
+&#39;get_timeout_sync&#39;
+&#39;get_tracker_dump&#39;
+&#39;get_tracker_numwant&#39;
+&#39;get_up_rate&#39;                   Get the overall upload speed in bytes/sec
+&#39;get_up_total&#39;
+&#39;get_upload_rate&#39;               Get the max upload speed in bytes/sec
+&#39;get_use_udp_trackers&#39;
+&#39;get_xmlrpc_size_limit&#39;
+&#39;greater&#39;
+&#39;group.insert&#39;
+&#39;group.insert_persistent_view&#39;
+&#39;group.seeding.ratio.command&#39;
+&#39;group.seeding.ratio.disable&#39;
+&#39;group.seeding.ratio.enable&#39;
+&#39;group.seeding.ratio.max&#39;
+&#39;group.seeding.ratio.max.set&#39;
+&#39;group.seeding.ratio.min&#39;
+&#39;group.seeding.ratio.min.set&#39;
+&#39;group.seeding.ratio.upload&#39;
+&#39;group.seeding.ratio.upload.set&#39;
+&#39;group.seeding.view&#39;
+&#39;group.seeding.view.set&#39;
+&#39;if&#39;
+&#39;import&#39;
+&#39;less&#39;
+&#39;load&#39;
+&#39;load_raw&#39;
+&#39;load_raw_start&#39;
+&#39;load_raw_verbose&#39;
+&#39;load_start&#39;
+&#39;load_start_verbose&#39;
+&#39;load_verbose&#39;
+&#39;not&#39;
+&#39;on_close&#39;
+&#39;on_erase&#39;
+&#39;on_finished&#39;
+&#39;on_hash_queued&#39;
+&#39;on_hash_removed&#39;
+&#39;on_insert&#39;
+&#39;on_open&#39;
+&#39;on_ratio&#39;
+&#39;on_start&#39;
+&#39;on_stop&#39;
+&#39;or&#39;
+&#39;print&#39;
+&#39;ratio.disable&#39;
+&#39;ratio.enable&#39;
+&#39;ratio.max&#39;
+&#39;ratio.max.set&#39;
+&#39;ratio.min&#39;
+&#39;ratio.min.set&#39;
+&#39;ratio.upload&#39;
+&#39;ratio.upload.set&#39;
+&#39;remove_untied&#39;
+&#39;scgi_local&#39;
+&#39;scgi_port&#39;
+&#39;schedule&#39;
+&#39;schedule_remove&#39;
+&#39;scheduler.max_active&#39;
+&#39;scheduler.max_active.set&#39;
+&#39;scheduler.simple.added&#39;
+&#39;scheduler.simple.removed&#39;
+&#39;scheduler.simple.update&#39;
+&#39;session_save&#39;
+&#39;set_bind&#39;
+&#39;set_check_hash&#39;
+&#39;set_connection_leech&#39;
+&#39;set_connection_seed&#39;
+&#39;set_dht_port&#39;
+&#39;set_dht_throttle&#39;
+&#39;set_directory&#39;
+&#39;set_download_rate&#39;
+&#39;set_handshake_log&#39;
+&#39;set_hash_interval&#39;
+&#39;set_hash_max_tries&#39;
+&#39;set_hash_read_ahead&#39;
+&#39;set_http_cacert&#39;
+&#39;set_http_capath&#39;
+&#39;set_http_proxy&#39;
+&#39;set_ip&#39;
+&#39;set_key_layout&#39;
+&#39;set_max_downloads_div&#39;
+&#39;set_max_downloads_global&#39;
+&#39;set_max_file_size&#39;
+&#39;set_max_memory_usage&#39;
+&#39;set_max_open_files&#39;
+&#39;set_max_open_http&#39;
+&#39;set_max_open_sockets&#39;
+&#39;set_max_peers&#39;
+&#39;set_max_peers_seed&#39;
+&#39;set_max_uploads&#39;
+&#39;set_max_uploads_div&#39;
+&#39;set_max_uploads_global&#39;
+&#39;set_min_peers&#39;
+&#39;set_min_peers_seed&#39;
+&#39;set_name&#39;
+&#39;set_peer_exchange&#39;
+&#39;set_port_open&#39;
+&#39;set_port_random&#39;
+&#39;set_port_range&#39;
+&#39;set_preload_min_size&#39;
+&#39;set_preload_required_rate&#39;
+&#39;set_preload_type&#39;
+&#39;set_proxy_address&#39;
+&#39;set_receive_buffer_size&#39;
+&#39;set_safe_sync&#39;
+&#39;set_scgi_dont_route&#39;
+&#39;set_send_buffer_size&#39;
+&#39;set_session&#39;
+&#39;set_session_lock&#39;
+&#39;set_session_on_completion&#39;
+&#39;set_split_file_size&#39;
+&#39;set_split_suffix&#39;
+&#39;set_timeout_safe_sync&#39;
+&#39;set_timeout_sync&#39;
+&#39;set_tracker_dump&#39;
+&#39;set_tracker_numwant&#39;
+&#39;set_upload_rate&#39;
+&#39;set_use_udp_trackers&#39;
+&#39;set_xmlrpc_size_limit&#39;
+&#39;start_tied&#39;
+&#39;stop_on_ratio&#39;
+&#39;stop_untied&#39;
+&#39;system.client_version&#39;
+&#39;system.file_allocate&#39;
+&#39;system.file_allocate.set&#39;
+&#39;system.file_status_cache.prune&#39;
+&#39;system.file_status_cache.size&#39;
+&#39;system.get_cwd&#39;
+&#39;system.hostname&#39;
+&#39;system.library_version&#39;
+&#39;system.method.erase&#39;
+&#39;system.method.get&#39;
+&#39;system.method.has_key&#39;
+&#39;system.method.insert&#39;
+&#39;system.method.list_keys&#39;
+&#39;system.method.set&#39;
+&#39;system.method.set_key&#39;
+&#39;system.pid&#39;
+&#39;system.set_cwd&#39;
+&#39;system.set_umask&#39;
+&#39;system.time&#39;
+&#39;system.time_seconds&#39;
+&#39;system.time_usec&#39;
+&#39;test.method.simple&#39;
+&#39;throttle_down&#39;
+&#39;throttle_ip&#39;
+&#39;throttle_up&#39;
+&#39;tos&#39;
+&#39;try_import&#39;
+&#39;ui.current_view.set&#39;
+&#39;ui.unfocus_download&#39;
+&#39;view.event_added&#39;
+&#39;view.event_removed&#39;
+&#39;view.filter_download&#39;
+&#39;view.persistent&#39;
+&#39;view.set_not_visible&#39;
+&#39;view.set_visible&#39;
+&#39;view.size&#39;
+&#39;view.size_not_visible&#39;
+&#39;view_add&#39;
+&#39;view_filter&#39;
+&#39;view_filter_on&#39;
+&#39;view_list&#39;
+&#39;view_set&#39;
+&#39;view_sort&#39;
+&#39;view_sort_current&#39;
+&#39;view_sort_new&#39;
+&#39;xmlrpc_dialect&#39;
+</pre></div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../hooks/" title="Спецкостыли для разных клиентов" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Предыдущая страница
+                </span>
+                Спецкостыли для разных клиентов
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../rTorrent-system_multicall/" title="rTorrent system_multicall" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Следующая страница
+                </span>
+                rTorrent system_multicall
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2018 Maxim Devaev
+          </div>
+        
+        powered by
+        <a href="http://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+  <div class="md-footer-social">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+      <a href="https://github.com/mdevaev/emonoda" class="md-footer-social__link fa fa-github-alt"></a>
+    
+  </div>
+
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.b438e6c5.js"></script>
+      
+        
+        
+      
+      <script>app.initialize({version:"0.17.4",url:{base:".."}})</script>
+      
+    
+    
+      
+    
+  </body>
+</html>
