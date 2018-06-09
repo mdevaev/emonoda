@@ -55,7 +55,6 @@
 
 ### [Способы оповещения](https://github.com/mdevaev/emonoda/wiki/confetti) ###
 * **E-mail** -- в виде плейнтекста или HTML, на ваш выбор. Посылаются в виде дайджеста по всем обновленным раздачам.
-* [Notify My Android](http://notifymyandroid.com/) -- короткие push-нотификации на андроид, по одной на обновленную раздачу.
 * [Pushover](https://pushover.net/) -- push-нотификации на айфон и андроид, по одной на раздачу, без подробностей.
 * Генерация ленты обновлений в формате Atom.
 
@@ -79,6 +78,6 @@ packer -S emonoda
 
 ### Скриншотики ###
 
-| emupdate в консоли | Сообщение на почту | Нотификации на андроид |
-|-------------------|--------------------|------------------------|
-| <img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate.png height=150> | <img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_email.png height=150> | <img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_android.png height=150> |
+| emupdate в консоли | Сообщение на почту |
+|--------------------|--------------------|
+| <img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate.png height=150> | <img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_email.png height=150> |

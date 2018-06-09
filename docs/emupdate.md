@@ -113,7 +113,7 @@ trackers:
 
 **emupdate** умеет отсылать оповещения при обновлении торрентов. Оповещения настраиваются почти так же, как и трекеры - перечислением плагинов с настройками в секции `confetti`. Они полезны в случае, когда вы хотите поставить **emupdate** в крон и получать новости, например, на почту. Следует отметить, что собственные оповещения программы - не замена логам. Информация о сбоях присылаться не будет, и при использовании в кроне настоятельно рекомендуется перенаправлять `stdout` и `stderr` от **emupdate** в файл. О том, как настроить оповещения об обновленных раздачах, читайте на странице [confetti](confetti).
 
-| Пример письма | Оповещения на андроиде |
-|---------------|------------------------|
-| [<img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_email.png height=150>](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_email.png) | [<img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_android.png height=150>](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_android.png) |
+| Пример письма |
+|---------------|
+| [<img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_email.png height=150>](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_email.png) |
 
