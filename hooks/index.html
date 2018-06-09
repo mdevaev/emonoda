@@ -1,0 +1,785 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="ru" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="A set of tools to organize and manage your torrents">
+      
+      
+        <link rel="canonical" href="https://github.com/mdevaev/emonoda/hooks/">
+      
+      
+        <meta name="author" content="Maxim Devaev">
+      
+      
+        <meta name="lang:clipboard.copy" content="">
+      
+        <meta name="lang:clipboard.copied" content="">
+      
+        <meta name="lang:search.language" content="">
+      
+        <meta name="lang:search.pipeline.stopwords" content="">
+      
+        <meta name="lang:search.pipeline.trimmer" content="">
+      
+        <meta name="lang:search.result.none" content="Нет совпадений">
+      
+        <meta name="lang:search.result.one" content="Совпадений: 1">
+      
+        <meta name="lang:search.result.other" content="Совпадений: #">
+      
+        <meta name="lang:search.tokenizer" content="">
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.4, mkdocs-material-2.7.3">
+    
+    
+      
+        <title>Спецкостыли для разных клиентов - Emonoda</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.8d40d89b.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.6079476c.css">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+    
+  </head>
+  
+    
+    
+    <body dir="" data-md-color-primary="blue-grey" data-md-color-accent="pink">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <a href="#emonodaappshooksrtorrentmanage_trackers" tabindex="1" class="md-skip">
+        
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="https://github.com/mdevaev/emonoda" title="Emonoda" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                Emonoda
+              </span>
+              <span class="md-header-nav__topic">
+                Спецкостыли для разных клиентов
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Поиск" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Начните писать для начала поиска
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/mdevaev/emonoda/" title="Перейти к исходному коду" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      mdevaev/emonoda
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    <span class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </span>
+    Emonoda
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/mdevaev/emonoda/" title="Перейти к исходному коду" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      mdevaev/emonoda
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Emonoda -- 得物だ" class="md-nav__link">
+      Emonoda -- 得物だ
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Базовая настройка
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        Базовая настройка
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../config/" title="Конфигурация" class="md-nav__link">
+      Конфигурация
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../clients/" title="Интеграция с торрент-клиентом" class="md-nav__link">
+      Интеграция с торрент-клиентом
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../trackers/" title="Настройка трекеров для обновления торрентов" class="md-nav__link">
+      Настройка трекеров для обновления торрентов
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../confetti/" title="Настройка оповещений об обновлениях" class="md-nav__link">
+      Настройка оповещений об обновлениях
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      Команды
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        Команды
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emupdate/" title="emupdate - обновление торрентов" class="md-nav__link">
+      emupdate - обновление торрентов
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emfile/" title="emfile - просмотр информации о торрент-файле" class="md-nav__link">
+      emfile - просмотр информации о торрент-файле
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emdiff/" title="emdiff - сравнение торрент-файлов" class="md-nav__link">
+      emdiff - сравнение торрент-файлов
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emload/" title="emload - добавление торрента в клиент" class="md-nav__link">
+      emload - добавление торрента в клиент
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emrm/" title="emrm - удаление торрента из клиента" class="md-nav__link">
+      emrm - удаление торрента из клиента
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emfind/" title="emfind - запросы к клиенту для обслуживания коллекции" class="md-nav__link">
+      emfind - запросы к клиенту для обслуживания коллекции
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Спецкостыли для разных клиентов
+      </label>
+    
+    <a href="./" title="Спецкостыли для разных клиентов" class="md-nav__link md-nav__link--active">
+      Спецкостыли для разных клиентов
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="toc">Содержание</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#emonodaappshooksrtorrentmanage_trackers" title="emonoda.apps.hooks.rtorrent.manage_trackers" class="md-nav__link">
+    emonoda.apps.hooks.rtorrent.manage_trackers
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" title="Опции" class="md-nav__link">
+    Опции
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" title="Примеры использования" class="md-nav__link">
+    Примеры использования
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#emonodaappshooksrtorrentcollectd_stat" title="emonoda.apps.hooks.rtorrent.collectd_stat" class="md-nav__link">
+    emonoda.apps.hooks.rtorrent.collectd_stat
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" title="Опции" class="md-nav__link">
+    Опции
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" title="Примеры использования" class="md-nav__link">
+    Примеры использования
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="toc">Содержание</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#emonodaappshooksrtorrentmanage_trackers" title="emonoda.apps.hooks.rtorrent.manage_trackers" class="md-nav__link">
+    emonoda.apps.hooks.rtorrent.manage_trackers
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" title="Опции" class="md-nav__link">
+    Опции
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_2" title="Примеры использования" class="md-nav__link">
+    Примеры использования
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#emonodaappshooksrtorrentcollectd_stat" title="emonoda.apps.hooks.rtorrent.collectd_stat" class="md-nav__link">
+    emonoda.apps.hooks.rtorrent.collectd_stat
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" title="Опции" class="md-nav__link">
+    Опции
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" title="Примеры использования" class="md-nav__link">
+    Примеры использования
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/mdevaev/emonoda/edit/master/docs/hooks.md" title="Редактировать эту страницу" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                  <h1>Спецкостыли для разных клиентов</h1>
+                
+                <p>Кроме основного функционала, в пакет входят несколько полезных скриптов, которые могут использоваться отдельно от <strong>emonoda</strong> и не требуют ее настроек. Вызываются они через <code>python -m</code>, например так:</p>
+<div class="codehilite"><pre><span></span>$ python -m emonoda.apps.hooks.rtorrent.manage_trackers --help
+</pre></div>
+
+
+<hr />
+<h3 id="emonodaappshooksrtorrentmanage_trackers">emonoda.apps.hooks.rtorrent.manage_trackers<a class="headerlink" href="#emonodaappshooksrtorrentmanage_trackers" title="Permanent link">&para;</a></h3>
+<p>Это костылик для группового управления трекерами в rTorrent. Он позволяет включать и отключать трекеры одновременно для всех раздач. Он подключается к клиенту, выгружает список раздач, а затем производит над их трекерами необходимые операции. Был написан, чтобы отключить использование ретрекеров, которых часто нет в локальных сетях, а rTorrent ругается на то, что не может зарезольвить их хостнеймы или получить из них данные.</p>
+<h5 id="_1">Опции<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h5>
+<ul>
+<li><strong><code>--enable &lt;s1 ...&gt;</code></strong><ul>
+<li>Если что-то из указанных подстрок входит в имя трекера на раздаче - включить этот трекер.</li>
+</ul>
+</li>
+<li><strong><code>--disable &lt;s1 ...&gt;</code></strong><ul>
+<li>Работает по той же логике, что и <code>--enable</code>, но отключает совпавшие трекеры.</li>
+</ul>
+</li>
+<li><strong><code>-t, --timeout &lt;number&gt;</code></strong><ul>
+<li>Таймаут на все сетевые операции, по умолчанию - <code>5</code> секунд.</li>
+</ul>
+</li>
+<li><strong><code>--client-url &lt;url&gt;</code></strong><ul>
+<li>URL для подключения к XMLRPC клиента, по умолчанию - <code>http://localhost/RPC2</code>.</li>
+</ul>
+</li>
+</ul>
+<h5 id="_2">Примеры использования<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h5>
+<p>Включить трекеры на домене <code>rutracker.org</code> и отключить остальное.</p>
+<div class="codehilite"><pre><span></span>$ python -m emonoda.apps.hooks.rtorrent.manage_trackers --enable rutracker.org --disable rutracker.net retracker.local
+</pre></div>
+
+
+<hr />
+<h3 id="emonodaappshooksrtorrentcollectd_stat">emonoda.apps.hooks.rtorrent.collectd_stat<a class="headerlink" href="#emonodaappshooksrtorrentcollectd_stat" title="Permanent link">&para;</a></h3>
+<p>Это специальный скрипт для <a href="https://collectd.org">Collectd</a>, собирающий статистику с rTorrent. Он использует <a href="https://collectd.org/wiki/index.php/Plain_text_protocol">текстовый протокол</a> для сброса этой информации в плагин <a href="https://collectd.org/wiki/index.php/Plugin:Exec">Exec</a>. По умолчанию считываются только метрики загрузки и отдачи, лимиты на скорость, а так же объем скачанных и отданных данных. Названия метрик говорят сами за себя.</p>
+<h5 id="_3">Опции<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h5>
+<ul>
+<li><strong><code>-t, --timeout &lt;number&gt;</code></strong><ul>
+<li>Таймаут на все сетевые операции, по умолчанию - <code>5</code> секунд.</li>
+</ul>
+</li>
+<li><strong><code>--client-url &lt;url&gt;</code></strong><ul>
+<li>URL для подключения к XMLRPC клиента, по умолчанию - <code>http://localhost/RPC2</code>.</li>
+</ul>
+</li>
+<li><strong><code>--with-dht</code></strong><ul>
+<li>Добавляет метрики для DHT.</li>
+</ul>
+</li>
+<li><strong><code>--with-summary</code></strong><ul>
+<li>Добавляет метрики с общим количеством торрентов, с активной отдачей, загрузкой и с ошибками.</li>
+</ul>
+</li>
+<li><strong><code>-n, --host &lt;hostname&gt;</code></strong><ul>
+<li>Хостнейм в идентификаторах всех метрик. По умолчанию - <code>localhost</code> или содержимое переменной окружения <code>COLLECTD_HOSTNAME</code>.</li>
+</ul>
+</li>
+<li><strong><code>-i, --interval &lt;number&gt;</code></strong><ul>
+<li>Скрипт запускает внутри себя цикл получения новых метрик с указанной паузой между итерациями. По умолчанию - <code>60</code> секунд или содержимое переменной окружения <code>COLLECTD_INTERVAL</code>.</li>
+</ul>
+</li>
+</ul>
+<h5 id="_4">Примеры использования<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h5>
+<p>Для включения плагина пропишите в <code>/etc/collectd.conf</code> что-то типа этого:</p>
+<div class="codehilite"><pre><span></span>LoadPLugin exec
+&lt;Plugin exec&gt;
+    Exec &quot;data&quot; &quot;python&quot; &quot;-m&quot; &quot;emonoda.apps.hooks.rtorrent.collectd_stat&quot; &quot;--client-url=http://localhost/RPC2&quot; &quot;--with-summary&quot;
+&lt;/Plugin&gt;
+</pre></div>
+
+
+<p>Скрипт также можно запустить из консоли и посмотреть, какие метрики и как он выводит:</p>
+<div class="codehilite"><pre><span></span>$ python -m emonoda.apps.hooks.rtorrent.collectd_stat --with-dht --with-summary
+PUTVAL localhost/rtorrent/gauge-dn_rate interval=60 N:22847
+PUTVAL localhost/rtorrent/gauge-dn_rate_limit interval=60 N:0
+PUTVAL localhost/rtorrent/bytes-dn_total interval=60 N:71241345665
+PUTVAL localhost/rtorrent/gauge-up_rate interval=60 N:11170199
+PUTVAL localhost/rtorrent/gauge-up_rate_limit interval=60 N:0
+PUTVAL localhost/rtorrent/bytes-up_total interval=60 N:4343293548954
+PUTVAL localhost/rtorrent/gauge-dht_active interval=60 N:1
+PUTVAL localhost/rtorrent/count-dht_nodes interval=60 N:191
+PUTVAL localhost/rtorrent/count-dht_cycle interval=60 N:434
+PUTVAL localhost/rtorrent/count-dht_torrents interval=60 N:0
+PUTVAL localhost/rtorrent/count-dht_buckets interval=60 N:25
+PUTVAL localhost/rtorrent/count-dht_replies_received interval=60 N:8708162
+PUTVAL localhost/rtorrent/count-dht_peers interval=60 N:0
+PUTVAL localhost/rtorrent/count-dht_peers_max interval=60 N:0
+PUTVAL localhost/rtorrent/count-dht_errors_caught interval=60 N:2054
+PUTVAL localhost/rtorrent/count-dht_errors_received interval=60 N:775079
+PUTVAL localhost/rtorrent/count-dht_queries_sent interval=60 N:17309084
+PUTVAL localhost/rtorrent/count-dht_queries_received interval=60 N:27524
+PUTVAL localhost/rtorrent/bytes-dht_bytes_written interval=60 N:1809635518
+PUTVAL localhost/rtorrent/bytes-dht_bytes_read interval=60 N:2285090405
+PUTVAL localhost/rtorrent/count-summary_total interval=60 N:546
+PUTVAL localhost/rtorrent/count-summary_dn interval=60 N:0
+PUTVAL localhost/rtorrent/count-summary_up interval=60 N:100
+PUTVAL localhost/rtorrent/count-summary_errors interval=60 N:219
+</pre></div>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../emfind/" title="emfind - запросы к клиенту для обслуживания коллекции" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Предыдущая страница
+                </span>
+                emfind - запросы к клиенту для обслуживания коллекции
+              </span>
+            </div>
+          </a>
+        
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2018 Maxim Devaev
+          </div>
+        
+        powered by
+        <a href="http://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+  <div class="md-footer-social">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+      <a href="https://github.com/mdevaev/emonoda" class="md-footer-social__link fa fa-github-alt"></a>
+    
+  </div>
+
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.b438e6c5.js"></script>
+      
+        
+        
+      
+      <script>app.initialize({version:"0.17.4",url:{base:".."}})</script>
+      
+    
+    
+      
+    
+  </body>
+</html>

@@ -1,0 +1,871 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="ru" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="A set of tools to organize and manage your torrents">
+      
+      
+        <link rel="canonical" href="https://github.com/mdevaev/emonoda/emupdate/">
+      
+      
+        <meta name="author" content="Maxim Devaev">
+      
+      
+        <meta name="lang:clipboard.copy" content="">
+      
+        <meta name="lang:clipboard.copied" content="">
+      
+        <meta name="lang:search.language" content="">
+      
+        <meta name="lang:search.pipeline.stopwords" content="">
+      
+        <meta name="lang:search.pipeline.trimmer" content="">
+      
+        <meta name="lang:search.result.none" content="Нет совпадений">
+      
+        <meta name="lang:search.result.one" content="Совпадений: 1">
+      
+        <meta name="lang:search.result.other" content="Совпадений: #">
+      
+        <meta name="lang:search.tokenizer" content="">
+      
+      <link rel="shortcut icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-0.17.4, mkdocs-material-2.7.3">
+    
+    
+      
+        <title>emupdate - обновление торрентов - Emonoda</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application.8d40d89b.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-palette.6079476c.css">
+      
+    
+    
+      <script src="../assets/javascripts/modernizr.1aa3b519.js"></script>
+    
+    
+      <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+      
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+    
+  </head>
+  
+    
+    
+    <body dir="" data-md-color-primary="blue-grey" data-md-color-accent="pink">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448"
+    viewBox="0 0 416 448" id="github">
+  <path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19-18.125
+        8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19 18.125-8.5
+        18.125 8.5 10.75 19 3.125 20.5zM320 304q0 10-3.125 20.5t-10.75
+        19-18.125 8.5-18.125-8.5-10.75-19-3.125-20.5 3.125-20.5 10.75-19
+        18.125-8.5 18.125 8.5 10.75 19 3.125 20.5zM360
+        304q0-30-17.25-51t-46.75-21q-10.25 0-48.75 5.25-17.75 2.75-39.25
+        2.75t-39.25-2.75q-38-5.25-48.75-5.25-29.5 0-46.75 21t-17.25 51q0 22 8
+        38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0
+        37.25-1.75t35-7.375 30.5-15 20.25-25.75 8-38.375zM416 260q0 51.75-15.25
+        82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5-41.75
+        1.125q-19.5 0-35.5-0.75t-36.875-3.125-38.125-7.5-34.25-12.875-30.25-20.25-21.5-28.75q-15.5-30.75-15.5-82.75
+        0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25
+        30.875q36.75-8.75 77.25-8.75 37 0 70 8 26.25-20.5
+        46.75-30.25t47.25-9.75q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34
+        99.5z" />
+</svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <a href="#_1" tabindex="1" class="md-skip">
+        
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="https://github.com/mdevaev/emonoda" title="Emonoda" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            
+              <span class="md-header-nav__topic">
+                Emonoda
+              </span>
+              <span class="md-header-nav__topic">
+                emupdate - обновление торрентов
+              </span>
+            
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          
+            <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+            
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Поиск" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Начните писать для начала поиска
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.com/mdevaev/emonoda/" title="Перейти к исходному коду" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      mdevaev/emonoda
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    <span class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </span>
+    Emonoda
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.com/mdevaev/emonoda/" title="Перейти к исходному коду" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      mdevaev/emonoda
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Emonoda -- 得物だ" class="md-nav__link">
+      Emonoda -- 得物だ
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
+    
+    <label class="md-nav__link" for="nav-2">
+      Базовая настройка
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        Базовая настройка
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../config/" title="Конфигурация" class="md-nav__link">
+      Конфигурация
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../clients/" title="Интеграция с торрент-клиентом" class="md-nav__link">
+      Интеграция с торрент-клиентом
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../trackers/" title="Настройка трекеров для обновления торрентов" class="md-nav__link">
+      Настройка трекеров для обновления торрентов
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../confetti/" title="Настройка оповещений об обновлениях" class="md-nav__link">
+      Настройка оповещений об обновлениях
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3" checked>
+    
+    <label class="md-nav__link" for="nav-3">
+      Команды
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        Команды
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        emupdate - обновление торрентов
+      </label>
+    
+    <a href="./" title="emupdate - обновление торрентов" class="md-nav__link md-nav__link--active">
+      emupdate - обновление торрентов
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="toc">Содержание</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" title="Описание" class="md-nav__link">
+    Описание
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#emupdate" title="emupdate в консоли" class="md-nav__link">
+    emupdate в консоли
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" title="Принцип работы" class="md-nav__link">
+    Принцип работы
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" title="Опции" class="md-nav__link">
+    Опции
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" title="Конфигурационные параметры" class="md-nav__link">
+    Конфигурационные параметры
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" title="Обработка ошибок" class="md-nav__link">
+    Обработка ошибок
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" title="Оповещения" class="md-nav__link">
+    Оповещения
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emfile/" title="emfile - просмотр информации о торрент-файле" class="md-nav__link">
+      emfile - просмотр информации о торрент-файле
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emdiff/" title="emdiff - сравнение торрент-файлов" class="md-nav__link">
+      emdiff - сравнение торрент-файлов
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emload/" title="emload - добавление торрента в клиент" class="md-nav__link">
+      emload - добавление торрента в клиент
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emrm/" title="emrm - удаление торрента из клиента" class="md-nav__link">
+      emrm - удаление торрента из клиента
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emfind/" title="emfind - запросы к клиенту для обслуживания коллекции" class="md-nav__link">
+      emfind - запросы к клиенту для обслуживания коллекции
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../hooks/" title="Спецкостыли для разных клиентов" class="md-nav__link">
+      Спецкостыли для разных клиентов
+    </a>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="toc">Содержание</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_1" title="Описание" class="md-nav__link">
+    Описание
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#emupdate" title="emupdate в консоли" class="md-nav__link">
+    emupdate в консоли
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_2" title="Принцип работы" class="md-nav__link">
+    Принцип работы
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_3" title="Опции" class="md-nav__link">
+    Опции
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_4" title="Конфигурационные параметры" class="md-nav__link">
+    Конфигурационные параметры
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" title="Обработка ошибок" class="md-nav__link">
+    Обработка ошибок
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_6" title="Оповещения" class="md-nav__link">
+    Оповещения
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/mdevaev/emonoda/edit/master/docs/emupdate.md" title="Редактировать эту страницу" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                  <h1>emupdate - обновление торрентов</h1>
+                
+                <h3 id="_1">Описание<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<p><strong>emupdate</strong> - команда для автоматического обновления раздач прямо с трекеров. Она умеет скачивать новые файлы в тот же каталог, где лежали прошлые раздачи, выводить список обновленных файлов, а так же отправлять об этом оповещения. Действует для трекеров с обновляемыми раздачами (http://rutracker.org, http://nnmclub.to и т.д.).</p>
+<h4 id="emupdate">emupdate в консоли<a class="headerlink" href="#emupdate" title="Permanent link">&para;</a></h4>
+<p><a href="https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate.png"><img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate.png height=150></a> </p>
+<hr />
+<h3 id="_2">Принцип работы<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
+<p>В секции <code>trackers</code> файла <code>~/.config/emonoda.yaml</code> указывается <a href="../trackers">список трекеров</a> и регистрационные данные пользователя на них (для не анонимных сайтов). Конфигурация выглядит примерно так:</p>
+<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">trackers</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">rutracker.org</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">login</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">xxx</span>
+        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">secretxxx</span>
+
+    <span class="l l-Scalar l-Scalar-Plain">nnmclub.to</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">login</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">yyy</span>
+        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">secretyyy</span>
+
+    <span class="l l-Scalar l-Scalar-Plain">rutor.org</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{}</span> <span class="c1"># Анонимный трекер, указание логина и пароля не требуется.</span>
+
+    <span class="l l-Scalar l-Scalar-Plain">tr.anidub.com</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">login</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">zzz</span>
+        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">secretzzz</span>
+</pre></div>
+
+
+<p>При запуске, <strong>emupdate</strong> логинится на трекерах, сканирует торрент-файлы в каталоге, указанном параметром <code>core/torrents_dir</code> и обрабатывает каждый из них следующим образом:</p>
+<ol>
+<li>
+<p>Из торрент-файла считывается комментарий, содержащий URL страницы, откуда файл был скачан. По адресу сайта определятся плагин и трекер, который должен обработать этот файл. Например для торрента с комментарием <code>http://rutracker.org/forum/viewtopic.php?t=4309797</code> будет выбран плагин <code>rutracker.org</code>.</p>
+</li>
+<li>
+<p>Учитывая специфические для трекера методы, <strong>emupdate</strong> посещает считанный URL и смотрит, произошло ли обновление торрента. Так, для рутрекера используется сравнение хешей локального торрента и файла в раздаче, для нонейм-клуба выполняется scrape-запрос, а в случае с анидабом проверяется время модификации локального торрент-файла и время обновления раздачи, с учетом вашего часового пояса на сайте.</p>
+</li>
+<li>
+<p>Если раздача обновилась, <strong>emupdate</strong> скачивает новый торрент-файл взамен старого. При этом старый торрент может быть опционально сохранен в каталоге с бекапами и с временной отметкой, когда он был помещен на хранение.</p>
+</li>
+<li>
+<p>Если вы настроили <a href="../clients">интеграцию с клиентом</a>, то <strong>emupdate</strong> удалит из него старую раздачу и добавит обновленную. Никаких дополнительных действий вам не потребуется, все происходит в автоматическом режиме. Ваш клиент скачает файлы в новой раздаче, сохранив их по тому же пути, по которому сохранялись данные в прошлой. Кроме того, если ваш клиент это поддерживает (как, например, <strong>rtorrent</strong>), можно сохранить метки раздач и другие их атрибуты.</p>
+</li>
+</ol>
+<hr />
+<h3 id="_3">Опции<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
+<p>Кроме собственных опций, указанных ниже, <strong>emupdate</strong> поддерживает еще и общий стандартный набор (например, <code>--help</code> и <code>--config</code>). За подробностями обратитесь на страницу <a href="../config">config</a>.</p>
+<ul>
+<li><strong><code>-f, --name-filter &lt;pattern&gt;</code></strong><ul>
+<li><strong>emupdate</strong> сканирует каталог, указанный в конфигурационном файле параметром <code>core/torrents_dir</code>, выбирая из него файлы по шаблону <code>*.torrent</code>. С помощью этой опции шаблон можно изменить, например так: <code>-f 'adventure_time*.torrent</code>. Это позволяет проверять только интересующие прямо сейчас раздачи. Опция переопределяет значение параметра <code>emupdate/name_filter</code>.</li>
+</ul>
+</li>
+<li><strong><code>-y, --only-trackers &lt;plugin1 plugin2 ...&gt;</code></strong><ul>
+<li>Проверять только торренты для указанного подмножества трекеров от всех настроенных в секции <code>trackers</code>.</li>
+</ul>
+</li>
+<li><strong><code>-x, --exclude-trackers &lt;plugin1 plugin2 ...&gt;</code></strong><ul>
+<li>Включить все трекеры из <code>trackers</code>, кроме перечисленных в этой опции.</li>
+</ul>
+</li>
+<li><strong><code>--noop</code></strong><ul>
+<li>Только проверить наличие обновлений, но не заменять локальные торрент-файлы и не трогать их в клиенте.</li>
+</ul>
+</li>
+<li><strong><code>--mute</code></strong><ul>
+<li>Даже если настроены оповещения об обновлениях в секции <code>confetti</code>, не рассылать их.</li>
+</ul>
+</li>
+<li><strong><code>--fail-on-captcha</code></strong><ul>
+<li>Некоторые трекеры могут запрашивать в редких случаях капчу при логине. В этом случае <strong>emupdate</strong> выдаст вам ссылку на картинку с капчей и попросит ввести в терминале ее раскодированное значение. Если указана эта опция, то <strong>emupdate</strong> упадет, вместо того, чтобы требовать капчу. Это полезно при запуске программы через крон.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3 id="_4">Конфигурационные параметры<a class="headerlink" href="#_4" title="Permanent link">&para;</a></h3>
+<p>Общие параметры и способ настройки описаны на странице <a href="../config">config</a>, здесь же приведены специфические параметры программы.</p>
+<ul>
+<li><strong><code>emupdate/name_filter='*.torrent'</code></strong><ul>
+<li>Шаблон, которому должны соответствовать файлы из каталога <code>core/torrents_dir</code>. Переопределяется опцией <code>--name-filter</code>.</li>
+</ul>
+</li>
+<li><strong><code>emupdate/backup_dir=""</code></strong><ul>
+<li>Каталог для бекапов старых торрент-файлов. В конце имени сохраненного файла дописывается время его помещения в бекап (либо что-то, что вы можете настроить параметром <code>emupdate/backup_suffix</code>.</li>
+</ul>
+</li>
+<li><strong><code>emupdate/backup_suffix=.%Y.%m.%d-%H:%M:%S.bak</code></strong><ul>
+<li>К имени забекапленного торрента дописывается этот суффикс. Например, если торрент назывался <code>archlinux.torrent</code>, то имя бекапа с суффиксом по умолчанию будет выглядеть так: <code>archlinux.torrent.2015.10.21-22:46:26.bak</code>. Список доступных форматтеров смотрите <a href="http://docs.python.org/3/library/datetime.html#strftime-strptime-behavior">тут</a>.</li>
+</ul>
+</li>
+<li><strong><code>emupdate/save_customs=[]</code></strong><ul>
+<li>У <a href="../clients">некоторых клиентов</a> есть особый набор полей данных, привязанных к торрентам (например, метки файлов). Эти поля доступны через API для чтения и запись. При обновлении торрента можно указать, какие из меток должны быть сохранены. Скажем, если вы используете <strong>ruTorrent</strong>, метки файлов будут храниться внутри <strong>rtorrent</strong>, доступные через <a href="../rTorrent-XMLRPC-Reference">XMLRPC</a> через методы <code>d.set_custom1/d.get_custom1</code>, и в <strong>emonoda</strong> им будет соответствовать поле <code>c1</code>. Таким образом, для сохранения меток торрентов при их обновлении вам потребуется указать параметр следующим образом (в виде списка):
+  <code>yaml
+  emupdate:
+  save_customs: [c1]</code>
+  или:
+  ```yaml
+  emupdate:
+  save_customs:<ul>
+<li>c1
+  ```</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong><code>emupdate/set_customs={}</code></strong><ul>
+<li>Работает почти так же, как и <code>emupdate/save_customs</code>, но вместо сохранения назначает обновленным торрентам новые значения кастомных полей. Поддерживает те же <a href="http://docs.python.org/3/library/datetime.html#strftime-strptime-behavior">форматтеры времени</a>, что и <code>emupdate/backup_suffix</code>. Например, следующая конфигурация заставит <strong>emupdate</strong> при использовании <strong>ruTorrent</strong> назначить метку <code>new</code> на все новые раздачи:
+  <code>yaml
+  emupdate:
+  set_customs:
+      c1: new</code></li>
+</ul>
+</li>
+<li><strong><code>emupdate/show_diff=true</code></strong><ul>
+<li>Если торрент был обновлен, показать, какие файлы изменились по сравнению с предыдущей его версией. Результат аналогичен выводу команды <a href="../emdiff">emdiff</a>. Удобно для слежения за новыми сериями в сериалах.</li>
+</ul>
+</li>
+<li><strong><code>emupdate/show_passed=false</code></strong><ul>
+<li>Этот параметр определяет, нужно ли показывать в логе записи о не обновленных торрентах. В большинстве случаев это не нужно.</li>
+</ul>
+</li>
+<li><strong><code>emupdate/show_unknown=false</code></strong><ul>
+<li>Этот параметр определяет, нужно ли показывать в логе записи о торрентах, для которых не нашлось подходящего трекерного плагина. В большинстве случаев это не нужно.</li>
+</ul>
+</li>
+</ul>
+<hr />
+<h3 id="_5">Обработка ошибок<a class="headerlink" href="#_5" title="Permanent link">&para;</a></h3>
+<p>Во время работы программа выводит на терминал построчный лог прогресса. Иногда вместо названия трекера могут появляться вот такие сообщения:</p>
+<div class="codehilite"><pre><span></span>[!] 1/2 UNKNOWN foo.torrent -- http://example.com
+[!] 2/2 NOT_IN_CLIENT bar.torrent -- http://example.com
+</pre></div>
+
+
+<p>Это означает, что у <strong>emupdate</strong> не получилось проверить обновления торрента.<br />
+Причины могут быть разными:</p>
+<table>
+<thead>
+<tr>
+<th align="center">Ошибка</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>UNKNOWN</code></td>
+<td>Возникает, когда не удалось распознать трекер, с которого был скачан торрент (в комментарии к нему не написан урл, либо поддержка трекера не реализована). Обычно пропускается и не показывается в логе, но можно включить отображение таких торрентов с помощью параметра <code>emupdate/show_passed=true</code>.</td>
+</tr>
+<tr>
+<td align="center"><code>NOT_IN_CLIENT</code></td>
+<td>Если торрент-файл не зарегистрирован в клиенте.</td>
+</tr>
+<tr>
+<td align="center"><code>INVALID_TORRENT</code></td>
+<td>Локальный торрент-файл побился и содержит мусор вместо валидного описания раздачи.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="_6">Оповещения<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
+<p><strong>emupdate</strong> умеет отсылать оповещения при обновлении торрентов. Оповещения настраиваются почти так же, как и трекеры - перечислением плагинов с настройками в секции <code>confetti</code>. Они полезны в случае, когда вы хотите поставить <strong>emupdate</strong> в крон и получать новости, например, на почту. Следует отметить, что собственные оповещения программы - не замена логам. Информация о сбоях присылаться не будет, и при использовании в кроне настоятельно рекомендуется перенаправлять <code>stdout</code> и <code>stderr</code> от <strong>emupdate</strong> в файл. О том, как настроить оповещения об обновленных раздачах, читайте на странице <a href="../confetti">confetti</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Пример письма</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_email.png"><img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate_email.png height=150></a></td>
+</tr>
+</tbody>
+</table>
+                
+                  
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../confetti/" title="Настройка оповещений об обновлениях" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Предыдущая страница
+                </span>
+                Настройка оповещений об обновлениях
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../emfile/" title="emfile - просмотр информации о торрент-файле" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Следующая страница
+                </span>
+                emfile - просмотр информации о торрент-файле
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Copyright &copy; 2018 Maxim Devaev
+          </div>
+        
+        powered by
+        <a href="http://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+        
+  <div class="md-footer-social">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+      <a href="https://github.com/mdevaev/emonoda" class="md-footer-social__link fa fa-github-alt"></a>
+    
+  </div>
+
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application.b438e6c5.js"></script>
+      
+        
+        
+      
+      <script>app.initialize({version:"0.17.4",url:{base:".."}})</script>
+      
+    
+    
+      
+    
+  </body>
+</html>
