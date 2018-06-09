@@ -17,8 +17,9 @@ release:
 	make push
 	make bump
 	make push
-	# make mkdocs
 	make pypi
+	make mkdocs
+	make mkdpcs-release
 	make clean
 
 tox:
@@ -34,10 +35,12 @@ push:
 mkdocs:
 	mkdocs build
 
+mkdocs-release:
+	mkdocs gh-deploy
+
 pypi:
 	python setup.py register
 	python setup.py sdist upload
-	# python setup.py upload_docs --upload-dir=site
 
 clean:
 	rm -rf build site dist pkg src *.egg-info emonoda-*.tar.gz

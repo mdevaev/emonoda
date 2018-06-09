@@ -14,6 +14,9 @@
     * [emrm](emrm) - удаление торрента из клиента
     * [emfind](emfind) - запросы к клиенту для обслуживания коллекции
 * [Спецкостыли для разных клиентов](hooks)
+* Инфа для разработчиков
+    * [rTorrent XMLRPC Reference](rTorrent-XMLRPC-Reference)
+	* [rTorrent system_multicall](rTorrent-system_multicall)
 
 ***
 

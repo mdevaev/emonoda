@@ -46,3 +46,6 @@ pages:
         - "emrm - удаление торрента из клиента": emrm.md
         - "emfind - запросы к клиенту для обслуживания коллекции": emfind.md
     - "Спецкостыли для разных клиентов": hooks.md
+    - "Инфа для разработчиков":
+        - "rTorrent XMLRPC Reference": rTorrent-XMLRPC-Reference.md
+        - "rTorrent system_multicall": rTorrent-system_multicall.md

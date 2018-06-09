@@ -53,8 +53,6 @@
     * Если указана вместе с любой из опций вывода полей, то **emfile** выведет только значение поля без его названия, что удобно для скриптов.
 
 !!! warning "Важные примечания к опциям"
-    ![WARNING](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/warning.png) ![WARNING](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/warning.png) ![WARNING](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/warning.png)
-
     Порядок выведения полей соответствует порядку указания опций вывода.
 
     Будьте внимательны при разборе вывода скрипта в режиме `--without-headers`.

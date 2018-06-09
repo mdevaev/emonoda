@@ -8,17 +8,17 @@
 [![Build Status](https://img.shields.io/travis/mdevaev/emonoda.svg)](https://travis-ci.org/mdevaev/emonoda)
 
 **Emonoda** (moon. _得物だ_, рус. _это добыча_) -- это набор программ для организации и управления коллекцией торрентов. Он поможет вам следить за актуальностью раздач и автоматически обновлять торрент-файлы, а так же вычищать старые данные, просматривать мета-информацию и делать множество других вещей.  
-За детальной информацией обращайтесь [к документации на сайте http://emonoda.readthedocs.io/en/latest/](http://emonoda.readthedocs.io/en/latest/)
+За детальной информацией обращайтесь [к документации на сайте https://mdevaev.github.io/emonoda](https://mdevaev.github.io/emonoda)
 
 ***
 
 ### Из коробки ###
-* [emupdate](https://github.com/mdevaev/emonoda/wiki/emupdate) -- Следит за раздачами, используя плагины для популярных трекеров; обновляет торрент-файлы при добавлении новых серий или перезаливке; интегрируется с основными линуксовыми клиентами.
-* [emfile](https://github.com/mdevaev/emonoda/wiki/emfile) -- Позволяет читать метаданные торрент-файлов и выдает их в человекочитаемом, либо удобном для скриптов формате.
-* [emdiff](https://github.com/mdevaev/emonoda/wiki/emdiff) -- Показывает разницу содержимого двух торрент-файлов в виде диффа.
-* [emfind](https://github.com/mdevaev/emonoda/wiki/emfind) -- Служит для выполнения различных поисковых запросов, например - найти в каталоге с данными файлы, не принадлежащими ни одному торренту, зарегистрированному в клиенте.
-* [emload](https://github.com/mdevaev/emonoda/wiki/emload) -- Загружает торрент, используя "ссылочную" модель хранения данных (см. документацию).
-* [emrm](https://github.com/mdevaev/emonoda/wiki/emrm) -- Удаляет торрент из клиента.
+* [emupdate](https://mdevaev.github.io/emonoda/emupdate) -- Следит за раздачами, используя плагины для популярных трекеров; обновляет торрент-файлы при добавлении новых серий или перезаливке; интегрируется с основными линуксовыми клиентами.
+* [emfile](https://mdevaev.github.io/emonoda/emfile) -- Позволяет читать метаданные торрент-файлов и выдает их в человекочитаемом, либо удобном для скриптов формате.
+* [emdiff](https://mdevaev.github.io/emonoda/emdiff) -- Показывает разницу содержимого двух торрент-файлов в виде диффа.
+* [emfind](https://mdevaev.github.io/emonoda/emfind) -- Служит для выполнения различных поисковых запросов, например - найти в каталоге с данными файлы, не принадлежащими ни одному торренту, зарегистрированному в клиенте.
+* [emload](https://mdevaev.github.io/emonoda/emload) -- Загружает торрент, используя "ссылочную" модель хранения данных (см. документацию).
+* [emrm](https://mdevaev.github.io/emonoda/emrm) -- Удаляет торрент из клиента.
 
 ***
 
@@ -32,7 +32,7 @@
 
 ***
 
-### [Поддерживаемые трекеры](https://github.com/mdevaev/emonoda/wiki/trackers) ###
+### [Поддерживаемые трекеры](https://mdevaev.github.io/emonoda/trackers) ###
 * http://rutracker.org
 * http://nnm-club.me
 * http://ipv6.nnm-club.name
@@ -46,14 +46,14 @@
 
 ***
 
-### [Поддерживаемые клиенты](https://github.com/mdevaev/emonoda/wiki/clients) ###
+### [Поддерживаемые клиенты](https://mdevaev.github.io/emonoda/clients) ###
 * [RTorrent](http://rakshasa.github.io/rtorrent/)
 * [KTorrent](http://ktorrent.pwsp.net/)
 * [Transmission](http://www.transmissionbt.com/)
 
 ***
 
-### [Способы оповещения](https://github.com/mdevaev/emonoda/wiki/confetti) ###
+### [Способы оповещения](https://mdevaev.github.io/emonoda/confetti) ###
 * **E-mail** -- в виде плейнтекста или HTML, на ваш выбор. Посылаются в виде дайджеста по всем обновленным раздачам.
 * [Pushover](https://pushover.net/) -- push-нотификации на айфон и андроид, по одной на раздачу, без подробностей.
 * Генерация ленты обновлений в формате Atom.

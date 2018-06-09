@@ -1,7 +1,7 @@
 ### Описание ###
-**emupdate** - команда для автоматического обновления раздач прямо с трекеров. Она умеет скачивать новые файлы в тот же каталог, где лежали прошлые раздачи, выводить список обновленных файлов, а так же отправлять об этом оповещения. Действует для трекеров с обновляемыми раздачами (http://rutracker.org, http://nnmclub.to и т.д.).
+**emupdate** - команда для автоматического обновления раздач прямо с трекеров. Она умеет скачивать новые файлы в тот же каталог, где лежали прошлые раздачи, выводить список обновленных файлов, а так же отправлять об этом оповещения. Действует для трекеров с обновляемыми раздачами (http://rutracker.org, http://nnm-club.me и т.д.).
 
-#### emupdate в консоли 
+#### emupdate в консоли ####
  [<img src=https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate.png height=150>](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/emupdate.png) 
 
 ***
@@ -14,7 +14,7 @@ trackers:
         login: xxx
         passwd: secretxxx
 
-    nnmclub.to:
+    nnm-club.me:
         login: yyy
         passwd: secretyyy
 

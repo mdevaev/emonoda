@@ -43,7 +43,7 @@ trackers:
         user: yourlogin
         passwd: 12345
 
-    nnmclub.to:
+    nnm-club.me:
         user: yourlogin
         passwd: 12345
 
