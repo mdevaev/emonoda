@@ -24,10 +24,10 @@ import itertools
 import argparse
 import datetime
 
-from typing import Tuple
+from collections import OrderedDict
+
 from typing import List
 from typing import Dict
-from typing import Callable
 from typing import Optional
 from typing import Any
 
@@ -44,6 +44,7 @@ from ..cli import Log
 from .. import fmt
 from .. import tools
 
+from . import StoreTrueOrderedAction
 from . import init
 from . import wrap_main
 from . import get_configured_log
@@ -142,7 +143,7 @@ def format_files_tree(torrent: Torrent) -> str:
     return _make_formatted_tree(tree)
 
 
-def print_pretty_meta(torrent: Torrent, client: Optional[BaseClient], customs: List[str], log: Log) -> None:
+def print_pretty_all(torrent: Torrent, client: Optional[BaseClient], customs: List[str], log: Log) -> None:
     log.print("{blue}Path:{reset}           %s", (torrent.get_path(),))
     log.print("{blue}Name:{reset}           %s", (torrent.get_name(),))
     log.print("{blue}Hash:{reset}           %s", (torrent.get_hash(),))
@@ -174,8 +175,8 @@ def print_value(header: str, value: Any, without_headers: bool, log: Log) -> Non
 @wrap_main
 def main() -> None:  # pylint: disable=too-many-locals
     options = config = client = None  # Makes pylint happy
-    actions: List[Tuple[str, str, Callable[[Torrent], Any]]] = [
-        (option, option[2:].replace("-", "_"), method)
+    actions = OrderedDict(
+        (option[2:].replace("-", "_"), (option, method))
         for (option, method) in [
             ("--path",                 lambda torrent: Torrent.get_path(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
             ("--name",                 lambda torrent: Torrent.get_name(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
@@ -197,7 +198,7 @@ def main() -> None:  # pylint: disable=too-many-locals
             ("--client-customs",       lambda torrent: format_client_customs(torrent, client, config.emfile.show_customs)),  # type: ignore
             ("--make-magnet",          lambda torrent: torrent.make_magnet(options.magnet_fields)),  # type: ignore
         ]
-    ]
+    )
 
     (parent_parser, argv, config) = init()
     args_parser = argparse.ArgumentParser(
@@ -205,8 +206,8 @@ def main() -> None:  # pylint: disable=too-many-locals
         description="Show a metadata of torrent file",
         parents=[parent_parser],
     )
-    for (option, dest, _) in actions:
-        args_parser.add_argument(option, dest=dest, action="store_true")
+    for (dest, (option, _)) in actions.items():
+        args_parser.add_argument(option, dest=dest, action=StoreTrueOrderedAction)
     args_parser.add_argument("--without-headers", action="store_true")
     args_parser.add_argument("--magnet-fields", nargs="+", default=[], metavar="<fields>", choices=["names", "trackers", "size"])
     args_parser.add_argument("-v", "--verbose", action="store_true")
@@ -214,9 +215,9 @@ def main() -> None:  # pylint: disable=too-many-locals
     options = args_parser.parse_args(argv[1:])
 
     to_print = [
-        (option[2:], method)
-        for (option, dest, method) in actions
-        if getattr(options, dest)
+        (actions[dest][0][2:], actions[dest][1])
+        for (dest, flag) in getattr(options, "ordered_flags", [])
+        if flag
     ]
     torrents = tcollection.find_torrents(config.core.torrents_dir, options.torrents)
 
@@ -231,7 +232,7 @@ def main() -> None:  # pylint: disable=too-many-locals
 
             for torrent in torrents:
                 if len(to_print) == 0:
-                    print_pretty_meta(torrent, client, config.emfile.show_customs, log_stdout)
+                    print_pretty_all(torrent, client, config.emfile.show_customs, log_stdout)
                 else:
                     for (header, method) in to_print:
                         retval = method(torrent)

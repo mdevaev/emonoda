@@ -26,10 +26,12 @@ from typing import TextIO
 from typing import Tuple
 from typing import List
 from typing import Dict
+from typing import Sequence
 from typing import Callable
 from typing import Generator
 from typing import Optional
 from typing import Type
+from typing import Any
 
 import pygments
 import pygments.lexers.data
@@ -65,6 +67,39 @@ from ..cli import Log
 
 
 # =====
+class StoreTrueOrderedAction(argparse.Action):
+    def __init__(
+        self,
+        option_strings: Sequence[str],
+        dest: str,
+        default: bool=False,
+        required: bool=False,
+        help: Optional[str]=None,  # pylint: disable=redefined-builtin
+    ) -> None:
+
+        super().__init__(
+            option_strings=option_strings,
+            dest=dest,
+            nargs=0,
+            const=True,
+            default=default,
+            required=required,
+            help=help,
+        )
+
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Any,
+        option_string: Any=None,
+    ) -> None:
+
+        if not hasattr(namespace, "ordered_flags"):
+            setattr(namespace, "ordered_flags", [])
+        namespace.ordered_flags.append((self.dest, self.const))
+
+
 def init() -> Tuple[argparse.ArgumentParser, List[str], Section]:
     args_parser = argparse.ArgumentParser(add_help=False)
     args_parser.add_argument("-c", "--config", dest="config_file_path", default="~/.config/emonoda.yaml", metavar="<file>")
