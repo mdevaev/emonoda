@@ -1,41 +1,48 @@
-site_name: emonoda! documentation
-site_url: https://pythonhosted.org/emonoda/
-theme : material
-theme_dir: 'docs/theme'
-extra:
-  font:
-    text: 'Ubuntu'
-    code: 'Hack'
-  social:
-    - type: 'github-alt'
-      link: 'https://github.com/mdevaev/emonoda'
-  feature:
-    tabs: false
-  palette:
-    primary: 'blue grey'
-    accent: 'pink'
-# Repository
+site_name: Emonoda
+site_description: A set of tools to organize and manage your torrents
+site_author: Maxim Devaev
+site_url: https://github.com/mdevaev/emonoda
+
 repo_name: mdevaev/emonoda
 repo_url: https://github.com/mdevaev/emonoda
 
+copyright: "Copyright &copy; 2018 Maxim Devaev"
+
+theme:
+    name: material
+    custom_dir: docs/theme
+    feature:
+        tabs: false
+    palette:
+        primary: blue grey
+        accent: pink
+
+extra:
+    social:
+        - type: github-alt
+          link: https://github.com/mdevaev/emonoda
+    search:
+        language: "en, de, ru"
+
 markdown_extensions:
-  - toc(permalink=true)
-  - admonition
-  - codehilite(guess_lang=false)
+    - admonition
+    - toc:
+        permalink: true
+    - codehilite:
+        guess_lang: false
 
 pages:
-  - 'Emonoda -- 得物だ': index.md
-  - 'Базовая настройка':
-    - 'Конфигурация': config.md
-    - 'Интеграция с торрент-клиентом': clients.md
-    - 'Настройка трекеров для обновления торрентов': trackers.md
-    - 'Настройка оповещений об обновлениях': confetti.md
-  - Команды:
-    - 'emupdate - обновление торрентов': emupdate.md
-    - 'emfile - просмотр информации о торрент-файле': emfile.md
-    - 'emdiff - сравнение торрент-файлов': emdiff.md
-    - 'emload - добавление торрента в клиент': emload.md
-    - 'emrm - удаление торрента из клиента': emrm.md
-    - 'emfind - запросы к клиенту для обслуживания коллекции': emfind.md
-  - 'Спецкостыли для разных клиентов': hooks.md
-                    
+    - "Emonoda -- 得物だ": index.md
+    - "Базовая настройка":
+        - "Конфигурация": config.md
+        - "Интеграция с торрент-клиентом": clients.md
+        - "Настройка трекеров для обновления торрентов": trackers.md
+        - "Настройка оповещений об обновлениях": confetti.md
+    - "Команды":
+        - "emupdate - обновление торрентов": emupdate.md
+        - "emfile - просмотр информации о торрент-файле": emfile.md
+        - "emdiff - сравнение торрент-файлов": emdiff.md
+        - "emload - добавление торрента в клиент": emload.md
+        - "emrm - удаление торрента из клиента": emrm.md
+        - "emfind - запросы к клиенту для обслуживания коллекции": emfind.md
+    - "Спецкостыли для разных клиентов": hooks.md
