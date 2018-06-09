@@ -28,7 +28,7 @@ from Cython.Build import cythonize
 if __name__ == "__main__":
     setup(
         name="emonoda",
-        version="2.1.7",
+        version="2.1.8",
         url="https://github.com/mdevaev/emonoda",
         license="GPLv3",
         author="Devaev Maxim",
