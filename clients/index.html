@@ -10,10 +10,10 @@
       <meta name="viewport" content="width=device-width,initial-scale=1">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
       
-        <meta name="description" content="A set of tools to organize and manage your torrents">
+        <meta name="description" content="Система управления коллекцией торрентов">
       
       
-        <link rel="canonical" href="https://github.com/mdevaev/emonoda/clients/">
+        <link rel="canonical" href="https://mdevaev.github.io/emonoda/clients/">
       
       
         <meta name="author" content="Maxim Devaev">
@@ -42,7 +42,7 @@
     
     
       
-        <title>Интеграция с торрент-клиентом - Emonoda</title>
+        <title>Настройка интеграции с торрент-клиентом - Emonoda</title>
       
     
     
@@ -99,7 +99,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
     
-      <a href="#-" tabindex="1" class="md-skip">
+      <a href="#rtorrent" tabindex="1" class="md-skip">
         
       </a>
     
@@ -108,7 +108,7 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="https://github.com/mdevaev/emonoda" title="Emonoda" class="md-header-nav__button md-logo">
+        <a href="https://mdevaev.github.io/emonoda" title="Emonoda" class="md-header-nav__button md-logo">
           
             <i class="md-icon"></i>
           
@@ -125,7 +125,7 @@
                 Emonoda
               </span>
               <span class="md-header-nav__topic">
-                Интеграция с торрент-клиентом
+                Настройка интеграции с торрент-клиентом
               </span>
             
           
@@ -260,11 +260,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
     
     <label class="md-nav__link" for="nav-2">
-      Базовая настройка
+      Настройка
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
       <label class="md-nav__title" for="nav-2">
-        Базовая настройка
+        Настройка
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -275,8 +275,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../config/" title="Конфигурация" class="md-nav__link">
-      Конфигурация
+    <a href="../config/" title="Общие принципы настройки" class="md-nav__link">
+      Общие принципы настройки
     </a>
   </li>
 
@@ -294,11 +294,11 @@
     
     
       <label class="md-nav__link md-nav__link--active" for="toc">
-        Интеграция с торрент-клиентом
+        Настройка интеграции с торрент-клиентом
       </label>
     
-    <a href="./" title="Интеграция с торрент-клиентом" class="md-nav__link md-nav__link--active">
-      Интеграция с торрент-клиентом
+    <a href="./" title="Настройка интеграции с торрент-клиентом" class="md-nav__link md-nav__link--active">
+      Настройка интеграции с торрент-клиентом
     </a>
     
       
@@ -310,36 +310,23 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#-" title="Настройка интеграции с торрент-клиентом" class="md-nav__link">
-    Настройка интеграции с торрент-клиентом
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#rtorrent" title="rTorrent" class="md-nav__link">
     rTorrent
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#transmission" title="Transmission" class="md-nav__link">
     Transmission
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#ktorrent" title="KTorrent" class="md-nav__link">
     KTorrent
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -360,8 +347,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../trackers/" title="Настройка трекеров для обновления торрентов" class="md-nav__link">
-      Настройка трекеров для обновления торрентов
+    <a href="../trackers/" title="Настройка трекеров" class="md-nav__link">
+      Настройка трекеров
     </a>
   </li>
 
@@ -408,8 +395,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emupdate/" title="emupdate - обновление торрентов" class="md-nav__link">
-      emupdate - обновление торрентов
+    <a href="../emupdate/" title="emupdate" class="md-nav__link">
+      emupdate
     </a>
   </li>
 
@@ -420,8 +407,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emfile/" title="emfile - просмотр информации о торрент-файле" class="md-nav__link">
-      emfile - просмотр информации о торрент-файле
+    <a href="../emfile/" title="emfile" class="md-nav__link">
+      emfile
     </a>
   </li>
 
@@ -432,8 +419,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emdiff/" title="emdiff - сравнение торрент-файлов" class="md-nav__link">
-      emdiff - сравнение торрент-файлов
+    <a href="../emdiff/" title="emdiff" class="md-nav__link">
+      emdiff
     </a>
   </li>
 
@@ -444,8 +431,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emload/" title="emload - добавление торрента в клиент" class="md-nav__link">
-      emload - добавление торрента в клиент
+    <a href="../emload/" title="emload" class="md-nav__link">
+      emload
     </a>
   </li>
 
@@ -456,8 +443,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emrm/" title="emrm - удаление торрента из клиента" class="md-nav__link">
-      emrm - удаление торрента из клиента
+    <a href="../emrm/" title="emrm" class="md-nav__link">
+      emrm
     </a>
   </li>
 
@@ -468,8 +455,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emfind/" title="emfind - запросы к клиенту для обслуживания коллекции" class="md-nav__link">
-      emfind - запросы к клиенту для обслуживания коллекции
+    <a href="../emfind/" title="emfind" class="md-nav__link">
+      emfind
     </a>
   </li>
 
@@ -485,8 +472,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../hooks/" title="Спецкостыли для разных клиентов" class="md-nav__link">
-      Спецкостыли для разных клиентов
+    <a href="../hooks/" title="Спецкостыли для клиентов" class="md-nav__link">
+      Спецкостыли для клиентов
     </a>
   </li>
 
@@ -558,36 +545,23 @@
     <ul class="md-nav__list" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#-" title="Настройка интеграции с торрент-клиентом" class="md-nav__link">
-    Настройка интеграции с торрент-клиентом
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
   <a href="#rtorrent" title="rTorrent" class="md-nav__link">
     rTorrent
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#transmission" title="Transmission" class="md-nav__link">
     Transmission
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
+      
+        <li class="md-nav__item">
   <a href="#ktorrent" title="KTorrent" class="md-nav__link">
     KTorrent
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -610,21 +584,27 @@
                   <a href="https://github.com/mdevaev/emonoda/edit/master/docs/clients.md" title="Редактировать эту страницу" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                  <h1>Интеграция с торрент-клиентом</h1>
+                  <h1>Настройка интеграции с торрент-клиентом</h1>
                 
-                <h3 id="-">Настройка интеграции с торрент-клиентом<a class="headerlink" href="#-" title="Permanent link">&para;</a></h3>
+                <div class="admonition info">
+<p class="admonition-title">Info</p>
 <p><strong>Emonoda</strong> должна стоять на одной машине с клиентом, поскольку ее программам требуется прямой доступ к файлам. О базовых принципах настройки системы читайте на странице, <a href="../config">посвящённой конфигурации</a>. Клиентские плагины имеют множество параметров, но в обычной ситуации достаточно значений по умолчанию. Их вы можете посмотреть с помощью <code>emfile -m</code>.</p>
-<h4 id="rtorrent">rTorrent<a class="headerlink" href="#rtorrent" title="Permanent link">&para;</a></h4>
-<p>Включается параметром <code>core/client=rtorrent</code>. Соединение с клиентом выполняется по урлу, задаваемому параметром <code>client/url</code>, по умолчанию - <code>http://localhost/RPC2</code>.<br />
-Для использования этого клиента вам потребуется веб-сервер с настроенным XMLRPC-шлюзом. Если вы используете <a href="https://github.com/Novik/ruTorrent">ruTorrent</a>, то все необходимые настройки у вас уже должны быть выполнены. В противном случае воспользуйтесь параграфом "Настройка веб-сервера" из <a href="https://wiki.archlinux.org/index.php/RuTorrent_(%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9)">этого</a> руководства.<br />
-Поддерживается полный набор функций, включая кастомные поля данных - атрибуты, которые позволяет сохранять <strong>rTorrent</strong> для каждого торрент-файла. Например, <strong>ruTorrent</strong> в поле <code>c1</code> хранит тег раздачи. Доступны <code>c1</code>, <code>c2</code>, <code>c3</code>, <code>c4</code> и <code>c5</code> - по аналогии с методами <code>d.set_custom1/d.get_custom1</code> <a href="../rTorrent-XMLRPC-Reference">API rTorrent</a>.</p>
-<h4 id="transmission">Transmission<a class="headerlink" href="#transmission" title="Permanent link">&para;</a></h4>
-<p>Включается параметром <code>core/client=transmission</code>. Соединение с клиентом выполняется по урлу, задаваемому параметром <code>client/url</code>, по умолчанию - <code>http://localhost:9091/transmission/rpc</code>.<br />
-Для работы нужен питоновый модуль <a href="https://bitbucket.org/blueluna/transmissionrpc">transmissionrpc</a> версии 0.11 или выше. Нет поддержки сохранения кастомных полей (по причине их <a href="https://trac.transmissionbt.com/ticket/2175">отсутствия</a> в самом Transmission).
-Логин и пароль задаются параметрами <code>client/user</code> и <code>client/passwd</code> соответственно.</p>
-<h4 id="ktorrent">KTorrent<a class="headerlink" href="#ktorrent" title="Permanent link">&para;</a></h4>
-<p>Включается параметром <code>core/client=ktorrent</code>. Соединение выполняется с помощью DBus. Поддержка этого клиента сильно ограничена из-за его куцего API. Кроме того, для использования вместе с <strong>emonoda</strong> вам потребуется убрать в настройках <strong>KTorrent</strong> путь по умолчанию для сохранения скачанных данных ("Папка по умолчанию для загрузки"), иначе <a href="../emupdate">emupdate</a> не сможет корректно обновлять ваши раздачи.<br />
-Для работы нужен питоновый модуль <strong>dbus</strong>. Нет поддержки кастомных полей.</p>
+</div>
+<hr />
+<h3 id="rtorrent">rTorrent<a class="headerlink" href="#rtorrent" title="Permanent link">&para;</a></h3>
+<p>Включается параметром <code>core/client=rtorrent</code>. Соединение с клиентом выполняется по урлу, задаваемому параметром <code>client/url</code>, по умолчанию - <code>http://localhost/RPC2</code>.</p>
+<p>Для использования этого клиента вам потребуется веб-сервер с настроенным XMLRPC-шлюзом. Если вы используете <a href="https://github.com/Novik/ruTorrent">ruTorrent</a>, то все необходимые настройки у вас уже должны быть выполнены. В противном случае воспользуйтесь параграфом "Настройка веб-сервера" из <a href="https://wiki.archlinux.org/index.php/RuTorrent_(%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9)">этого</a> руководства.</p>
+<p>Поддерживается полный набор функций, включая кастомные поля данных - атрибуты, которые позволяет сохранять <strong>rTorrent</strong> для каждого торрент-файла. Например, <strong>ruTorrent</strong> в поле <code>c1</code> хранит тег раздачи. Доступны <code>c1</code>, <code>c2</code>, <code>c3</code>, <code>c4</code> и <code>c5</code> - по аналогии с методами <code>d.set_custom1/d.get_custom1</code> <a href="../rTorrent-XMLRPC-Reference">API rTorrent</a>.</p>
+<hr />
+<h3 id="transmission">Transmission<a class="headerlink" href="#transmission" title="Permanent link">&para;</a></h3>
+<p>Включается параметром <code>core/client=transmission</code>. Соединение с клиентом выполняется по урлу, задаваемому параметром <code>client/url</code>, по умолчанию - <code>http://localhost:9091/transmission/rpc</code>.</p>
+<p>Для работы нужен питоновый модуль <a href="https://bitbucket.org/blueluna/transmissionrpc">transmissionrpc</a> версии 0.11 или выше. Нет поддержки сохранения кастомных полей (по причине их <a href="https://trac.transmissionbt.com/ticket/2175">отсутствия</a> в самом Transmission).</p>
+<p>Логин и пароль задаются параметрами <code>client/user</code> и <code>client/passwd</code> соответственно.</p>
+<hr />
+<h3 id="ktorrent">KTorrent<a class="headerlink" href="#ktorrent" title="Permanent link">&para;</a></h3>
+<p>Включается параметром <code>core/client=ktorrent</code>. Соединение выполняется с помощью DBus.</p>
+<p>Поддержка этого клиента сильно ограничена из-за его куцего API. Кроме того, для использования вместе с <strong>Emonoda</strong> вам потребуется убрать в настройках <strong>KTorrent</strong> путь по умолчанию для сохранения скачанных данных ("Папка по умолчанию для загрузки"), иначе <a href="../emupdate">emupdate</a> не сможет корректно обновлять ваши раздачи.</p>
+<p>Для работы нужен питоновый модуль <strong>dbus</strong>. Нет поддержки кастомных полей.</p>
                 
                   
                 
@@ -645,7 +625,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../config/" title="Конфигурация" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../config/" title="Общие принципы настройки" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -654,19 +634,19 @@
                 <span class="md-footer-nav__direction">
                   Предыдущая страница
                 </span>
-                Конфигурация
+                Общие принципы настройки
               </span>
             </div>
           </a>
         
         
-          <a href="../trackers/" title="Настройка трекеров для обновления торрентов" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../trackers/" title="Настройка трекеров" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Следующая страница
                 </span>
-                Настройка трекеров для обновления торрентов
+                Настройка трекеров
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

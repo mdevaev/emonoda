@@ -10,10 +10,10 @@
       <meta name="viewport" content="width=device-width,initial-scale=1">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
       
-        <meta name="description" content="A set of tools to organize and manage your torrents">
+        <meta name="description" content="Система управления коллекцией торрентов">
       
       
-        <link rel="canonical" href="https://github.com/mdevaev/emonoda/rTorrent-system_multicall/">
+        <link rel="canonical" href="https://mdevaev.github.io/emonoda/rTorrent-system_multicall/">
       
       
         <meta name="author" content="Maxim Devaev">
@@ -108,7 +108,7 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="https://github.com/mdevaev/emonoda" title="Emonoda" class="md-header-nav__button md-logo">
+        <a href="https://mdevaev.github.io/emonoda" title="Emonoda" class="md-header-nav__button md-logo">
           
             <i class="md-icon"></i>
           
@@ -258,11 +258,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
     
     <label class="md-nav__link" for="nav-2">
-      Базовая настройка
+      Настройка
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
       <label class="md-nav__title" for="nav-2">
-        Базовая настройка
+        Настройка
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -273,8 +273,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../config/" title="Конфигурация" class="md-nav__link">
-      Конфигурация
+    <a href="../config/" title="Общие принципы настройки" class="md-nav__link">
+      Общие принципы настройки
     </a>
   </li>
 
@@ -285,8 +285,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../clients/" title="Интеграция с торрент-клиентом" class="md-nav__link">
-      Интеграция с торрент-клиентом
+    <a href="../clients/" title="Настройка интеграции с торрент-клиентом" class="md-nav__link">
+      Настройка интеграции с торрент-клиентом
     </a>
   </li>
 
@@ -297,8 +297,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../trackers/" title="Настройка трекеров для обновления торрентов" class="md-nav__link">
-      Настройка трекеров для обновления торрентов
+    <a href="../trackers/" title="Настройка трекеров" class="md-nav__link">
+      Настройка трекеров
     </a>
   </li>
 
@@ -345,8 +345,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emupdate/" title="emupdate - обновление торрентов" class="md-nav__link">
-      emupdate - обновление торрентов
+    <a href="../emupdate/" title="emupdate" class="md-nav__link">
+      emupdate
     </a>
   </li>
 
@@ -357,8 +357,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emfile/" title="emfile - просмотр информации о торрент-файле" class="md-nav__link">
-      emfile - просмотр информации о торрент-файле
+    <a href="../emfile/" title="emfile" class="md-nav__link">
+      emfile
     </a>
   </li>
 
@@ -369,8 +369,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emdiff/" title="emdiff - сравнение торрент-файлов" class="md-nav__link">
-      emdiff - сравнение торрент-файлов
+    <a href="../emdiff/" title="emdiff" class="md-nav__link">
+      emdiff
     </a>
   </li>
 
@@ -381,8 +381,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emload/" title="emload - добавление торрента в клиент" class="md-nav__link">
-      emload - добавление торрента в клиент
+    <a href="../emload/" title="emload" class="md-nav__link">
+      emload
     </a>
   </li>
 
@@ -393,8 +393,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emrm/" title="emrm - удаление торрента из клиента" class="md-nav__link">
-      emrm - удаление торрента из клиента
+    <a href="../emrm/" title="emrm" class="md-nav__link">
+      emrm
     </a>
   </li>
 
@@ -405,8 +405,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emfind/" title="emfind - запросы к клиенту для обслуживания коллекции" class="md-nav__link">
-      emfind - запросы к клиенту для обслуживания коллекции
+    <a href="../emfind/" title="emfind" class="md-nav__link">
+      emfind
     </a>
   </li>
 
@@ -422,8 +422,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../hooks/" title="Спецкостыли для разных клиентов" class="md-nav__link">
-      Спецкостыли для разных клиентов
+    <a href="../hooks/" title="Спецкостыли для клиентов" class="md-nav__link">
+      Спецкостыли для клиентов
     </a>
   </li>
 
@@ -573,16 +573,20 @@
                   <h1>rTorrent system_multicall</h1>
                 
                 <h3 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h3>
-<p>The syntax for using system.multicall to speed up the query of multiple variables.<br />
-I've picked up this document from <a href="https://code.google.com/p/gi-torrent">gi-torrent wiki</a>.<br />
-Copyright (c) Hans.Hasert@gmail.com</p>
+<p>The syntax for using system.multicall to speed up the query of multiple variables.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>I've picked up this document from <a href="https://code.google.com/p/gi-torrent">gi-torrent wiki</a>.
+Copyright &copy; Hans.Hasert@gmail.com</p>
+</div>
+<hr />
 <h3 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h3>
 <p>The way to combine multiple queries is to use the <code>system.multicall</code> and specify which methods we want to call.
 The XML would look something like this:</p>
 <div class="codehilite"><pre><span></span><span class="cp">&lt;?xml version=&quot;1.0&quot;?&gt;</span>
 <span class="nt">&lt;methodCall&gt;</span>
-<span class="nt">&lt;methodName</span> <span class="nt">/&gt;</span>                                <span class="nt">&lt;--</span> <span class="err">&quot;system.multicall&quot;</span>
- <span class="err">&lt;params</span><span class="nt">&gt;</span>
+<span class="nt">&lt;methodName</span> <span class="nt">/&gt;</span>  // &quot;system.multicall&quot;
+ <span class="nt">&lt;params&gt;</span>
   <span class="nt">&lt;param&gt;</span>
    <span class="nt">&lt;value&gt;</span>
     <span class="nt">&lt;array&gt;</span>
@@ -590,16 +594,16 @@ The XML would look something like this:</p>
       <span class="nt">&lt;value&gt;</span>
        <span class="nt">&lt;struct&gt;</span>
         <span class="nt">&lt;member&gt;</span>
-         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>                             <span class="nt">&lt;--</span> <span class="err">&quot;methodName&quot;</span>
-         <span class="err">&lt;value</span><span class="nt">&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>            <span class="nt">&lt;--</span> <span class="err">the</span> <span class="err">1st</span> <span class="err">actual</span> <span class="err">method</span> <span class="err">to</span> <span class="err">be</span> <span class="err">called</span>
-        <span class="err">&lt;/member</span><span class="nt">&gt;</span>
+         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>  // &quot;methodName&quot;
+         <span class="nt">&lt;value&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>  // the 1st actual method to be called
+        <span class="nt">&lt;/member&gt;</span>
         <span class="nt">&lt;member&gt;</span>
-         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>                             <span class="nt">&lt;--</span> <span class="err">&quot;params&quot;</span>
-         <span class="err">&lt;value</span><span class="nt">&gt;</span>
+         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>  // &quot;params&quot;
+         <span class="nt">&lt;value&gt;</span>
           <span class="nt">&lt;array&gt;</span>
            <span class="nt">&lt;data&gt;</span>
-            <span class="nt">&lt;value&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>         <span class="nt">&lt;--</span> <span class="err">list</span> <span class="err">of</span> <span class="err">parameters</span>
-           <span class="err">&lt;/data</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;value&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>  // list of parameters
+           <span class="nt">&lt;/data&gt;</span>
           <span class="nt">&lt;/array&gt;</span>
          <span class="nt">&lt;/value&gt;</span>
         <span class="nt">&lt;/member&gt;</span>
@@ -608,16 +612,16 @@ The XML would look something like this:</p>
       <span class="nt">&lt;value&gt;</span>
        <span class="nt">&lt;struct&gt;</span>
         <span class="nt">&lt;member&gt;</span>
-         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>                             <span class="nt">&lt;--</span> <span class="err">&quot;methodName&quot;</span>
-         <span class="err">&lt;value</span><span class="nt">&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>            <span class="nt">&lt;--</span> <span class="err">the</span> <span class="err">2nd</span> <span class="err">actual</span> <span class="err">method</span> <span class="err">to</span> <span class="err">be</span> <span class="err">called</span>
-        <span class="err">&lt;/member</span><span class="nt">&gt;</span>
+         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>  // &quot;methodName&quot;
+         <span class="nt">&lt;value&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>  // the 2nd actual method to be called
+        <span class="nt">&lt;/member&gt;</span>
         <span class="nt">&lt;member&gt;</span>
-         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>                             <span class="nt">&lt;--</span> <span class="err">&quot;params&quot;</span>
-         <span class="err">&lt;value</span><span class="nt">&gt;</span>
+         <span class="nt">&lt;name</span> <span class="nt">/&gt;</span>  // &quot;params&quot;
+         <span class="nt">&lt;value&gt;</span>
           <span class="nt">&lt;array&gt;</span>
            <span class="nt">&lt;data&gt;</span>
-            <span class="nt">&lt;value&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>         <span class="nt">&lt;--</span> <span class="err">list</span> <span class="err">of</span> <span class="err">parameters</span>
-           <span class="err">&lt;/data</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;value&gt;&lt;string</span> <span class="nt">/&gt;&lt;/value&gt;</span>  // list of parameters
+           <span class="nt">&lt;/data&gt;</span>
           <span class="nt">&lt;/array&gt;</span>
          <span class="nt">&lt;/value&gt;</span>
         <span class="nt">&lt;/member&gt;</span>

@@ -10,10 +10,10 @@
       <meta name="viewport" content="width=device-width,initial-scale=1">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
       
-        <meta name="description" content="A set of tools to organize and manage your torrents">
+        <meta name="description" content="Система управления коллекцией торрентов">
       
       
-        <link rel="canonical" href="https://github.com/mdevaev/emonoda/rTorrent-XMLRPC-Reference/">
+        <link rel="canonical" href="https://mdevaev.github.io/emonoda/rTorrent-XMLRPC-Reference/">
       
       
         <meta name="author" content="Maxim Devaev">
@@ -108,7 +108,7 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="https://github.com/mdevaev/emonoda" title="Emonoda" class="md-header-nav__button md-logo">
+        <a href="https://mdevaev.github.io/emonoda" title="Emonoda" class="md-header-nav__button md-logo">
           
             <i class="md-icon"></i>
           
@@ -258,11 +258,11 @@
       <input class="md-toggle md-nav__toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2">
     
     <label class="md-nav__link" for="nav-2">
-      Базовая настройка
+      Настройка
     </label>
     <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
       <label class="md-nav__title" for="nav-2">
-        Базовая настройка
+        Настройка
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
@@ -273,8 +273,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../config/" title="Конфигурация" class="md-nav__link">
-      Конфигурация
+    <a href="../config/" title="Общие принципы настройки" class="md-nav__link">
+      Общие принципы настройки
     </a>
   </li>
 
@@ -285,8 +285,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../clients/" title="Интеграция с торрент-клиентом" class="md-nav__link">
-      Интеграция с торрент-клиентом
+    <a href="../clients/" title="Настройка интеграции с торрент-клиентом" class="md-nav__link">
+      Настройка интеграции с торрент-клиентом
     </a>
   </li>
 
@@ -297,8 +297,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../trackers/" title="Настройка трекеров для обновления торрентов" class="md-nav__link">
-      Настройка трекеров для обновления торрентов
+    <a href="../trackers/" title="Настройка трекеров" class="md-nav__link">
+      Настройка трекеров
     </a>
   </li>
 
@@ -345,8 +345,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emupdate/" title="emupdate - обновление торрентов" class="md-nav__link">
-      emupdate - обновление торрентов
+    <a href="../emupdate/" title="emupdate" class="md-nav__link">
+      emupdate
     </a>
   </li>
 
@@ -357,8 +357,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emfile/" title="emfile - просмотр информации о торрент-файле" class="md-nav__link">
-      emfile - просмотр информации о торрент-файле
+    <a href="../emfile/" title="emfile" class="md-nav__link">
+      emfile
     </a>
   </li>
 
@@ -369,8 +369,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emdiff/" title="emdiff - сравнение торрент-файлов" class="md-nav__link">
-      emdiff - сравнение торрент-файлов
+    <a href="../emdiff/" title="emdiff" class="md-nav__link">
+      emdiff
     </a>
   </li>
 
@@ -381,8 +381,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emload/" title="emload - добавление торрента в клиент" class="md-nav__link">
-      emload - добавление торрента в клиент
+    <a href="../emload/" title="emload" class="md-nav__link">
+      emload
     </a>
   </li>
 
@@ -393,8 +393,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emrm/" title="emrm - удаление торрента из клиента" class="md-nav__link">
-      emrm - удаление торрента из клиента
+    <a href="../emrm/" title="emrm" class="md-nav__link">
+      emrm
     </a>
   </li>
 
@@ -405,8 +405,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../emfind/" title="emfind - запросы к клиенту для обслуживания коллекции" class="md-nav__link">
-      emfind - запросы к клиенту для обслуживания коллекции
+    <a href="../emfind/" title="emfind" class="md-nav__link">
+      emfind
     </a>
   </li>
 
@@ -422,8 +422,8 @@
 
 
   <li class="md-nav__item">
-    <a href="../hooks/" title="Спецкостыли для разных клиентов" class="md-nav__link">
-      Спецкостыли для разных клиентов
+    <a href="../hooks/" title="Спецкостыли для клиентов" class="md-nav__link">
+      Спецкостыли для клиентов
     </a>
   </li>
 
@@ -489,6 +489,155 @@
     Details
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#systemlistmethods" title="system.listMethods" class="md-nav__link">
+    system.listMethods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemmethodsignature" title="system.methodSignature" class="md-nav__link">
+    system.methodSignature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemmethodhelp" title="system.methodHelp" class="md-nav__link">
+    system.methodHelp
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemmulticall" title="system.multicall" class="md-nav__link">
+    system.multicall
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemshutdown" title="system.shutdown" class="md-nav__link">
+    system.shutdown
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-torrents" title="Managing Torrents" class="md-nav__link">
+    Managing Torrents
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dmulticall" title="d.multicall" class="md-nav__link">
+    d.multicall
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-files" title="Managing Files" class="md-nav__link">
+    Managing Files
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fmulticall" title="f.multicall" class="md-nav__link">
+    f.multicall
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-peers" title="Managing Peers" class="md-nav__link">
+    Managing Peers
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pmulticall" title="p.multicall" class="md-nav__link">
+    p.multicall
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-trackers" title="Managing Trackers" class="md-nav__link">
+    Managing Trackers
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tmulticall" title="t.multicall" class="md-nav__link">
+    t.multicall
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dht95statistics" title="dht_statistics" class="md-nav__link">
+    dht_statistics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#to-functions" title="To functions" class="md-nav__link">
+    To functions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-torrents" title="Loading Torrents" class="md-nav__link">
+    Loading Torrents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-commands" title="Other Commands" class="md-nav__link">
+    Other Commands
+  </a>
+  
 </li>
       
       
@@ -549,6 +698,155 @@
     Details
   </a>
   
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#systemlistmethods" title="system.listMethods" class="md-nav__link">
+    system.listMethods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemmethodsignature" title="system.methodSignature" class="md-nav__link">
+    system.methodSignature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemmethodhelp" title="system.methodHelp" class="md-nav__link">
+    system.methodHelp
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemmulticall" title="system.multicall" class="md-nav__link">
+    system.multicall
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#systemshutdown" title="system.shutdown" class="md-nav__link">
+    system.shutdown
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-torrents" title="Managing Torrents" class="md-nav__link">
+    Managing Torrents
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dmulticall" title="d.multicall" class="md-nav__link">
+    d.multicall
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-files" title="Managing Files" class="md-nav__link">
+    Managing Files
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fmulticall" title="f.multicall" class="md-nav__link">
+    f.multicall
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-peers" title="Managing Peers" class="md-nav__link">
+    Managing Peers
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pmulticall" title="p.multicall" class="md-nav__link">
+    p.multicall
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-trackers" title="Managing Trackers" class="md-nav__link">
+    Managing Trackers
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tmulticall" title="t.multicall" class="md-nav__link">
+    t.multicall
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dht95statistics" title="dht_statistics" class="md-nav__link">
+    dht_statistics
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#to-functions" title="To functions" class="md-nav__link">
+    To functions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#loading-torrents" title="Loading Torrents" class="md-nav__link">
+    Loading Torrents
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other-commands" title="Other Commands" class="md-nav__link">
+    Other Commands
+  </a>
+  
 </li>
       
       
@@ -573,23 +871,28 @@
                   <h1>rTorrent XMLRPC Reference</h1>
                 
                 <h3 id="introduction">Introduction<a class="headerlink" href="#introduction" title="Permanent link">&para;</a></h3>
-<p>Draft reference for XML-RPC commands for rTorrent.<br />
-I've picked up this document from <a href="https://code.google.com/p/gi-torrent">gi-torrent wiki</a>.<br />
-Copyright (c) Hans.Hasert@gmail.com</p>
+<p>Draft reference for XML-RPC commands for rTorrent.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>I've picked up this document from <a href="https://code.google.com/p/gi-torrent">gi-torrent wiki</a>.
+Copyright &copy; Hans.Hasert@gmail.com</p>
+</div>
+<hr />
 <h3 id="details">Details<a class="headerlink" href="#details" title="Permanent link">&para;</a></h3>
-<p><strong>system.listMethods</strong></p>
+<h4 id="systemlistmethods">system.listMethods<a class="headerlink" href="#systemlistmethods" title="Permanent link">&para;</a></h4>
 <p>Return an array of all available XML-RPC methods on the server.</p>
-<p><strong>system.methodSignature</strong></p>
+<h4 id="systemmethodsignature">system.methodSignature<a class="headerlink" href="#systemmethodsignature" title="Permanent link">&para;</a></h4>
 <p>Given the name of a method, return an array of legal signatures. Each signature is an array of strings.  The first item of each signature is the return type, and any others items are parameter types.</p>
-<p><strong>system.methodHelp</strong></p>
+<h4 id="systemmethodhelp">system.methodHelp<a class="headerlink" href="#systemmethodhelp" title="Permanent link">&para;</a></h4>
 <p>Given the name of a method, return a help string.</p>
-<p><strong>system.multicall</strong></p>
+<h4 id="systemmulticall">system.multicall<a class="headerlink" href="#systemmulticall" title="Permanent link">&para;</a></h4>
 <p>Process an array of calls, and return an array of results.  Calls should be structs of the form <code>{'methodName': string, 'params': array}</code>. Each result will either be a single-item array containg the result value, or a struct of the form <code>{'faultCode': int, 'faultString': string}</code>.  This is useful when you need to make lots of small calls without lots of round trips. See <a href="../rTorrent-system_multicall">rTorrent-system_multicall</a> for syntax.</p>
-<p><strong>system.shutdown</strong></p>
+<h4 id="systemshutdown">system.shutdown<a class="headerlink" href="#systemshutdown" title="Permanent link">&para;</a></h4>
 <p>Shut down the server. Return code is always zero.</p>
-<p><strong>Managing Torrents</strong></p>
+<hr />
+<h3 id="managing-torrents">Managing Torrents<a class="headerlink" href="#managing-torrents" title="Permanent link">&para;</a></h3>
 <p>The commands that act on a torrent are prefixed with <code>d.</code>. They can be used separately (with the <code>hash</code> as the parameter that distinguishes the specific torrent) or together by using <code>d.multicall</code>.</p>
-<p><strong>d.multicall</strong></p>
+<h4 id="dmulticall">d.multicall<a class="headerlink" href="#dmulticall" title="Permanent link">&para;</a></h4>
 <p>Process an array of calls, and return an array of results. This is specific for a torrent listing, where the following arguments can be used to acquire information. The first argument is the type of view (f.i. <code>main</code>, <code>started</code>, <code>stopped</code>, <code>hashing</code>, <code>seeding</code>) that you want to get returned. The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents. Whenever in a multicall, the char <code>=</code> is added at the end.</p>
 <div class="codehilite"><pre><span></span>d.add_peer
 d.check_hash               Initiate a hash check
@@ -708,9 +1011,10 @@ d.views.remove
 </pre></div>
 
 
-<p><strong>Managing Files</strong></p>
+<hr />
+<h3 id="managing-files">Managing Files<a class="headerlink" href="#managing-files" title="Permanent link">&para;</a></h3>
 <p>The commands that act on a torrent are prefixed with <code>f.</code>. They can be used separately (with the 'hash and file number' as the parameter that distinguishes the specific torrent) or together by using <code>f.multicall</code>.</p>
-<p><strong>f.multicall</strong></p>
+<h4 id="fmulticall">f.multicall<a class="headerlink" href="#fmulticall" title="Permanent link">&para;</a></h4>
 <p>Process an array of calls, and return an array of results. This is specific for a file listing, where the following arguments can be used to acquire information. The first argument is the hash that you got from the previous torrent listing. Whenever in a multicall, the char '=' is added at the end of the individual commands.</p>
 <p>The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents and the file number to distinguish individual files. There are multiple ways to address a file, but for me the hash:f# method was the only working solution (see <a href="http://libtorrent.rakshasa.no/wiki/RTorrentXMLRPCGuide">rTorrent XML-RPC guide</a>)</p>
 <div class="codehilite"><pre><span></span>&#39;f.get_completed_chunks&#39;       Get the chunks that already downloaded
@@ -739,9 +1043,10 @@ d.views.remove
 </pre></div>
 
 
-<p><strong>Managing Peers</strong></p>
+<hr />
+<h3 id="managing-peers">Managing Peers<a class="headerlink" href="#managing-peers" title="Permanent link">&para;</a></h3>
 <p>The commands that act on a peer are prefixed with 'p.'. They can be used separately (with the 'hash' as the parameter that distinguishes the specific torrent) or together by using p.multicall.</p>
-<p><strong>p.multicall</strong></p>
+<h4 id="pmulticall">p.multicall<a class="headerlink" href="#pmulticall" title="Permanent link">&para;</a></h4>
 <p>Process an array of calls, and return an array of results. This is specific for a peer listing, where the following arguments can be used to acquire information. The first argument is the hash that you got from the previous torrent listing. Whenever in a multicall, the char '=' is added at the end of the individual commands.</p>
 <p>The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents.</p>
 <div class="codehilite"><pre><span></span>&#39;p.get_address&#39;             Get the peer ip address
@@ -764,9 +1069,10 @@ d.views.remove
 </pre></div>
 
 
-<p><strong>Managing Trackers</strong></p>
+<hr />
+<h3 id="managing-trackers">Managing Trackers<a class="headerlink" href="#managing-trackers" title="Permanent link">&para;</a></h3>
 <p>The commands that act on a tracker are prefixed with 't.'. They can be used separately (with the 'hash' as the parameter that distinguishes the specific torrent) or together by using t.multicall.</p>
-<p><strong>t.multicall</strong></p>
+<h4 id="tmulticall">t.multicall<a class="headerlink" href="#tmulticall" title="Permanent link">&para;</a></h4>
 <p>Process an array of calls, and return an array of results. This is specific for a tracker listing, where the following arguments can be used to acquire information. The first argument is the hash that you got from the previous torrent listing. Whenever in a multicall, the char '=' is added at the end of the individual commands.</p>
 <p>The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents.</p>
 <div class="codehilite"><pre><span></span>&#39;t.get_group&#39;
@@ -785,27 +1091,31 @@ d.views.remove
 </pre></div>
 
 
-<p>Note: rTorrent does not support explicit scrape, so the scrape values might be '0'.</p>
-<p><strong>dht_statistics</strong></p>
+<div class="admonition info">
+<p class="admonition-title">Note</p>
+<p>rTorrent does not support explicit scrape, so the scrape values might be '0'.</p>
+</div>
+<hr />
+<h3 id="dht95statistics">dht_statistics<a class="headerlink" href="#dht95statistics" title="Permanent link">&para;</a></h3>
 <p>Delivers statistics on the dht component. Data is returned in the following structure :</p>
-<div class="codehilite"><pre><span></span>&lt;methodResponse&gt;
- &lt;params&gt;
-  &lt;param&gt;
-   &lt;value&gt;
-    &lt;struct&gt;
-      &lt;member&gt;
-       &lt;name/&gt;
-       &lt;value&gt;&lt;i8/&gt;&lt;/value&gt;
-      &lt;/member&gt;
-      &lt;member&gt;
-       &lt;name/&gt;
-       &lt;value&gt;&lt;string/&gt;
-      &lt;/member&gt;
-     &lt;/struct&gt;
-    &lt;/value&gt;
-  &lt;/param&gt;
- &lt;/params&gt;
-&lt;/methodResponse&gt;
+<div class="codehilite"><pre><span></span><span class="nt">&lt;methodResponse&gt;</span>
+ <span class="nt">&lt;params&gt;</span>
+  <span class="nt">&lt;param&gt;</span>
+   <span class="nt">&lt;value&gt;</span>
+    <span class="nt">&lt;struct&gt;</span>
+      <span class="nt">&lt;member&gt;</span>
+       <span class="nt">&lt;name/&gt;</span>
+       <span class="nt">&lt;value&gt;&lt;i8/&gt;&lt;/value&gt;</span>
+      <span class="nt">&lt;/member&gt;</span>
+      <span class="nt">&lt;member&gt;</span>
+       <span class="nt">&lt;name/&gt;</span>
+       <span class="nt">&lt;value&gt;&lt;string/&gt;</span>
+      <span class="nt">&lt;/member&gt;</span>
+     <span class="nt">&lt;/struct&gt;</span>
+    <span class="nt">&lt;/value&gt;</span>
+  <span class="nt">&lt;/param&gt;</span>
+ <span class="nt">&lt;/params&gt;</span>
+<span class="nt">&lt;/methodResponse&gt;</span>
 </pre></div>
 
 
@@ -827,7 +1137,8 @@ torrents
 </pre></div>
 
 
-<p><strong>To functions</strong></p>
+<hr />
+<h3 id="to-functions">To functions<a class="headerlink" href="#to-functions" title="Permanent link">&para;</a></h3>
 <div class="codehilite"><pre><span></span>to_* functions operate on another command, the following operate on a unix timestamp :
 
 &#39;to_date&#39;                   convert the unix timestamp to a date string
@@ -845,7 +1156,8 @@ Syntax is &#39;to_*=$.....&#39;. Example : &#39;to_date=$d.get_creation_date&#39
 </pre></div>
 
 
-<p><strong>Loading Torrents</strong></p>
+<hr />
+<h3 id="loading-torrents">Loading Torrents<a class="headerlink" href="#loading-torrents" title="Permanent link">&para;</a></h3>
 <p>The URL for a restricted site is <code>http://userid:password@Torrent.location.org.</code></p>
 <div class="codehilite"><pre><span></span>&#39;load&#39;                   Load/download a torrent URL/file
 &#39;load_raw&#39;               Load a torrent file content
@@ -857,7 +1169,8 @@ Syntax is &#39;to_*=$.....&#39;. Example : &#39;to_date=$d.get_creation_date&#39
 </pre></div>
 
 
-<p><strong>Other Commands</strong></p>
+<hr />
+<h3 id="other-commands">Other Commands<a class="headerlink" href="#other-commands" title="Permanent link">&para;</a></h3>
 <div class="codehilite"><pre><span></span>&#39;call_download&#39;
 &#39;cat&#39;                    Used to convert to a string, cat=$......
 &#39;close_low_diskspace&#39;
@@ -1142,7 +1455,7 @@ Syntax is &#39;to_*=$.....&#39;. Example : &#39;to_date=$d.get_creation_date&#39
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../hooks/" title="Спецкостыли для разных клиентов" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../hooks/" title="Спецкостыли для клиентов" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1151,7 +1464,7 @@ Syntax is &#39;to_*=$.....&#39;. Example : &#39;to_date=$d.get_creation_date&#39
                 <span class="md-footer-nav__direction">
                   Предыдущая страница
                 </span>
-                Спецкостыли для разных клиентов
+                Спецкостыли для клиентов
               </span>
             </div>
           </a>
