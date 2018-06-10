@@ -1,36 +1,47 @@
-Кроме основного функционала, в пакет входят несколько полезных скриптов, которые могут использоваться отдельно от **emonoda** и не требуют ее настроек. Вызываются они через `python -m`, например так:
+В состав **Emonoda** входят несколько полезных скриптов, которые могут использоваться отдельно от нее и не требуют ни ее настроек, ни библиотек. Вызываются они через `python -m`, например так:
+
 ```
 $ python -m emonoda.apps.hooks.rtorrent.manage_trackers --help
 ```
 
-***
 
-###emonoda.apps.hooks.rtorrent.manage_trackers###
+***
+### emonoda.apps.hooks.rtorrent.manage_trackers
+
 Это костылик для группового управления трекерами в rTorrent. Он позволяет включать и отключать трекеры одновременно для всех раздач. Он подключается к клиенту, выгружает список раздач, а затем производит над их трекерами необходимые операции. Был написан, чтобы отключить использование ретрекеров, которых часто нет в локальных сетях, а rTorrent ругается на то, что не может зарезольвить их хостнеймы или получить из них данные.
 
-#####Опции#####
+
+#### Опции
 
 * **`--enable <s1 ...>`**
     * Если что-то из указанных подстрок входит в имя трекера на раздаче - включить этот трекер.
+
 * **`--disable <s1 ...>`**
     * Работает по той же логике, что и `--enable`, но отключает совпавшие трекеры.
+
 * **`-t, --timeout <number>`**
     * Таймаут на все сетевые операции, по умолчанию - `5` секунд.
+
 * **`--client-url <url>`**
     * URL для подключения к XMLRPC клиента, по умолчанию - `http://localhost/RPC2`.
 
-#####Примеры использования#####
-Включить трекеры на домене `rutracker.org` и отключить остальное.
+
+#### Примеры использования
+
+Включить трекеры на домене `rutracker.org` и отключить остальное:
+
 ```
 $ python -m emonoda.apps.hooks.rtorrent.manage_trackers --enable rutracker.org --disable rutracker.net retracker.local
 ```
 
-***
 
-###emonoda.apps.hooks.rtorrent.collectd_stat###
+***
+### emonoda.apps.hooks.rtorrent.collectd_stat
+
 Это специальный скрипт для [Collectd](https://collectd.org), собирающий статистику с rTorrent. Он использует [текстовый протокол](https://collectd.org/wiki/index.php/Plain_text_protocol) для сброса этой информации в плагин [Exec](https://collectd.org/wiki/index.php/Plugin:Exec). По умолчанию считываются только метрики загрузки и отдачи, лимиты на скорость, а так же объем скачанных и отданных данных. Названия метрик говорят сами за себя.
 
-#####Опции#####
+
+#### Опции
 
 * **`-t, --timeout <number>`**
     * Таймаут на все сетевые операции, по умолчанию - `5` секунд.
@@ -45,15 +56,20 @@ $ python -m emonoda.apps.hooks.rtorrent.manage_trackers --enable rutracker.org -
 * **`-i, --interval <number>`**
     * Скрипт запускает внутри себя цикл получения новых метрик с указанной паузой между итерациями. По умолчанию - `60` секунд или содержимое переменной окружения `COLLECTD_INTERVAL`.
 
-#####Примеры использования#####
+
+#### Примеры использования
+
 Для включения плагина пропишите в `/etc/collectd.conf` что-то типа этого:
+
 ```
 LoadPLugin exec
 <Plugin exec>
     Exec "data" "python" "-m" "emonoda.apps.hooks.rtorrent.collectd_stat" "--client-url=http://localhost/RPC2" "--with-summary"
 </Plugin>
 ```
+
 Скрипт также можно запустить из консоли и посмотреть, какие метрики и как он выводит:
+
 ```
 $ python -m emonoda.apps.hooks.rtorrent.collectd_stat --with-dht --with-summary
 PUTVAL localhost/rtorrent/gauge-dn_rate interval=60 N:22847

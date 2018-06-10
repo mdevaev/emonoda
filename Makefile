@@ -20,6 +20,7 @@ release:
 	make pypi
 	make clean
 	make mkdocs
+	make clean
 	make mkdocs-release
 	make clean
 

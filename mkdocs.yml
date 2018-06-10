@@ -1,7 +1,9 @@
+# https://squidfunk.github.io/mkdocs-material/getting-started
+
 site_name: Emonoda
-site_description: A set of tools to organize and manage your torrents
+site_description: Система управления коллекцией торрентов
 site_author: Maxim Devaev
-site_url: https://github.com/mdevaev/emonoda
+site_url: https://mdevaev.github.io/emonoda
 
 repo_name: mdevaev/emonoda
 repo_url: https://github.com/mdevaev/emonoda
@@ -22,7 +24,7 @@ extra:
         - type: github-alt
           link: https://github.com/mdevaev/emonoda
     search:
-        language: "en, de, ru"
+        language: "en, ru"
 
 markdown_extensions:
     - admonition
@@ -33,19 +35,19 @@ markdown_extensions:
 
 pages:
     - "Emonoda -- 得物だ": index.md
-    - "Базовая настройка":
-        - "Конфигурация": config.md
-        - "Интеграция с торрент-клиентом": clients.md
-        - "Настройка трекеров для обновления торрентов": trackers.md
+    - "Настройка":
+        - "Общие принципы настройки": config.md
+        - "Настройка интеграции с торрент-клиентом": clients.md
+        - "Настройка трекеров": trackers.md
         - "Настройка оповещений об обновлениях": confetti.md
     - "Команды":
-        - "emupdate - обновление торрентов": emupdate.md
-        - "emfile - просмотр информации о торрент-файле": emfile.md
-        - "emdiff - сравнение торрент-файлов": emdiff.md
-        - "emload - добавление торрента в клиент": emload.md
-        - "emrm - удаление торрента из клиента": emrm.md
-        - "emfind - запросы к клиенту для обслуживания коллекции": emfind.md
-    - "Спецкостыли для разных клиентов": hooks.md
+        - "emupdate": emupdate.md
+        - "emfile": emfile.md
+        - "emdiff": emdiff.md
+        - "emload": emload.md
+        - "emrm": emrm.md
+        - "emfind": emfind.md
+    - "Спецкостыли для клиентов": hooks.md
     - "Инфа для разработчиков":
         - "rTorrent XMLRPC Reference": rTorrent-XMLRPC-Reference.md
         - "rTorrent system_multicall": rTorrent-system_multicall.md

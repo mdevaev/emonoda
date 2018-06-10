@@ -1,37 +1,51 @@
 ### Introduction
-Draft reference for XML-RPC commands for rTorrent.  
-I've picked up this document from [gi-torrent wiki](https://code.google.com/p/gi-torrent).  
-Copyright (c) Hans.Hasert@gmail.com
 
+Draft reference for XML-RPC commands for rTorrent.
+
+!!! info
+    I've picked up this document from [gi-torrent wiki](https://code.google.com/p/gi-torrent).
+    Copyright &copy; Hans.Hasert@gmail.com
+
+
+***
 ### Details
 
-**system.listMethods**
+
+#### system.listMethods
 
 Return an array of all available XML-RPC methods on the server.
 
-**system.methodSignature**
+
+#### system.methodSignature
 
 Given the name of a method, return an array of legal signatures. Each signature is an array of strings.  The first item of each signature is the return type, and any others items are parameter types.
 
-**system.methodHelp**
+
+#### system.methodHelp
 
 Given the name of a method, return a help string.
 
-**system.multicall**
+
+#### system.multicall
 
 Process an array of calls, and return an array of results.  Calls should be structs of the form `{'methodName': string, 'params': array}`. Each result will either be a single-item array containg the result value, or a struct of the form `{'faultCode': int, 'faultString': string}`.  This is useful when you need to make lots of small calls without lots of round trips. See [rTorrent-system_multicall](rTorrent-system_multicall) for syntax.
 
-**system.shutdown**
+
+#### system.shutdown
 
 Shut down the server. Return code is always zero.
 
-**Managing Torrents**
+
+***
+### Managing Torrents
 
 The commands that act on a torrent are prefixed with `d.`. They can be used separately (with the `hash` as the parameter that distinguishes the specific torrent) or together by using `d.multicall`.
 
-**d.multicall**
+
+#### d.multicall
 
 Process an array of calls, and return an array of results. This is specific for a torrent listing, where the following arguments can be used to acquire information. The first argument is the type of view (f.i. `main`, `started`, `stopped`, `hashing`, `seeding`) that you want to get returned. The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents. Whenever in a multicall, the char `=` is added at the end.
+
 ```
 d.add_peer
 d.check_hash               Initiate a hash check
@@ -149,11 +163,14 @@ d.views.push_back_unique
 d.views.remove
 ```
 
-**Managing Files**
+
+***
+### Managing Files
 
 The commands that act on a torrent are prefixed with `f.`. They can be used separately (with the 'hash and file number' as the parameter that distinguishes the specific torrent) or together by using `f.multicall`.
 
-**f.multicall**
+
+#### f.multicall
 
 Process an array of calls, and return an array of results. This is specific for a file listing, where the following arguments can be used to acquire information. The first argument is the hash that you got from the previous torrent listing. Whenever in a multicall, the char '=' is added at the end of the individual commands.
 
@@ -185,15 +202,19 @@ The arguments can be used on their own as well, with the 'hash' as the parameter
 'f.unset_resize_queued'
 ```
 
-**Managing Peers**
+
+***
+### Managing Peers
 
 The commands that act on a peer are prefixed with 'p.'. They can be used separately (with the 'hash' as the parameter that distinguishes the specific torrent) or together by using p.multicall.
 
-**p.multicall**
+
+#### p.multicall
 
 Process an array of calls, and return an array of results. This is specific for a peer listing, where the following arguments can be used to acquire information. The first argument is the hash that you got from the previous torrent listing. Whenever in a multicall, the char '=' is added at the end of the individual commands.
 
 The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents.
+
 ```
 'p.get_address'             Get the peer ip address
 'p.get_client_version'      Get the client version
@@ -214,15 +235,19 @@ The arguments can be used on their own as well, with the 'hash' as the parameter
 'p.is_snubbed'              Is the peer snubbed (0=no, 1=yes)
 ```
 
-**Managing Trackers**
+
+***
+### Managing Trackers
 
 The commands that act on a tracker are prefixed with 't.'. They can be used separately (with the 'hash' as the parameter that distinguishes the specific torrent) or together by using t.multicall.
 
-**t.multicall**
+
+#### t.multicall
 
 Process an array of calls, and return an array of results. This is specific for a tracker listing, where the following arguments can be used to acquire information. The first argument is the hash that you got from the previous torrent listing. Whenever in a multicall, the char '=' is added at the end of the individual commands.
 
 The arguments can be used on their own as well, with the 'hash' as the parameter to distinguish the torrents.
+
 ```
 't.get_group'
 't.get_id'
@@ -238,12 +263,17 @@ The arguments can be used on their own as well, with the 'hash' as the parameter
 't.is_open'                   Get the status of the tracker (0=closed, 1=open)
 't.set_enabled'               Enable the tracker
 ```
-Note: rTorrent does not support explicit scrape, so the scrape values might be '0'.
 
-**dht\_statistics**
+!!! info "Note"
+    rTorrent does not support explicit scrape, so the scrape values might be '0'.
+
+
+***
+### dht\_statistics
 
 Delivers statistics on the dht component. Data is returned in the following structure :
-```
+
+```xml
 <methodResponse>
  <params>
   <param>
@@ -281,7 +311,9 @@ replies_received
 torrents
 ```
 
-**To functions**
+
+***
+### To functions
 
 ```
 to_* functions operate on another command, the following operate on a unix timestamp :
@@ -300,7 +332,9 @@ Syntax is 'to_*=$.....'. Example : 'to_date=$d.get_creation_date'.
 'to_xb'
 ```
 
-**Loading Torrents**
+
+***
+### Loading Torrents
 
 The URL for a restricted site is `http://userid:password@Torrent.location.org.`
 
@@ -314,7 +348,9 @@ The URL for a restricted site is `http://userid:password@Torrent.location.org.`
 'load_verbose'           Load/download a torrent URL/file and supply verbose info
 ```
 
-**Other Commands**
+
+***
+### Other Commands
 
 ```
 'call_download'
