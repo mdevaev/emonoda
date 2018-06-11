@@ -27,17 +27,17 @@ from typing import Any
 
 from ...optconf import Option
 from ...optconf.converters import as_string_list
-from ...optconf.converters import as_string_list_choices
 from ...optconf.converters import as_path_or_empty
 
 from . import STATUSES
 from . import ResultsType
 from . import WithWeb
+from . import WithStatuses
 from . import templated
 
 
 # =====
-class Plugin(WithWeb):
+class Plugin(WithWeb, WithStatuses):
     PLUGIN_NAME = "telegram"
 
     _SITE_RETRY_CODES = [429, 500, 502, 503]
@@ -47,7 +47,6 @@ class Plugin(WithWeb):
         token: str,
         chats: List[str],
         template: str,
-        statuses: List[str],
         **kwargs: Any,
     ) -> None:
 
@@ -56,19 +55,14 @@ class Plugin(WithWeb):
 
         self.__token = token
         self.__chats = chats
-
         self.__template_path = template
-        self.__statuses = statuses
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options({
             "token":    Option(default="CHANGE_ME", help="Bot token"),
             "chats":    Option(default=[], type=as_string_list, help="Chats ids"),
-
             "template": Option(default="", type=as_path_or_empty, help="Mako template file name"),
-            "statuses": Option(default=["invalid", "not_in_client", "tracker_error", "unhandled_error", "affected"],
-                               type=(lambda arg: as_string_list_choices(arg, list(STATUSES))), help="Statuses to notifications"),
         })
 
     # ===
@@ -84,7 +78,7 @@ class Plugin(WithWeb):
                 status_msg=STATUSES[status],
                 result=result,
             )
-            for status in self.__statuses
+            for status in self._statuses
             for (file_name, result) in results[status].items()
         ]
         for chat_id in self.__chats:

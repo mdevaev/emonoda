@@ -25,17 +25,17 @@ from typing import Any
 
 from ...optconf import Option
 from ...optconf.converters import as_string_list
-from ...optconf.converters import as_string_list_choices
 from ...optconf.converters import as_path_or_empty
 
 from . import STATUSES
 from . import ResultsType
 from . import WithWeb
+from . import WithStatuses
 from . import templated
 
 
 # =====
-class Plugin(WithWeb):
+class Plugin(WithWeb, WithStatuses):
     PLUGIN_NAME = "pushover"
 
     def __init__(  # pylint: disable=super-init-not-called
@@ -45,7 +45,6 @@ class Plugin(WithWeb):
         devices: List[str],
         title: str,
         template: str,
-        statuses: List[str],
         **kwargs: Any,
     ) -> None:
 
@@ -55,10 +54,8 @@ class Plugin(WithWeb):
         self.__user_key = user_key
         self.__api_key = api_key
         self.__devices = devices
-
         self.__title = title
         self.__template_path = template
-        self.__statuses = statuses
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
@@ -66,17 +63,14 @@ class Plugin(WithWeb):
             "user_key": Option(default="CHANGE_ME", help="User key"),
             "api_key":  Option(default="CHANGE_ME", help="API/Application key"),
             "devices":  Option(default=[], type=as_string_list, help="Devices list (empty for all)"),
-
             "title":    Option(default="Emonoda ({source})", help="Message title"),
             "template": Option(default="", type=as_path_or_empty, help="Mako template file name"),
-            "statuses": Option(default=["invalid", "not_in_client", "tracker_error", "unhandled_error", "affected"],
-                               type=(lambda arg: as_string_list_choices(arg, list(STATUSES))), help="Statuses to notifications"),
         })
 
     # ===
 
     def send_results(self, source: str, results: ResultsType) -> None:
-        for status in self.__statuses:
+        for status in self._statuses:
             for (file_name, result) in results[status].items():
                 self._read_url(
                     url="https://api.pushover.net/1/messages.json",

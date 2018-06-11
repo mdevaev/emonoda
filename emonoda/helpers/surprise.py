@@ -37,12 +37,12 @@ def deploy_surprise(
 
     ok = True
     for sender in confetti:
-        log.info("Sending {blue}%s{reset} ...", (sender.PLUGIN_NAME,), one_line=True)
+        log.info("Processing confetti {blue}%s{reset} ...", (sender.PLUGIN_NAME,), one_line=True)
         try:
             sender.send_results(source, results)
-            log.info("Result {blue}%s{reset} was {green}sent{reset}", (sender.PLUGIN_NAME,))
+            log.info("Confetti {blue}%s{reset} {green}processed{reset}", (sender.PLUGIN_NAME,))
         except Exception as err:
-            log.error("Can't send {red}%s{reset}: {red}%s{reset}(%s)", (sender.PLUGIN_NAME, type(err).__name__, err))
+            log.error("Can't process {red}%s{reset}: {red}%s{reset}(%s)", (sender.PLUGIN_NAME, type(err).__name__, err))
             log.print("%s", ("\n".join("\t" + row for row in traceback.format_exc().strip().split("\n")),))
             ok = False
     if not ok:

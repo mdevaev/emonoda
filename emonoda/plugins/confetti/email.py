@@ -36,12 +36,12 @@ from ...optconf.converters import as_string_list
 from ...optconf.converters import as_path_or_empty
 
 from . import ResultsType
-from . import BaseConfetti
+from . import WithStatuses
 from . import templated
 
 
 # =====
-class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
+class Plugin(WithStatuses):  # pylint: disable=too-many-instance-attributes
     PLUGIN_NAME = "email"
 
     def __init__(  # pylint: disable=super-init-not-called,too-many-arguments,too-many-locals
@@ -52,11 +52,13 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         sender: str,
         html: bool,
         template: str,
+
         server: str,
         port: int,
         ssl: bool,
         user: str,
         passwd: str,
+
         timeout: float,
         retries: int,
         retries_sleep: float,
@@ -87,7 +89,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         return cls._get_merged_options({
             "to":       Option(default=["root@localhost"], type=as_string_list, help="Destination email address"),
             "cc":       Option(default=[], type=as_string_list, help="Email 'CC' field"),
-            "subject":  Option(default="{source} report: you have {affected} new torrents ^_^", help="Email subject"),
+            "subject":  Option(default="{source} report: you have {statuses_sum} changed torrents", help="Email subject"),
             "sender":   Option(default="root@localhost", help="Email 'From' field"),
             "html":     Option(default=True, help="HTML or plaintext email body"),
             "template": Option(default="", type=as_path_or_empty, help="Mako template file name"),
@@ -106,22 +108,23 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     # ===
 
     def send_results(self, source: str, results: ResultsType) -> None:
-        msg = self.__format_message(source, results)
-        retries = self.__retries
-        while True:
-            try:
-                self.__send_message(msg)
-                break
-            except (
-                smtplib.SMTPServerDisconnected,
-                smtplib.SMTPConnectError,
-                smtplib.SMTPHeloError,
-                socket.timeout,
-            ):
-                if retries == 0:
-                    raise
-                time.sleep(self.__retries_sleep)
-                retries -= 1
+        if sum(len(results[status]) for status in self._statuses) > 0:
+            msg = self.__format_message(source, results)
+            retries = self.__retries
+            while True:
+                try:
+                    self.__send_message(msg)
+                    break
+                except (
+                    smtplib.SMTPServerDisconnected,
+                    smtplib.SMTPConnectError,
+                    smtplib.SMTPHeloError,
+                    socket.timeout,
+                ):
+                    if retries == 0:
+                        raise
+                    time.sleep(self.__retries_sleep)
+                    retries -= 1
 
     # ===
 
@@ -131,6 +134,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             for (field, items) in results.items()
         }
         subject_placeholders["source"] = source
+        subject_placeholders["statuses_sum"] = sum(len(results[status]) for status in self._statuses)
         return self.__make_message(
             subject=self.__subject.format(**subject_placeholders),
             body=templated(
@@ -140,6 +144,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
                 ),
                 built_in=(not self.__template_path),
                 source=source,
+                statuses=self._statuses,
                 results=results,
             ),
         )

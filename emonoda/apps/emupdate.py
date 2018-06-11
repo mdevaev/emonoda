@@ -501,14 +501,13 @@ def main() -> None:
                 log=log_stderr,
             )
             if not options.mute:
-                if len(results["affected"]) != 0:
-                    if not surprise.deploy_surprise(
-                        source="emupdate",
-                        results=results,
-                        confetti=confetti,
-                        log=log_stderr,
-                    ):
-                        raise SystemExit(1)
+                if not surprise.deploy_surprise(
+                    source="emupdate",
+                    results=results,
+                    confetti=confetti,
+                    log=log_stderr,
+                ):
+                    raise SystemExit(1)
 
 
 if __name__ == "__main__":

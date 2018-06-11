@@ -113,28 +113,29 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     # ===
 
     def send_results(self, source: str, results: ResultsType) -> None:
-        results_set: List[ResultsType] = []
-        try:
-            with open(self.__history_path) as history_file:
-                results_set = yaml.load(history_file)
-        except Exception:
-            traceback.print_exc()
-        results["ctime"] = time.time()  # type: ignore
-        results_set.insert(0, results)
-        results_set = results_set[:20]
-        with open(self.__path, "w") as atom_file:
-            atom_file.write(templated(
-                name=(self.__template_path if self.__template_path else "atom.{ctype}.{source}.mako").format(
-                    ctype=("html" if self.__html else "plain"),
+        if len(results["affected"]) != 0:
+            results_set: List[ResultsType] = []
+            try:
+                with open(self.__history_path) as history_file:
+                    results_set = yaml.load(history_file)
+            except Exception:
+                traceback.print_exc()
+            results["ctime"] = time.time()  # type: ignore
+            results_set.insert(0, results)
+            results_set = results_set[:20]
+            with open(self.__path, "w") as atom_file:
+                atom_file.write(templated(
+                    name=(self.__template_path if self.__template_path else "atom.{ctype}.{source}.mako").format(
+                        ctype=("html" if self.__html else "plain"),
+                        source=source,
+                    ),
+                    built_in=(not self.__template_path),
                     source=source,
-                ),
-                built_in=(not self.__template_path),
-                source=source,
-                results_set=results_set,
-                settings=dict(url=self.__url)
-            ))
-        os.chmod(self.__path, 0o664)
-        os.chown(self.__path, self.__uid, self.__gid)
-        with open(self.__history_path, "w") as history_file:
-            history_file.write(yaml.dump(results_set))
-        del results["ctime"]
+                    results_set=results_set,
+                    settings=dict(url=self.__url)
+                ))
+            os.chmod(self.__path, 0o664)
+            os.chown(self.__path, self.__uid, self.__gid)
+            with open(self.__history_path, "w") as history_file:
+                history_file.write(yaml.dump(results_set))
+            del results["ctime"]

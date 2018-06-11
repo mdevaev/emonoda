@@ -33,8 +33,9 @@ from typing import Any
 import mako.template
 
 from ...optconf import Option
+from ...optconf.converters import as_string_list_choices
 
-from ...plugins.trackers import BaseTracker  # FIXME
+from ...plugins.trackers import BaseTracker
 
 from ...tfile import TorrentsDiff
 from ...tfile import Torrent
@@ -50,7 +51,6 @@ STATUSES = {
     "invalid":         "Invalid torrent",
     "not_in_client":   "Torrent not in client",
     "unknown":         "Unknown tracker type",
-    "passed":          "Passed without changes",
     "affected":        "Updated",
     "tracker_error":   "Tracker error",
     "unhandled_error": "Unhandled error",
@@ -105,6 +105,9 @@ ResultsType = Dict[str, Dict[str, UpdateResult]]
 
 
 class BaseConfetti(BasePlugin):
+    def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
+        pass
+
     def send_results(self, source: str, results: ResultsType) -> None:
         raise NotImplementedError
 
@@ -119,6 +122,7 @@ class WithWeb(BaseConfetti):  # pylint: disable=abstract-method
         retries_sleep: float,
         user_agent: str,
         proxy_url: str,
+        **_: Any,
     ) -> None:
 
         self.__timeout = timeout
@@ -163,6 +167,26 @@ class WithWeb(BaseConfetti):  # pylint: disable=abstract-method
             retries_sleep=self.__retries_sleep,
             retry_codes=self._SITE_RETRY_CODES,
         )
+
+
+class WithStatuses(BaseConfetti):  # pylint: disable=abstract-method
+    def __init__(  # pylint: disable=super-init-not-called
+        self,
+        statuses: List[str],
+        **_: Any,
+    ) -> None:
+
+        self._statuses = statuses
+
+    @classmethod
+    def get_options(cls) -> Dict[str, Option]:
+        return {
+            "statuses": Option(
+                default=["invalid", "not_in_client", "tracker_error", "unhandled_error", "affected"],
+                type=(lambda arg: as_string_list_choices(arg, list(STATUSES))),
+                help="Statuses to notifications",
+            ),
+        }
 
 
 def get_confetti_class(name: str) -> Type[BaseConfetti]:

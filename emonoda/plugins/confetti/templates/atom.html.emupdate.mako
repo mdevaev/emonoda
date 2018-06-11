@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <%!
-  from datetime import datetime
-  from emonoda.tools import sorted_paths
+    from html import escape as esc
+    from datetime import datetime
+    from emonoda.tools import sorted_paths
 %>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:thr="http://purl.org/syndication/thread/1.0" xml:lang="en">
     <title type="text">Emonoda Update!</title>
@@ -30,7 +31,7 @@
                 <tr>
                     <td width="20" align="center" valign="top">&#8226;</td>
                     <td align="left" valign="top">
-                        <b>${file_name}</b> (from <a href="${result.torrent.get_comment()}">${result.tracker.PLUGIN_NAME}</a>)
+                        <b>${esc(file_name)}</b> (from <a href="${result.torrent.get_comment()}">${result.tracker.PLUGIN_NAME}</a>)
                         <table cellspacing="0" cellpadding="0">
                         % for (sign, color, field) in [ \
                             ("+", "green",  "added"), \
@@ -41,7 +42,7 @@
                             % for item in sorted_paths(getattr(result.diff, field)):
                                 <tr>
                                     <td width="20" align="center" valign="top"><b><font color="${color}">${sign}</font></b></td>
-                                    <td align="left" valign="top">${item}</td>
+                                    <td align="left" valign="top">${esc(item)}</td>
                                 </tr>
                             % endfor
                         % endfor
