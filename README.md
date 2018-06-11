@@ -1,4 +1,4 @@
-#![Chi](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/chi.png) Emonoda -- 得物だ
+# ![Chi](https://raw.githubusercontent.com/wiki/mdevaev/emonoda/chi.png) Emonoda -- 得物だ
 
 [![PyPI Version](https://img.shields.io/pypi/v/emonoda.svg)](https://pypi.python.org/pypi/emonoda)
 [![PyPI Status](https://img.shields.io/pypi/status/emonoda.svg)](https://pypi.python.org/pypi/emonoda)
