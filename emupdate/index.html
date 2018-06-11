@@ -482,6 +482,30 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emconfetti-demo/" title="emconfetti-demo" class="md-nav__link">
+      emconfetti-demo
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../emconfetti-tghi/" title="emconfetti-tghi" class="md-nav__link">
+      emconfetti-tghi
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -681,7 +705,7 @@
 <h3 id="_3">Опции<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>Кроме собственных опций, указанных ниже, <strong>emupdate</strong> поддерживает еще и общий стандартный набор (например, <code>--help</code> и <code>--config</code>). За подробностями обратитесь на страницу <a href="../config">config</a>.</p>
+<p>Кроме собственных опций, указанных ниже, команда поддерживает еще и общий стандартный набор (например, <code>--help</code> и <code>--config</code>). За подробностями обратитесь на страницу <a href="../config">config</a>.</p>
 </div>
 <ul>
 <li>
@@ -750,24 +774,29 @@
 </ul>
 </li>
 </ul>
-<p><code>yaml
-  emupdate:
-      save_customs: [c1]</code></p>
-<p>или:</p>
-<p><code>yaml
-  emupdate:
-      save_customs:
-          - c1</code></p>
+<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">emupdate</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">save_customs</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">c1</span><span class="p p-Indicator">]</span>
+
+<span class="c1"># или:</span>
+
+<span class="l l-Scalar l-Scalar-Plain">emupdate</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">save_customs</span><span class="p p-Indicator">:</span>
+        <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">c1</span>
+</pre></div>
+
+
 <ul>
 <li><strong><code>emupdate/set_customs={}</code></strong><ul>
 <li>Работает почти так же, как и <code>emupdate/save_customs</code>, но вместо сохранения назначает обновленным торрентам новые значения кастомных полей. Поддерживает те же <a href="http://docs.python.org/3/library/datetime.html#strftime-strptime-behavior">форматтеры времени</a>, что и <code>emupdate/backup_suffix</code>. Например, следующая конфигурация заставит <strong>emupdate</strong> при использовании <strong>ruTorrent</strong> назначить метку <code>new</code> на все новые раздачи:</li>
 </ul>
 </li>
 </ul>
-<p><code>yaml
-  emupdate:
-      set_customs:
-          c1: new</code></p>
+<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">emupdate</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">set_customs</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">c1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">new</span>
+</pre></div>
+
+
 <ul>
 <li>
 <p><strong><code>emupdate/show_diff=true</code></strong></p>
@@ -822,7 +851,8 @@
 </table>
 <hr />
 <h3 id="_6">Оповещения<a class="headerlink" href="#_6" title="Permanent link">&para;</a></h3>
-<p>Программа умеет отсылать оповещения при обновлении торрентов. Оповещения настраиваются почти так же, как и трекеры - перечислением плагинов с настройками в секции <code>confetti</code>. Они полезны в случае, когда вы хотите поставить <strong>emupdate</strong> в крон и получать новости, например, на почту. Следует отметить, что собственные оповещения программы - не замена логам. Информация о сбоях присылаться не будет, и при использовании в кроне настоятельно рекомендуется перенаправлять <code>stdout</code> и <code>stderr</code> от <strong>emupdate</strong> в файл. О том, как настроить оповещения об обновленных раздачах, читайте на странице <a href="../confetti">confetti</a>.</p>
+<p>Программа умеет отсылать оповещения при обновлении торрентов. Оповещения настраиваются почти так же, как и трекеры - перечислением плагинов с настройками в секции <code>confetti</code>. Они полезны в случае, когда вы хотите поставить <strong>emupdate</strong> в крон и получать новости, например, на почту.</p>
+<p>Следует отметить, что собственные оповещения программы - не замена логам. Информация о сбоях присылаться не будет, и при использовании в кроне настоятельно рекомендуется перенаправлять <code>stdout</code> и <code>stderr</code> от <strong>emupdate</strong> в файл. О том, как настроить оповещения об обновленных раздачах, читайте на странице <a href="../confetti">confetti</a>.</p>
 <table>
 <thead>
 <tr>
