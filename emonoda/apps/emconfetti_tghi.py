@@ -18,6 +18,7 @@
 
 
 import sys
+import argparse
 
 from . import init
 from . import wrap_main
@@ -28,7 +29,15 @@ from . import get_configured_confetti
 # ===== Main =====
 @wrap_main
 def main() -> None:
-    (_, _, config) = init()
+    (parent_parser, argv, config) = init()
+    args_parser = argparse.ArgumentParser(
+        prog="emconfetti-tghi",
+        description="Telegram-bot helper",
+        parents=[parent_parser],
+    )
+    args_parser.add_argument("-n", "--limit", default=10, type=int)
+    options = args_parser.parse_args(argv[1:])
+
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, False, sys.stdout) as log_stderr:
             confetti = get_configured_confetti(
@@ -39,7 +48,7 @@ def main() -> None:
             )
             if len(confetti) == 0:
                 raise RuntimeError("No configured telegram plugin")
-            for (user, chat_id) in confetti[0]._get_last_chats():  # type: ignore  # pylint: disable=protected-access
+            for (user, chat_id) in confetti[0]._get_last_chats(options.limit):  # type: ignore  # pylint: disable=protected-access
                 log_stdout.print("- Chat with user '{yellow}%s{reset}': %s", (user, chat_id))
 
 
