@@ -53,17 +53,16 @@
 
 
 ***
-### Компоненты из коробки
+### Основные rомпоненты из коробки
 
 | Компонент | Описание |
 |-----------|----------|
 | [emupdate](https://mdevaev.github.io/emonoda/emupdate) | Следит за раздачами, используя плагины для популярных трекеров; обновляет торрент-файлы при добавлении новых серий или перезаливке; интегрируется с основными линуксовыми клиентами |
 | [emfile](https://mdevaev.github.io/emonoda/emfile) | Позволяет читать метаданные торрент-файлов и выдает их в человекочитаемом, либо удобном для скриптов формате |
 | [emdiff](https://mdevaev.github.io/emonoda/emdiff) | Показывает разницу содержимого двух торрент-файлов в виде диффа |
-| [emfind](https://mdevaev.github.io/emonoda/emfind) | Служит для выполнения различных поисковых запросов, например - найти в каталоге с данными файлы, не принадлежащими ни одному торренту, зарегистрированному в клиенте |
 | [emload](https://mdevaev.github.io/emonoda/emload) | Загружает торрент, используя "ссылочную" модель хранения данных (см. документацию) |
 | [emrm](https://mdevaev.github.io/emonoda/emrm) | Удаляет торрент из клиента |
-| [Дополнительно](hooks) | Всякие спецкостыли для различных клиентов |
+| [emfind](https://mdevaev.github.io/emonoda/emfind) | Служит для выполнения различных поисковых запросов, например - найти в каталоге с данными файлы, не принадлежащими ни одному торренту, зарегистрированному в клиенте |
 
 
 ***
@@ -77,7 +76,7 @@
 ***
 ### Установка
 
-Для работы программы требуется Python версии 3.6 или выше. Для сборки нужен Cython.
+Для работы программы требуется Python версии 3.6 или выше. Для сборки нужен [Cython](https://pypi.org/project/Cython).
 
 
 ***
@@ -132,6 +131,8 @@ trackers:
     * [emload](https://mdevaev.github.io/emonoda/emload) - добавление торрента в клиент
     * [emrm](https://mdevaev.github.io/emonoda/emrm) - удаление торрента из клиента
     * [emfind](https://mdevaev.github.io/emonoda/emfind) - запросы к клиенту для обслуживания коллекции
+    * [emconfetti-demo](https://mdevaev.github.io/emonoda/emconfetti-demo) - тестирование оповещений об обновлениях
+    * [emconfetti-tghi](https://mdevaev.github.io/emonoda/emconfetti-tghi) - хелпер для Telegram-бота
 * [Спецкостыли для разных клиентов](https://mdevaev.github.io/emonoda/hooks)
 * Инфа для разработчиков
     * [rTorrent XMLRPC Reference](rTorrent-XMLRPC-Reference)

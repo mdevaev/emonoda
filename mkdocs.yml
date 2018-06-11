@@ -32,6 +32,8 @@ markdown_extensions:
         permalink: true
     - codehilite:
         guess_lang: false
+    - markdown_include.include:
+        base_path: docs
 
 pages:
     - "Emonoda -- 得物だ": index.md
@@ -47,6 +49,8 @@ pages:
         - "emload": emload.md
         - "emrm": emrm.md
         - "emfind": emfind.md
+        - "emconfetti-demo": emconfetti-demo.md
+        - "emconfetti-tghi": emconfetti-tghi.md
     - "Спецкостыли для клиентов": hooks.md
     - "Инфа для разработчиков":
         - "rTorrent XMLRPC Reference": rTorrent-XMLRPC-Reference.md
