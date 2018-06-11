@@ -251,9 +251,19 @@ def get_configured_trackers(
     return trackers
 
 
-def get_configured_confetti(config: Section, log: Log) -> List[BaseConfetti]:
+def get_configured_confetti(
+    config: Section,
+    only: List[str],
+    exclude: List[str],
+    log: Log,
+) -> List[BaseConfetti]:
+
+    to_init = set(config.confetti).difference(exclude)
+    if len(only) != 0:
+        to_init = to_init.intersection(only)
+
     senders: List[BaseConfetti] = []
-    for name in sorted(config.confetti):
+    for name in sorted(to_init):
         log.info("Enabling the confetti {blue}%s{reset} ...", (name,), one_line=True)
         cls = get_confetti_class(name)
         try:

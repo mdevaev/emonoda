@@ -424,6 +424,8 @@ def main() -> None:
     args_parser.add_argument("-f", "--name-filter", default="", metavar="<wildcard_pattern>")
     args_parser.add_argument("-y", "--only-trackers", default=[], nargs="+", metavar="<tracker>")
     args_parser.add_argument("-x", "--exclude-trackers", default=[], nargs="+", metavar="<tracker>")
+    args_parser.add_argument("--only-confetti", default=[], nargs="+", metavar="<tracker>")
+    args_parser.add_argument("--exclude-confetti", default=[], nargs="+", metavar="<tracker>")
     args_parser.add_argument("--noop", action="store_true")
     args_parser.add_argument("--mute", action="store_true")
     args_parser.add_argument("--fail-on-captcha", action="store_true")
@@ -460,6 +462,8 @@ def main() -> None:
             if not options.mute:
                 confetti = get_configured_confetti(
                     config=config,
+                    only=options.only_confetti,
+                    exclude=options.exclude_confetti,
                     log=log_stderr,
                 )
 

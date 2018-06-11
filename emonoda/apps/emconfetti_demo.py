@@ -18,6 +18,7 @@
 
 
 import sys
+import argparse
 
 from ..plugins.trackers import BaseTracker
 
@@ -44,7 +45,7 @@ class FakeTorrent(Torrent):
         return "foobar"
 
     def get_comment(self) -> str:
-        return "Test, test, test"
+        return "http://example.com"
 
 
 class FakeTracker(BaseTracker):  # pylint: disable=abstract-method
@@ -57,7 +58,16 @@ class FakeTracker(BaseTracker):  # pylint: disable=abstract-method
 # ===== Main =====
 @wrap_main
 def main() -> None:
-    (_, _, config) = init()
+    (parent_parser, argv, config) = init()
+    args_parser = argparse.ArgumentParser(
+        prog="emconfetti-demo",
+        description="Send demo notifications",
+        parents=[parent_parser],
+    )
+    args_parser.add_argument("-y", "--only-confetti", default=[], nargs="+", metavar="<tracker>")
+    args_parser.add_argument("-x", "--exclude-confetti", default=[], nargs="+", metavar="<tracker>")
+    options = args_parser.parse_args(argv[1:])
+
     with get_configured_log(config, False, sys.stderr) as log_stderr:
         results: ResultsType = {
             "affected": {
@@ -87,10 +97,14 @@ def main() -> None:
             "tracker_error":   {},
             "unhandled_error": {},
         }
+
         confetti = get_configured_confetti(
             config=config,
+            only=options.only_confetti,
+            exclude=options.exclude_confetti,
             log=log_stderr,
         )
+
         surprise.deploy_surprise(
             source="emupdate",
             results=results,

@@ -127,7 +127,6 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
                 name=(self.__template_path if self.__template_path else "atom.{ctype}.{source}.mako").format(
                     ctype=("html" if self.__html else "plain"),
                     source=source,
-                    results_set=results_set,
                 ),
                 built_in=(not self.__template_path),
                 source=source,
