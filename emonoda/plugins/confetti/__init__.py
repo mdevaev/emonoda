@@ -46,6 +46,18 @@ from .. import get_classes
 
 
 # =====
+STATUSES = {
+    "invalid":         "Invalid torrent",
+    "not_in_client":   "Torrent not in client",
+    "unknown":         "Unknown tracker type",
+    "passed":          "Passed without changes",
+    "affected":        "Updated",
+    "tracker_error":   "Tracker error",
+    "unhandled_error": "Unhandled error",
+}
+
+
+# =====
 def templated(name: str, built_in: bool=True, **kwargs: Any) -> str:
     if built_in:
         data = pkgutil.get_data(__name__, os.path.join("templates", name))

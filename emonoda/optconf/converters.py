@@ -14,6 +14,14 @@ def as_string_list(values: Union[str, Sequence]) -> List[str]:
     return list(map(str, values))
 
 
+def as_string_list_choices(values: Union[str, Sequence], choices: List[str]) -> List[str]:
+    values = as_string_list(values)
+    invalid = sorted(set(values).difference(choices))
+    if invalid:
+        raise ValueError("Incorrect values: %r" % (invalid))
+    return values
+
+
 def as_key_value(values: Union[str, Dict[str, Any]]) -> Dict[str, str]:
     if isinstance(values, dict):
         return values
