@@ -92,7 +92,7 @@ class Plugin(WithCustoms):
         self.__server.d.erase(torrent_hash)
 
     @check_torrent_accessible
-    def load_torrent(self, torrent: Torrent, prefix: str="") -> None:
+    def load_torrent(self, torrent: Torrent, prefix: str) -> None:
         torrent_hash = torrent.get_hash()
         # XXX: https://github.com/rakshasa/rtorrent/issues/22
         # All load_* calls re asynchronous, so we need to wait until the load of torrent files is complete.
@@ -111,8 +111,7 @@ class Plugin(WithCustoms):
                 retries -= 1
                 time.sleep(self.__retries_sleep)
 
-        if prefix:
-            self.__server.d.set_directory(torrent_hash, prefix)
+        self.__server.d.set_directory(torrent_hash, prefix)
         self.__server.d.start(torrent_hash)
 
     @hash_or_torrent
@@ -127,11 +126,6 @@ class Plugin(WithCustoms):
 
     def get_hashes(self) -> List[str]:
         return list(map(str.lower, self.__server.download_list()))
-
-    @hash_or_torrent
-    @_catch_unknown_torrent
-    def get_torrent_path(self, torrent_hash: str) -> str:
-        return self.__server.d.get_loaded_file(torrent_hash)
 
     @hash_or_torrent
     @_catch_unknown_torrent
@@ -168,23 +162,16 @@ class Plugin(WithCustoms):
 
     @hash_or_torrent
     @_catch_unknown_torrent
-    def is_single_file(self, torrent_hash: str) -> bool:
-        return (not self.__server.d.is_multi_file(torrent_hash))
-
-    @hash_or_torrent
-    @_catch_unknown_torrent
-    def get_files(self, torrent_hash: str, on_fs: bool=False) -> Dict[str, TorrentEntryAttrs]:
+    def get_files(self, torrent_hash: str) -> Dict[str, TorrentEntryAttrs]:
         mc = xmlrpc.client.MultiCall(self.__server)
-        mc.d.get_base_path(torrent_hash)
         mc.d.get_base_filename(torrent_hash)
         mc.d.is_multi_file(torrent_hash)
         mc.d.get_size_files(torrent_hash)
         mc.f.get_size_bytes(torrent_hash, 0)
-        (base_path, base_file_name, is_multi_file, count, first_file_size) = tuple(mc())
-        base = (base_path if on_fs else base_file_name)
+        (base_file_name, is_multi_file, count, first_file_size) = tuple(mc())
 
         if not is_multi_file:
-            return {base: TorrentEntryAttrs.new_file(first_file_size)}
+            return {base_file_name: TorrentEntryAttrs.new_file(first_file_size)}
 
         mc = xmlrpc.client.MultiCall(self.__server)
         for index in range(count):
@@ -193,8 +180,8 @@ class Plugin(WithCustoms):
         flist = list(mc())
         flist = list(zip(flist[::2], flist[1::2]))
 
-        files = build_files(base, flist)
-        files.update({base: TorrentEntryAttrs.new_dir()})
+        files = build_files(base_file_name, flist)
+        files.update({base_file_name: TorrentEntryAttrs.new_dir()})
         return files
 
     # ===

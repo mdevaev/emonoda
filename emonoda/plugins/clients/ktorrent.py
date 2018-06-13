@@ -69,9 +69,8 @@ class Plugin(BaseClient):
         self.__core.remove(torrent_hash, False)
 
     @check_torrent_accessible
-    def load_torrent(self, torrent: Torrent, prefix: str="") -> None:
-        if prefix:
-            self.__settings.setLastSaveDir(prefix)
+    def load_torrent(self, torrent: Torrent, prefix: str) -> None:
+        self.__settings.setLastSaveDir(prefix)
         self.__core.loadSilently(torrent.get_path(), "")
 
     @hash_or_torrent
@@ -84,10 +83,6 @@ class Plugin(BaseClient):
 
     def get_hashes(self) -> List[str]:
         return list(map(str.lower, self.__core.torrents()))
-
-    @hash_or_torrent
-    def get_torrent_path(self, torrent_hash: str) -> str:
-        raise RuntimeError("KTorrent can not return a path of the torrent file")
 
     @hash_or_torrent
     def get_data_prefix(self, torrent_hash: str) -> str:
@@ -107,16 +102,10 @@ class Plugin(BaseClient):
         return str(self.__get_torrent_obj(torrent_hash).name())
 
     @hash_or_torrent
-    def is_single_file(self, torrent_hash: str) -> bool:
-        return (self.__get_torrent_obj(torrent_hash).numFiles() == 0)
-
-    @hash_or_torrent
-    def get_files(self, torrent_hash: str, on_fs: bool=False) -> Dict[str, TorrentEntryAttrs]:
+    def get_files(self, torrent_hash: str) -> Dict[str, TorrentEntryAttrs]:
         torrent_obj = self.__get_torrent_obj(torrent_hash)
-        prefix = (str(torrent_obj.pathOnDisk()) if on_fs else "")
         count = torrent_obj.numFiles()
         name = str(torrent_obj.name())
-
         if count == 0:  # Single file
             flist = [(name, int(torrent_obj.totalSize()))]
         else:
@@ -127,7 +116,7 @@ class Plugin(BaseClient):
                 )
                 for index in range(count)
             ]
-        return build_files(prefix, flist)
+        return build_files("", flist)
 
     # ===
 

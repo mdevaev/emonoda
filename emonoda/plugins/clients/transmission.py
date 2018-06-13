@@ -23,7 +23,6 @@ import base64
 from typing import List
 from typing import Dict
 from typing import Optional
-from typing import Union
 from typing import Any
 
 from ...optconf import Option
@@ -90,11 +89,12 @@ class Plugin(BaseClient):
         self.__client.remove_torrent(torrent_hash)
 
     @check_torrent_accessible
-    def load_torrent(self, torrent: Torrent, prefix: str="") -> None:
-        kwargs: Dict[str, Union[bool, str]] = {"paused": False}
-        if prefix:
-            kwargs["download_dir"] = prefix
-        self.__client.add_torrent(base64.b64encode(torrent.get_data()).decode("utf-8"), **kwargs)
+    def load_torrent(self, torrent: Torrent, prefix: str) -> None:
+        self.__client.add_torrent(
+            base64.b64encode(torrent.get_data()).decode("utf-8"),
+            download_dir=prefix,
+            paused=False,
+        )
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
@@ -109,10 +109,6 @@ class Plugin(BaseClient):
             str(item.hashString.lower())
             for item in self.__client.get_torrents(arguments=("id", "hashString"))
         ]
-
-    @hash_or_torrent
-    def get_torrent_path(self, torrent_hash: str) -> str:
-        return self.__get_torrent_prop(torrent_hash, "torrentFile")
 
     @hash_or_torrent
     def get_data_prefix(self, torrent_hash: str) -> str:
@@ -135,20 +131,12 @@ class Plugin(BaseClient):
         return self.__get_torrent_prop(torrent_hash, "name")
 
     @hash_or_torrent
-    def is_single_file(self, torrent_hash: str) -> bool:
-        files = self.__get_files(torrent_hash)
-        if len(files) > 1:
-            return False
-        return (os.path.sep not in list(files.values())[0]["name"])
-
-    @hash_or_torrent
-    def get_files(self, torrent_hash: str, on_fs: bool=False) -> Dict[str, TorrentEntryAttrs]:
-        prefix = (self.get_data_prefix(torrent_hash) if on_fs else "")
+    def get_files(self, torrent_hash: str) -> Dict[str, TorrentEntryAttrs]:
         flist = [
             (item["name"], item["size"])
             for item in self.__get_files(torrent_hash).values()
         ]
-        return build_files(prefix, flist)
+        return build_files("", flist)
 
     # ===
 

@@ -80,7 +80,7 @@ class BaseClient(BasePlugin):
         raise NotImplementedError
 
     @check_torrent_accessible
-    def load_torrent(self, torrent: Torrent, prefix: str="") -> None:
+    def load_torrent(self, torrent: Torrent, prefix: str) -> None:
         raise NotImplementedError
 
     def get_hashes(self) -> List[str]:
@@ -88,10 +88,6 @@ class BaseClient(BasePlugin):
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
-        raise NotImplementedError
-
-    @hash_or_torrent
-    def get_torrent_path(self, torrent_hash: str) -> str:
         raise NotImplementedError
 
     @hash_or_torrent
@@ -112,11 +108,7 @@ class BaseClient(BasePlugin):
         raise NotImplementedError
 
     @hash_or_torrent
-    def is_single_file(self, torrent_hash: str) -> bool:
-        raise NotImplementedError
-
-    @hash_or_torrent
-    def get_files(self, torrent_hash: str, on_fs: bool=False) -> Dict[str, TorrentEntryAttrs]:
+    def get_files(self, torrent_hash: str) -> Dict[str, TorrentEntryAttrs]:
         raise NotImplementedError
 
 
