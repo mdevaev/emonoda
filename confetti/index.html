@@ -664,7 +664,7 @@
                 
                   <h1>Настройка оповещений об обновлениях</h1>
                 
-                <p>При обновлении торрентов <strong>emupdate</strong> умеет посылать оповещения. Для включения этой возможности вам нужно <a href="../config">настроить</a> соответствующие плагины в секции <code>confetti</code>. Ниже приведен пример для уведомлений по почте (через <a href="https://yandex.ru/support/mail/mail-clients.xml">внешний почтовый сервер</a>), а также через <a href="https://pushover.net/">Pushover</a>:</p>
+                <p>При обновлении торрентов <a href="../emupdate">emupdate</a> умеет посылать оповещения. Для включения этой возможности вам нужно <a href="../config">настроить</a> соответствующие плагины в секции <code>confetti</code>. Ниже приведен пример для уведомлений по почте (через <a href="https://yandex.ru/support/mail/mail-clients.xml">внешний почтовый сервер</a>), а также через <a href="https://pushover.net/">Pushover</a>:</p>
 <div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">confetti</span><span class="p p-Indicator">:</span>
     <span class="l l-Scalar l-Scalar-Plain">email</span><span class="p p-Indicator">:</span>
         <span class="l l-Scalar l-Scalar-Plain">to</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">yarr@example.com</span>
@@ -680,33 +680,8 @@
 </pre></div>
 
 
-<hr />
-<h3 id="_1">Виды оповещений<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>Большинство плагинов имеют возможность кастомизации шаблонов форматирования оповещений. Используя синтаксис <a href="http://docs.makotemplates.org/en/latest/syntax.html">Mako</a>, вы можете настроить шаблон по своему вкусу, взяв за основу <a href="https://github.com/mdevaev/emonoda/tree/master/emonoda/plugins/confetti/templates">любой из стандартных</a>.</p>
-<p>Создав свой шаблон, сохраните его где-нибудь в файле и пропишите в конфиге. Например вот так: <code>confetti/email/template=/root/emonoda-email.mako</code>.</p>
-</div>
-<h4 id="_2">Почта<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
-<p>Включается плагином <code>email</code>. По умолчанию плагин настроен на отправку почты через локальный SMTP-релей без SSL на <code>root@localhost</code>. Другие параметры со значениями по умолчанию перечислены ниже:</p>
-<ul>
-<li>
-<p><strong><code>confetti/email/subject='{source} report: you have {affected} new torrents ^_^'</code></strong></p>
-<ul>
-<li>Тема письма. В фигурных скобках указываются подставляемые параметры: <code>source</code> обозначает источник данных (сейчас это всегда <code>emupdate</code>), а <code>affected</code> показывает количество обновленных торрентов.</li>
-</ul>
-</li>
-<li>
-<p><strong><code>confetti/email/template=""</code></strong></p>
-<ul>
-<li>Путь к Mako-шаблону для форматирования письма. Если не указан, используется встроенный.</li>
-</ul>
-</li>
-<li>
-<p><strong><code>confetti/email/statuses=[invalid, not_in_client, tracker_error, unhandled_error, affected]</code></strong></p>
-<ul>
-<li>
-<p>Типы сообщений о результатах обновления, которые необходимо отправить (в порядке отправки кроме <code>affected</code>, который всегда идет первым). Доступны следующие варианты:</p>
+<p>Плагины отправляют оповещения в разных ситуациях и при различных событиях, происходящих с торрентами. Самый простой вариант - торрент обновился, добавилась новая серия вашего сериала, и <a href="../emupdate">emupdate</a> поставил ее на закачку. Это событие называется <code>affected</code>, и кроме него существуют еще несколько типов, относящихся, в основном, к обработке ошибок при обновлении торрентов.</p>
+<p>Полный список приведен в таблице ниже:</p>
 <table>
 <thead>
 <tr>
@@ -717,7 +692,7 @@
 <tbody>
 <tr>
 <td><code>invalid</code></td>
-<td>Торренты с некорректным форматом данных (битые файлы)</td>
+<td>Торрент с некорректным форматом данных (битые файлы)</td>
 </tr>
 <tr>
 <td><code>not_in_client</code></td>
@@ -737,11 +712,56 @@
 </tr>
 <tr>
 <td><code>unhandled_error</code></td>
-<td>Непредвиденная ошибка при обработке торрента. Рекомендуется почитать результат работы <a href="../emupdate">emupdate</a>, чтобы узнать, какое произошло исключение</td>
+<td>Непредвиденная ошибка при обработке торрента. Рекомендуется просмотреть результат работы <a href="../emupdate">emupdate</a>, чтобы узнать, какое произошло исключение</td>
 </tr>
 </tbody>
 </table>
+<p>То, какие оповещения должны отправляться соответствующим плагином, настраивается параметром <code>confetti/&lt;plugin&gt;/statuses</code> (при его наличии). Например, если значение этого параметра равно <code>[affected, tracker_error]</code>, то оповещения будут отправляться при изменениях торрента и при ошибках его обновления (скажем, если вдруг раздача была удалена с трекера).</p>
+<p>Следует отметить, что <a href="../emupdate">emupdate</a> не хранит истории сообщений, и поэтому, если при указанной выше настройке у вас появится раздача, вызывающая ошибку при обработке, вы будете получать оповещения <strong>каждый раз</strong> при запуске <a href="../emupdate">emupdate</a>, пока не удалите или не замените ее.</p>
+<div class="admonition advice">
+<p class="admonition-title">Advice</p>
+<p>Такое поведение может быть неприемлимым, если вы поставили <a href="../emupdate">emupdate</a> на исполниение в кроне каждый час. Вряд ли вам захочется получать спам-сообщения в Telegram о том, что какая-то раздача удалилась каждый час, пока вы не разберетесь с этой проблемой. Однако информация о том, что с раздачей что-то не так, может быть полезной, и в таком случае можно сделать следующее:</p>
+<ul>
+<li>
+<p>Настроить несколько видов оповещений. Например, в для Telegram вы можете сделать настройку <code>confetti/telegram/statuses=[affected]</code>, а для электропочты - <code>confetti/email/statuses=[invalid, not_in_client, tracker_error, unhandled_error, affected]</code>. Тогда Telegram будут падать только оповещения об обновлениях, а в почту - все возникающие события. Зафильтровав почту, вы можете отправить эти письма в отдельную папку и просмотреть потом в удобное время.</p>
 </li>
+<li>
+<p>Перенаправить результат работы <a href="../emupdate">emupdate</a> в лог.</p>
+</li>
+</ul>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>По умолчанию все плагины, кроме <code>atom</code>, настроены на оповещение при любых событиях, кроме <code>unknown</code>. Плагин <code>atom</code> настроек статусов не имеет и обновляет ленту только при наличии событий типа <code>affected</code>.</p>
+</div>
+<p>Большинство плагинов имеют возможность кастомизации шаблонов форматирования оповещений. Используя синтаксис <a href="http://docs.makotemplates.org/en/latest/syntax.html">Mako</a>, вы можете настроить шаблон по своему вкусу, взяв за основу <a href="https://github.com/mdevaev/emonoda/tree/master/emonoda/plugins/confetti/templates">любой из стандартных</a>. Создав свой шаблон, сохраните его где-нибудь в файле и пропишите в конфиге. Например так:</p>
+<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">confetti</span><span class="p p-Indicator">:</span>
+    <span class="l l-Scalar l-Scalar-Plain">email</span><span class="p p-Indicator">:</span>
+        <span class="l l-Scalar l-Scalar-Plain">template=/root/emonoda-email.mako</span>
+</pre></div>
+
+
+<hr />
+<h3 id="_1">Виды оповещений<a class="headerlink" href="#_1" title="Permanent link">&para;</a></h3>
+<h4 id="_2">Почта<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h4>
+<p>Включается плагином <code>email</code>. По умолчанию плагин настроен на отправку почты через локальный SMTP-релей без SSL на <code>root@localhost</code>. Другие параметры со значениями по умолчанию перечислены ниже:</p>
+<ul>
+<li>
+<p><strong><code>confetti/email/subject='{source} report: you have {affected} new torrents ^_^'</code></strong></p>
+<ul>
+<li>Тема письма. В фигурных скобках указываются подставляемые параметры: <code>source</code> обозначает источник данных (сейчас это всегда <code>emupdate</code>), а <code>affected</code> показывает количество обновленных торрентов.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>confetti/email/template=""</code></strong></p>
+<ul>
+<li>Путь к Mako-шаблону для форматирования письма. Если не указан, используется встроенный.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>confetti/email/statuses=[invalid, not_in_client, tracker_error, unhandled_error, affected]</code></strong></p>
+<ul>
+<li>Типы сообщений о результатах обновления, которые необходимо отправить (в порядке отправки, кроме <code>affected</code>, который всегда идет первым).</li>
 </ul>
 </li>
 <li>
@@ -888,43 +908,7 @@
 <li>
 <p><strong><code>confetti/telegram/statuses=[invalid, not_in_client, tracker_error, unhandled_error, affected]</code></strong></p>
 <ul>
-<li>
-<p>Типы сообщений о результатах обновления, которые необходимо отправить (в порядке отправки). Доступны следующие варианты:</p>
-<table>
-<thead>
-<tr>
-<th>Статус</th>
-<th>Описание</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>invalid</code></td>
-<td>Торренты с некорректным форматом данных (битые файлы)</td>
-</tr>
-<tr>
-<td><code>not_in_client</code></td>
-<td>Торрент не отслеживается клиентом</td>
-</tr>
-<tr>
-<td><code>unknown</code></td>
-<td>Неизвестный трекер, который не поддерживается <strong>Emonoda</strong></td>
-</tr>
-<tr>
-<td><code>affected</code></td>
-<td>Торрент обновился</td>
-</tr>
-<tr>
-<td><code>tracker_error</code></td>
-<td>Ошибка обновления торрента из-за некорректного ответа трекера. Вероятно, раздача могла быть удалена и ее стоит заменить на другую</td>
-</tr>
-<tr>
-<td><code>unhandled_error</code></td>
-<td>Непредвиденная ошибка при обработке торрента. Рекомендуется почитать результат работы <a href="../emupdate">emupdate</a>, чтобы узнать, какое произошло исключение</td>
-</tr>
-</tbody>
-</table>
-</li>
+<li>Типы сообщений о результатах обновления, которые необходимо отправить (в порядке отправки).</li>
 </ul>
 </li>
 <li>
@@ -995,43 +979,7 @@
 <li>
 <p><strong><code>confetti/pushover/statuses=[invalid, not_in_client, tracker_error, unhandled_error, affected]</code></strong></p>
 <ul>
-<li>
-<p>Типы сообщений о результатах обновления, которые необходимо отправить (в порядке отправки). Доступны следующие варианты:</p>
-<table>
-<thead>
-<tr>
-<th>Статус</th>
-<th>Описание</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>invalid</code></td>
-<td>Торренты с некорректным форматом данных (битые файлы)</td>
-</tr>
-<tr>
-<td><code>not_in_client</code></td>
-<td>Торрент не отслеживается клиентом</td>
-</tr>
-<tr>
-<td><code>unknown</code></td>
-<td>Неизвестный трекер, который не поддерживается <strong>Emonoda</strong></td>
-</tr>
-<tr>
-<td><code>affected</code></td>
-<td>Торрент обновился</td>
-</tr>
-<tr>
-<td><code>tracker_error</code></td>
-<td>Ошибка обновления торрента из-за некорректного ответа трекера. Вероятно, раздача могла быть удалена и ее стоит заменить на другую</td>
-</tr>
-<tr>
-<td><code>unhandled_error</code></td>
-<td>Непредвиденная ошибка при обработке торрента. Рекомендуется почитать результат работы <a href="../emupdate">emupdate</a>, чтобы узнать, какое произошло исключение</td>
-</tr>
-</tbody>
-</table>
-</li>
+<li>Типы сообщений о результатах обновления, которые необходимо отправить (в порядке отправки).</li>
 </ul>
 </li>
 <li>
@@ -1068,7 +1016,8 @@
 <hr />
 <h4 id="atom">Лента Atom для использования на сервере<a class="headerlink" href="#atom" title="Permanent link">&para;</a></h4>
 <p>Для полноценного использования этой опции необходимо, чтобы на компьютере, с которого запускается <strong>Emonoda</strong> был запущен любой веб-сервер. Подойдёт, например, встроенный в Python простейший сервер:</p>
-<div class="codehilite"><pre><span></span>python -m http.server
+<div class="codehilite"><pre><span></span>$ python -m http.server
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 </pre></div>
 
 
