@@ -42,6 +42,7 @@
 * [RTorrent](http://rakshasa.github.io/rtorrent/)
 * [KTorrent](http://ktorrent.pwsp.net/)
 * [Transmission](http://www.transmissionbt.com/)
+* [qBittorrent](https://www.qbittorrent.org/)
 
 
 #### [Способы оповещения](https://mdevaev.github.io/emonoda/confetti)
