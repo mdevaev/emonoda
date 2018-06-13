@@ -23,15 +23,25 @@ import urllib.parse
 import urllib.error
 import http.client
 import http.cookiejar
+import io
 import time
 
+from typing import Tuple
 from typing import List
 from typing import Dict
-from typing import Type
+from typing import NamedTuple
 from typing import Optional
+from typing import Type
 
 from . import gziphandler
 from . import sockshandler
+
+
+# =====
+class MultipartFile(NamedTuple):
+    name: str
+    mimetype: str
+    data: bytes
 
 
 # =====
@@ -94,3 +104,42 @@ def read_url(
 
         time.sleep(retries_sleep)
         retries -= 1
+
+
+def encode_multipart(
+    fields: Dict[str, str],
+    files: Dict[str, MultipartFile],
+    encoding: str="utf-8",
+    boundary: str="-------------------------acebdf13572468",
+) -> Tuple[bytes, Dict[str, str]]:
+
+    data_io = io.BytesIO()
+
+    def write_line(line: str="") -> None:
+        data_io.write(line.encode(encoding) + b"\r\n")
+
+    def escape_quote(line: str) -> str:
+        return line.replace("\"", "\\\"")
+
+    for (key, value) in fields.items():
+        write_line("--{0}".format(boundary))
+        write_line("Content-Disposition: form-data; name=\"{0}\"".format(escape_quote(key)))
+        write_line()
+        write_line(value)
+
+    for (key, mf) in files.items():
+        write_line("--{0}".format(boundary))
+        write_line("Content-Disposition: form-data; name=\"{0}\"; filename=\"{1}\"".format(
+                   escape_quote(key), escape_quote(mf.name)))
+        write_line("Content-Type: {0}".format(mf.mimetype))
+        write_line()
+        data_io.write(mf.data + b"\r\n")
+
+    write_line("--{0}--".format(boundary))
+
+    body = data_io.getvalue()
+    headers = {
+        "Content-Type": "multipart/form-data; boundary={0}".format(boundary),
+        "Content-Length": str(len(body)),
+    }
+    return (body, headers)
