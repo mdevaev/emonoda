@@ -54,8 +54,8 @@
                     % endif
                 </td>
             </tr>
-        </table>
         % endfor
+        </table>
     % endif
 % endfor
 <br>
