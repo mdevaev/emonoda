@@ -60,7 +60,6 @@ if __name__ == "__main__":
             "console_scripts": [
                 "emdiff = emonoda.apps.emdiff:main",
                 "emupdate = emonoda.apps.emupdate:main",
-                "emstat = emonoda.apps.emstat:main",
                 "emfile = emonoda.apps.emfile:main",
                 "emload = emonoda.apps.emload:main",
                 "emfind = emonoda.apps.emfind:main",
