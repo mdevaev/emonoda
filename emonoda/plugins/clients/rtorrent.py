@@ -57,7 +57,7 @@ def _catch_unknown_torrent(method: Callable) -> Callable:
 class Plugin(WithCustoms):
     # API description: http://code.google.com/p/gi-torrent/wiki/rTorrent_XMLRPC_reference
 
-    PLUGIN_NAME = "rtorrent"
+    PLUGIN_NAMES = ["rtorrent"]
 
     def __init__(  # pylint:disable=super-init-not-called
         self,

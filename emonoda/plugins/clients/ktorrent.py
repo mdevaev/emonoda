@@ -42,7 +42,7 @@ except ImportError:
 
 # =====
 class Plugin(BaseClient):
-    PLUGIN_NAME = "ktorrent"
+    PLUGIN_NAMES = ["ktorrent"]
 
     def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)

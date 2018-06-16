@@ -147,7 +147,7 @@ def print_stats_table(stats: List[StatRecord], min_seeders: int, log: Log) -> No
         table=[
             [
                 Cell(record.name),
-                Cell(record.tracker.PLUGIN_NAME if record.tracker else ""),
+                Cell(record.tracker.PLUGIN_NAMES[0] if record.tracker else ""),
                 Cell(
                     data=str(record.stat.seeders),
                     colors=("{green}" if record.stat.seeders >= min_seeders else "{red}"),
@@ -180,7 +180,7 @@ def export_stats(stats: List[StatRecord], path: str) -> None:
                     "path": record.torrent.get_path(),
                     "comment": record.torrent.get_comment(),
                 } if record.torrent else None),
-                "tracker": (record.tracker.PLUGIN_NAME if record.tracker else ""),
+                "tracker": (record.tracker.PLUGIN_NAMES[0] if record.tracker else ""),
                 "stat": record.stat._asdict(),
                 "err_name": record.err_name,
                 "err_msg": record.err_msg,

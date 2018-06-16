@@ -33,7 +33,7 @@ from ..optconf import Option
 
 # =====
 class BasePlugin:
-    PLUGIN_NAME = ""
+    PLUGIN_NAMES: List[str] = []
 
     def __init__(self, **_: Any) -> None:
         pass
@@ -47,7 +47,7 @@ class BasePlugin:
         return cls.__get_bases(cls.__mro__)
 
     def _init_bases(self, **kwargs: Any) -> None:
-        assert self.PLUGIN_NAME
+        assert self.PLUGIN_NAMES
         for parent in self.__get_bases(self.__class__.__mro__):
             parent.__init__(self, **kwargs)  # type: ignore
 
@@ -77,5 +77,6 @@ def get_classes(sub: str) -> Dict[str, Type[BasePlugin]]:
             module_name = file_name[:-3]
             module = importlib.import_module("emonoda.plugins.{}.{}".format(sub, module_name))
             plugin_class = getattr(module, "Plugin")
-            classes[plugin_class.PLUGIN_NAME] = plugin_class
+            for plugin_name in plugin_class.PLUGIN_NAMES:
+                classes[plugin_name] = plugin_class
     return classes

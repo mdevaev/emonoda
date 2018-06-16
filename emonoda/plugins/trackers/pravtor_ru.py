@@ -33,7 +33,7 @@ from . import WithCheckHash
 
 # =====
 class Plugin(WithLogin, WithCheckHash):
-    PLUGIN_NAME = "pravtor.ru"
+    PLUGIN_NAMES = ["pravtor.ru"]
 
     _SITE_VERSION = 0
     _SITE_ENCODING = "cp1251"

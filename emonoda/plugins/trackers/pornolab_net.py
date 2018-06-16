@@ -38,7 +38,7 @@ from . import WithStat
 
 # =====
 class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId, WithStat):
-    PLUGIN_NAME = "pornolab.net"
+    PLUGIN_NAMES = ["pornolab.net"]
 
     _SITE_VERSION = 3
     _SITE_ENCODING = "cp1251"

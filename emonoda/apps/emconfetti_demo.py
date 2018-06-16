@@ -49,7 +49,7 @@ class FakeTorrent(Torrent):
 
 
 class FakeTracker(BaseTracker):  # pylint: disable=abstract-method
-    PLUGIN_NAME = "example.org"
+    PLUGIN_NAMES = ["example.org"]
 
     def __init__(self) -> None:  # pylint: disable=super-init-not-called
         pass

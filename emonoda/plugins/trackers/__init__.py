@@ -233,7 +233,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def __get_upstream_info(self, opener: urllib.request.OpenerDirector) -> Dict:
         try:
             return json.loads(self.__read_url_nofe(
-                url="https://raw.githubusercontent.com/mdevaev/emonoda/master/trackers/{}.json".format(self.PLUGIN_NAME),
+                url="https://raw.githubusercontent.com/mdevaev/emonoda/master/trackers/{}.json".format(self.PLUGIN_NAMES[0]),
                 opener=opener,
             ).decode("utf-8"))
         except urllib.error.HTTPError as err:

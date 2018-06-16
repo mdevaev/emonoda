@@ -36,7 +36,7 @@ from . import WithStat
 
 # =====
 class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
-    PLUGIN_NAME = "booktracker.org"
+    PLUGIN_NAMES = ["booktracker.org"]
 
     _SITE_VERSION = 2
 

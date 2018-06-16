@@ -32,7 +32,11 @@ from . import WithStat
 
 # =====
 class Plugin(WithLogin, WithCheckHash, WithFetchByDownloadId, WithStat):
-    PLUGIN_NAME = "tfile-home.org"
+    PLUGIN_NAMES = [
+        "tfile-home.org",
+        "tfile.cc",
+        "tfile.co",
+    ]
 
     _SITE_VERSION = 6
     _SITE_ENCODING = "cp1251"

@@ -31,7 +31,10 @@ from . import WithStat
 
 # =====
 class Plugin(WithCheckHash, WithFetchByTorrentId, WithStat):
-    PLUGIN_NAME = "rutor.info"
+    PLUGIN_NAMES = [
+        "rutor.info",
+        "rutor.org",
+    ]
 
     _SITE_VERSION = 5
     _SITE_ENCODING = "utf-8"

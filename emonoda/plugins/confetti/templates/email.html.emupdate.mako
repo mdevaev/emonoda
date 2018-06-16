@@ -10,7 +10,7 @@
         <tr>
             <td width="20" align="center" valign="top">&bull;</td>
             <td align="left" valign="top">
-                <b>${esc(file_name)}</b> (from <a href="${result.torrent.get_comment()}">${result.tracker.PLUGIN_NAME}</a>)
+                <b>${esc(file_name)}</b> (from <a href="${result.torrent.get_comment()}">${result.tracker.PLUGIN_NAMES[0]}</a>)
                 <table cellspacing="0" cellpadding="0">
                 % for (sign, color, field) in [ \
                     ("+", "green",  "added"), \

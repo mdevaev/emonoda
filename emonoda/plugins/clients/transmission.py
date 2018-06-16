@@ -49,7 +49,7 @@ class Plugin(BaseClient):
     #   http://pythonhosted.org/transmissionrpc/
     #   https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
 
-    PLUGIN_NAME = "transmission"
+    PLUGIN_NAMES = ["transmission"]
 
     def __init__(  # pylint: disable=super-init-not-called
         self,

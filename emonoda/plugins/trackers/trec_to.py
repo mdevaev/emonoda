@@ -37,7 +37,10 @@ from . import WithStat
 
 # =====
 class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByDownloadId, WithStat):
-    PLUGIN_NAME = "trec.to"
+    PLUGIN_NAMES = [
+        "trec.to",
+        "torrent.rus.ec",
+    ]
 
     _SITE_VERSION = 1
     _SITE_ENCODING = "utf-8"

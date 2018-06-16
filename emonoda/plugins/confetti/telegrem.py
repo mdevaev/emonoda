@@ -38,7 +38,7 @@ from . import templated
 
 # =====
 class Plugin(WithWeb, WithStatuses):
-    PLUGIN_NAME = "telegram"
+    PLUGIN_NAMES = ["telegram"]
 
     _SITE_RETRY_CODES = [429, 500, 502, 503]
 

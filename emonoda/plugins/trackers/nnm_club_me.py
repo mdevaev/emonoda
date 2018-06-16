@@ -32,7 +32,13 @@ from . import WithStat
 
 # =====
 class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId, WithStat):
-    PLUGIN_NAME = _NNM_DOMAIN = "nnm-club.me"
+    PLUGIN_NAMES = [
+        "nnm-club.me",
+        "nnm-club.name",
+        "nnmclub.to",
+    ]
+
+    _NNM_DOMAIN = PLUGIN_NAMES[0]
 
     _SITE_VERSION = 4
     _SITE_ENCODING = "cp1251"

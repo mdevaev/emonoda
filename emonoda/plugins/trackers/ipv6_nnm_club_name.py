@@ -24,7 +24,13 @@ from . import nnm_club_me
 
 # =====
 class Plugin(nnm_club_me.Plugin):
-    PLUGIN_NAME = _NNM_DOMAIN = "ipv6.nnm-club.name"
+    PLUGIN_NAMES = [
+        "ipv6.nnm-club.name",
+        "ipv6.nnm-club.me",
+        "ipv6.nnmclub.to",
+    ]
+
+    _NNM_DOMAIN = PLUGIN_NAMES[0]
 
     _SITE_VERSION = 1
     _SITE_FINGERPRINT_URL = "http://{}".format(_NNM_DOMAIN)

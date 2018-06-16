@@ -1,8 +1,8 @@
 {
     "fingerprint": {
         "encoding": "utf-8",
-        "text": "var cookieDomain  = \"torrent.rus.ec\";",
-        "url": "http://torrent.rus.ec"
+        "text": "var cookieDomain  = \"trec.to\";",
+        "url": "http://trec.to"
     },
-    "version": 0
+    "version": 1
 }

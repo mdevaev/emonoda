@@ -36,7 +36,7 @@ from . import templated
 
 # =====
 class Plugin(WithWeb, WithStatuses):
-    PLUGIN_NAME = "pushover"
+    PLUGIN_NAMES = ["pushover"]
 
     def __init__(  # pylint: disable=super-init-not-called
         self,

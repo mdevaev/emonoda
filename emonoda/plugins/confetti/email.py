@@ -42,7 +42,7 @@ from . import templated
 
 # =====
 class Plugin(WithStatuses):  # pylint: disable=too-many-instance-attributes
-    PLUGIN_NAME = "email"
+    PLUGIN_NAMES = ["email"]
 
     def __init__(  # pylint: disable=super-init-not-called,too-many-arguments,too-many-locals
         self,

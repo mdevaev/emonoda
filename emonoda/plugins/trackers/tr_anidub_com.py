@@ -39,7 +39,7 @@ from . import WithCheckTime
 
 # =====
 class Plugin(WithLogin, WithCheckTime):
-    PLUGIN_NAME = "tr.anidub.com"
+    PLUGIN_NAMES = ["tr.anidub.com"]
 
     _SITE_VERSION = 2
 

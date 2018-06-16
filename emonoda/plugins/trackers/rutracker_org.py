@@ -36,7 +36,10 @@ from . import WithStat
 
 # =====
 class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
-    PLUGIN_NAME = "rutracker.org"
+    PLUGIN_NAMES = [
+        "rutracker.org",
+        "torrents.ru",
+    ]
 
     _SITE_VERSION = 5
     _SITE_ENCODING = "cp1251"

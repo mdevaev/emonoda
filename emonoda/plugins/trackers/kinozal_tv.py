@@ -36,7 +36,7 @@ from . import WithStat
 
 # =====
 class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId, WithStat):
-    PLUGIN_NAME = "kinozal.tv"
+    PLUGIN_NAMES = ["kinozal.tv"]
 
     _SITE_VERSION = 0
     _SITE_ENCODING = "cp1251"
