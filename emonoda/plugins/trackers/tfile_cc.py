@@ -33,27 +33,29 @@ from . import WithStat
 # =====
 class Plugin(WithLogin, WithCheckHash, WithFetchByDownloadId, WithStat):
     PLUGIN_NAMES = [
-        "tfile-home.org",
         "tfile.cc",
+        "www1.tfiles.cc",
+        "tfile-home.org",
         "tfile.co",
     ]
 
-    _SITE_VERSION = 6
+    _SITE_VERSION = 7
     _SITE_ENCODING = "cp1251"
 
-    _SITE_FINGERPRINT_URL = "http://tfile-home.org"
-    _SITE_FINGERPRINT_TEXT = "href=\"http://tfile-home.org/opensearch.xml\""
+    _SITE_FINGERPRINT_URL = "http://www1.tfiles.cc"
+    _SITE_FINGERPRINT_TEXT = "href=\"http://www1.tfiles.cc/opensearch.xml\""
 
-    _COMMENT_REGEXP = re.compile(r"http://((tfile\.(me|ru|co|cc))|tfile-home\.org)/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"http://((tfile\.(me|ru|co|cc))|tfile-home\.org|www1\.tfiles\.cc)"
+                                 r"/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
-    _TORRENT_HASH_URL = "http://tfile-home.org/forum/viewtopic.php?p={torrent_id}"
+    _TORRENT_HASH_URL = "http://www1.tfiles.cc/forum/viewtopic.php?p={torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<td style=\"color:darkgreen\">Info hash:</td>"
                                       r"<td><strong>(?P<torrent_hash>[a-fA-F0-9]{40})</strong></td>")
 
-    _DOWNLOAD_ID_URL = "http://tfile-home.org/forum/viewtopic.php?p={torrent_id}"
+    _DOWNLOAD_ID_URL = "http://www1.tfiles.cc/forum/viewtopic.php?p={torrent_id}"
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download.php\?id=(?P<download_id>\d+)\""
                                      r" style=\"background:url\(/blueGene/images/topic\.jpg\)")
-    _DOWNLOAD_URL = "http://tfile-home.org/forum/download.php?id={download_id}"
+    _DOWNLOAD_URL = "http://www1.tfiles.cc/forum/download.php?id={download_id}"
 
     _STAT_URL = _TORRENT_HASH_URL
     _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\" id=\"seedStats\"><b>(?P<seeders>\d+)</b>")
@@ -71,7 +73,7 @@ class Plugin(WithLogin, WithCheckHash, WithFetchByDownloadId, WithStat):
 
     def login(self) -> None:
         self._login_using_post(
-            url="http://tfile-home.org/login/",
+            url="http://www1.tfiles.cc/login/",
             post={
                 "username":  self._encode(self._user),
                 "password":  self._encode(self._passwd),

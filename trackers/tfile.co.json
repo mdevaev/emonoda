@@ -1,8 +1,8 @@
 {
     "fingerprint": {
         "encoding": "cp1251",
-        "text": "href=\"http://tfile-home.org/opensearch.xml\"",
-        "url": "http://tfile-home.org"
+        "text": "href=\"http://www1.tfiles.cc/opensearch.xml\"",
+        "url": "http://www1.tfiles.cc"
     },
-    "version": 6
+    "version": 7
 }
