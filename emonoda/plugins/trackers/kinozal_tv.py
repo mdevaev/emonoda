@@ -54,6 +54,7 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId, WithStat):
     _DOWNLOAD_PAYLOAD = b""
 
     _STAT_URL = "http://kinozal.tv/details.php?id={torrent_id}"
+    _STAT_OK_REGEXP = re.compile(r"<img src=\"/pic/dwn_torrent\.gif\"")
     _STAT_SEEDERS_REGEXP = re.compile(r"href=\"#\">Раздают<span class=\"floatright\">(?P<seeders>\d+)</span>")
     _STAT_LEECHERS_REGEXP = re.compile(r"href=\"#\">Раздают<span class=\"floatright\">(?P<leechers>\d+)</span>")
 

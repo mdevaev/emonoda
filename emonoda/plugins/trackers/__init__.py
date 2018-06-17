@@ -455,17 +455,24 @@ class TrackerStat(NamedTuple):
 
 class WithStat(BaseTracker):  # pylint: disable=abstract-method
     _STAT_URL = __D_STAT_URL = "{torrent_id}"
+    _STAT_OK_REGEXP = __D_STAT_OK_REGEXP = re.compile(r".*")
     _STAT_SEEDERS_REGEXP = __D_STAT_SEEDERS_REGEXP = re.compile(r"(?P<seeders>.*)")
     _STAT_LEECHERS_REGEXP = __D_STAT_LEECHERS_REGEXP = re.compile(r"(?P<leechers>.*)")
 
     def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
         assert self._STAT_URL != self.__D_STAT_URL
+        assert self._STAT_OK_REGEXP.pattern != self.__D_STAT_OK_REGEXP.pattern
         assert self._STAT_SEEDERS_REGEXP.pattern != self.__D_STAT_SEEDERS_REGEXP.pattern
         assert self._STAT_LEECHERS_REGEXP.pattern != self.__D_STAT_LEECHERS_REGEXP.pattern
 
     def fetch_stat(self, torrent: Torrent) -> TrackerStat:
         torrent_id = self._assert_match(torrent)
         page = self._decode(self._read_url(self._STAT_URL.format(torrent_id=torrent_id)))
+        self._assert_logic_re_search(
+            regexp=self._STAT_OK_REGEXP,
+            text=page,
+            msg="Missing OK mark",
+        )
         return TrackerStat(
             seeders=self.__parse_stat_int(page, self._STAT_SEEDERS_REGEXP, "seeders"),
             leechers=self.__parse_stat_int(page, self._STAT_LEECHERS_REGEXP, "leechers"),

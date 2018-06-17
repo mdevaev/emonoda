@@ -56,6 +56,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId, WithSt
     _DOWNLOAD_PAYLOAD = b""
 
     _STAT_URL = "https://pornolab.net/forum/viewtopic.php?t={torrent_id}"
+    _STAT_OK_REGEXP = re.compile(r"class=\"dl-stub dl-link\">Скачать \.torrent</a></p>")
     _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\">Сиды:&nbsp;\s+<b>(?P<seeders>\d+)</b>")
     _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\">Личи:&nbsp;\s+<b>(?P<leechers>\d+)</b>")
 

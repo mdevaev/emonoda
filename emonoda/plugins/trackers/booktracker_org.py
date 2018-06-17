@@ -53,7 +53,8 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(?P<download_id>\d+)\" class=\"\">")
     _DOWNLOAD_URL = "https://booktracker.org/download.php?id={download_id}"
 
-    _STAT_URL = "https://booktracker.org()/viewtopic.php?p={torrent_id}"
+    _STAT_URL = _DOWNLOAD_ID_URL
+    _STAT_OK_REGEXP = _DOWNLOAD_ID_REGEXP
     _STAT_SEEDERS_REGEXP = re.compile(r"<b>Раздают:\s+(?P<seeders>\d+)</b></span> &#0183;")
     _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leechmed\" ><b>Качают:\s+(?P<leechers>\d+)</b></span>")
 

@@ -56,6 +56,7 @@ class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId, WithStat):
     _DOWNLOAD_URL = "https://{}//forum/download.php?id={{download_id}}".format(_NNM_DOMAIN)
 
     _STAT_URL = _DOWNLOAD_ID_URL
+    _STAT_OK_REGEXP = _DOWNLOAD_ID_REGEXP
     _STAT_SEEDERS_REGEXP = re.compile(r"align=\"center\"><span class=\"seed\">\[\s+<b>(?P<seeders>\d+)")
     _STAT_LEECHERS_REGEXP = re.compile(r"align=\"center\"><span class=\"leech\">\[\s+<b>(?P<leechers>\d+)")
 

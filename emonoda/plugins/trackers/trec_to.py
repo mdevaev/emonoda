@@ -58,7 +58,8 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByDownloadId, WithS
     _DOWNLOAD_ID_REGEXP = re.compile(r"<a href=\"download\.php\?id=(?P<download_id>\d+)\" class=\"(leech|seed|gen)med\">")
     _DOWNLOAD_URL = "http://trec.to/download.php?id={download_id}"
 
-    _STAT_URL = "http://trec.to/viewtopic.php?p={torrent_id}"
+    _STAT_URL = _DOWNLOAD_ID_URL
+    _STAT_OK_REGEXP = _DOWNLOAD_ID_REGEXP
     _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\">Сидов:&nbsp;\s+<b>(?P<seeders>\d+)</b>")
     _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\">Личеров:&nbsp;\s+<b>(?P<leechers>\d+)</b>")
 

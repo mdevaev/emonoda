@@ -58,6 +58,7 @@ class Plugin(WithLogin, WithCheckHash, WithFetchByDownloadId, WithStat):
     _DOWNLOAD_URL = "http://www1.tfiles.cc/forum/download.php?id={download_id}"
 
     _STAT_URL = _TORRENT_HASH_URL
+    _STAT_OK_REGEXP = _TORRENT_HASH_REGEXP
     _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\" id=\"seedStats\"><b>(?P<seeders>\d+)</b>")
     _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\" id=\"leechStats\"><b>(?P<leechers>\d+)</b>")
 

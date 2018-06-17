@@ -55,6 +55,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
     _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-fA-F0-9]{40})</span>")
 
     _STAT_URL = _TORRENT_HASH_URL
+    _STAT_OK_REGEXP = _TORRENT_HASH_REGEXP
     _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\">Сиды:&nbsp;\s+<b>(?P<seeders>\d+)</b></span>")
     _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\">Личи:&nbsp;\s+<b>(?P<leechers>\d+)</b></span>")
 
