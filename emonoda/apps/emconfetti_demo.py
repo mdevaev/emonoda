@@ -74,19 +74,19 @@ def main() -> None:
                 "test1.torrent": UpdateResult.new(
                     torrent=FakeTorrent(),
                     tracker=FakeTracker(),
-                    diff=TorrentsDiff.new(
-                        added=set(["nya.mkv", "nya.srt"]),
-                        removed=set(["nyaa.srt", "nyaa.mkv"]),
-                        type_modified=set(["list.lst"]),
+                    diff=TorrentsDiff(
+                        added=frozenset(["nya.mkv", "nya.srt"]),
+                        removed=frozenset(["nyaa.srt", "nyaa.mkv"]),
+                        type_modified=frozenset(["list.lst"]),
                     ),
                 ),
                 "test2.torrent": UpdateResult.new(
                     torrent=FakeTorrent(),
                     tracker=FakeTracker(),
-                    diff=TorrentsDiff.new(
-                        added=set(["nya.mkv", "nya.srt"]),
-                        removed=set(["nyaa.srt", "nyaa.mkv"]),
-                        type_modified=set(["list.lst"]),
+                    diff=TorrentsDiff(
+                        added=frozenset(["nya.mkv", "nya.srt"]),
+                        removed=frozenset(["nyaa.srt", "nyaa.mkv"]),
+                        type_modified=frozenset(["list.lst"]),
                     ),
                 ),
             },

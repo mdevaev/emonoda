@@ -26,7 +26,7 @@ import itertools
 
 from typing import List
 from typing import Dict
-from typing import Set
+from typing import FrozenSet
 from typing import NamedTuple
 from typing import Optional
 from typing import Union
@@ -53,28 +53,11 @@ class TorrentEntryAttrs(_InnerTorrentEntryAttrs):
         return TorrentEntryAttrs(is_dir=True, size=0)
 
 
-class _InnerTorrentsDiff(NamedTuple):
-    added: Set[str]
-    removed: Set[str]
-    modified: Set[str]
-    type_modified: Set[str]
-
-
-class TorrentsDiff(_InnerTorrentsDiff):
-    @staticmethod
-    def new(
-        added: Optional[Set[str]]=None,
-        removed: Optional[Set[str]]=None,
-        modified: Optional[Set[str]]=None,
-        type_modified: Optional[Set[str]]=None,
-    ) -> "TorrentsDiff":
-
-        return TorrentsDiff(
-            added=(added or set()),
-            removed=(removed or set()),
-            modified=(modified or set()),
-            type_modified=(type_modified or set()),
-        )
+class TorrentsDiff(NamedTuple):
+    added: FrozenSet[str] = frozenset()
+    removed: FrozenSet[str] = frozenset()
+    modified: FrozenSet[str] = frozenset()
+    type_modified: FrozenSet[str] = frozenset()
 
 
 class Torrent:
@@ -281,8 +264,8 @@ def get_torrents_difference(
             modified.add(path)
 
     return TorrentsDiff(
-        added=set(new_files).difference(set(old_files)),
-        removed=set(old_files).difference(set(new_files)),
-        modified=modified,
-        type_modified=type_modified,
+        added=frozenset(new_files).difference(frozenset(old_files)),
+        removed=frozenset(old_files).difference(frozenset(new_files)),
+        modified=frozenset(modified),
+        type_modified=frozenset(type_modified),
     )

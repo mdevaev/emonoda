@@ -94,7 +94,7 @@ class UpdateResult(_InnerUpdateResult):
         return UpdateResult(
             torrent=torrent,
             tracker=tracker,
-            diff=(diff or TorrentsDiff.new()),
+            diff=(diff or TorrentsDiff()),
             err_name=err_name,
             err_msg=err_msg,
             tb_lines=(tb_lines or []),
