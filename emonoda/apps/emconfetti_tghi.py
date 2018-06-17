@@ -48,7 +48,8 @@ def main() -> None:
             )
             if len(confetti) == 0:
                 raise RuntimeError("No configured telegram plugin")
-            for (user, chat_id) in confetti[0]._get_last_chats(options.limit):  # type: ignore  # pylint: disable=protected-access
+            assert hasattr(confetti[0], "get_last_chats"), confetti[0]
+            for (user, chat_id) in confetti[0].get_last_chats(options.limit):  # type: ignore
                 log_stdout.print("- Chat with user '{yellow}%s{reset}': %s", (user, chat_id))
 
 

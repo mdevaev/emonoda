@@ -38,18 +38,16 @@ from .thirdparty import bencoder  # type: ignore
 
 
 # =====
-class _InnerTorrentEntryAttrs(NamedTuple):
+class TorrentEntryAttrs(NamedTuple):
     is_dir: bool
     size: int
 
-
-class TorrentEntryAttrs(_InnerTorrentEntryAttrs):
     @staticmethod
-    def new_file(size: int) -> "TorrentEntryAttrs":
+    def file(size: int) -> "TorrentEntryAttrs":
         return TorrentEntryAttrs(is_dir=False, size=size)
 
     @staticmethod
-    def new_dir() -> "TorrentEntryAttrs":
+    def dir() -> "TorrentEntryAttrs":
         return TorrentEntryAttrs(is_dir=True, size=0)
 
 
@@ -190,16 +188,16 @@ class Torrent:
         assert self.__bencode, (self, self.__bencode)
         base = os.path.join(prefix, self.get_name())
         if self.is_single_file():
-            return {base: TorrentEntryAttrs.new_file(self.__bencode[b"info"][b"length"])}
+            return {base: TorrentEntryAttrs.file(self.__bencode[b"info"][b"length"])}
         else:
-            files = {base: TorrentEntryAttrs.new_dir()}
+            files = {base: TorrentEntryAttrs.dir()}
             for fstruct in self.__bencode[b"info"][b"files"]:
                 name = None
                 for index in range(len(fstruct[b"path"])):
                     name = os.path.join(base, os.path.sep.join(map(self.__decode, fstruct[b"path"][0:index + 1])))
-                    files[name] = TorrentEntryAttrs.new_dir()
+                    files[name] = TorrentEntryAttrs.dir()
                 assert name is not None
-                files[name] = TorrentEntryAttrs.new_file(fstruct[b"length"])
+                files[name] = TorrentEntryAttrs.file(fstruct[b"length"])
             return files
 
     # ===
@@ -252,20 +250,20 @@ def get_torrents_difference(
 ) -> TorrentsDiff:
 
     old_files = (old.get_files() if isinstance(old, Torrent) else old)
-    new_files = (new.get_files() if isinstance(new, Torrent) else new)
+    files = (new.get_files() if isinstance(new, Torrent) else new)
 
     modified = set()
     type_modified = set()
 
-    for path in set(old_files).intersection(set(new_files)):
-        if old_files[path].is_dir != new_files[path].is_dir:
+    for path in set(old_files).intersection(set(files)):
+        if old_files[path].is_dir != files[path].is_dir:
             type_modified.add(path)
-        elif old_files[path].size != new_files[path].size:
+        elif old_files[path].size != files[path].size:
             modified.add(path)
 
     return TorrentsDiff(
-        added=frozenset(new_files).difference(frozenset(old_files)),
-        removed=frozenset(old_files).difference(frozenset(new_files)),
+        added=frozenset(files).difference(frozenset(old_files)),
+        removed=frozenset(old_files).difference(frozenset(files)),
         modified=frozenset(modified),
         type_modified=frozenset(type_modified),
     )

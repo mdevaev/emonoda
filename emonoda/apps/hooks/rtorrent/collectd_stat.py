@@ -123,7 +123,7 @@ def main() -> None:
     args_parser.add_argument("--with-dht", action="store_true")
     args_parser.add_argument("--with-summary", action="store_true")
     args_parser.add_argument("-n", "--host", default=os.getenv("COLLECTD_HOSTNAME", "localhost"), metavar="<hostname>")
-    args_parser.add_argument("-i", "--interval", default=os.getenv("COLLECTD_INTERVAL", 60), type=float, metavar="<seconds>")
+    args_parser.add_argument("-i", "--interval", default=os.getenv("COLLECTD_INTERVAL", "60"), type=float, metavar="<seconds>")
     args_parser.add_argument("-t", "--timeout", default=5.0, type=float, metavar="<seconds>")
     args_parser.add_argument("--client-url", default="http://localhost/RPC2", metavar="<url>")
 

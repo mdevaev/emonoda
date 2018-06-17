@@ -93,7 +93,7 @@ class Plugin(WithWeb, WithStatuses):
                     }).encode("utf-8"),
                 )
 
-    def _get_last_chats(self, limit: int) -> List[Tuple[str, str]]:  # XXX: Only for emonoda.apps.emconfetti_tghi
+    def get_last_chats(self, limit: int) -> List[Tuple[str, str]]:  # XXX: Only for emonoda.apps.emconfetti_tghi
         last_chats: List[Tuple[str, str]] = []
         for update in json.loads(self._read_url(
             url="https://api.telegram.org/bot{}/getUpdates?limit={}".format(self.__token, limit),

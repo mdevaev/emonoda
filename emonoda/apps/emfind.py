@@ -44,7 +44,7 @@ from . import get_configured_client
 
 # =====
 def build_used_files(cache: datacache.TorrentsCache, data_roots: List[str]) -> Dict[str, TorrentEntryAttrs]:
-    files: Dict[str, TorrentEntryAttrs] = dict.fromkeys(data_roots, TorrentEntryAttrs.new_dir())
+    files: Dict[str, TorrentEntryAttrs] = dict.fromkeys(data_roots, TorrentEntryAttrs.dir())
     for c_attrs in cache.torrents.values():
         prefix = os.path.normpath(c_attrs.prefix)
 
@@ -56,7 +56,7 @@ def build_used_files(cache: datacache.TorrentsCache, data_roots: List[str]) -> D
                 parts: List[str] = list(filter(None, prefix[len(data_root_path):].split(os.path.sep)))
                 for index in range(len(parts)):
                     path = os.path.join(*([data_root_path] + parts[:index + 1]))
-                    files[path] = TorrentEntryAttrs.new_dir()
+                    files[path] = TorrentEntryAttrs.dir()
                 break
     return files
 
@@ -71,14 +71,14 @@ def build_all_files(data_root_path: str, log: Log) -> Dict[str, TorrentEntryAttr
         ("Scanning directory {cyan}%s{reset} ...", (data_root_path,)),
         ("Scanned directory {cyan}%s{reset}", (data_root_path,))
     ):
-        files[tools.get_decoded_path(prefix)] = TorrentEntryAttrs.new_dir()
+        files[tools.get_decoded_path(prefix)] = TorrentEntryAttrs.dir()
         for name in local_files:
             path = os.path.join(prefix, name)
             try:
                 size = os.path.getsize(path)
             except FileNotFoundError:
                 continue
-            files[tools.get_decoded_path(path)] = TorrentEntryAttrs.new_file(size)
+            files[tools.get_decoded_path(path)] = TorrentEntryAttrs.file(size)
 
     if not log.isatty():
         log.info("Scanned directory {cyan}%s{reset}", (data_root_path,))

@@ -65,9 +65,9 @@ def build_files(prefix: str, flist: List[Tuple[str, int]]) -> Dict[str, TorrentE
         name = None
         for index in range(len(path_list)):
             name = os.path.join(prefix, os.path.sep.join(path_list[0:index + 1]))
-            files[name] = TorrentEntryAttrs.new_dir()
+            files[name] = TorrentEntryAttrs.dir()
         assert name is not None
-        files[name] = TorrentEntryAttrs.new_file(size)
+        files[name] = TorrentEntryAttrs.file(size)
     return files
 
 

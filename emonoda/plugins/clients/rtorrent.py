@@ -171,7 +171,7 @@ class Plugin(WithCustoms):
         (base_file_name, is_multi_file, count, first_file_size) = tuple(mc())
 
         if not is_multi_file:
-            return {base_file_name: TorrentEntryAttrs.new_file(first_file_size)}
+            return {base_file_name: TorrentEntryAttrs.file(first_file_size)}
 
         mc = xmlrpc.client.MultiCall(self.__server)
         for index in range(count):
@@ -181,7 +181,7 @@ class Plugin(WithCustoms):
         flist = list(zip(flist[::2], flist[1::2]))
 
         files = build_files(base_file_name, flist)
-        files.update({base_file_name: TorrentEntryAttrs.new_dir()})
+        files.update({base_file_name: TorrentEntryAttrs.dir()})
         return files
 
     # ===
