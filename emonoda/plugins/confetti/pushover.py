@@ -72,21 +72,24 @@ class Plugin(WithWeb, WithStatuses):
     def send_results(self, source: str, results: ResultsType) -> None:
         for status in self._statuses:
             for (file_name, result) in results[status].items():
+                post = {
+                    "token":   self.__api_key,
+                    "user":    self.__user_key,
+                    "html":    "1",
+                    "title":   self.__title.format(source=source),
+                    "message": templated(
+                        name=(self.__template_path if self.__template_path else "pushover.{source}.mako").format(source=source),
+                        built_in=(not self.__template_path),
+                        source=source,
+                        file_name=file_name,
+                        status=status,
+                        status_msg=STATUSES[status],
+                        result=result,
+                    ),
+                }
+                if self.__devices:
+                    post["device"] = ",".join(self.__devices)
                 self._read_url(
                     url="https://api.pushover.net/1/messages.json",
-                    data=urllib.parse.urlencode({
-                        "token":   self.__api_key,
-                        "user":    self.__user_key,
-                        "html":    "1",
-                        "title":   self.__title.format(source=source),
-                        "message": templated(
-                            name=(self.__template_path if self.__template_path else "pushover.{source}.mako").format(source=source),
-                            built_in=(not self.__template_path),
-                            source=source,
-                            file_name=file_name,
-                            status=status,
-                            status_msg=STATUSES[status],
-                            result=result,
-                        )
-                    }).encode("utf-8"),
+                    data=urllib.parse.urlencode(post).encode("utf-8"),
                 )
