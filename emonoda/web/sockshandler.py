@@ -87,8 +87,9 @@ class _SocksConnection(HTTPConnection):
         assert self.__proxy_args is not None, "Proxy args weren't initialized"
         self.sock = socks.socksocket()
         self.sock.setproxy(*self.__proxy_args)
-        if self.timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:  # type: ignore  # pylint: disable=protected-access
-            self.sock.settimeout(self.timeout)  # type: ignore
+        timeout = self.timeout  # type: ignore
+        if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:  # pylint: disable=protected-access
+            self.sock.settimeout(timeout)
         self.sock.connect((self.host, self.port))  # type: ignore
 
 
@@ -130,3 +131,8 @@ class SocksHandler(HTTPHandler, HTTPSHandler):
             return connection
 
         return self.do_open(build, req)  # type: ignore
+
+    # XXX: vulture hacks
+    _ = http_open
+    _ = https_open
+    del _

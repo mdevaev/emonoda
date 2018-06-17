@@ -35,6 +35,7 @@ from .. import fmt
 
 from . import init
 from . import wrap_main
+from . import validate_client_customs
 from . import get_configured_log
 from . import get_configured_client
 
@@ -139,6 +140,8 @@ def main() -> None:
             with_customs=bool(customs),
             log=log_stderr,
         )
+        if customs:
+            validate_client_customs(client, list(customs))  # type: ignore
 
         load_torrents(
             torrents=torrents,

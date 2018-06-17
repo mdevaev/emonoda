@@ -28,6 +28,7 @@ from collections import OrderedDict
 
 from typing import List
 from typing import Dict
+from typing import Callable
 from typing import Optional
 from typing import Any
 
@@ -93,20 +94,27 @@ def format_is_private_pretty(torrent: Torrent) -> str:
     return ("yes" if torrent.is_private() else "no")
 
 
-def _format_client_method(torrent: Torrent, client: Optional[BaseClient], method_name: str, *args: Any, **kwargs: Any) -> str:
-    assert client is not None, "Required client"
-    try:
-        return str(getattr(client, method_name)(torrent, *args, **kwargs))
-    except NoSuchTorrentError:
-        return ""
+def _catch_no_such_torrent(
+    method: Callable[[Torrent, BaseClient], str],
+) -> Callable[[Torrent, Optional[BaseClient]], str]:
+
+    def wrap(torrent: Torrent, client: Optional[BaseClient]) -> str:
+        assert client is not None, "Required client"
+        try:
+            return str(method(torrent, client))
+        except NoSuchTorrentError:
+            return ""
+    return wrap
 
 
-def format_client_path(torrent: Torrent, client: Optional[BaseClient]) -> str:
-    return _format_client_method(torrent, client, "get_full_path")
+@_catch_no_such_torrent
+def format_client_path(torrent: Torrent, client: BaseClient) -> str:
+    return client.get_full_path(torrent)
 
 
-def format_client_prefix(torrent: Torrent, client: Optional[BaseClient]) -> str:
-    return _format_client_method(torrent, client, "get_data_prefix")
+@_catch_no_such_torrent
+def format_client_prefix(torrent: Torrent, client: BaseClient) -> str:
+    return client.get_data_prefix(torrent)
 
 
 def format_client_customs(torrent: Torrent, client: Optional[WithCustoms], customs: List[str]) -> str:
@@ -178,11 +186,11 @@ def main() -> None:  # pylint: disable=too-many-locals
     actions = OrderedDict(
         (option[2:].replace("-", "_"), (option, method))
         for (option, method) in [
-            ("--path",                 lambda torrent: Torrent.get_path(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
-            ("--name",                 lambda torrent: Torrent.get_name(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
-            ("--hash",                 lambda torrent: Torrent.get_hash(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
-            ("--comment",              lambda torrent: Torrent.get_comment(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
-            ("--size",                 lambda torrent: Torrent.get_size(torrent)),  # for mypy  # pylint: disable=unnecessary-lambda
+            ("--path",                 Torrent.get_path),
+            ("--name",                 Torrent.get_name),
+            ("--hash",                 Torrent.get_hash),
+            ("--comment",              Torrent.get_comment),
+            ("--size",                 Torrent.get_size),
             ("--size-pretty",          format_size_pretty),
             ("--announce",             format_announce),
             ("--announce-list",        format_announce_list),
@@ -235,7 +243,7 @@ def main() -> None:  # pylint: disable=too-many-locals
                     print_pretty_all(torrent, client, config.emfile.show_customs, log_stdout)
                 else:
                     for (header, method) in to_print:
-                        retval = method(torrent)
+                        retval = method(torrent)  # type: ignore
                         if isinstance(retval, (list, tuple)):
                             for item in retval:
                                 print_value(header, item, options.without_headers, log_stdout)

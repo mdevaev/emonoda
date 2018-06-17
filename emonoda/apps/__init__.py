@@ -95,6 +95,11 @@ class StoreTrueOrderedAction(argparse.Action):
         option_string: Any=None,
     ) -> None:
 
+        # XXX: vulture hacks
+        _ = parser
+        _ = option_string  # type: ignore
+        del _
+
         if not hasattr(namespace, "ordered_flags"):
             setattr(namespace, "ordered_flags", [])
         namespace.ordered_flags.append((self.dest, self.const))
@@ -157,6 +162,12 @@ def wrap_main(method: Callable[..., None]) -> Callable[..., None]:
         except (SystemExit, KeyboardInterrupt):
             sys.exit(1)
     return wrap
+
+
+def validate_client_customs(client: C_WithCustoms, customs: List[str]) -> None:
+    invalid = sorted(set(customs).difference(client.get_custom_keys()))
+    if invalid:
+        raise RuntimeError("Invalid custom keys: {}".format(", ".join(invalid)))
 
 
 def _merge_dicts(dest: Dict, src: Dict) -> None:

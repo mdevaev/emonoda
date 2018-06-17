@@ -63,6 +63,7 @@ from .. import tools
 
 from . import init
 from . import wrap_main
+from . import validate_client_customs
 from . import get_configured_log
 from . import get_configured_client
 from . import get_configured_trackers
@@ -129,7 +130,6 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         show_passed: bool,
         show_diff: bool,
         log_stdout: Log,
-        log_stderr: Log,
     ) -> None:
 
         self._trackers = trackers
@@ -138,7 +138,6 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
         self._show_passed = show_passed
         self._show_diff = show_diff
         self._log_stdout = log_stdout
-        self._log_stderr = log_stderr
 
         self._current_count = 0
         self._current_file_name = ""
@@ -441,6 +440,10 @@ def main() -> None:
                 with_customs=bool(len(config.emupdate.save_customs) or len(config.emupdate.set_customs)),
                 log=log_stderr,
             )
+            if client and config.emupdate.save_customs:
+                validate_client_customs(client, list(config.emupdate.save_customs))  # type: ignore
+            if client and config.emupdate.set_customs:
+                validate_client_customs(client, list(config.emupdate.set_customs))  # type: ignore
 
             def read_captcha(url: str) -> str:
                 if options.fail_on_captcha:
@@ -481,7 +484,6 @@ def main() -> None:
                 show_passed=config.emupdate.show_passed,
                 show_diff=config.emupdate.show_diff,
                 log_stdout=log_stdout,
-                log_stderr=log_stderr,
             )
 
             update(

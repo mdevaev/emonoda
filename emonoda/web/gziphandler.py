@@ -44,3 +44,8 @@ class GzipHandler(BaseHandler):
 
     https_request = http_request
     https_response = http_response
+
+    # XXX: vulture hacks
+    _ = https_request
+    _ = https_response  # type: ignore
+    del _
