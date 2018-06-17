@@ -47,11 +47,14 @@ def _inner_make_dump(config: Section, _path: Tuple[str, ...]=()) -> List[str]:
         else:
             default = config._get_default(key)  # pylint: disable=protected-access
             comment = config._get_help(key)  # pylint: disable=protected-access
+            print_value = (None if config._is_secret(key) else value)  # pylint: disable=protected-access
             if default == value:
-                lines.append("{}{}: {} # {}".format(indent, key, _make_yaml(value), comment))
+                lines.append("{}{}: {} # {}".format(indent, key, _make_yaml(print_value), comment))
             else:
                 lines.append("{}# {}: {} # {}".format(indent, key, _make_yaml(default), comment))
-                lines.append("{}{}: {}".format(indent, key, _make_yaml(value)))
+                if config._is_secret(key):
+                    lines.append("{}# Note: value is secret and has been hidden".format(indent))
+                lines.append("{}{}: {}".format(indent, key, _make_yaml(print_value)))
     return lines
 
 

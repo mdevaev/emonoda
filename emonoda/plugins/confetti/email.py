@@ -32,6 +32,7 @@ from typing import Union
 from typing import Any
 
 from ...optconf import Option
+from ...optconf import SecretOption
 from ...optconf.converters import as_string_list
 from ...optconf.converters import as_path_or_empty
 
@@ -98,7 +99,7 @@ class Plugin(WithStatuses):  # pylint: disable=too-many-instance-attributes
             "port":     Option(default=0, help="Port of SMTP server"),
             "ssl":      Option(default=False, help="Use SMTPS"),
             "user":     Option(default="", help="Account on SMTP server"),
-            "passwd":   Option(default="", help="Passwd for account on SMTP server"),
+            "passwd":   SecretOption(default="", help="Passwd for account on SMTP server"),
 
             "timeout":       Option(default=10.0, help="Network timeout"),
             "retries":       Option(default=5, help="Retries for failed attempts"),

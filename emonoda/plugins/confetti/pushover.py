@@ -24,6 +24,7 @@ from typing import Dict
 from typing import Any
 
 from ...optconf import Option
+from ...optconf import SecretOption
 from ...optconf.converters import as_string_list
 from ...optconf.converters import as_path_or_empty
 
@@ -60,8 +61,8 @@ class Plugin(WithWeb, WithStatuses):
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options({
-            "user_key": Option(default="CHANGE_ME", help="User key"),
-            "api_key":  Option(default="CHANGE_ME", help="API/Application key"),
+            "user_key": SecretOption(default="CHANGE_ME", help="User key"),
+            "api_key":  SecretOption(default="CHANGE_ME", help="API/Application key"),
             "devices":  Option(default=[], type=as_string_list, help="Devices list (empty for all)"),
             "title":    Option(default="Emonoda ({source})", help="Message title"),
             "template": Option(default="", type=as_path_or_empty, help="Mako template file name"),
