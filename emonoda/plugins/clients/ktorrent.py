@@ -44,22 +44,26 @@ except ImportError:
 class Plugin(BaseClient):
     PLUGIN_NAMES = ["ktorrent"]
 
-    def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
+    def __init__(self, service: str, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
 
         if dbus is None:
             raise RuntimeError("Required module dbus")
 
+        self.__service = service
+
         self.__bus = dbus.SessionBus()
-        self.__core = self.__bus.get_object("org.ktorrent.ktorrent", "/core")
-        self.__settings = self.__bus.get_object("org.ktorrent.ktorrent", "/settings")
+        self.__core = self.__bus.get_object(self.__service, "/core")
+        self.__settings = self.__bus.get_object(self.__service, "/settings")
 
         if self.__settings.useSaveDir():
             raise RuntimeError("Turn off the 'path by default' in KTorrent settings")
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
-        return cls._get_merged_options()
+        return cls._get_merged_options({
+            "service": Option(default="org.kde.ktorrent", help="D-Bus service, use 'org.ktorrent.ktorrent' for old client"),
+        })
 
     # ===
 
@@ -89,7 +93,7 @@ class Plugin(BaseClient):
         return str(self.__get_torrent_obj(torrent_hash).dataDir())
 
     def get_data_prefix_default(self) -> str:
-        raise RuntimeError("KTorrent can not return a default data path")
+        return str(self.__settings.saveDir())
 
     # ===
 
@@ -124,7 +128,7 @@ class Plugin(BaseClient):
         if torrent_hash not in self.get_hashes():
             raise NoSuchTorrentError("Unknown torrent hash")
         try:
-            torrent_obj = self.__bus.get_object("org.ktorrent.ktorrent", "/torrent/" + torrent_hash)
+            torrent_obj = self.__bus.get_object(self.__service, "/torrent/" + torrent_hash)
             assert str(torrent_obj.infoHash()) == torrent_hash
             return torrent_obj
         except dbus.exceptions.DBusException as err:
