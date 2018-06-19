@@ -57,6 +57,9 @@ class TorrentsDiff(NamedTuple):
     modified: FrozenSet[str] = frozenset()
     type_modified: FrozenSet[str] = frozenset()
 
+    def __bool__(self) -> bool:
+        return bool(self.added or self.removed or self.modified or self.type_modified)
+
 
 class Torrent:
     def __init__(self, data: Optional[bytes]=None, path: Optional[str]=None) -> None:

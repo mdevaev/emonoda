@@ -215,7 +215,7 @@ class Feeder:  # pylint: disable=too-many-instance-attributes
 
     def _done_affected(self, result: UpdateResult) -> None:
         self._log_stdout.print(*self._format_status("green", "+"))
-        if self._show_diff:
+        if self._show_diff and result.diff:
             self._log_stdout.print(*fmt.format_torrents_diff(result.diff, "\t"))
 
     def _done_not_in_client(self, _: Any) -> None:
