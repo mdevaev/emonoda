@@ -17,7 +17,6 @@
 """
 
 
-import http.cookiejar
 import re
 
 from typing import Dict
@@ -65,25 +64,7 @@ class Plugin(WithLogin, WithCheckHash):
             msg="Torrent-ID not found",
         ).group(1)
 
-        self._cookie_jar.set_cookie(http.cookiejar.Cookie(  # type: ignore
-            version=0,
-            name="bb_dl",
-            value=torrent_id,
-            port=None,
-            port_specified=False,
-            domain="",
-            domain_specified=False,
-            domain_initial_dot=False,
-            path="/",
-            path_specified=True,
-            secure=False,
-            expires=None,
-            discard=True,
-            comment=None,
-            comment_url=None,
-            rest={"HttpOnly": None},
-            rfc2109=False,
-        ))
+        self._set_cookie("bb_dl", torrent_id)
 
         return self._assert_valid_data(self._read_url(
             url="http://pravtor.ru/download.php?id={}".format(dl_id),

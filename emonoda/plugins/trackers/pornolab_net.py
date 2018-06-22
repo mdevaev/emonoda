@@ -17,7 +17,6 @@
 """
 
 
-import urllib.parse
 import re
 
 from datetime import datetime
@@ -126,5 +125,5 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId, WithSt
     def __read_login(self, post: Dict[str, bytes]) -> str:
         return self._decode(self._read_url(
             url="https://pornolab.net/forum/login.php",
-            data=self._encode(urllib.parse.urlencode(post)),
+            data=self._urlencode(post),
         ))

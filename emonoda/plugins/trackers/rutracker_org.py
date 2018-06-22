@@ -17,8 +17,6 @@
 """
 
 
-import urllib.parse
-import http.cookiejar
 import re
 
 from typing import Dict
@@ -71,25 +69,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
 
     def fetch_new_data(self, torrent: Torrent) -> bytes:
         torrent_id = self._assert_match(torrent)
-        self._cookie_jar.set_cookie(http.cookiejar.Cookie(  # type: ignore
-            version=0,
-            name="bb_dl",
-            value=torrent_id,
-            port=None,
-            port_specified=False,
-            domain="",
-            domain_specified=False,
-            domain_initial_dot=False,
-            path="/forum/",
-            path_specified=True,
-            secure=True,
-            expires=None,
-            discard=True,
-            comment=None,
-            comment_url=None,
-            rest={"HttpOnly": None},
-            rfc2109=False,
-        ))
+        self._set_cookie("bb_dl", torrent_id, path="/forum/", secure=True)
         return self._assert_valid_data(self._read_url(
             url="https://rutracker.org/forum/dl.php?t={}".format(torrent_id),
             data=b"",
@@ -133,5 +113,5 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
     def __read_login(self, post: Dict[str, bytes]) -> str:
         return self._decode(self._read_url(
             url="https://rutracker.org/forum/login.php",
-            data=self._encode(urllib.parse.urlencode(post)),
+            data=self._urlencode(post),
         ))

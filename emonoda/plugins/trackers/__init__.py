@@ -116,7 +116,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
         self.__opener: Optional[urllib.request.OpenerDirector] = None
 
-        self._cookie_jar: Optional[http.cookiejar.CookieJar] = None
+        self.__cookie_jar: Optional[http.cookiejar.CookieJar] = None
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
@@ -153,15 +153,44 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def _decode(self, arg: bytes) -> str:
         return arg.decode(self._SITE_ENCODING)
 
+    def _urlencode(self, arg: Dict) -> bytes:
+        return self._encode(urllib.parse.urlencode(arg))
+
     # ===
 
     def _init_opener(self, with_cookies: bool) -> None:
         assert not self.__opener
         if with_cookies:
-            self._cookie_jar = http.cookiejar.CookieJar()
-            self.__opener = web.build_opener(self.__proxy_url, self._cookie_jar)
+            self.__cookie_jar = http.cookiejar.CookieJar()
+            self.__opener = web.build_opener(self.__proxy_url, self.__cookie_jar)
         else:
             self.__opener = web.build_opener(self.__proxy_url)
+
+    def _set_cookie(self, name: str, value: str, **kwargs: Any) -> None:
+        assert self.__cookie_jar
+        params = {
+            "version": 0,
+            "port": None,
+            "port_specified": False,
+            "domain": "",
+            "domain_specified": False,
+            "domain_initial_dot": False,
+            "path": "/",
+            "path_specified": True,
+            "secure": False,
+            "expires": None,
+            "discard": True,
+            "comment": None,
+            "comment_url": None,
+            "rest": {"HttpOnly": None},
+            "rfc2109": False,
+        }
+        params.update(kwargs)
+        self.__cookie_jar.set_cookie(http.cookiejar.Cookie(  # type: ignore
+            name=name,
+            value=value,
+            **params,
+        ))
 
     def _read_url(self, *args: Any, **kwargs: Any) -> bytes:
         if not kwargs.get("opener"):
@@ -289,7 +318,7 @@ class WithLogin(BaseTracker):
 
     def _login_using_post(self, url: str, post: Dict[str, bytes], ok_text: str) -> None:
         self._assert_required_user_passwd()
-        page = self._decode(self._read_url(url, data=self._encode(urllib.parse.urlencode(post))))
+        page = self._decode(self._read_url(url, data=self._urlencode(post)))
         self._assert_auth(ok_text in page, "Invalid user or password")
 
     def _assert_auth(self, *args: Any) -> None:
