@@ -19,19 +19,23 @@
 
 import re
 
+from datetime import datetime
+
 from typing import Dict
 from typing import Any
 
 from ...optconf import Option
 
+from ...tfile import Torrent
+
 from . import WithLogin
-from . import WithCheckScrape
+from . import WithCheckTime
 from . import WithFetchByDownloadId
 from . import WithStat
 
 
 # =====
-class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId, WithStat):
+class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
     PLUGIN_NAMES = [
         "nnm-club.me",
         "nnm-club.name",
@@ -40,7 +44,7 @@ class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId, WithStat):
 
     _NNM_DOMAIN = PLUGIN_NAMES[0]
 
-    _SITE_VERSION = 4
+    _SITE_VERSION = 5
     _SITE_ENCODING = "cp1251"
 
     _SITE_FINGERPRINT_URL = "https://{}".format(_NNM_DOMAIN)
@@ -49,7 +53,9 @@ class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId, WithStat):
     _COMMENT_REGEXP = re.compile(r"https?://(nnm-club\.(me|ru|name|tv|lib)|nnmclub\.to)"
                                  r"/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
-    _TORRENT_SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_NNM_DOMAIN)
+    _TIMEZONE_URL = "https://{}/forum/profile.php?mode=editprofile".format(_NNM_DOMAIN)
+    _TIMEZONE_REGEXP = re.compile(r"selected=\"selected\">(?P<timezone>GMT [+-] [\d:]+)")
+    _TIMEZONE_PREFIX = "Etc/"
 
     _DOWNLOAD_ID_URL = "https://{}/forum/viewtopic.php?p={{torrent_id}}".format(_NNM_DOMAIN)
     _DOWNLOAD_ID_REGEXP = re.compile(r"filelst.php\?attach_id=(?P<download_id>[a-zA-Z0-9]+)")
@@ -70,7 +76,32 @@ class Plugin(WithLogin, WithCheckScrape, WithFetchByDownloadId, WithStat):
             "timeout": Option(default=20.0, help="Timeout for HTTP client"),
         })
 
-    # ===
+    def fetch_time(self, torrent: Torrent) -> int:
+        torrent_id = self._assert_match(torrent)
+        date = self._assert_logic_re_search(
+            regexp=re.compile(r"<td class=\"genmed\">&nbsp;Зарегистрирован:&nbsp;</td>"
+                              r"\s*<td class=\"genmed\">&nbsp;(\d{1,2} ... \d{4} \d\d:\d\d:\d\d)</td>"),
+            text=self._decode(self._read_url("https://{}/forum/viewtopic.php?p={}".format(self._NNM_DOMAIN, torrent_id))),
+            msg="Upload date not found",
+        ).group(1).lower()
+        for (m_src, m_dest) in [
+            ("янв", "01"),
+            ("фев", "02"),
+            ("мар", "03"),
+            ("апр", "04"),
+            ("май", "05"),
+            ("июн", "06"),
+            ("июл", "07"),
+            ("авг", "08"),
+            ("сен", "09"),
+            ("окт", "10"),
+            ("ноя", "11"),
+            ("дек", "12"),
+        ]:
+            date = date.replace(m_src, m_dest)
+        date += " " + datetime.now(self._tzinfo).strftime("%z")
+        upload_time = int(datetime.strptime(date, "%d %m %Y %H:%M:%S %z").strftime("%s"))
+        return upload_time
 
     def login(self) -> None:
         self._login_using_post(
