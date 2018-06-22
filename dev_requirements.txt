@@ -1,2 +1,6 @@
+Cython
+mkdocs
 mkdocs-material
 markdown-include
+bumpversion
+tox

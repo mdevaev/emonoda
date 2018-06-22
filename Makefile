@@ -1,12 +1,12 @@
 all: bencoder
 
 bencoder:
-	python setup.py build_ext --inplace
+	python3 setup.py build_ext --inplace
 
 regen: regen-trackers
 
 regen-trackers: bencoder
-	python -c 'from json import dumps; from emonoda.plugins import get_classes; \
+	python3 -c 'from json import dumps; from emonoda.plugins import get_classes; \
 			[ open("trackers/{}.json".format(name), "w").write(dumps(cls._get_local_info(), sort_keys=True, indent=" " * 4)) \
 			for (name, cls) in get_classes("trackers").items() ]'
 
@@ -41,8 +41,8 @@ mkdocs-release:
 	mkdocs gh-deploy
 
 pypi:
-	python setup.py register
-	python setup.py sdist upload
+	python3 setup.py register
+	python3 setup.py sdist upload
 
 clean:
 	rm -rf build site dist pkg src *.egg-info emonoda-*.tar.gz

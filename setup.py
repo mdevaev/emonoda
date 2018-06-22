@@ -25,7 +25,10 @@ from Cython.Build import cythonize
 
 
 # =====
-if __name__ == "__main__":
+def main() -> None:
+    with open("requirements.txt") as requirements_file:
+        install_requires = list(filter(None, requirements_file.read().splitlines()))
+
     setup(
         name="emonoda",
         version="2.1.16",
@@ -75,15 +78,7 @@ if __name__ == "__main__":
             extra_compile_args=["-O3"],
         )),
 
-        install_requires=[
-            "chardet",
-            "pyyaml",
-            "colorama",
-            "pygments",
-            "pytz",
-            "python-dateutil",
-            "Mako",
-        ],
+        install_requires=install_requires,
 
         classifiers=[
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
@@ -99,3 +94,7 @@ if __name__ == "__main__":
             "Intended Audience :: End Users/Desktop",
         ],
     )
+
+
+if __name__ == "__main__":
+    main()
