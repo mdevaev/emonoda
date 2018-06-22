@@ -59,7 +59,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId, WithSt
     _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\">Сиды:&nbsp;\s+<b>(?P<seeders>\d+)</b>")
     _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\">Личи:&nbsp;\s+<b>(?P<leechers>\d+)</b>")
 
-    # ===
+    # =====
 
     def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)

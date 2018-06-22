@@ -44,7 +44,6 @@ class MultipartFile(NamedTuple):
     data: bytes
 
 
-# =====
 def build_opener(
     proxy_url: str="",
     cookie_jar: Optional[http.cookiejar.CookieJar]=None,

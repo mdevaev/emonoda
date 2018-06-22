@@ -106,8 +106,6 @@ class Plugin(WithStatuses):  # pylint: disable=too-many-instance-attributes
             "retries_sleep": Option(default=1.0, help="Sleep interval between failed attempts"),
         })
 
-    # ===
-
     def send_results(self, source: str, results: ResultsType) -> None:
         if sum(len(results[status]) for status in self._statuses) > 0:
             msg = self.__format_message(source, results)
@@ -126,8 +124,6 @@ class Plugin(WithStatuses):  # pylint: disable=too-many-instance-attributes
                         raise
                     time.sleep(self.__retries_sleep)
                     retries -= 1
-
-    # ===
 
     def __format_message(self, source: str, results: ResultsType) -> email.mime.multipart.MIMEMultipart:
         subject_placeholders: Dict[str, Union[str, int]] = {

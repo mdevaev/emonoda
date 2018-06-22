@@ -84,7 +84,7 @@ class Plugin(BaseClient):
             "timeout": Option(default=10.0, help="Network timeout"),
         })
 
-    # ===
+    # =====
 
     @hash_or_torrent
     def remove_torrent(self, torrent_hash: str) -> None:
@@ -128,7 +128,7 @@ class Plugin(BaseClient):
     def get_data_prefix_default(self) -> str:
         return json.loads(self.__get("/query/preferences"))["save_path"]
 
-    # ===
+    # =====
 
     @hash_or_torrent
     def get_full_path(self, torrent_hash: str) -> str:
@@ -151,7 +151,7 @@ class Plugin(BaseClient):
                 raise NoSuchTorrentError("Unknown torrent hash")
             raise
 
-    # ===
+    # =====
 
     def __get_torrent_props(self, torrent_hash: str) -> Dict[str, Any]:
         result = json.loads(self.__get("/query/torrents?hashes={}".format(torrent_hash)))

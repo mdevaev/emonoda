@@ -97,7 +97,7 @@ class BaseClient(BasePlugin):
     def get_data_prefix_default(self) -> str:
         raise NotImplementedError
 
-    # ===
+    # =====
 
     @hash_or_torrent
     def get_full_path(self, torrent_hash: str) -> str:

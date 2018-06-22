@@ -67,7 +67,6 @@ class BasePlugin:
         ][1:]
 
 
-# =====
 @functools.lru_cache()
 def get_classes(sub: str) -> Dict[str, Type[BasePlugin]]:
     classes: Dict[str, Type[BasePlugin]] = {}  # noqa: E701

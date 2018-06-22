@@ -68,8 +68,6 @@ class Plugin(WithWeb, WithStatuses):
             "template": Option(default="", type=as_path_or_empty, help="Mako template file name"),
         })
 
-    # ===
-
     def send_results(self, source: str, results: ResultsType) -> None:
         for status in self._statuses:
             for (file_name, result) in results[status].items():

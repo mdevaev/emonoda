@@ -65,7 +65,7 @@ class Plugin(BaseClient):
             "service": Option(default="org.kde.ktorrent", help="D-Bus service, use 'org.ktorrent.ktorrent' for old client"),
         })
 
-    # ===
+    # =====
 
     @hash_or_torrent
     def remove_torrent(self, torrent_hash: str) -> None:
@@ -95,7 +95,7 @@ class Plugin(BaseClient):
     def get_data_prefix_default(self) -> str:
         return str(self.__settings.saveDir())
 
-    # ===
+    # =====
 
     @hash_or_torrent
     def get_full_path(self, torrent_hash: str) -> str:
@@ -122,7 +122,7 @@ class Plugin(BaseClient):
             ]
         return build_files("", flist)
 
-    # ===
+    # =====
 
     def __get_torrent_obj(self, torrent_hash: str) -> Any:
         if torrent_hash not in self.get_hashes():

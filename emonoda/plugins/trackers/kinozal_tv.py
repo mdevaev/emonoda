@@ -58,7 +58,7 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId, WithStat):
     _STAT_SEEDERS_REGEXP = re.compile(r"href=\"#\">Раздают<span class=\"floatright\">(?P<seeders>\d+)</span>")
     _STAT_LEECHERS_REGEXP = re.compile(r"href=\"#\">Раздают<span class=\"floatright\">(?P<leechers>\d+)</span>")
 
-    # ===
+    # =====
 
     def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)

@@ -84,7 +84,7 @@ class Plugin(WithCustoms):
             "xmlrpc_size_limit": Option(default=67108863, help="Max XMLRPC data size"),
         })
 
-    # ===
+    # =====
 
     @hash_or_torrent
     @_catch_unknown_torrent
@@ -141,7 +141,7 @@ class Plugin(WithCustoms):
     def get_data_prefix_default(self) -> str:
         return self.__server.get_directory()
 
-    # ===
+    # =====
 
     @hash_or_torrent
     @_catch_unknown_torrent
@@ -184,7 +184,7 @@ class Plugin(WithCustoms):
         files.update({base_file_name: TorrentEntryAttrs.dir()})
         return files
 
-    # ===
+    # =====
 
     @classmethod
     def get_custom_keys(cls) -> List[str]:

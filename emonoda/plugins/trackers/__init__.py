@@ -145,7 +145,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def fetch_new_data(self, torrent: Torrent) -> bytes:
         raise NotImplementedError
 
-    # ===
+    # =====
 
     def _encode(self, arg: str) -> bytes:
         return arg.encode(self._SITE_ENCODING)
@@ -156,7 +156,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def _urlencode(self, arg: Dict) -> bytes:
         return self._encode(urllib.parse.urlencode(arg))
 
-    # ===
+    # =====
 
     def _init_opener(self, with_cookies: bool) -> None:
         assert not self.__opener
@@ -230,7 +230,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             retry_codes=self._SITE_RETRY_CODES,
         )
 
-    # ===
+    # =====
 
     def _assert_logic(self, arg: Any, *args: Any) -> None:
         _assert(LogicError, arg, *args)
@@ -257,7 +257,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         self._assert_logic(is_valid_torrent_data(data), msg)
         return data
 
-    # ===
+    # =====
 
     def __get_upstream_info(self, opener: urllib.request.OpenerDirector) -> Dict:
         try:

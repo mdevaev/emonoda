@@ -57,6 +57,8 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
     _STAT_SEEDERS_REGEXP = re.compile(r"<span class=\"seed\">Сиды:&nbsp;\s+<b>(?P<seeders>\d+)</b></span>")
     _STAT_LEECHERS_REGEXP = re.compile(r"<span class=\"leech\">Личи:&nbsp;\s+<b>(?P<leechers>\d+)</b></span>")
 
+    # =====
+
     def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
         self._init_opener(with_cookies=True)
@@ -64,8 +66,6 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options()
-
-    # ===
 
     def fetch_new_data(self, torrent: Torrent) -> bytes:
         torrent_id = self._assert_match(torrent)

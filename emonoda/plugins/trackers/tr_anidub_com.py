@@ -51,7 +51,7 @@ class Plugin(WithLogin, WithCheckTime):
 
     _TIMEZONE_STATIC = "Etc/GMT+4"
 
-    # ===
+    # =====
 
     def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)

@@ -81,7 +81,7 @@ class Plugin(BaseClient):
             "passwd":  SecretOption(default="", help="HTTP password"),
         })
 
-    # ===
+    # =====
 
     @hash_or_torrent
     def remove_torrent(self, torrent_hash: str) -> None:
@@ -119,7 +119,7 @@ class Plugin(BaseClient):
         assert session is not None
         return session.download_dir
 
-    # ===
+    # =====
 
     @hash_or_torrent
     def get_full_path(self, torrent_hash: str) -> str:
@@ -138,7 +138,7 @@ class Plugin(BaseClient):
         ]
         return build_files("", flist)
 
-    # ===
+    # =====
 
     def __get_torrent_prop(self, torrent_hash: str, prop: str) -> Any:
         return getattr(self.__get_torrent_obj(torrent_hash, [prop]), prop)

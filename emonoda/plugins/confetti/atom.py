@@ -110,8 +110,6 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             "html":         Option(default=True, help="HTML or plaintext feed")
         })
 
-    # ===
-
     def send_results(self, source: str, results: ResultsType) -> None:
         if len(results["affected"]) != 0:
             results_set: List[ResultsType] = []

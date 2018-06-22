@@ -88,7 +88,7 @@ class Torrent:
         self.__scrape_hash = ""
         return self
 
-    # ===
+    # =====
 
     def get_path(self) -> str:
         assert self.__path, self
@@ -98,7 +98,7 @@ class Torrent:
         assert self.__data, self
         return self.__data
 
-    # ===
+    # =====
 
     def get_name(self, surrogate_escape: bool=False) -> str:
         assert self.__bencode, (self, self.__bencode)
@@ -133,7 +133,7 @@ class Torrent:
         assert self.__bencode, (self, self.__bencode)
         return bool(self.__bencode[b"info"].get(b"private", 0))
 
-    # ===
+    # =====
 
     def get_hash(self) -> str:
         if not self.__hash:
@@ -171,7 +171,7 @@ class Torrent:
             magnet += "&xl={}".format(self.get_size())
         return magnet
 
-    # ===
+    # =====
 
     def get_size(self) -> int:
         assert self.__bencode, (self, self.__bencode)
@@ -203,7 +203,7 @@ class Torrent:
                 files[name] = TorrentEntryAttrs.file(fstruct[b"length"])
             return files
 
-    # ===
+    # =====
 
     def __decode(self, value: Any, surrogate_escape: bool=False) -> str:  # pylint: disable=inconsistent-return-statements
         assert self.__bencode, (self, self.__bencode)

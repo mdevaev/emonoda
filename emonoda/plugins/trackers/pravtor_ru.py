@@ -45,7 +45,7 @@ class Plugin(WithLogin, WithCheckHash):
     _TORRENT_HASH_URL = "http://pravtor.ru/viewtopic.php?p={torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-zA-Z0-9]+)</span>")
 
-    # ===
+    # =====
 
     def __init__(self, **kwargs: Any) -> None:  # pylint: disable=super-init-not-called
         self._init_bases(**kwargs)
