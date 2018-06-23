@@ -62,11 +62,11 @@ class Plugin(WithLogin, WithCheckTime):
         return cls._get_merged_options()
 
     def fetch_time(self, torrent: Torrent) -> int:
-        self._assert_match(torrent)
+        torrent_id = self._assert_match(torrent)
 
         date = self._assert_logic_re_search(
             regexp=re.compile(r"<li><b>Дата:</b> ([^,\s]+, \d\d:\d\d)</li>"),
-            text=self._decode(self._read_url(torrent.get_comment())),
+            text=self._decode(self._read_url("https://tr.anidub.com/?newsid={}".format(torrent_id))),
             msg="Upload date not found",
         ).group(1)
 
@@ -83,14 +83,14 @@ class Plugin(WithLogin, WithCheckTime):
         return upload_time
 
     def fetch_new_data(self, torrent: Torrent) -> bytes:
-        self._assert_match(torrent)
-        page = self._decode(self._read_url(torrent.get_comment().replace("http://", "https://")))
+        torrent_id = self._assert_match(torrent)
+        page = self._decode(self._read_url("https://tr.anidub.com/?newsid={}".format(torrent_id)))
         downloads = set(map(int, re.findall(r"<a href=\"/engine/download.php\?id=(\d+)\" class=\" \">", page)))
         candidates: Dict[str, List[Tuple[Torrent, str]]] = {}
         for download_id in downloads:
             data = self._assert_valid_data(self._read_url(
                 url="https://tr.anidub.com/engine/download.php?id={}".format(download_id),
-                headers={"Referer": torrent.get_comment()},
+                headers={"Referer": "https://tr.anidub.com/?newsid={}".format(torrent_id)},
             ))
             candidate = Torrent(data=data)
 

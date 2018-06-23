@@ -69,11 +69,11 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
         return cls._get_merged_options()
 
     def fetch_time(self, torrent: Torrent) -> int:
-        self._assert_match(torrent)
+        torrent_id = self._assert_match(torrent)
         date = self._assert_logic_re_search(
             regexp=re.compile(r"Зарегистрирован &nbsp;\s*\[ <span title=\"[\w\s]+\">"
                               r"(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span> ]"),
-            text=self._decode(self._read_url(torrent.get_comment())),
+            text=self._decode(self._read_url("https://booktracker.org/viewtopic.php?p={}".format(torrent_id))),
             msg="Upload date not found",
         ).group(1)
         date += " " + datetime.now(self._tzinfo).strftime("%z")

@@ -81,11 +81,11 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId, WithStat):
         self._tzinfo = self._select_tzinfo(timezone)
 
     def fetch_time(self, torrent: Torrent) -> int:
-        self._assert_match(torrent)
+        torrent_id = self._assert_match(torrent)
         date_match = self._assert_logic_re_search(
             regexp=re.compile(r"<li>(Обновлен|Залит)<span class=\"floatright green n\">"
                               r"(\d{1,2}) ([А-Яа-я]{3,8}) (\d{4}) в (\d{2}:\d{2})</span></li>"),
-            text=self._decode(self._read_url(torrent.get_comment())),
+            text=self._decode(self._read_url("http://kinozal.tv/details.php?id={}".format(torrent_id))),
             msg="Upload date not found",
         )
         date_str = "%s %s %s %s %s" % (

@@ -60,7 +60,7 @@ class Plugin(WithLogin, WithCheckHash):
 
         dl_id = self._assert_logic_re_search(
             regexp=re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">"),
-            text=self._decode(self._read_url(torrent.get_comment())),
+            text=self._decode(self._read_url("http://pravtor.ru/viewtopic.php?p={}".format(torrent_id))),
             msg="Torrent-ID not found",
         ).group(1)
 

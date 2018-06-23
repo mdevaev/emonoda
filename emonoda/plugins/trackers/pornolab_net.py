@@ -70,11 +70,11 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId, WithSt
         return cls._get_merged_options()
 
     def fetch_time(self, torrent: Torrent) -> int:
-        self._assert_match(torrent)
+        torrent_id = self._assert_match(torrent)
 
         date_match = self._assert_logic_re_search(
             regexp=re.compile(r"<span title=\"Зарегистрирован\">\[ (\d\d-([а-яА-Я]{3})-\d\d \d\d:\d\d:\d\d) \]</span>"),
-            text=self._decode(self._read_url(torrent.get_comment())),
+            text=self._decode(self._read_url("https://pornolab.net/forum/viewtopic.php?t={}".format(torrent_id))),
             msg="Upload date not found",
         )
         date = date_match.group(1)
@@ -85,7 +85,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId, WithSt
                 ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
                  "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"], 1
             )
-        }[date_month])  # TODO: Send shitbeam to datetime authors
+        }[date_month])  # Send shitbeam to datetime authors
         date += " " + datetime.now(self._tzinfo).strftime("%z")
 
         upload_time = int(datetime.strptime(date, "%d-%m-%y %H:%M:%S %z").strftime("%s"))
