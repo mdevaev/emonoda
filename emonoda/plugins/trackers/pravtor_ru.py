@@ -76,8 +76,6 @@ class Plugin(WithLogin, WithCheckHash):
         ))
 
     def login(self) -> None:
-        self._assert_required_user_passwd()
-
         self._login_using_post(
             url="https://pravtor.ru/login.php",
             post={
