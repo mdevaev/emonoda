@@ -67,6 +67,7 @@ def main() -> None:
                 "emload = emonoda.apps.emload:main",
                 "emfind = emonoda.apps.emfind:main",
                 "emrm = emonoda.apps.emrm:main",
+                "emrun = emonoda.apps.emrun:main",
                 "emconfetti-demo = emonoda.apps.emconfetti_demo:main",
                 "emconfetti-tghi = emonoda.apps.emconfetti_tghi:main",
             ],
