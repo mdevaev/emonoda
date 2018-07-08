@@ -37,12 +37,12 @@ class Plugin(WithLogin, WithCheckHash):
     _SITE_VERSION = 0
     _SITE_ENCODING = "cp1251"
 
-    _SITE_FINGERPRINT_URL = "http://pravtor.ru"
+    _SITE_FINGERPRINT_URL = "https://pravtor.ru"
     _SITE_FINGERPRINT_TEXT = "<img src=\"/images/pravtor_beta1.png\""
 
-    _COMMENT_REGEXP = re.compile(r"http://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(?P<torrent_id>\d+)")
+    _COMMENT_REGEXP = re.compile(r"https?://pravtor\.(ru|spb\.ru)/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
-    _TORRENT_HASH_URL = "http://pravtor.ru/viewtopic.php?p={torrent_id}"
+    _TORRENT_HASH_URL = "https://pravtor.ru/viewtopic.php?p={torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-zA-Z0-9]+)</span>")
 
     # =====
@@ -60,7 +60,7 @@ class Plugin(WithLogin, WithCheckHash):
 
         dl_id = self._assert_logic_re_search(
             regexp=re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">"),
-            text=self._decode(self._read_url("http://pravtor.ru/viewtopic.php?p={}".format(torrent_id))),
+            text=self._decode(self._read_url("https://pravtor.ru/viewtopic.php?p={}".format(torrent_id))),
             msg="Torrent-ID not found",
         ).group(1)
 
@@ -76,8 +76,10 @@ class Plugin(WithLogin, WithCheckHash):
         ))
 
     def login(self) -> None:
+        self._assert_required_user_passwd()
+
         self._login_using_post(
-            url="http://pravtor.ru/login.php",
+            url="https://pravtor.ru/login.php",
             post={
                 "login_username": self._encode(self._user),
                 "login_password": self._encode(self._passwd),
