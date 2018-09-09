@@ -43,7 +43,7 @@ def sorted_paths(paths: Iterable, get: Optional[Any]=None) -> List:
             return path.replace(os.path.sep, "\0")
     else:
         def get_path_nulled(item: Sequence) -> str:  # type: ignore
-            return item[get].replace(os.path.sep, "\0")
+            return item[get].replace(os.path.sep, "\0")  # type: ignore
     return sorted(paths, key=get_path_nulled)
 
 
