@@ -85,7 +85,7 @@ def read_url(
         try:
             request = urllib.request.Request(url, data, (headers or {}))
             return opener.open(request, timeout=timeout).read()
-        except socket.timeout as err:
+        except socket.timeout:
             if retries == 0 or not retry_timeout:
                 raise
         except urllib.error.HTTPError as err:
@@ -97,7 +97,7 @@ def read_url(
                     raise
             else:
                 raise
-        except (http.client.IncompleteRead, http.client.BadStatusLine, ConnectionResetError) as err:
+        except (http.client.IncompleteRead, http.client.BadStatusLine, ConnectionResetError):
             if retries == 0:
                 raise
 
