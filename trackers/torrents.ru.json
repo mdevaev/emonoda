@@ -1,8 +1,8 @@
 {
     "fingerprint": {
         "encoding": "cp1251",
-        "text": "<link rel=\"search\" type=\"application/opensearchdescription+xml\" title=\"\u041f\u043e\u0438\u0441\u043a \u043d\u0430 RuTracker.org\" href=\"//static.t-ru.org/opensearch.xml\">",
+        "text": "<link rel=\"search\" type=\"application/opensearchdescription+xml\" title=\"\u041f\u043e\u0438\u0441\u043a \u043d\u0430 RuTracker.org\" href=\"https://static.t-ru.org/opensearch.xml\">",
         "url": "https://rutracker.org/forum/index.php"
     },
-    "version": 5
+    "version": 6
 }
