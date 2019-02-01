@@ -29,7 +29,6 @@
 * http://nnm-club.me
 * http://ipv6.nnm-club.name
 * http://rutor.info
-* http://tfile.cc
 * http://pravtor.ru
 * http://tr.anidub.com
 * http://pornolab.net
