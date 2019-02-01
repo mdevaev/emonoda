@@ -646,12 +646,12 @@
 <hr />
 <h3 id="_2">Конфигурационный файл<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <p>Вся система настраивается через единственный файл <code>~/.config/emonoda.yaml</code>. Его содержимое делится на секции, в которых описываются одиночные ключи, списки или пары вида ключ-значение. Для описания параметров в рамках одной секции используется отступ из четырех или двух пробелов. Комментарий отделяется символом <code>#</code>. Например:</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">core</span><span class="p p-Indicator">:</span>  <span class="c1"># Корневая секция</span>
-    <span class="l l-Scalar l-Scalar-Plain">client</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">rtorrent</span>  <span class="c1"># Параметр client в секции core со значением rtorrent</span>
+<div class="codehilite"><pre><span></span><span class="nt">core</span><span class="p">:</span>  <span class="c1"># Корневая секция</span>
+    <span class="nt">client</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">rtorrent</span>  <span class="c1"># Параметр client в секции core со значением rtorrent</span>
 
-<span class="l l-Scalar l-Scalar-Plain">trackers</span><span class="p p-Indicator">:</span>  <span class="c1"># Другая корневая секция</span>
-    <span class="l l-Scalar l-Scalar-Plain">rutor.org</span><span class="p p-Indicator">:</span>  <span class="c1"># Подсекция</span>
-        <span class="l l-Scalar l-Scalar-Plain">timeout</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>  <span class="c1"># Параметр</span>
+<span class="nt">trackers</span><span class="p">:</span>  <span class="c1"># Другая корневая секция</span>
+    <span class="nt">rutor.org</span><span class="p">:</span>  <span class="c1"># Подсекция</span>
+        <span class="nt">timeout</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">5</span>  <span class="c1"># Параметр</span>
 </pre></div>
 
 
@@ -661,23 +661,23 @@
 <h3 id="_3">Основные параметры<a class="headerlink" href="#_3" title="Permanent link">&para;</a></h3>
 <p>Команды <a href="emfile">emfile</a> и <a href="emdiff">emdiff</a> могут работать с конфигурацией по умолчанию, однако для всех остальных утилит вам потребуется настроить <a href="clients">интеграцию с клиентом</a>, а также указать пути к каталогам с торрент-файлами и данными.</p>
 <p>Конфигурация делится на несколько секций. Одна их часть является общими параметрами, другия же относятся непосредственно к каждой отдельной программе. Ниже приведен минимальный пример файла <code>~/.config/emonoda.yaml</code>, содержащий простые настройки для торрент-клиента и трех трекеров. С такой конфигурацией вы сможете пользоваться всеми программами <strong>Emonoda</strong>. Трекеры необходимы только для <a href="emupdate">emupdate</a>.</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">core</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">torrents_dir</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">/home/user/torrents</span>  <span class="c1"># Каталог с торрент-файлами</span>
-    <span class="l l-Scalar l-Scalar-Plain">data_root_dir</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">/home/user/Downloads</span>  <span class="c1"># Каталог, куда скачиваются данные</span>
-    <span class="l l-Scalar l-Scalar-Plain">client</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">rtorrent</span>  <span class="c1"># Имя плагина для клиента</span>
+<div class="codehilite"><pre><span></span><span class="nt">core</span><span class="p">:</span>
+    <span class="nt">torrents_dir</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/home/user/torrents</span>  <span class="c1"># Каталог с торрент-файлами</span>
+    <span class="nt">data_root_dir</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/home/user/Downloads</span>  <span class="c1"># Каталог, куда скачиваются данные</span>
+    <span class="nt">client</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">rtorrent</span>  <span class="c1"># Имя плагина для клиента</span>
 
-<span class="l l-Scalar l-Scalar-Plain">trackers</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">rutracker.org</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">user</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">yourlogin</span>
-        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">12345</span>
+<span class="nt">trackers</span><span class="p">:</span>
+    <span class="nt">rutracker.org</span><span class="p">:</span>
+        <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">yourlogin</span>
+        <span class="nt">passwd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">12345</span>
 
-    <span class="l l-Scalar l-Scalar-Plain">nnm-club.me</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">user</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">yourlogin</span>
-        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">12345</span>
+    <span class="nt">nnm-club.me</span><span class="p">:</span>
+        <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">yourlogin</span>
+        <span class="nt">passwd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">12345</span>
 
-    <span class="l l-Scalar l-Scalar-Plain">tr.anidub.com</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">user</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">yourlogin</span>
-        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">12345</span>
+    <span class="nt">tr.anidub.com</span><span class="p">:</span>
+        <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">yourlogin</span>
+        <span class="nt">passwd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">12345</span>
 </pre></div>
 
 

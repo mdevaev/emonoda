@@ -670,18 +670,18 @@
                   <h1>Настройка оповещений об обновлениях</h1>
                 
                 <p>При обновлении торрентов <a href="emupdate">emupdate</a> умеет посылать оповещения. Для включения этой возможности вам нужно <a href="config">настроить</a> соответствующие плагины в секции <code>confetti</code>. Ниже приведен пример для уведомлений по почте (через <a href="https://yandex.ru/support/mail/mail-clients.xml">внешний почтовый сервер</a>), а также через <a href="https://pushover.net/">Pushover</a>:</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">confetti</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">email</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">to</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">yarr@example.com</span>
-        <span class="l l-Scalar l-Scalar-Plain">server</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">smtp.yandex.ru</span>
-        <span class="l l-Scalar l-Scalar-Plain">ssl</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
-        <span class="l l-Scalar l-Scalar-Plain">user</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">emonodaserver</span>
-        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">secretword</span>
-        <span class="l l-Scalar l-Scalar-Plain">sender</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">emonodaserver@yandex.ru</span>
+<div class="codehilite"><pre><span></span><span class="nt">confetti</span><span class="p">:</span>
+    <span class="nt">email</span><span class="p">:</span>
+        <span class="nt">to</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">yarr@example.com</span>
+        <span class="nt">server</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">smtp.yandex.ru</span>
+        <span class="nt">ssl</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">true</span>
+        <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">emonodaserver</span>
+        <span class="nt">passwd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">secretword</span>
+        <span class="nt">sender</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">emonodaserver@yandex.ru</span>
 
-    <span class="l l-Scalar l-Scalar-Plain">pushover</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">api_key</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">xxxxxxxxxxxxxxxxxxxx</span>
-        <span class="l l-Scalar l-Scalar-Plain">user_key</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">yyyyyyyyyyyyyyyyyyyy</span>
+    <span class="nt">pushover</span><span class="p">:</span>
+        <span class="nt">api_key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">xxxxxxxxxxxxxxxxxxxx</span>
+        <span class="nt">user_key</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">yyyyyyyyyyyyyyyyyyyy</span>
 </pre></div>
 
 
@@ -740,8 +740,8 @@
 <p>По умолчанию все плагины, кроме <code>atom</code>, настроены на оповещение при любых событиях, кроме <code>unknown</code>. Плагин <code>atom</code> настроек статусов не имеет и обновляет ленту только при наличии событий типа <code>affected</code>.</p>
 </div>
 <p>Большинство плагинов имеют возможность кастомизации шаблонов форматирования оповещений. Используя синтаксис <a href="http://docs.makotemplates.org/en/latest/syntax.html">Mako</a>, вы можете настроить шаблон по своему вкусу, взяв за основу <a href="https://github.com/mdevaev/emonoda/tree/master/emonoda/plugins/confetti/templates">любой из стандартных</a>. Создав свой шаблон, сохраните его где-нибудь в файле и пропишите в конфиге. Например так:</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">confetti</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">email</span><span class="p p-Indicator">:</span>
+<div class="codehilite"><pre><span></span><span class="nt">confetti</span><span class="p">:</span>
+    <span class="nt">email</span><span class="p">:</span>
         <span class="l l-Scalar l-Scalar-Plain">template=/root/emonoda-email.mako</span>
 </pre></div>
 

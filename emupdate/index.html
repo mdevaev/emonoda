@@ -674,20 +674,20 @@
 <hr />
 <h3 id="_2">Принцип работы<a class="headerlink" href="#_2" title="Permanent link">&para;</a></h3>
 <p>В секции <code>trackers</code> файла <code>~/.config/emonoda.yaml</code> указывается <a href="trackers">список трекеров</a> и регистрационные данные пользователя на них (для неанонимных сайтов). Конфигурация выглядит примерно так:</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">trackers</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">rutracker.org</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">login</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">xxx</span>
-        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">secretxxx</span>
+<div class="codehilite"><pre><span></span><span class="nt">trackers</span><span class="p">:</span>
+    <span class="nt">rutracker.org</span><span class="p">:</span>
+        <span class="nt">login</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">xxx</span>
+        <span class="nt">passwd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">secretxxx</span>
 
-    <span class="l l-Scalar l-Scalar-Plain">nnm-club.me</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">login</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">yyy</span>
-        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">secretyyy</span>
+    <span class="nt">nnm-club.me</span><span class="p">:</span>
+        <span class="nt">login</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">yyy</span>
+        <span class="nt">passwd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">secretyyy</span>
 
-    <span class="l l-Scalar l-Scalar-Plain">rutor.org</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">{}</span> <span class="c1"># Анонимный трекер, указание логина и пароля не требуется.</span>
+    <span class="nt">rutor.org</span><span class="p">:</span> <span class="p p-Indicator">{}</span> <span class="c1"># Анонимный трекер, указание логина и пароля не требуется.</span>
 
-    <span class="l l-Scalar l-Scalar-Plain">tr.anidub.com</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">login</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">zzz</span>
-        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">secretzzz</span>
+    <span class="nt">tr.anidub.com</span><span class="p">:</span>
+        <span class="nt">login</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">zzz</span>
+        <span class="nt">passwd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">secretzzz</span>
 </pre></div>
 
 
@@ -779,13 +779,13 @@
 </ul>
 </li>
 </ul>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">emupdate</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">save_customs</span><span class="p p-Indicator">:</span> <span class="p p-Indicator">[</span><span class="nv">c1</span><span class="p p-Indicator">]</span>
+<div class="codehilite"><pre><span></span><span class="nt">emupdate</span><span class="p">:</span>
+    <span class="nt">save_customs</span><span class="p">:</span> <span class="p p-Indicator">[</span><span class="nv">c1</span><span class="p p-Indicator">]</span>
 
 <span class="c1"># или:</span>
 
-<span class="l l-Scalar l-Scalar-Plain">emupdate</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">save_customs</span><span class="p p-Indicator">:</span>
+<span class="nt">emupdate</span><span class="p">:</span>
+    <span class="nt">save_customs</span><span class="p">:</span>
         <span class="p p-Indicator">-</span> <span class="l l-Scalar l-Scalar-Plain">c1</span>
 </pre></div>
 
@@ -796,9 +796,9 @@
 </ul>
 </li>
 </ul>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">emupdate</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">set_customs</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">c1</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">new</span>
+<div class="codehilite"><pre><span></span><span class="nt">emupdate</span><span class="p">:</span>
+    <span class="nt">set_customs</span><span class="p">:</span>
+        <span class="nt">c1</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">new</span>
 </pre></div>
 
 

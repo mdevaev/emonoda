@@ -763,7 +763,6 @@
 <li>http://nnm-club.me</li>
 <li>http://ipv6.nnm-club.name</li>
 <li>http://rutor.info</li>
-<li>http://tfile.cc</li>
 <li>http://pravtor.ru</li>
 <li>http://tr.anidub.com</li>
 <li>http://pornolab.net</li>
@@ -858,14 +857,14 @@
 <h3 id="_8">С чего начать?<a class="headerlink" href="#_8" title="Permanent link">&para;</a></h3>
 <p><strong>Emonoda</strong> - очень развесистая система, имеющая тонну параметров для тонкой настройки под конкретные цели и юзкейсы. Чтобы начать эффективно пользоваться всеми ее возможностями, рекомендуется изучить <a href="config">базовые принципы настройки</a>, а затем перейти к рассмотрению каждой команды, например <a href="emupdate">emupdate</a>.</p>
 <p>В самом простом случае вам потребуется лишь минимальная настройка. Скажем, если у вас большинство торрентов скачано с рутрекера, а в качестве клиента вы используете связку <a href="https://github.com/rakshasa/rtorrent">rTorrent</a> с <a href="https://github.com/Novik/ruTorrent">ruTorrent</a>, вам будет достаточно создать файл <code>~/.config/emonoda.yaml</code> примерно такого содержания:</p>
-<div class="codehilite"><pre><span></span><span class="l l-Scalar l-Scalar-Plain">core</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">client</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">rtorrent</span>
-    <span class="l l-Scalar l-Scalar-Plain">torrents_dir</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">/путь/к/торрент-файлам</span>
+<div class="codehilite"><pre><span></span><span class="nt">core</span><span class="p">:</span>
+    <span class="nt">client</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">rtorrent</span>
+    <span class="nt">torrents_dir</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">/путь/к/торрент-файлам</span>
 
-<span class="l l-Scalar l-Scalar-Plain">trackers</span><span class="p p-Indicator">:</span>
-    <span class="l l-Scalar l-Scalar-Plain">rutracker.org</span><span class="p p-Indicator">:</span>
-        <span class="l l-Scalar l-Scalar-Plain">user</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">логин-на-рутрекере</span>
-        <span class="l l-Scalar l-Scalar-Plain">passwd</span><span class="p p-Indicator">:</span> <span class="l l-Scalar l-Scalar-Plain">пароль</span>
+<span class="nt">trackers</span><span class="p">:</span>
+    <span class="nt">rutracker.org</span><span class="p">:</span>
+        <span class="nt">user</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">логин-на-рутрекере</span>
+        <span class="nt">passwd</span><span class="p">:</span> <span class="l l-Scalar l-Scalar-Plain">пароль</span>
 </pre></div>
 
 
