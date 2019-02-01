@@ -32,7 +32,7 @@ def manage_trackers(client_url: str, to_enable: List[str], to_disable: List[str]
     multicall = xmlrpc.client.MultiCall(server)
     hashes = server.download_list()
     for t_hash in hashes:
-        multicall.t.multicall(t_hash, "", "t.is_enabled=", "t.get_url=")
+        multicall.t.multicall(t_hash, "", "t.is_enabled=", "t.url=")
     trackers = list(multicall())
 
     actions = dict.fromkeys(set(to_enable or ()), 1)
@@ -43,7 +43,7 @@ def manage_trackers(client_url: str, to_enable: List[str], to_disable: List[str]
         for (index, (is_enabled, url)) in enumerate(trackers[count]):
             for (pattern, action) in actions.items():
                 if pattern in url and action != is_enabled:
-                    multicall.t.set_enabled(t_hash, index, action)
+                    multicall.t.is_enabled.set(t_hash, index, action)
                     print(url, pattern, action)
                     continue
     multicall()

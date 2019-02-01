@@ -33,12 +33,12 @@ from typing import Dict
 # =====
 def get_summary(server: xmlrpc.client.ServerProxy, hashes: List[str]) -> Dict[str, int]:
     mapping = (
-        ("get_peers_accounted",  "leechers"),
-        ("is_hash_checking",     "is_checking"),
-        ("get_completed_chunks", "completed_chunks"),
-        ("get_chunks_hashed",    "hashed_chunks"),
-        ("get_size_chunks",      "size_chunks"),
-        ("get_message",          "msg"),
+        ("peers_accounted",  "leechers"),
+        ("is_hash_checking", "is_checking"),
+        ("completed_chunks", "completed_chunks"),
+        ("chunks_hashed",    "hashed_chunks"),
+        ("size_chunks",      "size_chunks"),
+        ("message",          "msg"),
     )
     mc = xmlrpc.client.MultiCall(server)
     for torrent_hash in hashes:
@@ -68,13 +68,13 @@ def print_stat(client_url: str, host: str, interval: float, with_dht: bool, with
     server = xmlrpc.client.ServerProxy(client_url)
     while True:
         mc = xmlrpc.client.MultiCall(server)
-        mc.get_down_rate()  # Download rate
-        mc.get_download_rate()  # Download rate limit
-        mc.get_down_total()  # Downloaded
-        mc.get_up_rate()  # Upload rate
-        mc.get_upload_rate()  # Upload rate limit
-        mc.get_up_total()  # Uploaded
-        mc.dht_statistics()
+        mc.throttle.global_down.rate()  # Download rate
+        mc.throttle.global_down.max_rate()  # Download rate limit
+        mc.throttle.global_down.total()  # Downloaded
+        mc.throttle.global_up.rate()  # Upload rate
+        mc.throttle.global_up.max_rate()  # Upload rate limit
+        mc.throttle.global_up.total()  # Uploaded
+        mc.dht.statistics()
         mc.download_list()
         values = list(mc())
 
