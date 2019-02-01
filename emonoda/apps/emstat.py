@@ -210,9 +210,8 @@ def main() -> None:
             def read_captcha(url: str) -> str:
                 if options.fail_on_captcha:
                     raise RuntimeError("Required decoding of captcha but '--fail-on-captcha' specified")
-                else:
-                    log_stderr.info("{yellow}Enter the captcha{reset} from [{blue}%s{reset}]: ", (url,), no_nl=True)
-                    return input()
+                log_stderr.info("{yellow}Enter the captcha{reset} from [{blue}%s{reset}]: ", (url,), no_nl=True)
+                return input()
 
             trackers: List[WithStat] = get_configured_trackers(  # type: ignore
                 config=config,
