@@ -63,7 +63,7 @@ def main() -> None:
                 if obj.error == 3 and obj.errorString.startswith("No data") and obj.status == "stopped":
                     log_stdout.print("[%s] %s: status=%s; error=%s (%s)", (obj.id, obj.name, obj.status, obj.error, obj.errorString))
 
-                    for (path, attr) in client.get_files():
+                    for (path, attr) in client.get_files(obj.hashString):
                         if not attr.is_dir:
                             file_path = os.path.join(obj.downloadDir, path)
                             if not os.path.exists(file_path):
