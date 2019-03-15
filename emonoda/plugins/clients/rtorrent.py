@@ -164,7 +164,7 @@ class Plugin(WithCustoms):
     @_catch_unknown_torrent
     def get_files(self, torrent_hash: str) -> Dict[str, TorrentEntryAttrs]:
         mc = xmlrpc.client.MultiCall(self.__server)
-        mc.d.get_base_filename(torrent_hash)
+        mc.d.base_filename(torrent_hash)
         mc.d.is_multi_file(torrent_hash)
         mc.d.size_files(torrent_hash)
         mc.f.size_bytes(torrent_hash, 0)
