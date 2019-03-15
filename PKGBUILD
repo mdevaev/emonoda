@@ -24,24 +24,17 @@ optdepends=(
 	"python-dbus: KTorrent support"
 )
 makedepends=("python-setuptools" "cython" "wget")
-
+source=(
+    "${pkgname}-${pkgver}.tar.gz"::${url}/archive/v${pkgver}.tar.gz
+)
+sha256sums=('43e17d16c59c870696ee56e193a171033c60f9ce55a76ffb6e878d498bb9d356')
 
 build() {
-	cd $startdir/src
-	if [ ! -d $pkgname-$pkgver ]; then
-		msg "Downloading tag v$pkgver..."
-		wget $url/archive/v$pkgver.tar.gz
-		tar -xzf v$pkgver.tar.gz
-	fi
-
-	rm -rf $pkgname-build
-	cp -r $pkgname-$pkgver $pkgname-build
-	cd $pkgname-build
-
+	cd "${srcdir}/${pkgname}-${pkgver}"
 	python setup.py build
 }
 
 package() {
-	cd $srcdir/emonoda-$pkgver
-	python setup.py install --root=$pkgdir
+	cd "${srcdir}/${pkgname}-${pkgver}"
+	python setup.py install --root="${pkgdir}"
 }
