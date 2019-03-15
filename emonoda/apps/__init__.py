@@ -327,6 +327,7 @@ def _get_config_scheme() -> Dict:
         "emfind": {
             "cache_file":  Option(default="~/.cache/emfind.pk", type=as_path, help="Torrents cache"),
             "name_filter": Option(default="*.torrent", help="Cache only filtered torrent files"),
+            "files_from_client": Option(default=False, help="Fetch torrent file entries from a client instead of torrent files"),
             "ignore_orphans": Option(default=[], type=as_paths_list, help="Ignore these paths on the final analyse"),
         },
     }

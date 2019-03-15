@@ -262,8 +262,9 @@ def main() -> None:
             def get_cache(force_rebuild: bool) -> datacache.TorrentsCache:
                 return datacache.get_cache(
                     cache_path=config.emfind.cache_file,
-                    force_rebuild=force_rebuild,
                     client=get_client(),
+                    files_from_client=config.emfind.files_from_client,
+                    force_rebuild=force_rebuild,
                     torrents_dir_path=config.core.torrents_dir,
                     name_filter=config.emfind.name_filter,
                     log=log_stderr,

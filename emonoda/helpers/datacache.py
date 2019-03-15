@@ -45,15 +45,16 @@ class TorrentsCache(NamedTuple):
 
 def get_cache(
     cache_path: str,
-    force_rebuild: bool,
     client: BaseClient,
+    files_from_client: bool,
+    force_rebuild: bool,
     torrents_dir_path: str,
     name_filter: str,
     log: Log,
 ) -> TorrentsCache:
 
     cache = _read(cache_path, force_rebuild, log)
-    if _update(cache, client, torrents_dir_path, name_filter, log):
+    if _update(cache, client, files_from_client, torrents_dir_path, name_filter, log):
         _write(cache, cache_path, log)
     return cache
 
@@ -93,7 +94,15 @@ def _write(cache: TorrentsCache, path: str, log: Log) -> None:
         }, cache_file)
 
 
-def _update(cache: TorrentsCache, client: BaseClient, path: str, name_filter: str, log: Log) -> bool:
+def _update(
+    cache: TorrentsCache,
+    client: BaseClient,
+    files_from_client: bool,
+    path: str,
+    name_filter: str,
+    log: Log,
+) -> bool:
+
     log.info("Fetching all hashes from client ...")
     hashes = client.get_hashes()
 
@@ -123,7 +132,7 @@ def _update(cache: TorrentsCache, client: BaseClient, path: str, name_filter: st
             torrent = torrents.get(torrent_hash)
             if torrent is not None:
                 cache.torrents[torrent_hash] = CacheEntryAttrs(
-                    files=torrent.get_files(),
+                    files=(client.get_files(torrent) if files_from_client else torrent.get_files()),
                     prefix=client.get_data_prefix(torrent),
                 )
                 added += 1
