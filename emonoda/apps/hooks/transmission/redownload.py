@@ -66,9 +66,12 @@ def main() -> None:
                     for (path, attr) in client.get_files(obj.hashString).items():
                         if not attr.is_dir:
                             file_path = os.path.join(obj.downloadDir, path)
+                            dir_path = os.path.dirname(file_path)
+                            if not os.path.exists(dir_path):
+                                os.makedirs(dir_path)
+                                log_stdout.print("    Creating dir: %s", (dir_path,))
                             if not os.path.exists(file_path):
-                                os.makedirs(os.path.dirname(file_path))
-                                log_stdout.print("    Creating file: %s", (file_path,))
+                                log_stdout.print("      Creating file: %s", (file_path,))
                                 open(file_path, "w").close()
 
                     try:
