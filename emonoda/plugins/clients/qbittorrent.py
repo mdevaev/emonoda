@@ -86,14 +86,6 @@ class Plugin(BaseClient):
 
     # =====
 
-    @hash_or_torrent
-    def remove_torrent(self, torrent_hash: str) -> None:
-        self.__get_torrent_props(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
-        self.__post(
-            path="/command/delete",
-            payload={"hashes": torrent_hash},
-        )
-
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str) -> None:
         self.__post(
@@ -109,6 +101,14 @@ class Plugin(BaseClient):
                     data=torrent.get_data(),
                 ),
             },
+        )
+
+    @hash_or_torrent
+    def remove_torrent(self, torrent_hash: str) -> None:
+        self.__get_torrent_props(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
+        self.__post(
+            path="/command/delete",
+            payload={"hashes": torrent_hash},
         )
 
     @hash_or_torrent

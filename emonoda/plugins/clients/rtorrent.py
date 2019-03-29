@@ -86,11 +86,6 @@ class Plugin(WithCustoms):
 
     # =====
 
-    @hash_or_torrent
-    @_catch_unknown_torrent
-    def remove_torrent(self, torrent_hash: str) -> None:
-        self.__server.d.erase(torrent_hash)
-
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str) -> None:
         torrent_hash = torrent.get_hash()
@@ -113,6 +108,11 @@ class Plugin(WithCustoms):
 
         self.__server.d.directory.set(torrent_hash, prefix)
         self.__server.d.start(torrent_hash)
+
+    @hash_or_torrent
+    @_catch_unknown_torrent
+    def remove_torrent(self, torrent_hash: str) -> None:
+        self.__server.d.erase(torrent_hash)
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:

@@ -67,15 +67,15 @@ class Plugin(BaseClient):
 
     # =====
 
-    @hash_or_torrent
-    def remove_torrent(self, torrent_hash: str) -> None:
-        self.__get_torrent_obj(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
-        self.__core.remove(torrent_hash, False)
-
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str) -> None:
         self.__settings.setLastSaveDir(prefix)
         self.__core.loadSilently(torrent.get_path(), "")
+
+    @hash_or_torrent
+    def remove_torrent(self, torrent_hash: str) -> None:
+        self.__get_torrent_obj(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
+        self.__core.remove(torrent_hash, False)
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
