@@ -86,6 +86,16 @@ class Plugin(WithCustoms):
 
     # =====
 
+    @hash_or_torrent
+    @_catch_unknown_torrent
+    def start_torrent(self, torrent_hash: str) -> None:
+        self.__server.d.start(torrent_hash)
+
+    @hash_or_torrent
+    @_catch_unknown_torrent
+    def stop_torrent(self, torrent_hash: str) -> None:
+        self.__server.d.stop(torrent_hash)
+
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str) -> None:
         torrent_hash = torrent.get_hash()

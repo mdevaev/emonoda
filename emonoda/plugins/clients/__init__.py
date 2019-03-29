@@ -75,6 +75,14 @@ class BaseClient(BasePlugin):
     def __init__(self, **_: Any) -> None:  # pylint: disable=super-init-not-called
         pass
 
+    @hash_or_torrent
+    def start_torrent(self, torrent_hash: str) -> None:
+        raise NotImplementedError
+
+    @hash_or_torrent
+    def stop_torrent(self, torrent_hash: str) -> None:
+        raise NotImplementedError
+
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str) -> None:
         raise NotImplementedError
