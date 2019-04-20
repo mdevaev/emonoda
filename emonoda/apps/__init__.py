@@ -312,6 +312,8 @@ def _get_config_scheme() -> Dict:
 
         "emstat": {
             "min_seeders":      Option(default=5, help="Minimal seeders to green color"),
+            "start_if":         Option(default="", help="Condition to start torrent"),
+            "stop_if":          Option(default="", help="Condition to stop torrent"),
             "fail_bad_tracker": Option(default=True, help="Fail on trackers with invalid configuration"),
         },
 

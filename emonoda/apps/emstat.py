@@ -28,6 +28,8 @@ from typing import Dict
 from typing import NamedTuple
 from typing import Optional
 
+from ..plugins.clients import BaseClient
+
 from ..plugins.trackers import TrackerError
 from ..plugins.trackers import TrackerStat
 from ..plugins.trackers import WithStat
@@ -43,6 +45,7 @@ from ..cli import Log
 from . import init
 from . import wrap_main
 from . import get_configured_log
+from . import get_configured_client
 from . import get_configured_trackers
 
 
@@ -188,6 +191,58 @@ def export_stats(stats: List[StatRecord], path: str) -> None:
         }, export_file, indent=4, sort_keys=True)
 
 
+def process_torrents(
+    client: BaseClient,
+    stats: List[StatRecord],
+    start_if: str,
+    stop_if: str,
+    log: Log,
+) -> None:
+
+    if not log.isatty():
+        log.info("Processing torrents start/stop ...")
+        if start_if:
+            log.info("Condition start_if is %r", (start_if,))
+        if stop_if:
+            log.info("Condition stop_if is %r", (stop_if,))
+
+    hashes = client.get_hashes()
+    started = 0
+    stopped = 0
+    ignored = 0
+    errors = 0
+    for record in log.progress(
+        sorted(stats, key=operator.attrgetter("name")),
+        ("Processing torrents", ()),
+        (
+            "Processed {magenta}%d{reset} torrents, started={magenta}%d{reset},"
+            " stopped={magenta}%d{reset}, ignored={magenta}%d{reset}, errors={magenta}%d{reset}",
+            (lambda: len(stats), lambda: started, lambda: stopped, lambda: ignored, lambda: errors),
+        ),
+    ):
+        if record.torrent.get_hash() in hashes:
+            try:
+                if start_if and eval_condition(start_if, record):
+                    client.start_torrent(record.torrent)
+                    started += 1
+                if stop_if and eval_condition(stop_if, record):
+                    client.stop_torrent(record.torrent)
+                    stopped += 1
+            except Exception:
+                log.print("%s", ("\n".join("\t" + row for row in traceback.format_exc().strip().split("\n")),))
+                errors += 1
+        else:
+            ignored += 1
+
+    if not log.isatty():
+        log.info("Processed {magenta}%d{reset} torrents", (len(stats),))
+
+
+def eval_condition(condition: str, record: StatRecord) -> bool:
+    _ = record
+    return eval(condition)  # pylint: disable=eval-used
+
+
 # ===== Main =====
 @wrap_main
 def main() -> None:
@@ -202,10 +257,17 @@ def main() -> None:
     args_parser.add_argument("-x", "--exclude-trackers", default=[], nargs="+", metavar="<tracker>")
     args_parser.add_argument("--fail-on-captcha", action="store_true")
     args_parser.add_argument("--export", default="", metavar="<json_file>")
+    args_parser.add_argument("--dont", action="store_true")
     options = args_parser.parse_args(argv[1:])
 
     with get_configured_log(config, False, sys.stdout) as log_stdout:
         with get_configured_log(config, False, sys.stderr) as log_stderr:
+            client = get_configured_client(
+                config=config,
+                required=True,
+                with_customs=False,
+                log=log_stderr,
+            )
 
             def read_captcha(url: str) -> str:
                 if options.fail_on_captcha:
@@ -230,15 +292,20 @@ def main() -> None:
                 log=log_stderr,
             )
 
-            stats = fetch_stat(
-                trackers=trackers,
-                torrents=torrents,
-                log=log_stderr,
-            )
+            stats = fetch_stat(trackers, torrents, log_stderr)
 
             print_stats_table(stats, config.emstat.min_seeders, log_stdout)
             if options.export:
                 export_stats(stats, options.export)
+
+            if not options.dont and (config.emstat.start_if or config.emstat.stop_if):
+                process_torrents(  # type: ignore
+                    client=client,
+                    stats=stats,
+                    start_if=config.emstat.start_if,
+                    stop_if=config.emstat.stop_if,
+                    log=log_stderr,
+                )
 
 
 if __name__ == "__main__":
