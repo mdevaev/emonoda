@@ -37,14 +37,14 @@ from . import WithStat
 # =====
 class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
     PLUGIN_NAMES = [
+        "nnmclub.to",
         "nnm-club.me",
         "nnm-club.name",
-        "nnmclub.to",
     ]
 
     _NNM_DOMAIN = PLUGIN_NAMES[0]
 
-    _SITE_VERSION = 5
+    _SITE_VERSION = 6
     _SITE_ENCODING = "cp1251"
 
     _SITE_FINGERPRINT_URL = "https://{}".format(_NNM_DOMAIN)
