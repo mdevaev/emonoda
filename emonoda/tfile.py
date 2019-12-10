@@ -155,7 +155,7 @@ class Torrent:
         # http://stackoverflow.com/questions/12479570/given-a-torrent-file-how-do-i-generate-a-magnet-link-in-python
         info_sha1 = hashlib.sha1(bencoder.bencode(self.__bencode[b"info"]))
         info_digest = info_sha1.digest()
-        b32_hash = base64.b32encode(info_digest)
+        b32_hash = base64.b32encode(info_digest).decode()
 
         magnet = "magnet:?xt={}".format(urllib.parse.quote_plus("urn:btih:{}".format(b32_hash)))
         if "name" in extras:
