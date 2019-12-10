@@ -25,7 +25,7 @@ release:
 	make clean
 
 tox:
-	tox
+	tox -q $(if $(E),-e $(E),-p auto)
 
 bump:
 	bumpversion patch

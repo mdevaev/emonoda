@@ -160,8 +160,8 @@ class Plugin(WithStatuses):  # pylint: disable=too-many-instance-attributes
         for (key, value) in email_headers.items():
             msg[key] = value  # type: ignore
 
-        msg.attach(email.mime.text.MIMEText(  # type: ignore
-            _text=body.encode("utf-8"),
+        msg.attach(email.mime.text.MIMEText(
+            _text=body.encode("utf-8"),  # type: ignore
             _subtype=("html" if self.__html else "plain"),
             _charset="utf-8",
         ))

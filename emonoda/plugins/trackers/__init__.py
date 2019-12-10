@@ -186,10 +186,10 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "rfc2109": False,
         }
         params.update(kwargs)
-        self.__cookie_jar.set_cookie(http.cookiejar.Cookie(  # type: ignore
+        self.__cookie_jar.set_cookie(http.cookiejar.Cookie(
             name=name,
             value=value,
-            **params,
+            **params,  # type: ignore
         ))
 
     def _read_url(self, *args: Any, **kwargs: Any) -> bytes:

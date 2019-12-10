@@ -116,7 +116,7 @@ def print_orphaned_files(  # pylint: disable=too-many-locals
         for path in tools.sorted_paths(files):
             size += all_files[path].size
             if reduce_dirs:
-                if path.startswith(common_root + os.path.sep):
+                if path.startswith(common_root + os.path.sep):  # pylint: disable=no-else-continue
                     continue
                 else:
                     common_root = (path if all_files[path].is_dir else "\0")

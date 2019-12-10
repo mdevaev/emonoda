@@ -268,6 +268,7 @@ def main() -> None:
                 with_customs=False,
                 log=log_stderr,
             )
+            assert client
 
             def read_captcha(url: str) -> str:
                 if options.fail_on_captcha:
