@@ -39,7 +39,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
         "torrents.ru",
     ]
 
-    _SITE_VERSION = 6
+    _SITE_VERSION = 7
     _SITE_ENCODING = "cp1251"
     _SITE_RETRY_CODES = [503, 404]
 
@@ -50,7 +50,8 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
     _COMMENT_REGEXP = re.compile(r"https?://rutracker\.org/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
 
     _TORRENT_HASH_URL = "https://rutracker.org/forum/viewtopic.php?t={torrent_id}"
-    _TORRENT_HASH_REGEXP = re.compile(r"<span id=\"tor-hash\">(?P<torrent_hash>[a-fA-F0-9]{40})</span>")
+    _TORRENT_HASH_REGEXP = re.compile(r"<a href=\"magnet:\?xt=urn:btih:(?P<torrent_hash>[a-fA-F0-9]{40})&[^\"]+\""
+                                      r" class=\"med magnet-link\" data-topic_id=\"\d+\"")
 
     _STAT_URL = _TORRENT_HASH_URL
     _STAT_OK_REGEXP = _TORRENT_HASH_REGEXP
