@@ -88,7 +88,7 @@ class _SocksConnection(HTTPConnection):
         self.sock = socks.socksocket()
         self.sock.setproxy(*self.__proxy_args)
         timeout = self.timeout  # type: ignore
-        if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:  # pylint: disable=protected-access
+        if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:  # type: ignore  # pylint: disable=protected-access
             self.sock.settimeout(timeout)
         self.sock.connect((self.host, self.port))  # type: ignore
 
@@ -110,7 +110,7 @@ class SocksHandler(HTTPHandler, HTTPSHandler):
         def build(
             host: str,
             port: Optional[int]=None,
-            timeout: int=socket._GLOBAL_DEFAULT_TIMEOUT,  # pylint: disable=protected-access
+            timeout: int=socket._GLOBAL_DEFAULT_TIMEOUT,  # type: ignore  # pylint: disable=protected-access
         ) -> _SocksConnection:
 
             connection = _SocksConnection(host, port=port, timeout=timeout, **self.__kwargs)
@@ -123,7 +123,7 @@ class SocksHandler(HTTPHandler, HTTPSHandler):
         def build(
             host: str,
             port: Optional[int]=None,
-            timeout: int=socket._GLOBAL_DEFAULT_TIMEOUT,  # pylint: disable=protected-access
+            timeout: int=socket._GLOBAL_DEFAULT_TIMEOUT,  # type: ignore  # pylint: disable=protected-access
         ) -> _SocksSecureConnection:
 
             connection = _SocksSecureConnection(host, port=port, timeout=timeout, **self.__kwargs)
