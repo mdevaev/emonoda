@@ -25,9 +25,9 @@ optdepends=(
 )
 makedepends=("python-setuptools" "cython" "wget")
 source=(
-    "${pkgname}-${pkgver}.tar.gz"::${url}/archive/v${pkgver}.tar.gz
+    "${pkgname}-${pkgver}"::git+${url}#tag=v${pkgver}
 )
-sha256sums=('43e17d16c59c870696ee56e193a171033c60f9ce55a76ffb6e878d498bb9d356')
+sha256sums=('SKIP')
 
 build() {
 	cd "${srcdir}/${pkgname}-${pkgver}"
