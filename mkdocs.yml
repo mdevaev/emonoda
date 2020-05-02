@@ -41,7 +41,7 @@ markdown_extensions:
     - markdown_include.include:
         base_path: docs
 
-pages:
+nav:
     - "Emonoda -- 得物だ": index.md
     - "Настройка":
         - "Общие принципы настройки": config.md
