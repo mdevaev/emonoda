@@ -12,6 +12,7 @@ copyright: "Copyright &copy; 2018 Maxim Devaev"
 
 theme:
     name: material
+    language: ru
     custom_dir: docs/theme
     feature:
         tabs: false
@@ -19,9 +20,14 @@ theme:
         primary: blue grey
         accent: pink
 
+plugins:
+  - search:
+      lang:
+        - ru
+
 extra:
     social:
-        - type: github-alt
+        - icon: fontawesome/brands/github-alt
           link: https://github.com/mdevaev/emonoda
     search:
         language: "en, ru"
