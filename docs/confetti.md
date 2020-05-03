@@ -211,7 +211,8 @@ confetti:
 Включаются плагином `matrix`. Для отправки уведомлений используется API.
 
 !!! warning
-    End-to-end шифрование плагином **не** поддерживается!
+    * Для работы плагина необходим питоновый модуль [`matrix-nio`](https://matrix-nio.readthedocs.io/en/latest/#installation)
+    * End-to-end шифрование плагином **не** поддерживается!
 
 1. Чтобы отправлять себе сообщения, необходимо зарегистрировать аккаунт, от лица которого они будут отправляться. Для примера - вы создали пользователя `@emonoda:some.example.com` - имя пользователя `emonoda` на homeserver'е `some.example.com` - c паролём `very[in]S1cureP@ss`.
 2. После регистрации зайдите в созданный аккаунт через клиент (например - в [этот](https://riot.im/app) в приватной вкладке браузера).
@@ -224,24 +225,24 @@ confetti:
 confetti:
     matrix:
         homeserver_url: 'some.example.com'
-        username: '@emonoda:some.example.com'
-        password: 'very[in]S1cureP@ss'
+        user: '@emonoda:some.example.com'
+        passwd: 'very[in]S1cureP@ss'
         room_ids:
             - '!SomELoNgLEtteRsSeq:some.example.org'
 ```
 
 !!! warning
-    Обратите внимание, что некоторые параметры содержат символ двоеточия **`:`**, который является элементом синтаксиса в `YAML`. Потому все значения с этим символом должны быть в кавычках - пример: `username: '@emonoda:some.example.com'`.
+    Обратите внимание, что некоторые параметры содержат символ двоеточия **`:`**, который является элементом синтаксиса в `YAML`. Потому все значения с этим символом должны быть в кавычках - пример: `user: '@emonoda:some.example.com'`.
 
 Параметры конфигурации:
 
 * **`confetti/matrix/homeserver_url=https://matrix.org`**
     * Адрес homeserver, через который вы будете работать с сетью Matrix.
 
-* **`confetti/matrix/username=CHANGE_ME`**
+* **`confetti/matrix/user=CHANGE_ME`**
     * Имя пользователя от имени которого будут отправляться уведомления. **Должно** быть в форме **`@somename:example.com`**
 
-* **`confetti/matrix/password=CHANGE_ME`**
+* **`confetti/matrix/passwd=CHANGE_ME`**
     * Пароль для этого имени пользователя
 
 * **`confetti/matrix/room_ids=[]`**
@@ -291,4 +292,4 @@ Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
 ***
 ### Тестирование оповещений
 
-После настройки всех оповещений вы можете протестировать их с помощью команды [emconfetti-demo](/emconfetti-demo). Данная команда генерирует демо-сообщения и их всеми способами, указанными в секции `confetti`.
+После настройки всех оповещений вы можете протестировать их с помощью команды [emconfetti-demo](/emconfetti-demo). Данная команда генерирует демо-сообщения и отсылает их всеми способами, указанными в секции `confetti`.
