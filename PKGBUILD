@@ -3,7 +3,7 @@
 
 
 pkgname=emonoda
-pkgver=2.1.29
+pkgver=2.1.30
 pkgrel=1
 pkgdesc="A set of tools to organize and manage your torrents"
 url="https://github.com/mdevaev/emonoda"
