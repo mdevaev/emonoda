@@ -18,6 +18,10 @@
 """
 
 
+import textwrap
+
+import setuptools.command.easy_install
+
 from setuptools import setup
 from setuptools.extension import Extension
 
@@ -25,7 +29,45 @@ from Cython.Build import cythonize
 
 
 # =====
+class _ScriptWriter(setuptools.command.easy_install.ScriptWriter):
+    template = textwrap.dedent("""
+        # EASY-INSTALL-ENTRY-SCRIPT: {spec},{group},{name}
+
+        __requires__ = "{spec}"
+
+        from {module} import main
+
+        if __name__ == "__main__":
+            main()
+    """).strip()
+
+    @classmethod
+    def get_args(cls, dist, header=None):  # type: ignore
+        if header is None:
+            header = cls.get_header()
+        spec = str(dist.as_requirement())
+        for group_type in ["console", "gui"]:
+            group = group_type + "_scripts"
+            for (name, ep) in dist.get_entry_map(group).items():
+                cls._ensure_safe_name(name)
+                script_text = cls.template.format(
+                    spec=spec,
+                    group=group,
+                    name=name,
+                    module=ep.module_name,
+                )
+                yield from cls._get_script_args(group_type, name, header, script_text)
+
+
+_ = _ScriptWriter.get_args  # Makes vulture happy
+
+
+# =====
 def main() -> None:
+    setuptools.command.easy_install.ScriptWriter = _ScriptWriter
+    setuptools.command.easy_install.get_script_args = _ScriptWriter.get_script_args
+    setuptools.command.easy_install.get_script_header = _ScriptWriter.get_script_header
+
     with open("requirements.txt") as requirements_file:
         install_requires = list(filter(None, requirements_file.read().splitlines()))
 
