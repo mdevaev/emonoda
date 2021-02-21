@@ -10,8 +10,8 @@ url="https://github.com/mdevaev/emonoda"
 license=(GPL)
 arch=(any)
 depends=(
-	"python>=3.8"
-	"python<3.9"
+	"python>=3.9"
+	"python<3.10"
 	python-chardet
 	python-yaml
 	python-colorama
