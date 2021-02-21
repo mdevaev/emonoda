@@ -44,7 +44,7 @@ def get_summary(server: xmlrpc.client.ServerProxy, hashes: List[str]) -> Dict[st
     for torrent_hash in hashes:
         for (method_name, _) in mapping:
             getattr(mc.d, method_name)(torrent_hash)
-    rows = list(mc())
+    rows = list(mc())  # type: ignore
     rows = list(
         dict(zip(map(operator.itemgetter(1), mapping), rows[count:count + len(mapping)]))
         for count in range(0, len(rows), len(mapping))
@@ -76,7 +76,7 @@ def print_stat(client_url: str, host: str, interval: float, with_dht: bool, with
         mc.throttle.global_up.total()  # Uploaded
         mc.dht.statistics()
         mc.download_list()
-        values = list(mc())
+        values = list(mc())  # type: ignore
 
         metrics = [
             ("gauge-dn_rate",       values[0]),

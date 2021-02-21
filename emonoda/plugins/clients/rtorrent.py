@@ -105,7 +105,7 @@ class Plugin(WithCustoms):
         retries = self.__load_retries
         while True:
             try:
-                assert self.__server.d.hash(torrent_hash).lower() == torrent_hash
+                assert self.__server.d.hash(torrent_hash).lower() == torrent_hash  # type: ignore
                 break
             except xmlrpc.client.Fault as err:
                 if err.faultCode != _XMLRPC_UNKNOWN_HASH:
@@ -127,7 +127,7 @@ class Plugin(WithCustoms):
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
         try:
-            assert self.__server.d.hash(torrent_hash).lower() == torrent_hash
+            assert self.__server.d.hash(torrent_hash).lower() == torrent_hash  # type: ignore
             return True
         except xmlrpc.client.Fault as err:
             if err.faultCode != _XMLRPC_UNKNOWN_HASH:
@@ -135,7 +135,7 @@ class Plugin(WithCustoms):
         return False
 
     def get_hashes(self) -> List[str]:
-        return list(map(str.lower, self.__server.download_list()))
+        return list(map(str.lower, self.__server.download_list()))  # type: ignore
 
     @hash_or_torrent
     @_catch_unknown_torrent
@@ -143,13 +143,13 @@ class Plugin(WithCustoms):
         mc = xmlrpc.client.MultiCall(self.__server)
         mc.d.directory(torrent_hash)
         mc.d.is_multi_file(torrent_hash)
-        (path, is_multi_file) = mc()
-        if is_multi_file:
-            path = os.path.dirname(os.path.normpath(path))
+        (path, is_multi_file) = mc()  # type: ignore
+        if is_multi_file:  # type: ignore
+            path = os.path.dirname(os.path.normpath(path))  # type: ignore
         return path
 
     def get_data_prefix_default(self) -> str:
-        return self.__server.directory.default()
+        return self.__server.directory.default()  # type: ignore
 
     # =====
 
@@ -160,15 +160,15 @@ class Plugin(WithCustoms):
         mc.d.directory(torrent_hash)
         mc.d.name(torrent_hash)
         mc.d.is_multi_file(torrent_hash)
-        (path, name, is_multi_file) = mc()
-        if is_multi_file:
-            return path
-        return os.path.join(path, name)
+        (path, name, is_multi_file) = mc()  # type: ignore
+        if is_multi_file:  # type: ignore
+            return path  # type: ignore
+        return os.path.join(path, name)  # type: ignore
 
     @hash_or_torrent
     @_catch_unknown_torrent
     def get_file_name(self, torrent_hash: str) -> str:
-        return self.__server.d.name(torrent_hash)
+        return self.__server.d.name(torrent_hash)  # type: ignore
 
     @hash_or_torrent
     @_catch_unknown_torrent
@@ -178,7 +178,7 @@ class Plugin(WithCustoms):
         mc.d.is_multi_file(torrent_hash)
         mc.d.size_files(torrent_hash)
         mc.f.size_bytes(torrent_hash, 0)
-        (base_file_name, is_multi_file, count, first_file_size) = tuple(mc())
+        (base_file_name, is_multi_file, count, first_file_size) = tuple(mc())  # type: ignore
 
         if not is_multi_file:
             return {base_file_name: TorrentEntryAttrs.file(first_file_size)}
@@ -187,7 +187,7 @@ class Plugin(WithCustoms):
         for index in range(count):
             mc.f.path(torrent_hash, index)
             mc.f.size_bytes(torrent_hash, index)
-        flist = list(mc())
+        flist = list(mc())  # type: ignore
         flist = list(zip(flist[::2], flist[1::2]))
 
         files = build_files(base_file_name, flist)
@@ -217,4 +217,4 @@ class Plugin(WithCustoms):
         mc = xmlrpc.client.MultiCall(self.__server)
         for key in keys:
             getattr(mc.d, "custom{}".format(key[1:]))(torrent_hash)
-        return dict(zip(keys, list(mc())))
+        return dict(zip(keys, list(mc())))  # type: ignore
