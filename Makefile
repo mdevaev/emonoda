@@ -42,7 +42,8 @@ mkdocs-release:
 
 pypi:
 	python3 setup.py register
-	python3 setup.py sdist upload
+	python3 setup.py sdist
+	twine upload dist/*
 
 clean:
 	rm -rf build site dist pkg src *.egg-info emonoda-*.tar.gz
