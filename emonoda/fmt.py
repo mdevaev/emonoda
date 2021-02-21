@@ -61,9 +61,9 @@ def format_progress_bar(value: int, limit: int, length: int) -> Tuple[str, Tuple
         color = "red"
     else:
         color = "green"
-    fill = int(value / limit * length)
+    fill = int(value / (limit or 1) * length)
     pb = "{{cyan}}{percent:5.1f}%% {{{color}}}[{bar}{{reset}}{fill}{{{color}}}]{{reset}} {progress}".format(
-        percent=value / limit * 100,
+        percent=value / (limit or 1) * 100,
         color=color,
         bar="\u2588" * fill,
         fill="\u00b7" * (length - fill),
