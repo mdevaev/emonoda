@@ -124,7 +124,8 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "timeout":           Option(default=10.0, help="Timeout for HTTP client"),
             "retries":           Option(default=20, help="The number of retries to handle tracker-specific HTTP errors"),
             "retries_sleep":     Option(default=1.0, help="Sleep interval between failed retries"),
-            "user_agent":        Option(default="Mozilla/5.0", help="User-Agent for site"),
+            "user_agent":        Option(default="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko)"
+                                                " Chrome/88.0.4324.150 Safari/537.36", help="User-Agent for site"),
             "proxy_url":         Option(default="", help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
             "check_fingerprint": Option(default=True, help="Check the site fingerprint"),
             "check_version":     Option(default=True, help="Check the tracker version from GitHub"),
