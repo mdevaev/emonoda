@@ -161,6 +161,9 @@ class Plugin(BaseClient):
         flist = [
             (item["name"], item["size"])
             for item in self.__get_files(torrent_hash).values()
+        ] if transmissionrpc.project is "original" else [
+            (item.name, item.size)
+            for item in self.__get_files(torrent_hash)
         ]
         return build_files("", flist)
 
