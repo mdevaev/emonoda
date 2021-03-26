@@ -40,13 +40,21 @@ from . import build_files
 try:
     import transmissionrpc
 except ImportError:
-    transmissionrpc = None
+    try:
+        import transmission_rpc as transmissionrpc
+    except ImportError:
+        transmissionrpc = None
+    else:
+        transmissionrpc.project = "forked"
+else:
+    transmissionrpc.project = "original"
 
 
 # =====
 class Plugin(BaseClient):
     # API description:
     #   http://pythonhosted.org/transmissionrpc/
+    #   (or https://transmission-rpc.readthedocs.io for forked version)
     #   https://trac.transmissionbt.com/browser/trunk/extras/rpc-spec.txt
 
     PLUGIN_NAMES = ["transmission"]
@@ -65,12 +73,20 @@ class Plugin(BaseClient):
         if transmissionrpc is None:
             raise RuntimeError("Required module transmissionrpc")
 
-        self._client = transmissionrpc.Client(
-            address=url,
-            user=(user or None),
-            password=(passwd or None),
-            timeout=timeout,
-        )
+        if transmissionrpc.project is "original":
+            self._client = transmissionrpc.Client(
+                address=url,
+                user=(user or None),
+                password=(passwd or None),
+                timeout=timeout,
+            )
+        elif transmissionrpc.project is "forked":
+            self._client = transmissionrpc.Client(
+                host=url,
+                username=(user or None),
+                password=(passwd or None),
+                timeout=timeout,
+            )
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
@@ -145,6 +161,9 @@ class Plugin(BaseClient):
         flist = [
             (item["name"], item["size"])
             for item in self.__get_files(torrent_hash).values()
+        ] if transmissionrpc.project is "original" else [
+            (item.name, item.size)
+            for item in self.__get_files(torrent_hash)
         ]
         return build_files("", flist)
 
