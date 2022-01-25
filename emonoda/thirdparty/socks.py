@@ -67,7 +67,6 @@ import struct
 from errno import EOPNOTSUPP, EINVAL, EAGAIN
 from io import BytesIO
 from os import SEEK_CUR
-from collections import Callable
 
 PROXY_TYPE_SOCKS4 = SOCKS4 = 1
 PROXY_TYPE_SOCKS5 = SOCKS5 = 2
@@ -200,7 +199,7 @@ for name in ("sendto", "send", "recvfrom", "recv"):
     # as a function in the class.
     # Python 2 uses __slots__, so there are descriptors for each method,
     # but they are not functions.
-    if not isinstance(method, Callable):
+    if not callable(method):
         _BaseSocket._savenames.append(name)
         setattr(_BaseSocket, name, _makemethod(name))
 
