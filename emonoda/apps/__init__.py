@@ -167,7 +167,7 @@ def wrap_main(method: Callable[..., None]) -> Callable[..., None]:
 def validate_client_customs(client: C_WithCustoms, customs: List[str]) -> None:
     invalid = sorted(set(customs).difference(client.get_custom_keys()))
     if invalid:
-        raise RuntimeError("Invalid custom keys: {}".format(", ".join(invalid)))
+        raise RuntimeError(f"Invalid custom keys: {', '.join(invalid)}")
 
 
 def _merge_dicts(dest: Dict, src: Dict) -> None:

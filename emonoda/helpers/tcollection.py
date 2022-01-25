@@ -93,4 +93,4 @@ def _find_torrent_or_hash(path: str, item: str, pass_hash: bool) -> Union[Torren
             return Torrent(path=full_path)
     if pass_hash and is_torrent_hash(item.strip()):
         return item.strip()
-    raise RuntimeError("Can't find torrent: {}".format(item))
+    raise RuntimeError(f"Can't find torrent: {item}")

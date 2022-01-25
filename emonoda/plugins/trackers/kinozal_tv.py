@@ -85,10 +85,10 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId, WithStat):
         date_match = self._assert_logic_re_search(
             regexp=re.compile(r"<li>(Обновлен|Залит)<span class=\"floatright green n\">"
                               r"(\d{1,2}) ([А-Яа-я]{3,8}) (\d{4}) в (\d{2}:\d{2})</span></li>"),
-            text=self._decode(self._read_url("http://kinozal.tv/details.php?id={}".format(torrent_id))),
+            text=self._decode(self._read_url(f"http://kinozal.tv/details.php?id={torrent_id}")),
             msg="Upload date not found",
         )
-        date_str = "%s %s %s %s %s" % (
+        date_str = " ".join([
             date_match.group(2),  # Day
             {
                 "января":   "01",
@@ -107,7 +107,7 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByTorrentId, WithStat):
             date_match.group(4),  # Year
             date_match.group(5),  # Time
             datetime.now(self._tzinfo).strftime("%z")  # Timezone offset
-        )
+        ])
         upload_time = int(datetime.strptime(date_str, "%d %m %Y %H:%M %z").strftime("%s"))
         return upload_time
 

@@ -33,9 +33,9 @@ def build_raw_from_options(options: List[str]) -> Dict[str, Any]:
     for option in options:
         (key, value) = (option.split("=", 1) + [None])[:2]  # type: ignore
         if len(key.strip()) == 0:
-            raise ValueError("Empty option key (required 'key=value' instead of '{}')".format(option))
+            raise ValueError(f"Empty option key (required 'key=value' instead of {option!r})")
         if value is None:
-            raise ValueError("No value for key '{}'".format(key))
+            raise ValueError(f"No value for key {key!r}")
 
         section = raw
         subs = list(map(str.strip, key.split("/")))
@@ -53,7 +53,7 @@ def _parse_value(value: str) -> Any:
         and value not in ["true", "false", "null"]
         and not value.startswith(("{", "[", "\""))
     ):
-        value = "\"{}\"".format(value)
+        value = f"\"{value}\""
     return json.loads(value)
 
 
@@ -105,7 +105,7 @@ class SecretOption(Option):
 # =====
 def make_config(raw: Dict[str, Any], scheme: Dict[str, Any], _keys: Tuple[str, ...]=()) -> Section:
     if not isinstance(raw, dict):
-        raise ValueError("The node '{}' must be a dictionary".format("/".join(_keys) or "/"))
+        raise ValueError(f"The node '{'/'.join(_keys) or '/'}' must be a dictionary")
 
     config = Section()
     for (key, option) in scheme.items():
@@ -117,7 +117,7 @@ def make_config(raw: Dict[str, Any], scheme: Dict[str, Any], _keys: Tuple[str, .
             try:
                 value = option.type(value)
             except Exception:
-                raise ValueError("Invalid value '{value}' for key '{key}'".format(key=full_name, value=value))
+                raise ValueError(f"Invalid value {value!r} for key {full_name!r}")
             config[key] = value
             config._set_meta(  # pylint: disable=protected-access
                 name=key,
@@ -128,6 +128,6 @@ def make_config(raw: Dict[str, Any], scheme: Dict[str, Any], _keys: Tuple[str, .
         elif isinstance(option, dict):
             config[key] = make_config(raw.get(key, {}), option, full_key)
         else:
-            raise RuntimeError("Incorrect scheme definition for key '{}':"
-                               " the value is {}, not dict or [Secret]Option()".format(full_name, type(option)))
+            raise RuntimeError(f"Incorrect scheme definition for key {full_name!r}:"
+                               f" the value is {type(option)}, not dict or [Secret]Option()")
     return config

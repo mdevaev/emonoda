@@ -35,6 +35,7 @@ disable =
 	no-else-return,
 	len-as-condition,
 	raise-missing-from,
+	unspecified-encoding,
 
 [REPORTS]
 msg-template={symbol} -- {path}:{line}({obj}): {msg}

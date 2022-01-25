@@ -74,7 +74,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByTorrentId, WithSt
 
         date_match = self._assert_logic_re_search(
             regexp=re.compile(r"<span title=\"Зарегистрирован\">\[ (\d\d-([а-яА-Я]{3})-\d\d \d\d:\d\d:\d\d) \]</span>"),
-            text=self._decode(self._read_url("https://pornolab.net/forum/viewtopic.php?t={}".format(torrent_id))),
+            text=self._decode(self._read_url(f"https://pornolab.net/forum/viewtopic.php?t={torrent_id}")),
             msg="Upload date not found",
         )
         date = date_match.group(1)

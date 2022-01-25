@@ -129,7 +129,7 @@ class Plugin(BaseClient):
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
-        return bool(json.loads(self.__get("/query/torrents?hashes={}".format(torrent_hash))))
+        return bool(json.loads(self.__get(f"/query/torrents?hashes={torrent_hash}")))
 
     def get_hashes(self) -> List[str]:
         return [
@@ -160,7 +160,7 @@ class Plugin(BaseClient):
         try:
             return build_files("", [
                 (item["name"], item["size"])
-                for item in json.loads(self.__get("/query/propertiesFiles/{}".format(torrent_hash)))
+                for item in json.loads(self.__get(f"/query/propertiesFiles/{torrent_hash}"))
             ])
         except urllib.error.HTTPError as err:
             if err.code == 404:
@@ -170,7 +170,7 @@ class Plugin(BaseClient):
     # =====
 
     def __get_torrent_props(self, torrent_hash: str) -> Dict[str, Any]:
-        result = json.loads(self.__get("/query/torrents?hashes={}".format(torrent_hash)))
+        result = json.loads(self.__get(f"/query/torrents?hashes={torrent_hash}"))
         assert len(result) >= 0, (torrent_hash, result)
         if len(result) == 0:
             raise NoSuchTorrentError("Unknown torrent hash")
@@ -192,7 +192,7 @@ class Plugin(BaseClient):
             files=files,
         ).decode("utf-8")
         if page.lower().startswith("fails"):
-            raise RuntimeError("{} error: {}".format(path, page.strip()))
+            raise RuntimeError(f"{path} error: {page.strip()}")
 
     def __read_handle(
         self,

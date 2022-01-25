@@ -66,7 +66,7 @@ class Plugin(WithLogin, WithCheckTime):
 
         date = self._assert_logic_re_search(
             regexp=re.compile(r"<li><b>Дата:</b> ([^,\s]+, \d\d:\d\d)</li>"),
-            text=self._decode(self._read_url("https://tr.anidub.com/?newsid={}".format(torrent_id))),
+            text=self._decode(self._read_url(f"https://tr.anidub.com/?newsid={torrent_id}")),
             msg="Upload date not found",
         ).group(1)
 
@@ -84,13 +84,13 @@ class Plugin(WithLogin, WithCheckTime):
 
     def fetch_new_data(self, torrent: Torrent) -> bytes:
         torrent_id = self._assert_match(torrent)
-        page = self._decode(self._read_url("https://tr.anidub.com/?newsid={}".format(torrent_id)))
+        page = self._decode(self._read_url(f"https://tr.anidub.com/?newsid={torrent_id}"))
         downloads = set(map(int, re.findall(r"<a href=\"/engine/download.php\?id=(\d+)\" class=\" \">", page)))
         candidates: Dict[str, List[Tuple[Torrent, str]]] = {}
         for download_id in downloads:
             data = self._assert_valid_data(self._read_url(
-                url="https://tr.anidub.com/engine/download.php?id={}".format(download_id),
-                headers={"Referer": "https://tr.anidub.com/?newsid={}".format(torrent_id)},
+                url=f"https://tr.anidub.com/engine/download.php?id={download_id}",
+                headers={"Referer": f"https://tr.anidub.com/?newsid={torrent_id}"},
             ))
             candidate = Torrent(data=data)
 
@@ -99,9 +99,9 @@ class Plugin(WithLogin, WithCheckTime):
             candidates[name].append((candidate, str(download_id)))
 
         name = torrent.get_name()
-        self._assert_logic(name in candidates, "Can't find torrent named '{}' in downloads".format(name))
-        self._assert_logic(len(candidates[name]) == 1, "Too many variants to download: {}".format(
-                                                       ", ".join(map(operator.itemgetter(1), candidates[name]))))
+        self._assert_logic(name in candidates, f"Can't find torrent named {name!r} in downloads")
+        self._assert_logic(len(candidates[name]) == 1,
+                           f"Too many variants to download: {', '.join(map(operator.itemgetter(1), candidates[name]))}")
         return candidates[name][0][0].get_data()
 
     def login(self) -> None:
@@ -112,5 +112,5 @@ class Plugin(WithLogin, WithCheckTime):
                 "login_password":  self._encode(self._passwd),
                 "login":           b"submit",
             },
-            ok_text="<li><a href=\"https://tr.anidub.com/user/{}/\">Мой профиль</a></li>".format(self._user)
+            ok_text=f"<li><a href=\"https://tr.anidub.com/user/{self._user}/\">Мой профиль</a></li>"
         )

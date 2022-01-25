@@ -159,12 +159,12 @@ class Log:
                 now = time.time()
                 if prev + refresh < now:
                     (pb, pb_placeholders) = fmt.format_progress_bar(current, len(items), length)
-                    self.info("{} :: {}".format(pb, wip[0]), pb_placeholders + wip[1], one_line=True)
+                    self.info(f"{pb} :: {wip[0]}", pb_placeholders + wip[1], one_line=True)
                     prev = now
                 yield item
 
             (pb, pb_placeholders) = fmt.format_progress_bar(current, len(items), length)
-            self.info("{} :: {}".format(pb, finish[0]), pb_placeholders + finish[1])
+            self.info(f"{pb} :: {finish[0]}", pb_placeholders + finish[1])
 
         else:
             yield from iterable

@@ -78,7 +78,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckTime, WithFetchByDownloadId, WithS
         date = self._assert_logic_re_search(
             regexp=re.compile(r"<td width=\"70%\">\s*Зарегистрирован &nbsp;\s*\[ <span title=\"\">"
                               r"(\d\d-\d\d-\d\d\d\d \d\d:\d\d)</span> ]\s*</td>"),
-            text=self._decode(self._read_url("http://trec.to/viewtopic.php?p={}".format(torrent_id))),
+            text=self._decode(self._read_url(f"http://trec.to/viewtopic.php?p={torrent_id}")),
             msg="Upload date not found",
         ).group(1)
         date += " " + datetime.now(self._tzinfo).strftime("%z")

@@ -129,7 +129,7 @@ def main() -> None:
         classifiers=[
             "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
             "Development Status :: 5 - Production/Stable",
-            "Programming Language :: Python :: 3.6",
+            "Programming Language :: Python :: 3.10",
             "Programming Language :: Cython",
             "Topic :: Software Development :: Libraries :: Python Modules",
             "Topic :: Communications :: File Sharing",

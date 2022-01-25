@@ -122,7 +122,7 @@ def format_client_customs(torrent: Torrent, client: Optional[WithCustoms], custo
     if len(customs) != 0:
         try:
             return " ".join(sorted(
-                "{}={}".format(key, shlex.quote(str(value or "")))
+                key + "=" + shlex.quote(str(value or ""))
                 for (key, value) in client.get_customs(torrent, customs).items()
             ))
         except NoSuchTorrentError:

@@ -41,7 +41,7 @@ def format_size(size: int) -> str:
         exponent = min(int(math.log(size, 1024)), len(_UNITS) - 1)
         quotient = float(size) / 1024 ** exponent
         (unit, decimals) = _UNITS[exponent]
-        result = ("{:.%sf} {}" % (decimals)).format(quotient, unit)
+        result = ("{:.%sf} {}" % (decimals)).format(quotient, unit)  # pylint: disable=consider-using-f-string
     elif size == 0:
         result = "0 bytes"
     elif size == 1:
@@ -52,7 +52,7 @@ def format_size(size: int) -> str:
 
 
 def format_progress(value: int, limit: int) -> Tuple[str, Tuple[int, int]]:
-    return (("{cyan}%%%dd/{yellow}" % (len(str(limit)))) + "%d{reset}", (value, limit))
+    return (("{cyan}%%%dd/{yellow}" % (len(str(limit)))) + "%d{reset}", (value, limit))  # pylint: disable=consider-using-f-string
 
 
 def format_progress_bar(value: int, limit: int, length: int) -> Tuple[str, Tuple[int, int]]:

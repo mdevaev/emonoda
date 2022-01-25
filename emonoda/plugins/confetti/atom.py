@@ -92,8 +92,8 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
         if self.__gid > -1:
             if self.__gid not in get_user_groups(getpass.getuser()):
                 raise UserError(
-                    "I wouldn't be able to edit {path} with current user if I chown it for "
-                    "uid={uid} and gid={gid}".format(path=path, uid=self.__uid, gid=self.__gid),
+                    f"I wouldn't be able to edit {path} with current user if I chown it for"
+                    f" uid={self.__uid} and gid={self.__gid}"
                 )
         self.__template_path = template
         self.__html = html
@@ -115,7 +115,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             results_set: List[ResultsType] = []
             try:
                 with open(self.__history_path) as history_file:
-                    results_set = yaml.load(history_file)
+                    results_set = yaml.safe_load(history_file)
             except Exception:
                 traceback.print_exc()
             results["ctime"] = time.time()  # type: ignore

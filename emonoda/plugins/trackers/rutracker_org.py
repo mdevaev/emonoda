@@ -72,10 +72,10 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
         torrent_id = self._assert_match(torrent)
         self._set_cookie("bb_dl", torrent_id, path="/forum/", secure=True)
         return self._assert_valid_data(self._read_url(
-            url="https://rutracker.org/forum/dl.php?t={}".format(torrent_id),
+            url=f"https://rutracker.org/forum/dl.php?t={torrent_id}",
             data=b"",
             headers={
-                "Referer": "https://rutracker.org/forum/viewtopic.php?t={}".format(torrent_id),
+                "Referer": f"https://rutracker.org/forum/viewtopic.php?t={torrent_id}",
                 "Origin":  "https://rutracker.org",
             }
         ))
@@ -105,7 +105,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
                 msg="Unknown cap_code",
             ).group(1)
 
-            post[cap_code] = self._encode(self._captcha_decoder("https://{}".format(cap_static_match.group(1))))
+            post[cap_code] = self._encode(self._captcha_decoder(f"https://{cap_static_match.group(1)}"))
             post["cap_sid"] = self._encode(cap_sid)
 
             page = self.__read_login(post)

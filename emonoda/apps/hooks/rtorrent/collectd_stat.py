@@ -113,7 +113,7 @@ def print_stat(client_url: str, host: str, interval: float, with_dht: bool, with
             ]
 
         for (key, value) in metrics:
-            print("PUTVAL {}/rtorrent/{} interval={} N:{}".format(host, key, interval, value), flush=True)
+            print(f"PUTVAL {host}/rtorrent/{key} interval={interval} N:{value}", flush=True)
         time.sleep(interval)
 
 

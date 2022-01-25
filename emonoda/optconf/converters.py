@@ -18,7 +18,7 @@ def as_string_list_choices(values: Union[str, Sequence], choices: List[str]) -> 
     values = as_string_list(values)
     invalid = sorted(set(values).difference(choices))
     if invalid:
-        raise ValueError("Incorrect values: %r" % (invalid))
+        raise ValueError(f"Incorrect values: {invalid!r}")
     return values
 
 

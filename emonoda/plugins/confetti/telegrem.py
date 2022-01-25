@@ -83,7 +83,7 @@ class Plugin(WithWeb, WithStatuses):
         for chat_id in self.__chats:
             for msg in messages:
                 self._read_url(
-                    url="https://api.telegram.org/bot{}/sendMessage".format(self.__token),
+                    url=f"https://api.telegram.org/bot{self.__token}/sendMessage",
                     data=urllib.parse.urlencode({
                         "chat_id": chat_id,
                         "text": msg,
@@ -95,7 +95,7 @@ class Plugin(WithWeb, WithStatuses):
     def get_last_chats(self, limit: int) -> List[Tuple[str, str]]:  # XXX: Only for emonoda.apps.emconfetti_tghi
         last_chats: List[Tuple[str, str]] = []
         for update in json.loads(self._read_url(
-            url="https://api.telegram.org/bot{}/getUpdates?limit={}".format(self.__token, limit),
+            url=f"https://api.telegram.org/bot{self.__token}/getUpdates?limit={limit}",
         ).decode("utf-8"))["result"]:
             if "edited_message" in update:
                 update["message"] = update["edited_message"]

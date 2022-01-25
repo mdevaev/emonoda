@@ -47,19 +47,19 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
     _SITE_VERSION = 6
     _SITE_ENCODING = "cp1251"
 
-    _SITE_FINGERPRINT_URL = "https://{}".format(_NNM_DOMAIN)
-    _SITE_FINGERPRINT_TEXT = "<link rel=\"canonical\" href=\"http://{}/\">".format(_NNM_DOMAIN)
+    _SITE_FINGERPRINT_URL = f"https://{_NNM_DOMAIN}"
+    _SITE_FINGERPRINT_TEXT = f"<link rel=\"canonical\" href=\"http://{_NNM_DOMAIN}/\">"
 
     _COMMENT_REGEXP = re.compile(r"https?://(nnm-club\.(me|ru|name|tv|lib)|nnmclub\.to)"
                                  r"/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
-    _TIMEZONE_URL = "https://{}/forum/profile.php?mode=editprofile".format(_NNM_DOMAIN)
+    _TIMEZONE_URL = f"https://{_NNM_DOMAIN}/forum/profile.php?mode=editprofile"
     _TIMEZONE_REGEXP = re.compile(r"selected=\"selected\">(?P<timezone>GMT [+-] [\d:]+)")
     _TIMEZONE_PREFIX = "Etc/"
 
-    _DOWNLOAD_ID_URL = "https://{}/forum/viewtopic.php?p={{torrent_id}}".format(_NNM_DOMAIN)
+    _DOWNLOAD_ID_URL = f"https://{_NNM_DOMAIN}/forum/viewtopic.php?p={{torrent_id}}"
     _DOWNLOAD_ID_REGEXP = re.compile(r"filelst.php\?attach_id=(?P<download_id>[a-zA-Z0-9]+)")
-    _DOWNLOAD_URL = "https://{}//forum/download.php?id={{download_id}}".format(_NNM_DOMAIN)
+    _DOWNLOAD_URL = f"https://{_NNM_DOMAIN}//forum/download.php?id={{download_id}}"
 
     _STAT_URL = _DOWNLOAD_ID_URL
     _STAT_OK_REGEXP = _DOWNLOAD_ID_REGEXP
@@ -83,7 +83,7 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
         date = self._assert_logic_re_search(
             regexp=re.compile(r"<td class=\"genmed\">&nbsp;Зарегистрирован:&nbsp;</td>"
                               r"\s*<td class=\"genmed\">&nbsp;(\d{1,2} ... \d{4} \d\d:\d\d:\d\d)</td>"),
-            text=self._decode(self._read_url("https://{}/forum/viewtopic.php?p={}".format(self._NNM_DOMAIN, torrent_id))),
+            text=self._decode(self._read_url(f"https://{self._NNM_DOMAIN}/forum/viewtopic.php?p={torrent_id}")),
             msg="Upload date not found",
         ).group(1).lower()
         for (m_src, m_dest) in [
@@ -107,12 +107,12 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
 
     def login(self) -> None:
         self._login_using_post(
-            url="https://{}/forum/login.php".format(self._NNM_DOMAIN),
+            url=f"https://{self._NNM_DOMAIN}/forum/login.php",
             post={
                 "username": self._encode(self._user),
                 "password": self._encode(self._passwd),
                 "redirect": b"",
                 "login":    b"\xc2\xf5\xee\xe4",
             },
-            ok_text="class=\"mainmenu\">Выход [ {} ]</a>".format(self._user),
+            ok_text=f"class=\"mainmenu\">Выход [ {self._user} ]</a>",
         )

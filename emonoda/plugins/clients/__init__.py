@@ -51,7 +51,7 @@ def check_torrent_accessible(method: Callable) -> Callable:
     def wrap(self: "BaseClient", torrent: Torrent, prefix: str="") -> Any:
         path = torrent.get_path()
         assert path is not None, "Required Torrent() with local file"
-        open(path, "rb").close()  # Check accessible file
+        open(path, "rb").close()  # Check accessible file  # pylint: disable=consider-using-with
         if prefix:
             os.listdir(prefix)  # Check accessible prefix
         return method(self, torrent, prefix)

@@ -73,14 +73,14 @@ class Plugin(BaseClient):
         if transmissionrpc is None:
             raise RuntimeError("Required module transmissionrpc")
 
-        if transmissionrpc.project is "original":
+        if transmissionrpc.project == "original":
             self._client = transmissionrpc.Client(
                 address=url,
                 user=(user or None),
                 password=(passwd or None),
                 timeout=timeout,
             )
-        elif transmissionrpc.project is "forked":
+        elif transmissionrpc.project == "forked":
             self._client = transmissionrpc.Client(
                 host=url,
                 username=(user or None),
@@ -158,13 +158,13 @@ class Plugin(BaseClient):
 
     @hash_or_torrent
     def get_files(self, torrent_hash: str) -> Dict[str, TorrentEntryAttrs]:
-        flist = [
+        flist = ([
             (item["name"], item["size"])
             for item in self.__get_files(torrent_hash).values()
-        ] if transmissionrpc.project is "original" else [
+        ] if transmissionrpc.project == "original" else [
             (item.name, item.size)
             for item in self.__get_files(torrent_hash)
-        ]
+        ])
         return build_files("", flist)
 
     # =====

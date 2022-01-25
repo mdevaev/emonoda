@@ -79,7 +79,7 @@ class _SocksConnection(HTTPConnection):
             proxy_port = (parsed.port or SOCKS_PORT)
             proxy_type = SCHEME_TO_TYPE.get((scheme or "").lower())
             if proxy_type is None:
-                raise RuntimeError("Invalid SOCKS protocol: {}".format(scheme))
+                raise RuntimeError(f"Invalid SOCKS protocol: {scheme}")
 
         self.__proxy_args = (proxy_type, proxy_host, proxy_port, rdns, proxy_user, proxy_passwd)
 

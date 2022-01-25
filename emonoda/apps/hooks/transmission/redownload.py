@@ -72,7 +72,7 @@ def main() -> None:
                                 log_stdout.print("    Creating dir: %s", (dir_path,))
                             if not os.path.exists(file_path):
                                 log_stdout.print("      Creating file: %s", (file_path,))
-                                open(file_path, "w").close()
+                                open(file_path, "w").close()  # pylint: disable=consider-using-with
 
                     try:
                         client._client.start_torrent(obj.id)  # pylint: disable=protected-access

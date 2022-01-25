@@ -34,7 +34,7 @@ def load_file(file_path: str) -> Any:
             return yaml.load(yaml_file, _YamlLoader)
         except Exception:
             # Reraise internal exception as standard ValueError and show the incorrect file
-            raise ValueError("Incorrect YAML syntax in file '{}'".format(file_path))
+            raise ValueError(f"Incorrect YAML syntax in file {file_path!r}")
 
 
 # =====
@@ -45,7 +45,7 @@ class _YamlLoader(yaml.loader.Loader):  # pylint: disable=too-many-ancestors
 
     def include(self, node: yaml.nodes.Node) -> str:
         # Logger which supports include-files
-        file_path = os.path.join(self.__root, self.construct_scalar(node))  # pylint: disable=no-member
+        file_path = os.path.join(self.__root, str(self.construct_scalar(node)))  # type: ignore
         return load_file(file_path)
 
 

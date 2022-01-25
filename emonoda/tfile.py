@@ -145,7 +145,7 @@ class Torrent:
         if not self.__scrape_hash:
             torrent_hash = self.get_hash()
             for index in range(0, len(torrent_hash), 2):
-                self.__scrape_hash += "%{}".format(torrent_hash[index:index + 2])
+                self.__scrape_hash += "%" + torrent_hash[index:index + 2]
         return self.__scrape_hash
 
     def make_magnet(self, extras: Optional[List[str]]=None) -> str:
@@ -157,18 +157,18 @@ class Torrent:
         info_digest = info_sha1.digest()
         b32_hash = base64.b32encode(info_digest).decode()
 
-        magnet = "magnet:?xt={}".format(urllib.parse.quote_plus("urn:btih:{}".format(b32_hash)))
+        magnet = "magnet:?xt=" + urllib.parse.quote_plus("urn:btih:" + b32_hash)
         if "name" in extras:
-            magnet += "&dn={}".format(urllib.parse.quote_plus(self.get_name()))
+            magnet += "&dn=" + urllib.parse.quote_plus(self.get_name())
         if "trackers" in extras:
             announces = self.get_announce_list()
             announce = self.get_announce()
             if announce:
                 announces.insert(0, [announce])
             for announce in set(itertools.chain.from_iterable(announces)):
-                magnet += "&tr={}".format(urllib.parse.quote_plus(announce))
+                magnet += "&tr=" + urllib.parse.quote_plus(announce)
         if "size" in extras:
-            magnet += "&xl={}".format(self.get_size())
+            magnet += "&xl=" + str(self.get_size())
         return magnet
 
     # =====
@@ -219,7 +219,7 @@ class Torrent:
                     pass
 
             encoding = chardet.detect(value)["encoding"]
-            assert encoding is not None, "Can't determine encoding for bytes string: '{}'".format(repr(value))
+            assert encoding is not None, f"Can't determine encoding for bytes string: {value!r}"
             return value.decode(encoding)
         else:
             return value

@@ -111,8 +111,8 @@ class Plugin(WithCustoms):
                 if err.faultCode != _XMLRPC_UNKNOWN_HASH:
                     raise
                 if retries == 0:
-                    raise RuntimeError("Timed out torrent uploads after {} seconds".format(
-                        self.__load_retries * self.__retries_sleep))
+                    left = self.__load_retries * self.__retries_sleep
+                    raise RuntimeError(f"Timed out torrent uploads after {left} seconds")
                 retries -= 1
                 time.sleep(self.__retries_sleep)
 
@@ -206,7 +206,7 @@ class Plugin(WithCustoms):
         assert len(customs) != 0, "Empty customs dict"
         mc = xmlrpc.client.MultiCall(self.__server)
         for (key, value) in customs.items():
-            getattr(mc.d, "custom{}.set".format(key[1:]))(torrent_hash, value)
+            getattr(mc.d, f"custom{key[1:]}.set")(torrent_hash, value)
         mc()
 
     @hash_or_torrent
@@ -216,5 +216,5 @@ class Plugin(WithCustoms):
         keys = list(set(keys))
         mc = xmlrpc.client.MultiCall(self.__server)
         for key in keys:
-            getattr(mc.d, "custom{}".format(key[1:]))(torrent_hash)
+            getattr(mc.d, f"custom{key[1:]}")(torrent_hash)
         return dict(zip(keys, list(mc())))  # type: ignore

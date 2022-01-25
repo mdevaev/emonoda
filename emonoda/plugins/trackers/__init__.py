@@ -70,7 +70,7 @@ class NetworkError(TrackerError):
         self._sub = sub
 
     def __str__(self) -> str:
-        return "{}: {}".format(type(self._sub).__name__, str(self._sub))
+        return f"{type(self._sub).__name__}: {self._sub}"
 
 
 # =====
@@ -254,7 +254,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         ).group("torrent_id")
 
     def _assert_valid_data(self, data: bytes, target: str="torrent") -> bytes:
-        msg = "Received an invalid {} data: {} ...".format(target, repr(data[:20]))
+        msg = f"Received an invalid {target} data: {data[:20]!r} ..."
         self._assert_logic(is_valid_torrent_data(data), msg)
         return data
 
@@ -263,7 +263,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
     def __get_upstream_info(self, opener: urllib.request.OpenerDirector) -> Dict:
         try:
             return json.loads(self.__read_url_nofe(
-                url="https://raw.githubusercontent.com/mdevaev/emonoda/master/trackers/{}.json".format(self.PLUGIN_NAMES[0]),
+                url=f"https://raw.githubusercontent.com/mdevaev/emonoda/master/trackers/{self.PLUGIN_NAMES[0]}.json",
                 opener=opener,
             ).decode("utf-8"))
         except urllib.error.HTTPError as err:
@@ -295,9 +295,9 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         _assert(
             TrackerError,
             self._SITE_VERSION >= upstream,
-            "Tracker plugin is outdated (ver. local:{}, upstream:{}). I recommend to update the program".format(
-                self._SITE_VERSION,
-                upstream,
+            (
+                f"Tracker plugin is outdated (ver. local:{self._SITE_VERSION},"
+                f" upstream:{upstream}). I recommend to update the program"
             ),
         )
 

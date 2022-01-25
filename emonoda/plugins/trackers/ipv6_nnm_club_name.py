@@ -33,14 +33,14 @@ class Plugin(nnm_club_me.Plugin):
     _NNM_DOMAIN = PLUGIN_NAMES[0]
 
     _SITE_VERSION = 1
-    _SITE_FINGERPRINT_URL = "http://{}".format(_NNM_DOMAIN)
+    _SITE_FINGERPRINT_URL = f"http://{_NNM_DOMAIN}"
 
     _COMMENT_REGEXP = re.compile(r"http://ipv6\.(nnm-club\.(me|ru|name|tv|lib)|nnmclub\.to)"
                                  r"/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
 
-    _TORRENT_SCRAPE_URL = "http://bt.{}:2710/scrape.php?info_hash={{scrape_hash}}".format(_NNM_DOMAIN)
+    _TORRENT_SCRAPE_URL = f"http://bt.{_NNM_DOMAIN}:2710/scrape.php?info_hash={{scrape_hash}}"
 
-    _DOWNLOAD_ID_URL = "http://{}/forum/viewtopic.php?p={{torrent_id}}".format(_NNM_DOMAIN)
-    _DOWNLOAD_URL = "http://{}//forum/download.php?id={{download_id}}".format(_NNM_DOMAIN)
+    _DOWNLOAD_ID_URL = f"http://{_NNM_DOMAIN}/forum/viewtopic.php?p={{torrent_id}}"
+    _DOWNLOAD_URL = f"http://{_NNM_DOMAIN}//forum/download.php?id={{download_id}}"
 
     _STAT_URL = _DOWNLOAD_ID_URL

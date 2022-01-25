@@ -73,7 +73,7 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
         date = self._assert_logic_re_search(
             regexp=re.compile(r"Зарегистрирован &nbsp;\s*\[ <span title=\"[\w\s]+\">"
                               r"(\d\d\d\d-\d\d-\d\d \d\d:\d\d)</span> ]"),
-            text=self._decode(self._read_url("https://booktracker.org/viewtopic.php?p={}".format(torrent_id))),
+            text=self._decode(self._read_url(f"https://booktracker.org/viewtopic.php?p={torrent_id}")),
             msg="Upload date not found",
         ).group(1)
         date += " " + datetime.now(self._tzinfo).strftime("%z")
@@ -88,5 +88,5 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
                 "login_password": self._encode(self._passwd),
                 "login":          self._encode("Вход"),
             },
-            ok_text="<b class=\"med\">{}</b></a>&nbsp; [ <a href=\"./login.php?logout=1".format(self._user),
+            ok_text=f"<b class=\"med\">{self._user}</b></a>&nbsp; [ <a href=\"./login.php?logout=1",
         )

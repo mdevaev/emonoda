@@ -60,17 +60,17 @@ class Plugin(WithLogin, WithCheckHash):
 
         dl_id = self._assert_logic_re_search(
             regexp=re.compile(r"<a href=\"download.php\?id=(\d+)\" class=\"(leech|seed|gen)med\">"),
-            text=self._decode(self._read_url("https://pravtor.ru/viewtopic.php?p={}".format(torrent_id))),
+            text=self._decode(self._read_url(f"https://pravtor.ru/viewtopic.php?p={torrent_id}")),
             msg="Torrent-ID not found",
         ).group(1)
 
         self._set_cookie("bb_dl", torrent_id)
 
         return self._assert_valid_data(self._read_url(
-            url="http://pravtor.ru/download.php?id={}".format(dl_id),
+            url=f"http://pravtor.ru/download.php?id={dl_id}",
             data=b"",
             headers={
-                "Referer": "http://pravtor.ru/viewtopic.php?t={}".format(torrent_id),
+                "Referer": f"http://pravtor.ru/viewtopic.php?t={torrent_id}",
                 "Origin":  "http://pravtor.ru",
             }
         ))
@@ -83,5 +83,5 @@ class Plugin(WithLogin, WithCheckHash):
                 "login_password": self._encode(self._passwd),
                 "login":          b"\xc2\xf5\xee\xe4",
             },
-            ok_text="<b class=\"med\">{}</b></a>&nbsp; [ <a href=\"./login.php?logout=1\"".format(self._user),
+            ok_text=f"<b class=\"med\">{self._user}</b></a>&nbsp; [ <a href=\"./login.php?logout=1\"",
         )

@@ -58,7 +58,7 @@ def build_opener(
         elif scheme in ["socks4", "socks5"]:
             handlers.append(sockshandler.SocksHandler(proxy_url=proxy_url))
         else:
-            raise RuntimeError("Invalid proxy protocol: {}".format(scheme))
+            raise RuntimeError(f"Invalid proxy protocol: {scheme}")
 
     if cookie_jar is not None:
         handlers.append(urllib.request.HTTPCookieProcessor(cookie_jar))
@@ -121,24 +121,23 @@ def encode_multipart(
         return line.replace("\"", "\\\"")
 
     for (key, value) in fields.items():
-        write_line("--{0}".format(boundary))
-        write_line("Content-Disposition: form-data; name=\"{0}\"".format(escape_quote(key)))
+        write_line(f"--{boundary}")
+        write_line(f"Content-Disposition: form-data; name=\"{escape_quote(key)}\"")
         write_line()
         write_line(value)
 
     for (key, mf) in files.items():
-        write_line("--{0}".format(boundary))
-        write_line("Content-Disposition: form-data; name=\"{0}\"; filename=\"{1}\"".format(
-                   escape_quote(key), escape_quote(mf.name)))
-        write_line("Content-Type: {0}".format(mf.mimetype))
+        write_line(f"--{boundary}")
+        write_line(f"Content-Disposition: form-data; name=\"{escape_quote(key)}\"; filename=\"{escape_quote(mf.name)}\"")
+        write_line(f"Content-Type: {mf.mimetype}")
         write_line()
         data_io.write(mf.data + b"\r\n")
 
-    write_line("--{0}--".format(boundary))
+    write_line(f"--{boundary}--")
 
     body = data_io.getvalue()
     headers = {
-        "Content-Type": "multipart/form-data; boundary={0}".format(boundary),
+        "Content-Type": f"multipart/form-data; boundary={boundary}",
         "Content-Length": str(len(body)),
     }
     return (body, headers)
