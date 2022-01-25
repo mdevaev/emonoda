@@ -44,11 +44,11 @@ class Plugin(WithLogin, WithCheckTime, WithFetchByDownloadId, WithStat):
 
     _NNM_DOMAIN = PLUGIN_NAMES[0]
 
-    _SITE_VERSION = 6
+    _SITE_VERSION = 7
     _SITE_ENCODING = "cp1251"
 
     _SITE_FINGERPRINT_URL = f"https://{_NNM_DOMAIN}"
-    _SITE_FINGERPRINT_TEXT = f"<link rel=\"canonical\" href=\"http://{_NNM_DOMAIN}/\">"
+    _SITE_FINGERPRINT_TEXT = f"<link rel=\"canonical\" href=\"https://{_NNM_DOMAIN}/\">"
 
     _COMMENT_REGEXP = re.compile(r"https?://(nnm-club\.(me|ru|name|tv|lib)|nnmclub\.to)"
                                  r"/forum/viewtopic\.php\?p=(?P<torrent_id>\d+)")
