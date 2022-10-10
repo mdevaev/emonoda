@@ -68,7 +68,7 @@ class Plugin(BaseClient):
         )
         if user:
             self.__post(
-                path="/api/v2/auth/login",
+                path="auth/login",
                 payload={
                     "username": user,
                     "password": passwd,
@@ -90,7 +90,7 @@ class Plugin(BaseClient):
     def start_torrent(self, torrent_hash: str) -> None:
         self.__get_torrent_props(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
         self.__post(
-            path="/api/v2/torrents/resume",
+            path="torrents/resume",
             payload={"hashes": torrent_hash},
         )
 
@@ -98,14 +98,14 @@ class Plugin(BaseClient):
     def stop_torrent(self, torrent_hash: str) -> None:
         self.__get_torrent_props(torrent_hash)
         self.__post(
-            path="/api/v2/torrents/pause",
+            path="torrents/pause",
             payload={"hashes": torrent_hash},
         )
 
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str) -> None:
         self.__post(
-            path="/api/v2/torrents/add",
+            path="torrents/add",
             payload={"savepath": prefix},
             files={
                 "torrents": web.MultipartFile(
@@ -120,18 +120,18 @@ class Plugin(BaseClient):
     def remove_torrent(self, torrent_hash: str) -> None:
         self.__get_torrent_props(torrent_hash)
         self.__post(
-            path="/api/v2/torrents/delete",
+            path="torrents/delete",
             payload={"hashes": torrent_hash},
         )
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
-        return bool(json.loads(self.__get(f"/api/v2/torrents/info?hashes={torrent_hash}")))
+        return bool(json.loads(self.__get(f"torrents/info?hashes={torrent_hash}")))
 
     def get_hashes(self) -> List[str]:
         return [
             item["hash"].lower()
-            for item in json.loads(self.__get("/api/v2/torrents/info"))
+            for item in json.loads(self.__get("torrents/info"))
         ]
 
     @hash_or_torrent
@@ -139,7 +139,7 @@ class Plugin(BaseClient):
         return self.__get_torrent_props(torrent_hash)["save_path"]
 
     def get_data_prefix_default(self) -> str:
-        return json.loads(self.__get("/api/v2/app/preferences"))["save_path"]
+        return json.loads(self.__get("app/preferences"))["save_path"]
 
     # =====
 
@@ -157,7 +157,7 @@ class Plugin(BaseClient):
         try:
             return build_files("", [
                 (item["name"], item["size"])
-                for item in json.loads(self.__get(f"/api/v2/torrents/files?hash={torrent_hash}"))
+                for item in json.loads(self.__get(f"torrents/files?hash={torrent_hash}"))
             ])
         except urllib.error.HTTPError as err:
             if err.code == 404:
@@ -167,7 +167,7 @@ class Plugin(BaseClient):
     # =====
 
     def __get_torrent_props(self, torrent_hash: str) -> Dict[str, Any]:
-        result = json.loads(self.__get(f"/api/v2/torrents/info?hashes={torrent_hash}"))
+        result = json.loads(self.__get(f"torrents/info?hashes={torrent_hash}"))
         assert len(result) >= 0, (torrent_hash, result)
         if len(result) == 0:
             raise NoSuchTorrentError("Unknown torrent hash")
@@ -205,7 +205,7 @@ class Plugin(BaseClient):
             data = urllib.parse.urlencode(payload).encode("utf-8")
         return web.read_url(
             opener=self.__opener,
-            url=urllib.parse.urljoin(self.__url, path),
+            url=urllib.parse.urljoin(self.__url, "/api/v2/" + path),
             data=data,
             headers=headers,
             timeout=self.__timeout,
