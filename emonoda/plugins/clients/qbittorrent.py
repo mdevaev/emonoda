@@ -45,7 +45,7 @@ from . import build_files
 
 # =====
 class Plugin(BaseClient):
-    # API description: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-Documentation
+    # API description: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-v3.2.0-v4.0.4)
 
     PLUGIN_NAMES = ["qbittorrent"]
 
