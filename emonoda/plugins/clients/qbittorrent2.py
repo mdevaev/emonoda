@@ -45,9 +45,9 @@ from . import build_files
 
 # =====
 class Plugin(BaseClient):
-    # API description: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-v3.2.0-v4.0.4)
+    # API description: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)
 
-    PLUGIN_NAMES = ["qbittorrent"]
+    PLUGIN_NAMES = ["qbittorrent2"]
 
     def __init__(  # pylint:disable=super-init-not-called
         self,
@@ -68,7 +68,7 @@ class Plugin(BaseClient):
         )
         if user:
             self.__post(
-                path="/login",
+                path="auth/login",
                 payload={
                     "username": user,
                     "password": passwd,
@@ -90,26 +90,23 @@ class Plugin(BaseClient):
     def start_torrent(self, torrent_hash: str) -> None:
         self.__get_torrent_props(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
         self.__post(
-            path="/command/resume",
-            payload={"hash": torrent_hash},
+            path="torrents/resume",
+            payload={"hashes": torrent_hash},
         )
 
     @hash_or_torrent
     def stop_torrent(self, torrent_hash: str) -> None:
         self.__get_torrent_props(torrent_hash)
         self.__post(
-            path="/command/pause",
-            payload={"hash": torrent_hash},
+            path="torrents/pause",
+            payload={"hashes": torrent_hash},
         )
 
     @check_torrent_accessible
     def load_torrent(self, torrent: Torrent, prefix: str) -> None:
         self.__post(
-            path="/command/upload",
-            payload={
-                "save_path": prefix,
-                "savepath": prefix,
-            },
+            path="torrents/add",
+            payload={"savepath": prefix},
             files={
                 "torrents": web.MultipartFile(
                     name=os.path.basename(torrent.get_path()),
@@ -123,18 +120,18 @@ class Plugin(BaseClient):
     def remove_torrent(self, torrent_hash: str) -> None:
         self.__get_torrent_props(torrent_hash)
         self.__post(
-            path="/command/delete",
+            path="torrents/delete",
             payload={"hashes": torrent_hash},
         )
 
     @hash_or_torrent
     def has_torrent(self, torrent_hash: str) -> bool:
-        return bool(json.loads(self.__get(f"/query/torrents?hashes={torrent_hash}")))
+        return bool(json.loads(self.__get(f"torrents/info?hashes={torrent_hash}")))
 
     def get_hashes(self) -> List[str]:
         return [
             item["hash"].lower()
-            for item in json.loads(self.__get("/query/torrents"))
+            for item in json.loads(self.__get("torrents/info"))
         ]
 
     @hash_or_torrent
@@ -142,7 +139,7 @@ class Plugin(BaseClient):
         return self.__get_torrent_props(torrent_hash)["save_path"]
 
     def get_data_prefix_default(self) -> str:
-        return json.loads(self.__get("/query/preferences"))["save_path"]
+        return json.loads(self.__get("app/preferences"))["save_path"]
 
     # =====
 
@@ -160,7 +157,7 @@ class Plugin(BaseClient):
         try:
             return build_files("", [
                 (item["name"], item["size"])
-                for item in json.loads(self.__get(f"/query/propertiesFiles/{torrent_hash}"))
+                for item in json.loads(self.__get(f"torrents/files?hash={torrent_hash}"))
             ])
         except urllib.error.HTTPError as err:
             if err.code == 404:
@@ -170,7 +167,7 @@ class Plugin(BaseClient):
     # =====
 
     def __get_torrent_props(self, torrent_hash: str) -> Dict[str, Any]:
-        result = json.loads(self.__get(f"/query/torrents?hashes={torrent_hash}"))
+        result = json.loads(self.__get(f"torrents/info?hashes={torrent_hash}"))
         assert len(result) >= 0, (torrent_hash, result)
         if len(result) == 0:
             raise NoSuchTorrentError("Unknown torrent hash")
@@ -208,7 +205,7 @@ class Plugin(BaseClient):
             data = urllib.parse.urlencode(payload).encode("utf-8")
         return web.read_url(
             opener=self.__opener,
-            url=urllib.parse.urljoin(self.__url, path),
+            url=urllib.parse.urljoin(self.__url, "/api/v2/" + path),
             data=data,
             headers=headers,
             timeout=self.__timeout,
