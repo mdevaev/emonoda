@@ -34,4 +34,4 @@
 ***
 ### qBittorrent
 
-Включается параметром `core/client=qbittorrent` (для qBittorrent v3.2.0-v4.0.4) или `core/client=qbittorrent2` (для v4.1+). Для работы плагина необходимо запустить WebUI через настройках **qBittorrent**. Соединение выполняется по урлу, задаваемому параметром `client/url`, по умолчанию - `http://localhost:8008`. При необходимости аутентификаии логин и пароль задаются параметрами `client/user` и `client/passwd` соответственно.
+Включается параметром `core/client=qbittorrent` (для qBittorrent v3.2.0-v4.0.4) или `core/client=qbittorrent2` (для v4.1+). Для работы плагина необходимо запустить WebUI в настройках **qBittorrent**. Соединение выполняется по урлу, задаваемому параметром `client/url`, по умолчанию - `http://localhost:8080`. При необходимости аутентификации логин и пароль задаются параметрами `client/user` и `client/passwd` соответственно.
