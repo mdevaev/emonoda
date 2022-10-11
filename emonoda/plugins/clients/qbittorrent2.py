@@ -47,7 +47,7 @@ from . import build_files
 class Plugin(BaseClient):
     # API description: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)
 
-    PLUGIN_NAMES = ["qbittorrent_v2"]
+    PLUGIN_NAMES = ["qbittorrent2"]
 
     def __init__(  # pylint:disable=super-init-not-called
         self,
