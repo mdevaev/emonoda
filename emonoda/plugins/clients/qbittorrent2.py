@@ -121,7 +121,7 @@ class Plugin(BaseClient):
         self.__get_torrent_props(torrent_hash)
         self.__post(
             path="torrents/delete",
-            payload={"hashes": torrent_hash},
+            payload={"hashes": torrent_hash, "deleteFiles": False},
         )
 
     @hash_or_torrent
