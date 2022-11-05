@@ -18,8 +18,9 @@
 
 
 import os
-import time
+import ssl
 import xmlrpc.client
+import time
 
 from typing import List
 from typing import Dict
@@ -62,6 +63,7 @@ class Plugin(WithCustoms):
     def __init__(  # pylint:disable=super-init-not-called
         self,
         url: str,
+        verify: bool,
         load_retries: int,
         retries_sleep: float,
         xmlrpc_size_limit: int,
@@ -72,13 +74,17 @@ class Plugin(WithCustoms):
 
         self.__load_retries = load_retries
         self.__retries_sleep = retries_sleep
-        self.__server = xmlrpc.client.ServerProxy(url)
+        self.__server = xmlrpc.client.ServerProxy(
+            uri=url,
+            context=(None if verify else ssl._create_unverified_context()),
+        )
         self.__server.network.xmlrpc.size_limit(xmlrpc_size_limit)
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
         return cls._get_merged_options({
             "url":               Option(default="http://localhost/RPC2", help="XMLRPC mountpoint"),
+            "verify":            Option(default=True, help="HTTPS verification"),
             "load_retries":      Option(default=10, help="The number of retries to load the torrent"),
             "retries_sleep":     Option(default=1.0, help="Sleep interval between the load retries"),
             "xmlrpc_size_limit": Option(default=67108863, help="Max XMLRPC data size"),
