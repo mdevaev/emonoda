@@ -73,7 +73,7 @@ def main() -> None:
 
     setup(
         name="emonoda",
-        version="2.1.34",
+        version="2.1.35",
         url="https://github.com/mdevaev/emonoda",
         license="GPLv3",
         author="Devaev Maxim",
