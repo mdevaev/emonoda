@@ -31,6 +31,7 @@ from typing import Any
 def build_raw_from_options(options: List[str]) -> Dict[str, Any]:
     raw: Dict[str, Any] = {}
     for option in options:
+        key: str
         (key, value) = (option.split("=", 1) + [None])[:2]  # type: ignore
         if len(key.strip()) == 0:
             raise ValueError(f"Empty option key (required 'key=value' instead of {option!r})")
@@ -38,7 +39,7 @@ def build_raw_from_options(options: List[str]) -> Dict[str, Any]:
             raise ValueError(f"No value for key {key!r}")
 
         section = raw
-        subs = list(map(str.strip, key.split("/")))
+        subs = list(filter(None, map(str.strip, key.split("/"))))
         for sub in subs[:-1]:
             section.setdefault(sub, {})
             section = section[sub]

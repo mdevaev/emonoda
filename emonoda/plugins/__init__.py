@@ -49,7 +49,7 @@ class BasePlugin:
     def _init_bases(self, **kwargs: Any) -> None:
         assert self.PLUGIN_NAMES
         for parent in self.__get_bases(self.__class__.__mro__):
-            parent.__init__(self, **kwargs)  # type: ignore
+            parent.__init__(self, **kwargs)  # type: ignore  # pylint: disable=unnecessary-dunder-call
 
     @classmethod
     def _get_merged_options(cls, params: Optional[Dict[str, Option]]=None) -> Dict[str, Option]:

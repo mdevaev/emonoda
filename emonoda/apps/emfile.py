@@ -201,10 +201,10 @@ def main() -> None:  # pylint: disable=too-many-locals
             ("--provides",             format_provides),
             ("--is-private",           format_is_private),
             ("--is-private-pretty",    format_is_private_pretty),
-            ("--client-path",          lambda torrent: format_client_path(torrent, client)),
-            ("--client-prefix",        lambda torrent: format_client_prefix(torrent, client)),
-            ("--client-customs",       lambda torrent: format_client_customs(torrent, client, config.emfile.show_customs)),  # type: ignore
-            ("--make-magnet",          lambda torrent: torrent.make_magnet(options.magnet_fields)),  # type: ignore
+            ("--client-path",          (lambda torrent: format_client_path(torrent, client))),
+            ("--client-prefix",        (lambda torrent: format_client_prefix(torrent, client))),
+            ("--client-customs",       (lambda torrent: format_client_customs(torrent, client, config.emfile.show_customs))),  # type: ignore
+            ("--make-magnet",          (lambda torrent: torrent.make_magnet(options.magnet_fields))),  # type: ignore
         ]
     )
 

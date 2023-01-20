@@ -26,7 +26,6 @@ from typing import List
 from typing import Dict
 from typing import NamedTuple
 from typing import Optional
-from typing import Union
 from typing import Type
 from typing import Any
 

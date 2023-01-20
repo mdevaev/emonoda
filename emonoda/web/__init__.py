@@ -31,7 +31,6 @@ from typing import List
 from typing import Dict
 from typing import NamedTuple
 from typing import Optional
-from typing import Type
 
 from . import gziphandler
 from . import sockshandler

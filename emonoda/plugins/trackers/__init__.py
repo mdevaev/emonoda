@@ -214,7 +214,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         *,
         data: Optional[bytes]=None,
         headers: Optional[Dict[str, str]]=None,
-        opener: urllib.request.OpenerDirector=None,
+        opener: Optional[urllib.request.OpenerDirector]=None,
     ) -> bytes:
 
         assert opener

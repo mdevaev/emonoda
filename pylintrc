@@ -19,15 +19,8 @@ disable =
 	locally-disabled,
 	fixme,
 	missing-docstring,
-	no-init,
-	no-self-use,
 	superfluous-parens,
-	abstract-class-not-used,
-	abstract-class-little-used,
 	duplicate-code,
-	bad-continuation,
-	bad-whitespace,
-	star-args,
 	broad-except,
 	redundant-keyword-arg,
 	wrong-import-order,
@@ -41,12 +34,9 @@ disable =
 msg-template={symbol} -- {path}:{line}({obj}): {msg}
 
 [FORMAT]
-max-line-length=140
+max-line-length=160
 
 [BASIC]
-# List of builtins function names that should not be used, separated by a comma
-bad-functions=
-
 # Regular expression matching correct method names
 method-rgx=[a-z_][a-z0-9_]{2,50}$
 

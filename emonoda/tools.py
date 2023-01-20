@@ -56,6 +56,6 @@ def get_decoded_path(path: str) -> str:
         try:
             return path_bytes.decode("cp1251")
         except UnicodeDecodeError:
-            encoding = chardet.detect(path)["encoding"]
+            encoding = chardet.detect(path_bytes)["encoding"]
             assert encoding is not None, f"Can't determine encoding for bytes string: {path_bytes!r}"
             return path_bytes.decode(encoding)
