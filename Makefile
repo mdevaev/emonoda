@@ -17,7 +17,7 @@ release:
 	make push
 	make bump
 	make push
-	make pypi
+#	make pypi
 	make clean
 	make mkdocs
 	make clean
