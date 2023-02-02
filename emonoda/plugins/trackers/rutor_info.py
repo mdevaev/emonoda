@@ -36,11 +36,11 @@ class Plugin(WithCheckHash, WithFetchByTorrentId, WithStat):
         "rutor.org",
     ]
 
-    _SITE_VERSION = 5
+    _SITE_VERSION = 8
     _SITE_ENCODING = "utf-8"
 
     _SITE_FINGERPRINT_URL = "http://rutor.info"
-    _SITE_FINGERPRINT_TEXT = "<a href=\"/\"><img src=\"http://s.rutor.info/logo.jpg\" alt=\"rutor.info logo\" /></a>"
+    _SITE_FINGERPRINT_TEXT = "<a href=\"/\"><img src=\"http://cdnbunny.org/logo.jpg\" alt=\"rutor.info logo\" /></a>"
 
     _COMMENT_REGEXP = re.compile(r"^http://rutor\.(info|org|is)/torrent/(?P<torrent_id>\d+)$")
 

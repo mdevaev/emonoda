@@ -39,13 +39,13 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
         "torrents.ru",
     ]
 
-    _SITE_VERSION = 7
+    _SITE_VERSION = 8
     _SITE_ENCODING = "cp1251"
     _SITE_RETRY_CODES = [503, 404]
 
     _SITE_FINGERPRINT_URL = "https://rutracker.org/forum/index.php"
     _SITE_FINGERPRINT_TEXT = ("<link rel=\"search\" type=\"application/opensearchdescription+xml\""
-                              " title=\"Поиск на RuTracker.org\" href=\"https://static.t-ru.org/opensearch.xml\">")
+                              " title=\"Поиск на RuTracker.org\" href=\"https://static.rutracker.cc/opensearch.xml\">")
 
     _COMMENT_REGEXP = re.compile(r"https?://rutracker\.org/forum/viewtopic\.php\?t=(?P<torrent_id>\d+)")
 
