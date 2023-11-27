@@ -130,7 +130,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
                     built_in=(not self.__template_path),
                     source=source,
                     results_set=results_set,
-                    settings=dict(url=self.__url)
+                    settings={"url": self.__url},
                 ))
             os.chmod(self.__path, 0o664)
             os.chown(self.__path, self.__uid, self.__gid)

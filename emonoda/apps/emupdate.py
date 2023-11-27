@@ -379,7 +379,7 @@ def update(  # pylint: disable=too-many-branches,too-many-locals
                     need_update = (tracker_time > time_info.read())
 
                 else:
-                    RuntimeError(f"Invalid tracker {op.tracker}: missing method of check")
+                    raise RuntimeError(f"Invalid tracker {op.tracker}: missing method of check")
 
                 if need_update or test_mode:
                     tmp_torrent = Torrent(data=op.tracker.fetch_new_data(op.torrent))

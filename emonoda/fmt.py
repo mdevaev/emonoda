@@ -47,7 +47,7 @@ def format_size(size: int) -> str:
     elif size == 1:
         result = "1 byte"
     else:
-        ValueError("size must be >= 0")
+        raise ValueError("size must be >= 0")
     return result
 
 
