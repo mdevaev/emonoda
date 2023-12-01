@@ -95,7 +95,6 @@ class BaseConfetti(BasePlugin):
     def send_results(self, source: str, results: ResultsType) -> None:
         raise NotImplementedError
 
-    
     @classmethod
     def templated(cls, name: str, built_in: bool=True, **kwargs: Any) -> str:
         if built_in:
@@ -108,7 +107,6 @@ class BaseConfetti(BasePlugin):
                 text = template_file.read()
         template = textwrap.dedent(text).strip()
         return mako.template.Template(template).render(**kwargs).strip()
-
 
 
 class WithWeb(BaseConfetti):  # pylint: disable=abstract-method
