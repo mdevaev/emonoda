@@ -57,19 +57,6 @@ STATUSES = {
 
 
 # =====
-def templated(name: str, built_in: bool=True, **kwargs: Any) -> str:
-    if built_in:
-        data = pkgutil.get_data(__name__, os.path.join("templates", name))
-        assert data, (data, name, __name__)
-        text = data.decode()
-    else:
-        with open(name) as template_file:
-            text = template_file.read()
-    template = textwrap.dedent(text).strip()
-    return mako.template.Template(template).render(**kwargs).strip()
-
-
-# =====
 class UpdateResult(NamedTuple):
     torrent: Optional[Torrent]
     tracker: Optional[BaseTracker]
@@ -107,6 +94,21 @@ class BaseConfetti(BasePlugin):
 
     def send_results(self, source: str, results: ResultsType) -> None:
         raise NotImplementedError
+
+    
+    @classmethod
+    def templated(cls, name: str, built_in: bool=True, **kwargs: Any) -> str:
+        if built_in:
+            module_name = cls.__module__
+            data = pkgutil.get_data(module_name, os.path.join("templates", name))
+            assert data, (data, name, module_name)
+            text = data.decode()
+        else:
+            with open(name) as template_file:
+                text = template_file.read()
+        template = textwrap.dedent(text).strip()
+        return mako.template.Template(template).render(**kwargs).strip()
+
 
 
 class WithWeb(BaseConfetti):  # pylint: disable=abstract-method

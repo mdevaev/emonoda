@@ -38,7 +38,7 @@ from ...optconf.converters import as_path_or_empty
 
 from . import ResultsType
 from . import WithStatuses
-from . import templated
+# from . import templated
 
 
 # =====
@@ -134,7 +134,7 @@ class Plugin(WithStatuses):  # pylint: disable=too-many-instance-attributes
         subject_placeholders["statuses_sum"] = sum(len(results[status]) for status in self._statuses)
         return self.__make_message(
             subject=self.__subject.format(**subject_placeholders),
-            body=templated(
+            body=Plugin.templated(
                 name=(self.__template_path if self.__template_path else "email.{ctype}.{source}.mako").format(
                     ctype=("html" if self.__html else "plain"),
                     source=source,

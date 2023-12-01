@@ -34,7 +34,7 @@ from . import STATUSES
 from . import ResultsType
 from . import WithWeb
 from . import WithStatuses
-from . import templated
+# from . import templated
 
 
 # =====
@@ -68,7 +68,7 @@ class Plugin(WithWeb, WithStatuses):
 
     def send_results(self, source: str, results: ResultsType) -> None:
         messages = [
-            templated(
+            Plugin.templated(
                 name=(self.__template_path if self.__template_path else "telegram.{source}.mako").format(source=source),
                 built_in=(not self.__template_path),
                 source=source,
