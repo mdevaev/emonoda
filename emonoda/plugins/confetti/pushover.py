@@ -32,7 +32,7 @@ from . import STATUSES
 from . import ResultsType
 from . import WithWeb
 from . import WithStatuses
-from . import templated
+# from . import templated
 
 
 # =====
@@ -76,7 +76,7 @@ class Plugin(WithWeb, WithStatuses):
                     "user":    self.__user_key,
                     "html":    "1",
                     "title":   self.__title.format(source=source),
-                    "message": templated(
+                    "message": Plugin.templated(
                         name=(self.__template_path if self.__template_path else "pushover.{source}.mako").format(source=source),
                         built_in=(not self.__template_path),
                         source=source,

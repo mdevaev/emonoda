@@ -72,8 +72,13 @@ def get_classes(sub: str) -> Dict[str, Type[BasePlugin]]:
     classes: Dict[str, Type[BasePlugin]] = {}  # noqa: E701
     sub_path = os.path.join(os.path.dirname(__file__), sub)
     for file_name in os.listdir(sub_path):
-        if not file_name.startswith("__") and file_name.endswith(".py"):
-            module_name = file_name[:-3]
+        if not file_name.startswith("__"):
+            if file_name.endswith(".py"):
+                module_name = file_name[:-3]
+            elif os.path.exists(os.path.join(sub_path, file_name, "__init__.py")):
+                module_name = file_name
+            else:
+                continue
             module = importlib.import_module(f"emonoda.plugins.{sub}.{module_name}")
             plugin_class = getattr(module, "Plugin")
             for plugin_name in plugin_class.PLUGIN_NAMES:

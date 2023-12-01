@@ -39,7 +39,7 @@ from ...optconf.converters import as_path_or_empty
 
 from . import ResultsType
 from . import BaseConfetti
-from . import templated
+# from . import templated
 
 
 # =====
@@ -122,7 +122,7 @@ class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
             results_set.insert(0, results)
             results_set = results_set[:20]
             with open(self.__path, "w") as atom_file:
-                atom_file.write(templated(
+                atom_file.write(Plugin.templated(
                     name=(self.__template_path if self.__template_path else "atom.{ctype}.{source}.mako").format(
                         ctype=("html" if self.__html else "plain"),
                         source=source,
