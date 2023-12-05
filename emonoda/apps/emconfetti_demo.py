@@ -46,7 +46,8 @@ from typing import Dict
 from typing import List
 
 
-ALL_STATUSES = [ "passed", *STATUSES ]
+# =====
+ALL_STATUSES = ["passed", *STATUSES]
 FORMATS = ["mkv", "jpg", "srt", "ass", "png", "pdf", "exe", "dll"]
 WORDS = [
     "neko", "sempai", "sensei", "kitsune", "test",
@@ -66,6 +67,7 @@ ERRS = [
 ]
 
 
+# =====
 def rand_some_range(start: int=1, end: int=5) -> Sequence[int]:
     return range(random.randint(start, end))
 
