@@ -1,6 +1,7 @@
 """
     Emonoda -- A set of tools to organize and manage your torrents
     Copyright (C) 2016  Devaev Maxim <mdevaev@gmail.com>
+    Copyright (C) 2020  Pavel Pletenev <cpp.create@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,11 +20,14 @@
 
 import sys
 import argparse
+import uuid
+import random
 
 from ..plugins.trackers import BaseTracker
 
 from ..plugins.confetti import UpdateResult
 from ..plugins.confetti import ResultsType
+from ..plugins.confetti import STATUSES
 
 from ..helpers import surprise
 
@@ -35,24 +39,120 @@ from . import wrap_main
 from . import get_configured_log
 from . import get_configured_confetti
 
+from typing import Sequence
+from typing import Generator
+from typing import Optional
+from typing import Dict
+from typing import List
+
+
+ALL_STATUSES = [ "passed", *STATUSES ]
+FORMATS = ["mkv", "jpg", "srt", "ass", "png", "pdf", "exe", "dll"]
+WORDS = [
+    "neko", "sempai", "sensei", "kitsune", "test",
+    "lain", "imouto", "aneki", "baka"
+]
+VERBS = [
+    "kotaeru", "waku", "waku-waku", "yobu", "wa"
+]
+SUFFIXES = ["chan", "kun", "san", "sama", "sensei", "sempai"]
+SEPS = ["_", "-", ".", "...", "__"]
+DOMAINS = ["org", "com", "ru", "io"]
+ERRS = [
+    ["BadError", "Something bad had happened!"],
+    ["WaitError", "WAIT OH-"],
+    ["OniiChanError", "Feed me, onii-chan"],
+    ["ConnectionError", "Lost connection with reality"]
+]
+
+
+def rand_some_range(start: int=1, end: int=5) -> Sequence[int]:
+    return range(random.randint(start, end))
+
+
+def coin_toss() -> bool:
+    return random.choice((False, True))
+
+
+def randsuffix(word: str) -> str:
+    if not coin_toss():
+        return word
+    return word + "-" + random.choice(SUFFIXES)
+
+
+def randword() -> str:
+    return random.choice(WORDS)
+
+
+def randverb() -> str:
+    return random.choice(VERBS)
+
+
+def randphrase() -> str:
+    return " ".join((randsuffix(randword()), "wa", randsuffix(randword()), randverb(), "desu"))
+
+
+def randwords(some_index: Optional[int]=None) -> str:
+    suffix = ""
+    if some_index is not None and coin_toss():
+        suffix = f"{some_index:0{random.randint(1, 10)}d}"
+    if coin_toss():
+        ret = " ".join(randsuffix(randword()) for _ in rand_some_range())
+    else:
+        ret = randphrase()
+    return ret + suffix
+
+
+def randdomain() -> str:
+    return randword() + "." + random.choice(DOMAINS)
+
+
+def randfile(some_index: int) -> str:
+    path = [randwords(i) for i in rand_some_range(0)]
+    path.append(randwords(some_index) + "." + random.choice(FORMATS))
+    return "/".join(path)
+
+
+def rand_some_files() -> Generator[str, None, None]:
+    for some_index in rand_some_range(0):
+        yield randfile(some_index)
+
 
 # =====
 class FakeTorrent(Torrent):
-    def __init__(self) -> None:  # pylint: disable=super-init-not-called
-        pass
+    def __init__(self, tracker: BaseTracker) -> None:  # pylint: disable=super-init-not-called
+        name = randwords()
+        domain = random.choice(tracker.PLUGIN_NAMES)
+        self.__filename = name.replace(" ", random.choice(SEPS)) + ".torrent"
+        self.__name = name + randwords()
+        self.__comment = f"http://{domain}/{uuid.uuid4().hex}"
+
+    def get_filename(self) -> str:
+        return self.__filename
 
     def get_name(self, surrogate_escape: bool=False) -> str:
-        return "foobar"
+        return self.__name
 
     def get_comment(self) -> str:
-        return "http://example.com"
+        return self.__comment
 
 
-class FakeTracker(BaseTracker):  # pylint: disable=abstract-method
-    PLUGIN_NAMES = ["example.org"]
+def gen_trackers() -> List[BaseTracker]:
+    trackers: List[BaseTracker] = []
+    for _ in rand_some_range(2):
+        names = [randdomain() for i in rand_some_range()]
 
-    def __init__(self) -> None:  # pylint: disable=super-init-not-called
-        pass
+        class FakeTracker(BaseTracker):  # pylint: disable=abstract-method
+            PLUGIN_NAMES = names
+
+            def __init__(self) -> None:  # pylint: disable=super-init-not-called
+                pass
+
+        trackers.append(FakeTracker())
+    return trackers
+
+
+TRACKERS = gen_trackers()
 
 
 # ===== Main =====
@@ -69,34 +169,31 @@ def main() -> None:
     options = args_parser.parse_args(argv[1:])
 
     with get_configured_log(config, False, sys.stderr) as log_stderr:
-        results: ResultsType = {
-            "affected": {
-                "test1.torrent": UpdateResult.new(
-                    torrent=FakeTorrent(),
-                    tracker=FakeTracker(),
-                    diff=TorrentsDiff(
-                        added=frozenset(["nya.mkv", "nya.srt"]),
-                        removed=frozenset(["nyaa.srt", "nyaa.mkv"]),
-                        type_modified=frozenset(["list.lst"]),
-                    ),
-                ),
-                "test2.torrent": UpdateResult.new(
-                    torrent=FakeTorrent(),
-                    tracker=FakeTracker(),
-                    diff=TorrentsDiff(
-                        added=frozenset(["nya.mkv", "nya.srt"]),
-                        removed=frozenset(["nyaa.srt", "nyaa.mkv"]),
-                        type_modified=frozenset(["list.lst"]),
-                    ),
-                ),
-            },
-            "passed":          {},
-            "not_in_client":   {},
-            "unknown":         {},
-            "invalid":         {},
-            "tracker_error":   {},
-            "unhandled_error": {},
-        }
+        results: ResultsType = {}
+        for status in ALL_STATUSES:
+            stat_result: Dict[str, UpdateResult] = {}
+            results[status] = stat_result
+            for _ in rand_some_range(0):
+                tracker = random.choice(TRACKERS)
+                torr = FakeTorrent(tracker)
+                diff = None
+                err = ["", ""]
+                if status == "affected":
+                    diff = TorrentsDiff(
+                        added=frozenset(rand_some_files()),
+                        removed=frozenset(rand_some_files()),
+                        modified=frozenset(rand_some_files()),
+                        type_modified=frozenset(rand_some_files())
+                    )
+                if status in ("tracker_error", "unhandled_error"):
+                    err = random.choice(ERRS)
+                stat_result[torr.get_filename()] = UpdateResult.new(
+                    torrent=torr,
+                    tracker=tracker,
+                    diff=diff,
+                    err_msg=err[1],
+                    err_name=err[0]
+                )
 
         confetti = get_configured_confetti(
             config=config,
