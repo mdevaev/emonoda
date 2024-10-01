@@ -102,5 +102,5 @@ class Plugin(WithWeb, WithStatuses):
             if "text" in update["message"]:  # Only text messages
                 user = update["message"]["from"].get("username", "")
                 chat_id = str(update["message"]["chat"]["id"])
-            last_chats.append((user, chat_id))
+                last_chats.append((user, chat_id))
         return last_chats

@@ -70,7 +70,7 @@ class UserError(Exception):
 class Plugin(BaseConfetti):  # pylint: disable=too-many-instance-attributes
     PLUGIN_NAMES = ["atom"]
 
-    def __init__(  # pylint: disable=super-init-not-called,too-many-arguments
+    def __init__(  # pylint: disable=super-init-not-called,too-many-positional-arguments
         self,
         history_path: str,
         path: str,

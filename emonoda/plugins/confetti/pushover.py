@@ -39,7 +39,7 @@ from . import WithStatuses
 class Plugin(WithWeb, WithStatuses):
     PLUGIN_NAMES = ["pushover"]
 
-    def __init__(  # pylint: disable=super-init-not-called
+    def __init__(  # pylint: disable=super-init-not-called,too-many-positional-arguments
         self,
         user_key: str,
         api_key: str,

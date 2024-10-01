@@ -66,7 +66,7 @@ class UpdateResult(NamedTuple):
     tb_lines: List[str]
 
     @staticmethod
-    def new(
+    def new(  # pylint: disable=too-many-positional-arguments
         torrent: Optional[Torrent]=None,
         tracker: Optional[BaseTracker]=None,
         diff: Optional[TorrentsDiff]=None,
@@ -112,7 +112,7 @@ class BaseConfetti(BasePlugin):
 class WithWeb(BaseConfetti):  # pylint: disable=abstract-method
     _SITE_RETRY_CODES: List[int] = []
 
-    def __init__(  # pylint: disable=super-init-not-called
+    def __init__(  # pylint: disable=super-init-not-called,too-many-positional-arguments
         self,
         timeout: float,
         retries: int,

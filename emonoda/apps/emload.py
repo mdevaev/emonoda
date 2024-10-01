@@ -70,7 +70,7 @@ def link_data(
     os.symlink(os.path.join(data_dir_path, torrent.get_name(surrogate_escape=True)), link_to_path)
 
 
-def load_torrents(
+def load_torrents(  # pylint: disable=too-many-positional-arguments
     torrents: List[Torrent],
     client: BaseClient,
     data_root_path: str,

@@ -65,7 +65,7 @@ def build_opener(
     return urllib.request.build_opener(*handlers)
 
 
-def read_url(
+def read_url(  # pylint: disable=too-many-positional-arguments
     opener: urllib.request.OpenerDirector,
     url: str,
     data: Optional[bytes]=None,

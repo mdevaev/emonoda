@@ -86,7 +86,7 @@ def build_all_files(data_root_path: str, log: Log) -> Dict[str, TorrentEntryAttr
 
 
 # =====
-def print_orphaned_files(  # pylint: disable=too-many-locals
+def print_orphaned_files(  # pylint: disable=too-many-locals,too-many-positional-arguments
     cache: datacache.TorrentsCache,
     data_roots: List[str],
     ignore_orphans: List[str],

@@ -59,7 +59,7 @@ class _SocksConnection(HTTPConnection):
         ]] = None
 
     # XXX: because proxy args/kwargs break super
-    def make_proxy_args(
+    def make_proxy_args(  # pylint: disable=too-many-positional-arguments
         self,
         proxy_url: str="",
         proxy_type: Optional[int]=None,

@@ -61,7 +61,7 @@ class StatRecord(NamedTuple):
     tb_lines: List[str]
 
     @staticmethod
-    def new(
+    def new(  # pylint: disable=too-many-positional-arguments
         name: str,
         status: str,
         torrent: Optional[Torrent] = None,

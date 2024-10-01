@@ -43,7 +43,7 @@ class TorrentsCache(NamedTuple):
     torrents: Dict[str, CacheEntryAttrs]
 
 
-def get_cache(
+def get_cache(  # pylint: disable=too-many-positional-arguments
     cache_path: str,
     client: BaseClient,
     files_from_client: bool,
@@ -94,7 +94,7 @@ def _write(cache: TorrentsCache, path: str, log: Log) -> None:
         }, cache_file)
 
 
-def _update(
+def _update(  # pylint: disable=too-many-positional-arguments
     cache: TorrentsCache,
     client: BaseClient,
     files_from_client: bool,

@@ -141,7 +141,7 @@ class Log:
 
         self.print("\n".join(text_rows))
 
-    def progress(
+    def progress(  # pylint: disable=too-many-positional-arguments
         self,
         iterable: Iterable[Any],
         wip: Tuple[str, Tuple],

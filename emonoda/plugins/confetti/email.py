@@ -45,7 +45,7 @@ from . import WithStatuses
 class Plugin(WithStatuses):  # pylint: disable=too-many-instance-attributes
     PLUGIN_NAMES = ["email"]
 
-    def __init__(  # pylint: disable=super-init-not-called,too-many-arguments,too-many-locals
+    def __init__(  # pylint: disable=super-init-not-called,too-many-positional-arguments,too-many-arguments,too-many-locals
         self,
         to: str,
         cc: List[str],

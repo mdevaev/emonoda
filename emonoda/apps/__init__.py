@@ -68,7 +68,7 @@ from ..cli import Log
 
 # =====
 class StoreTrueOrderedAction(argparse.Action):
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         option_strings: Sequence[str],
         dest: str,
@@ -209,7 +209,7 @@ def get_configured_client(config: Section, required: bool, with_customs: bool, l
         return None
 
 
-def get_configured_trackers(
+def get_configured_trackers(  # pylint: disable=too-many-positional-arguments
     config: Section,
     captcha_decoder: Callable[[str], str],
     only: List[str],

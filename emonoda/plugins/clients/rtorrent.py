@@ -60,7 +60,7 @@ class Plugin(WithCustoms):
 
     PLUGIN_NAMES = ["rtorrent"]
 
-    def __init__(  # pylint:disable=super-init-not-called
+    def __init__(  # pylint:disable=super-init-not-called,too-many-positional-arguments
         self,
         url: str,
         verify: bool,

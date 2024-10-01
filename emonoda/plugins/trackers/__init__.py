@@ -89,7 +89,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
 
     _COMMENT_REGEXP = __D_COMMENT_REGEXP = re.compile(r"(?P<torrent_id>.*)")
 
-    def __init__(  # pylint: disable=super-init-not-called
+    def __init__(  # pylint: disable=super-init-not-called,too-many-positional-arguments
         self,
         timeout: float,
         retries: int,
@@ -135,10 +135,10 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         if self.__check_fingerprint or self.__check_version:
             opener = web.build_opener(self.__proxy_url)
             info = self.__get_upstream_info(opener)
-        if self.__check_fingerprint:
-            self.__test_fingerprint(info["fingerprint"], opener)
-        if self.__check_version:
-            self.__test_version(info["version"])
+            if self.__check_fingerprint:
+                self.__test_fingerprint(info["fingerprint"], opener)
+            if self.__check_version:
+                self.__test_version(info["version"])
 
     def is_matched_for(self, torrent: Torrent) -> bool:
         return (self._COMMENT_REGEXP.match(torrent.get_comment()) is not None)

@@ -122,7 +122,7 @@ class OpContext:
 
 
 class Feeder:  # pylint: disable=too-many-instance-attributes
-    def __init__(
+    def __init__(  # pylint: disable=too-many-positional-arguments
         self,
         trackers: List[BaseTracker],
         torrents: Dict[str, Optional[Torrent]],
@@ -346,7 +346,7 @@ class TorrentTimeInfo:
             time_file.write(str(int(value)))
 
 
-def update(  # pylint: disable=too-many-branches,too-many-locals
+def update(  # pylint: disable=too-many-branches,too-many-locals,too-many-positional-arguments
     feeder: Feeder,
     client: Optional[BaseClient],
     backup_dir_path: str,
