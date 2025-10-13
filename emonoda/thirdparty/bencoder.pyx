@@ -123,10 +123,10 @@ cdef encode_int(long x, list r):
     r.append(b'e')
 
 
-cdef encode_long(x, list r):
-    r.append(b'i')
-    r.append(str(x).encode())
-    r.append(b'e')
+#cdef encode_long(x, list r):
+#    r.append(b'i')
+#    r.append(str(x).encode())
+#    r.append(b'e')
 
 
 cdef encode_bytes(bytes x, list r):
@@ -163,7 +163,7 @@ cdef encode_dict(x, list r):
 encode_func = {
     int: encode_int,
     bool: encode_int,
-    long: encode_long,
+#    long: encode_long,
     bytes: encode_bytes,
     str: encode_string,
     list: encode_list,
