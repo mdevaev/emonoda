@@ -18,10 +18,10 @@ release:
 	make bump
 	make push
 #	make pypi
-	make clean
-	make mkdocs
-	make clean
-	make mkdocs-release
+#	make clean
+#	make mkdocs
+#	make clean
+#	make mkdocs-release
 	make clean
 
 tox:
