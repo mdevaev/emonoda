@@ -40,7 +40,7 @@ class BTFailure(Exception):
 
 def decode_int(bytes x, int f):
     f += 1
-    cdef long new_f = x.index(b'e', f)
+    cdef int new_f = x.index(b'e', f)
     n = int(x[f:new_f])
     if x[f] == b'-'[0]:
         if x[f + 1] == b'0'[0]:
@@ -51,8 +51,8 @@ def decode_int(bytes x, int f):
 
 
 def decode_string(bytes x, int f):
-    cdef long colon = x.index(b':', f)
-    cdef long n = int(x[f:colon])
+    cdef int colon = x.index(b':', f)
+    cdef int n = int(x[f:colon])
     if x[f] == b'0'[0] and colon != f + 1:
         raise ValueError()
     colon += 1
@@ -117,13 +117,7 @@ cdef encode(v, list r):
     )
 
 
-cdef encode_int(long x, list r):
-    r.append(b'i')
-    r.append(str(x).encode())
-    r.append(b'e')
-
-
-cdef encode_long(x, list r):
+cdef encode_int(int x, list r):
     r.append(b'i')
     r.append(str(x).encode())
     r.append(b'e')
@@ -163,7 +157,6 @@ cdef encode_dict(x, list r):
 encode_func = {
     int: encode_int,
     bool: encode_int,
-    long: encode_long,
     bytes: encode_bytes,
     str: encode_string,
     list: encode_list,
