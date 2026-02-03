@@ -168,7 +168,7 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             self.__opener = web.build_opener(self.__proxy_url)
 
     def _set_cookie(self, name: str, value: str, **kwargs: Any) -> None:
-        assert self.__cookie_jar
+        assert self.__cookie_jar is not None
         params = {
             "version": 0,
             "port": None,
