@@ -51,7 +51,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
 
     _TORRENT_HASH_URL = "https://rutracker.org/forum/viewtopic.php?t={torrent_id}"
     _TORRENT_HASH_REGEXP = re.compile(r"<a href=\"magnet:\?xt=urn:btih:(?P<torrent_hash>[a-fA-F0-9]{40})&[^\"]+\""
-                                      r" class=\"med magnet-link\" data-topic_id=\"\d+\"")
+                                      r" class=\"(med )?magnet-link\" data-topic_id=\"\d+\"")
 
     _STAT_URL = _TORRENT_HASH_URL
     _STAT_OK_REGEXP = _TORRENT_HASH_REGEXP
@@ -90,7 +90,7 @@ class Plugin(WithLogin, WithCaptcha, WithCheckHash, WithStat):
         }
         page = self.__read_login(post)
 
-        cap_static_regexp = re.compile(r"\"//(static\.t-ru\.org/captcha/[^\"]+)\"")
+        cap_static_regexp = re.compile(r"\"https://(static\.rutracker\.cc/captcha/[^\"]+)\"")
         cap_static_match = cap_static_regexp.search(page)
         if cap_static_match is not None:
             cap_sid = self._assert_auth_re_search(
