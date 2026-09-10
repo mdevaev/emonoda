@@ -36,7 +36,7 @@ from ...tfile import Torrent
 
 from ... import web
 
-from . import BaseClient
+from . import WithCustoms
 from . import NoSuchTorrentError
 from . import hash_or_torrent
 from . import check_torrent_accessible
@@ -44,7 +44,7 @@ from . import build_files
 
 
 # =====
-class Plugin(BaseClient):
+class Plugin(WithCustoms):
     # API description: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)
 
     PLUGIN_NAMES = ["qbittorrent2"]
@@ -163,6 +163,29 @@ class Plugin(BaseClient):
             if err.code == 404:
                 raise NoSuchTorrentError("Unknown torrent hash")
             raise
+
+    # =====
+
+    @classmethod
+    def get_custom_keys(cls) -> List[str]:
+        return ["category"]
+
+    @hash_or_torrent
+    def set_customs(self, torrent_hash: str, customs: Dict[str, str]) -> None:
+        assert len(customs) != 0, "Empty customs dict"
+        self.__get_torrent_props(torrent_hash)  # XXX: raise NoSuchTorrentError if torrent does not exist
+        if "category" in customs:
+            self.__post(
+                path="torrents/setCategory",
+                payload={"hashes": torrent_hash, "category": customs["category"]},
+            )
+
+    @hash_or_torrent
+    def get_customs(self, torrent_hash: str, keys: List[str]) -> Dict[str, str]:
+        assert len(keys) != 0, "Empty customs keys list"
+        props = self.__get_torrent_props(torrent_hash)
+        customs = {"category": props.get("category", "")}
+        return {key: customs[key] for key in set(keys) if key in customs}
 
     # =====
 
