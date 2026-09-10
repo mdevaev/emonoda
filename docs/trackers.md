@@ -13,6 +13,12 @@
 * **`trackers/rutracker.org/proxy_url=""`**
     * Позволяет указать прокси для сайта. Поддерживаются HTTP-прокси и SOCKS4/5. Этот параметр можно использовать так: `trackers/rutracker.org/proxy_url=socks5://localhost:5000` (вместе с [SOCKS-проксированием по SSH](https://ru.wikibooks.org/wiki/SSH_%D1%82%D1%83%D0%BD%D0%BD%D0%B5%D0%BB%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5)). Формат - `scheme://username:passwd@host:port`. Вместо `scheme` нужно указать `socks4`, `socks5` или `http`.
 
+* **`trackers/rutracker.org/flaresolverr_url=""`**
+    * Позволяет обходить Cloudflare-челленджи (страница «Just a moment…», отдающая HTTP 403) с помощью внешнего сервиса [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr). По умолчанию параметр пуст, и функция отключена — поведение плагина не меняется. Если указать URL инстанса FlareSolverr (например, `http://localhost:8191`), то при получении 403 плагин попросит FlareSolverr решить челлендж, заберёт у него cookie `cf_clearance` **вместе с точным User-Agent, которым пользовался FlareSolverr**, и повторит запрос напрямую. Важно: выданный Cloudflare `cf_clearance` привязан к паре User-Agent + IP, поэтому emonoda и FlareSolverr должны иметь один и тот же внешний IP (в противном случае Cloudflare снова вернёт 403). User-Agent при этом подменяется автоматически, параметр `user_agent` игнорируется.
+
+* **`trackers/rutracker.org/flaresolverr_timeout=60.0`**
+    * Максимальное время в секундах, которое FlareSolverr может потратить на решение одного челленджа. Используется только при заданном `flaresolverr_url`.
+
 * **`trackers/rutracker.org/retries=20`**
     * Количество повторов при обращении к трекеру при возникновении таймаутов, пятисоток или специфичных для сайта ошибок (например, 404 у рутрекера при скачке торрент-файла не является критической ошибкой, т.к. иногда сайт отдает неправильный бекенд за балансером, и программе нужно просто несколько раз повторить свой запрос).
 
