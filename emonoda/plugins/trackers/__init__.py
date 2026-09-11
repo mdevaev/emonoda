@@ -46,6 +46,7 @@ from ...tfile import is_valid_torrent_data
 from ...tfile import decode_torrent_data
 
 from ... import web
+from ...web import flaresolverr
 
 from .. import BasePlugin
 from .. import get_classes
@@ -98,6 +99,8 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         proxy_url: str,
         check_version: bool,
         check_fingerprint: bool,
+        flaresolverr_url: str,
+        flaresolverr_timeout: float,
         **_: Any,
     ) -> None:
 
@@ -113,6 +116,8 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         self.__proxy_url = proxy_url
         self.__check_version = check_version
         self.__check_fingerprint = check_fingerprint
+        self.__flaresolverr_url = flaresolverr_url
+        self.__flaresolverr_timeout = flaresolverr_timeout
 
         self.__opener: Optional[urllib.request.OpenerDirector] = None
 
@@ -129,6 +134,8 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             "proxy_url":         Option(default="", help="URL of HTTP/SOCKS4/SOCKS5 proxy"),
             "check_fingerprint": Option(default=True, help="Check the site fingerprint"),
             "check_version":     Option(default=True, help="Check the tracker version from GitHub"),
+            "flaresolverr_url":  Option(default="", help="URL of a FlareSolverr instance to bypass Cloudflare challenges (empty -- disabled)"),
+            "flaresolverr_timeout": Option(default=60.0, help="Max time in seconds for FlareSolverr to solve a challenge"),
         }
 
     def test(self) -> None:
@@ -220,6 +227,25 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
         assert opener
         headers = (headers or {})
         headers.setdefault("User-Agent", self.__user_agent)
+        try:
+            return self.__read_url_raw(opener, url, data, headers)
+        except urllib.error.HTTPError as err:
+            if err.code != 403 or not self.__flaresolverr_url:
+                raise
+            # A Cloudflare interstitial (HTTP 403). Ask FlareSolverr to solve it, adopt the
+            # UA + cookies it used, and retry the request directly -- see __solve_cloudflare.
+            self.__solve_cloudflare(url)
+            headers["User-Agent"] = self.__user_agent
+            return self.__read_url_raw(opener, url, data, headers)
+
+    def __read_url_raw(
+        self,
+        opener: urllib.request.OpenerDirector,
+        url: str,
+        data: Optional[bytes],
+        headers: Dict[str, str],
+    ) -> bytes:
+
         return web.read_url(
             opener=opener,
             url=url,
@@ -230,6 +256,28 @@ class BaseTracker(BasePlugin):  # pylint: disable=too-many-instance-attributes
             retries_sleep=self.__retries_sleep,
             retry_codes=self._SITE_RETRY_CODES,
         )
+
+    def __solve_cloudflare(self, url: str) -> None:
+        # A Cloudflare clearance is bound to the exact User-Agent *and* egress IP that solved it,
+        # so we must adopt FlareSolverr's UA for every subsequent direct request (emonoda and
+        # FlareSolverr are expected to share the same egress IP). The solved cookies -- notably
+        # cf_clearance -- go into our cookie jar so plain urllib requests pass the challenge.
+        solution = flaresolverr.solve(self.__flaresolverr_url, url, self.__flaresolverr_timeout)
+        if solution.user_agent:
+            self.__user_agent = solution.user_agent
+        if self.__cookie_jar is not None:
+            for cookie in solution.cookies:
+                domain = str(cookie.get("domain", ""))
+                self._set_cookie(
+                    name=str(cookie["name"]),
+                    value=str(cookie["value"]),
+                    domain=domain,
+                    domain_specified=bool(domain),
+                    domain_initial_dot=domain.startswith("."),
+                    path=str(cookie.get("path", "/")),
+                    secure=bool(cookie.get("secure", False)),
+                    expires=(int(cookie["expires"]) if cookie.get("expires") else None),
+                )
 
     # =====
 
