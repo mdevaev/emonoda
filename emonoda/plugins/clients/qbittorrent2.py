@@ -18,6 +18,7 @@
 
 
 import os
+import time
 import urllib.parse
 import urllib.error
 import http.cookiejar
@@ -48,6 +49,10 @@ class Plugin(WithCustoms):
     # API description: https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-(qBittorrent-4.1)
 
     PLUGIN_NAMES = ["qbittorrent2"]
+
+    # torrents/add is asynchronous; how long to wait for the torrent to register.
+    __ADD_WAIT_TIMEOUT = 30.0
+    __ADD_WAIT_INTERVAL = 0.5
 
     def __init__(  # pylint:disable=super-init-not-called
         self,
@@ -115,6 +120,7 @@ class Plugin(WithCustoms):
                 ),
             },
         )
+        self.__wait_torrent(torrent.get_hash())
 
     @hash_or_torrent
     def remove_torrent(self, torrent_hash: str) -> None:
@@ -195,6 +201,16 @@ class Plugin(WithCustoms):
         if len(result) == 0:
             raise NoSuchTorrentError("Unknown torrent hash")
         return result[0]
+
+    def __wait_torrent(self, torrent_hash: str) -> None:
+        # Poll until the torrent registers; raise if it never appears in time.
+        deadline = time.monotonic() + self.__ADD_WAIT_TIMEOUT
+        while True:
+            if json.loads(self.__get(f"torrents/info?hashes={torrent_hash}")):
+                return
+            if time.monotonic() >= deadline:
+                raise NoSuchTorrentError("Unknown torrent hash")
+            time.sleep(self.__ADD_WAIT_INTERVAL)
 
     def __get(self, path: str) -> str:
         return self.__read_handle(path).decode("utf-8")
