@@ -78,7 +78,11 @@ class Plugin(WithCustoms):
             uri=url,
             context=(None if verify else ssl._create_unverified_context()),
         )
-        self.__server.network.xmlrpc.size_limit(xmlrpc_size_limit)
+        try:
+            self.__server.network.xmlrpc.size_limit(xmlrpc_size_limit)
+        except xmlrpc.client.Fault:
+            # rTorrent >= 0.15 requires an explicit (empty) target as the first argument
+            self.__server.network.xmlrpc.size_limit("", xmlrpc_size_limit)
 
     @classmethod
     def get_options(cls) -> Dict[str, Option]:
