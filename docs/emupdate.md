@@ -15,17 +15,17 @@
 ```yaml
 trackers:
     rutracker.org:
-        login: xxx
+        user: xxx
         passwd: secretxxx
 
     nnm-club.me:
-        login: yyy
+        user: yyy
         passwd: secretyyy
 
     rutor.org: {} # Анонимный трекер, указание логина и пароля не требуется.
 
     tr.anidub.com:
-        login: zzz
+        user: zzz
         passwd: secretzzz
 ```
 
